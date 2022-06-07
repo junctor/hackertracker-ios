@@ -1,0 +1,728 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		5DAE04B42820948B00930A2D /* hackertrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04B32820948B00930A2D /* hackertrackerApp.swift */; };
+		5DAE04B62820948B00930A2D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04B52820948B00930A2D /* ContentView.swift */; };
+		5DAE04B82820948E00930A2D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DAE04B72820948E00930A2D /* Assets.xcassets */; };
+		5DAE04BB2820948E00930A2D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DAE04BA2820948E00930A2D /* Preview Assets.xcassets */; };
+		5DAE04BD2820948E00930A2D /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04BC2820948E00930A2D /* Persistence.swift */; };
+		5DAE04C02820948E00930A2D /* hackertracker.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04BE2820948E00930A2D /* hackertracker.xcdatamodeld */; };
+		5DAE04CA2820948F00930A2D /* hackertrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04C92820948F00930A2D /* hackertrackerTests.swift */; };
+		5DAE04D42820948F00930A2D /* hackertrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04D32820948F00930A2D /* hackertrackerUITests.swift */; };
+		5DAE04D62820948F00930A2D /* hackertrackerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04D52820948F00930A2D /* hackertrackerUITestsLaunchTests.swift */; };
+		5DAE3E952836A18B00F9F845 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5DAE3E942836A18B00F9F845 /* GoogleService-Info.plist */; };
+		5DAE3E982836A76000F9F845 /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 5DAE3E972836A76000F9F845 /* FirebaseAnalyticsSwift */; };
+		5DAE3E9A2836A76000F9F845 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 5DAE3E992836A76000F9F845 /* FirebaseAnalyticsWithoutAdIdSupport */; };
+		5DAE3E9C2836A76000F9F845 /* FirebaseDatabaseSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 5DAE3E9B2836A76000F9F845 /* FirebaseDatabaseSwift */; };
+		5DAE3E9E2836A76000F9F845 /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 5DAE3E9D2836A76000F9F845 /* FirebaseFirestoreSwift */; };
+		5DB4E0AB284E86900012F6F4 /* ScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0AA284E86900012F6F4 /* ScheduleView.swift */; };
+		5DB4E0AD284E86AD0012F6F4 /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0AC284E86AD0012F6F4 /* MapView.swift */; };
+		5DB4E0AF284E86CC0012F6F4 /* InfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0AE284E86CC0012F6F4 /* InfoView.swift */; };
+		5DB4E0B1284E86D80012F6F4 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0B0284E86D80012F6F4 /* SettingsView.swift */; };
+		5DB4E0B5284E9F880012F6F4 /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0B4284E9F880012F6F4 /* Event.swift */; };
+		5DB4E0B8284E9FEF0012F6F4 /* Conference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0B7284E9FEF0012F6F4 /* Conference.swift */; };
+		5DB4E0BA284EA02C0012F6F4 /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0B9284EA02C0012F6F4 /* Map.swift */; };
+		5DB4E0BC284EA0AE0012F6F4 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */; };
+		5DB4E0BE284EA1310012F6F4 /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0BD284EA1310012F6F4 /* EventView.swift */; };
+		5DB4E0C1284EDA7E0012F6F4 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C0284EDA7E0012F6F4 /* Settings.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5DAE04C62820948F00930A2D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5DAE04A82820948B00930A2D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5DAE04AF2820948B00930A2D;
+			remoteInfo = hackertracker;
+		};
+		5DAE04D02820948F00930A2D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5DAE04A82820948B00930A2D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5DAE04AF2820948B00930A2D;
+			remoteInfo = hackertracker;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		5DAE04B02820948B00930A2D /* hackertracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hackertracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5DAE04B32820948B00930A2D /* hackertrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hackertrackerApp.swift; sourceTree = "<group>"; };
+		5DAE04B52820948B00930A2D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		5DAE04B72820948E00930A2D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5DAE04BA2820948E00930A2D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		5DAE04BC2820948E00930A2D /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		5DAE04BF2820948E00930A2D /* hackertracker.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = hackertracker.xcdatamodel; sourceTree = "<group>"; };
+		5DAE04C52820948F00930A2D /* hackertrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = hackertrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5DAE04C92820948F00930A2D /* hackertrackerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hackertrackerTests.swift; sourceTree = "<group>"; };
+		5DAE04CF2820948F00930A2D /* hackertrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = hackertrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5DAE04D32820948F00930A2D /* hackertrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hackertrackerUITests.swift; sourceTree = "<group>"; };
+		5DAE04D52820948F00930A2D /* hackertrackerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hackertrackerUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		5DAE3E942836A18B00F9F845 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		5DB4E0AA284E86900012F6F4 /* ScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleView.swift; sourceTree = "<group>"; };
+		5DB4E0AC284E86AD0012F6F4 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
+		5DB4E0AE284E86CC0012F6F4 /* InfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoView.swift; sourceTree = "<group>"; };
+		5DB4E0B0284E86D80012F6F4 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		5DB4E0B4284E9F880012F6F4 /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
+		5DB4E0B7284E9FEF0012F6F4 /* Conference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conference.swift; sourceTree = "<group>"; };
+		5DB4E0B9284EA02C0012F6F4 /* Map.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
+		5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
+		5DB4E0BD284EA1310012F6F4 /* EventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventView.swift; sourceTree = "<group>"; };
+		5DB4E0C0284EDA7E0012F6F4 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		5DAE04AD2820948B00930A2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5DAE3E9C2836A76000F9F845 /* FirebaseDatabaseSwift in Frameworks */,
+				5DAE3E982836A76000F9F845 /* FirebaseAnalyticsSwift in Frameworks */,
+				5DAE3E9A2836A76000F9F845 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
+				5DAE3E9E2836A76000F9F845 /* FirebaseFirestoreSwift in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5DAE04C22820948F00930A2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5DAE04CC2820948F00930A2D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		5DAE04A72820948B00930A2D = {
+			isa = PBXGroup;
+			children = (
+				5DAE04B22820948B00930A2D /* hackertracker */,
+				5DAE04C82820948F00930A2D /* hackertrackerTests */,
+				5DAE04D22820948F00930A2D /* hackertrackerUITests */,
+				5DAE04B12820948B00930A2D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		5DAE04B12820948B00930A2D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5DAE04B02820948B00930A2D /* hackertracker.app */,
+				5DAE04C52820948F00930A2D /* hackertrackerTests.xctest */,
+				5DAE04CF2820948F00930A2D /* hackertrackerUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5DAE04B22820948B00930A2D /* hackertracker */ = {
+			isa = PBXGroup;
+			children = (
+				5DB4E0BF284EDA670012F6F4 /* Utils */,
+				5DB4E0B3284E9F4C0012F6F4 /* Models */,
+				5DB4E0B2284E9F320012F6F4 /* Views */,
+				5DAE3E942836A18B00F9F845 /* GoogleService-Info.plist */,
+				5DAE04B32820948B00930A2D /* hackertrackerApp.swift */,
+				5DAE04B72820948E00930A2D /* Assets.xcassets */,
+				5DAE04BC2820948E00930A2D /* Persistence.swift */,
+				5DAE04BE2820948E00930A2D /* hackertracker.xcdatamodeld */,
+				5DAE04B92820948E00930A2D /* Preview Content */,
+			);
+			path = hackertracker;
+			sourceTree = "<group>";
+		};
+		5DAE04B92820948E00930A2D /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				5DAE04BA2820948E00930A2D /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		5DAE04C82820948F00930A2D /* hackertrackerTests */ = {
+			isa = PBXGroup;
+			children = (
+				5DAE04C92820948F00930A2D /* hackertrackerTests.swift */,
+			);
+			path = hackertrackerTests;
+			sourceTree = "<group>";
+		};
+		5DAE04D22820948F00930A2D /* hackertrackerUITests */ = {
+			isa = PBXGroup;
+			children = (
+				5DAE04D32820948F00930A2D /* hackertrackerUITests.swift */,
+				5DAE04D52820948F00930A2D /* hackertrackerUITestsLaunchTests.swift */,
+			);
+			path = hackertrackerUITests;
+			sourceTree = "<group>";
+		};
+		5DB4E0B2284E9F320012F6F4 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				5DAE04B52820948B00930A2D /* ContentView.swift */,
+				5DB4E0AA284E86900012F6F4 /* ScheduleView.swift */,
+				5DB4E0AC284E86AD0012F6F4 /* MapView.swift */,
+				5DB4E0AE284E86CC0012F6F4 /* InfoView.swift */,
+				5DB4E0B0284E86D80012F6F4 /* SettingsView.swift */,
+				5DB4E0BD284EA1310012F6F4 /* EventView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		5DB4E0B3284E9F4C0012F6F4 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				5DB4E0B4284E9F880012F6F4 /* Event.swift */,
+				5DB4E0B7284E9FEF0012F6F4 /* Conference.swift */,
+				5DB4E0B9284EA02C0012F6F4 /* Map.swift */,
+				5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		5DB4E0BF284EDA670012F6F4 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				5DB4E0C0284EDA7E0012F6F4 /* Settings.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5DAE04AF2820948B00930A2D /* hackertracker */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5DAE04D92820948F00930A2D /* Build configuration list for PBXNativeTarget "hackertracker" */;
+			buildPhases = (
+				5DAE04AC2820948B00930A2D /* Sources */,
+				5DAE04AD2820948B00930A2D /* Frameworks */,
+				5DAE04AE2820948B00930A2D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = hackertracker;
+			packageProductDependencies = (
+				5DAE3E972836A76000F9F845 /* FirebaseAnalyticsSwift */,
+				5DAE3E992836A76000F9F845 /* FirebaseAnalyticsWithoutAdIdSupport */,
+				5DAE3E9B2836A76000F9F845 /* FirebaseDatabaseSwift */,
+				5DAE3E9D2836A76000F9F845 /* FirebaseFirestoreSwift */,
+			);
+			productName = hackertracker;
+			productReference = 5DAE04B02820948B00930A2D /* hackertracker.app */;
+			productType = "com.apple.product-type.application";
+		};
+		5DAE04C42820948F00930A2D /* hackertrackerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5DAE04DC2820948F00930A2D /* Build configuration list for PBXNativeTarget "hackertrackerTests" */;
+			buildPhases = (
+				5DAE04C12820948F00930A2D /* Sources */,
+				5DAE04C22820948F00930A2D /* Frameworks */,
+				5DAE04C32820948F00930A2D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5DAE04C72820948F00930A2D /* PBXTargetDependency */,
+			);
+			name = hackertrackerTests;
+			productName = hackertrackerTests;
+			productReference = 5DAE04C52820948F00930A2D /* hackertrackerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		5DAE04CE2820948F00930A2D /* hackertrackerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5DAE04DF2820948F00930A2D /* Build configuration list for PBXNativeTarget "hackertrackerUITests" */;
+			buildPhases = (
+				5DAE04CB2820948F00930A2D /* Sources */,
+				5DAE04CC2820948F00930A2D /* Frameworks */,
+				5DAE04CD2820948F00930A2D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5DAE04D12820948F00930A2D /* PBXTargetDependency */,
+			);
+			name = hackertrackerUITests;
+			productName = hackertrackerUITests;
+			productReference = 5DAE04CF2820948F00930A2D /* hackertrackerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		5DAE04A82820948B00930A2D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1330;
+				LastUpgradeCheck = 1330;
+				TargetAttributes = {
+					5DAE04AF2820948B00930A2D = {
+						CreatedOnToolsVersion = 13.3.1;
+					};
+					5DAE04C42820948F00930A2D = {
+						CreatedOnToolsVersion = 13.3.1;
+						TestTargetID = 5DAE04AF2820948B00930A2D;
+					};
+					5DAE04CE2820948F00930A2D = {
+						CreatedOnToolsVersion = 13.3.1;
+						TestTargetID = 5DAE04AF2820948B00930A2D;
+					};
+				};
+			};
+			buildConfigurationList = 5DAE04AB2820948B00930A2D /* Build configuration list for PBXProject "hackertracker" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 5DAE04A72820948B00930A2D;
+			packageReferences = (
+				5DAE3E962836A76000F9F845 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
+			productRefGroup = 5DAE04B12820948B00930A2D /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5DAE04AF2820948B00930A2D /* hackertracker */,
+				5DAE04C42820948F00930A2D /* hackertrackerTests */,
+				5DAE04CE2820948F00930A2D /* hackertrackerUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		5DAE04AE2820948B00930A2D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5DAE04BB2820948E00930A2D /* Preview Assets.xcassets in Resources */,
+				5DAE04B82820948E00930A2D /* Assets.xcassets in Resources */,
+				5DAE3E952836A18B00F9F845 /* GoogleService-Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5DAE04C32820948F00930A2D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5DAE04CD2820948F00930A2D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5DAE04AC2820948B00930A2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5DB4E0AB284E86900012F6F4 /* ScheduleView.swift in Sources */,
+				5DB4E0B5284E9F880012F6F4 /* Event.swift in Sources */,
+				5DB4E0BE284EA1310012F6F4 /* EventView.swift in Sources */,
+				5DB4E0B1284E86D80012F6F4 /* SettingsView.swift in Sources */,
+				5DB4E0C1284EDA7E0012F6F4 /* Settings.swift in Sources */,
+				5DB4E0BC284EA0AE0012F6F4 /* Speaker.swift in Sources */,
+				5DB4E0AD284E86AD0012F6F4 /* MapView.swift in Sources */,
+				5DAE04C02820948E00930A2D /* hackertracker.xcdatamodeld in Sources */,
+				5DAE04BD2820948E00930A2D /* Persistence.swift in Sources */,
+				5DAE04B62820948B00930A2D /* ContentView.swift in Sources */,
+				5DB4E0BA284EA02C0012F6F4 /* Map.swift in Sources */,
+				5DB4E0B8284E9FEF0012F6F4 /* Conference.swift in Sources */,
+				5DAE04B42820948B00930A2D /* hackertrackerApp.swift in Sources */,
+				5DB4E0AF284E86CC0012F6F4 /* InfoView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5DAE04C12820948F00930A2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5DAE04CA2820948F00930A2D /* hackertrackerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5DAE04CB2820948F00930A2D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5DAE04D42820948F00930A2D /* hackertrackerUITests.swift in Sources */,
+				5DAE04D62820948F00930A2D /* hackertrackerUITestsLaunchTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		5DAE04C72820948F00930A2D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5DAE04AF2820948B00930A2D /* hackertracker */;
+			targetProxy = 5DAE04C62820948F00930A2D /* PBXContainerItemProxy */;
+		};
+		5DAE04D12820948F00930A2D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5DAE04AF2820948B00930A2D /* hackertracker */;
+			targetProxy = 5DAE04D02820948F00930A2D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		5DAE04D72820948F00930A2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		5DAE04D82820948F00930A2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		5DAE04DA2820948F00930A2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
+				DEVELOPMENT_TEAM = MJ97FDMT75;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5DAE04DB2820948F00930A2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
+				DEVELOPMENT_TEAM = MJ97FDMT75;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		5DAE04DD2820948F00930A2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MJ97FDMT75;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertrackerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hackertracker.app/hackertracker";
+			};
+			name = Debug;
+		};
+		5DAE04DE2820948F00930A2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MJ97FDMT75;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertrackerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hackertracker.app/hackertracker";
+			};
+			name = Release;
+		};
+		5DAE04E02820948F00930A2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MJ97FDMT75;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertrackerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = hackertracker;
+			};
+			name = Debug;
+		};
+		5DAE04E12820948F00930A2D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MJ97FDMT75;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertrackerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = hackertracker;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		5DAE04AB2820948B00930A2D /* Build configuration list for PBXProject "hackertracker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5DAE04D72820948F00930A2D /* Debug */,
+				5DAE04D82820948F00930A2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5DAE04D92820948F00930A2D /* Build configuration list for PBXNativeTarget "hackertracker" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5DAE04DA2820948F00930A2D /* Debug */,
+				5DAE04DB2820948F00930A2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5DAE04DC2820948F00930A2D /* Build configuration list for PBXNativeTarget "hackertrackerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5DAE04DD2820948F00930A2D /* Debug */,
+				5DAE04DE2820948F00930A2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5DAE04DF2820948F00930A2D /* Build configuration list for PBXNativeTarget "hackertrackerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5DAE04E02820948F00930A2D /* Debug */,
+				5DAE04E12820948F00930A2D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		5DAE3E962836A76000F9F845 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		5DAE3E972836A76000F9F845 /* FirebaseAnalyticsSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5DAE3E962836A76000F9F845 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsSwift;
+		};
+		5DAE3E992836A76000F9F845 /* FirebaseAnalyticsWithoutAdIdSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5DAE3E962836A76000F9F845 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsWithoutAdIdSupport;
+		};
+		5DAE3E9B2836A76000F9F845 /* FirebaseDatabaseSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5DAE3E962836A76000F9F845 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabaseSwift;
+		};
+		5DAE3E9D2836A76000F9F845 /* FirebaseFirestoreSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5DAE3E962836A76000F9F845 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestoreSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		5DAE04BE2820948E00930A2D /* hackertracker.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				5DAE04BF2820948E00930A2D /* hackertracker.xcdatamodel */,
+			);
+			currentVersion = 5DAE04BF2820948E00930A2D /* hackertracker.xcdatamodel */;
+			path = hackertracker.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = 5DAE04A82820948B00930A2D /* Project object */;
+}
