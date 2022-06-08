@@ -16,7 +16,6 @@
 		5DAE04CA2820948F00930A2D /* hackertrackerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04C92820948F00930A2D /* hackertrackerTests.swift */; };
 		5DAE04D42820948F00930A2D /* hackertrackerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04D32820948F00930A2D /* hackertrackerUITests.swift */; };
 		5DAE04D62820948F00930A2D /* hackertrackerUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04D52820948F00930A2D /* hackertrackerUITestsLaunchTests.swift */; };
-		5DAE3E952836A18B00F9F845 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5DAE3E942836A18B00F9F845 /* GoogleService-Info.plist */; };
 		5DAE3E982836A76000F9F845 /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 5DAE3E972836A76000F9F845 /* FirebaseAnalyticsSwift */; };
 		5DAE3E9A2836A76000F9F845 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 5DAE3E992836A76000F9F845 /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		5DAE3E9C2836A76000F9F845 /* FirebaseDatabaseSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 5DAE3E9B2836A76000F9F845 /* FirebaseDatabaseSwift */; };
@@ -31,6 +30,12 @@
 		5DB4E0BC284EA0AE0012F6F4 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */; };
 		5DB4E0BE284EA1310012F6F4 /* EventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0BD284EA1310012F6F4 /* EventView.swift */; };
 		5DB4E0C1284EDA7E0012F6F4 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C0284EDA7E0012F6F4 /* Settings.swift */; };
+		5DB4E0C3284FFEF00012F6F4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info.plist */; };
+		5DB4E0C6285000320012F6F4 /* EventRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C5285000320012F6F4 /* EventRow.swift */; };
+		5DB4E0C8285001820012F6F4 /* events.json in Resources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C7285001820012F6F4 /* events.json */; };
+		5DB4E0CA285002AD0012F6F4 /* ModelData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C9285002AD0012F6F4 /* ModelData.swift */; };
+		5DF51AB8285007EC007BCB83 /* DateFormatterUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51AB7285007EC007BCB83 /* DateFormatterUtility.swift */; };
+		5DF51ABA2850310B007BCB83 /* ConferenceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51AB92850310B007BCB83 /* ConferenceRow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,7 +68,6 @@
 		5DAE04CF2820948F00930A2D /* hackertrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = hackertrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DAE04D32820948F00930A2D /* hackertrackerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hackertrackerUITests.swift; sourceTree = "<group>"; };
 		5DAE04D52820948F00930A2D /* hackertrackerUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hackertrackerUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		5DAE3E942836A18B00F9F845 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		5DB4E0AA284E86900012F6F4 /* ScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleView.swift; sourceTree = "<group>"; };
 		5DB4E0AC284E86AD0012F6F4 /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		5DB4E0AE284E86CC0012F6F4 /* InfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InfoView.swift; sourceTree = "<group>"; };
@@ -74,6 +78,12 @@
 		5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		5DB4E0BD284EA1310012F6F4 /* EventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventView.swift; sourceTree = "<group>"; };
 		5DB4E0C0284EDA7E0012F6F4 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		5DB4E0C5285000320012F6F4 /* EventRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRow.swift; sourceTree = "<group>"; };
+		5DB4E0C7285001820012F6F4 /* events.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = events.json; sourceTree = "<group>"; };
+		5DB4E0C9285002AD0012F6F4 /* ModelData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelData.swift; sourceTree = "<group>"; };
+		5DF51AB7285007EC007BCB83 /* DateFormatterUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatterUtility.swift; sourceTree = "<group>"; };
+		5DF51AB92850310B007BCB83 /* ConferenceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceRow.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -128,15 +138,17 @@
 		5DAE04B22820948B00930A2D /* hackertracker */ = {
 			isa = PBXGroup;
 			children = (
+				5DB4E0C4284FFF090012F6F4 /* DataControllers */,
 				5DB4E0BF284EDA670012F6F4 /* Utils */,
 				5DB4E0B3284E9F4C0012F6F4 /* Models */,
 				5DB4E0B2284E9F320012F6F4 /* Views */,
-				5DAE3E942836A18B00F9F845 /* GoogleService-Info.plist */,
 				5DAE04B32820948B00930A2D /* hackertrackerApp.swift */,
+				5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info.plist */,
 				5DAE04B72820948E00930A2D /* Assets.xcassets */,
 				5DAE04BC2820948E00930A2D /* Persistence.swift */,
 				5DAE04BE2820948E00930A2D /* hackertracker.xcdatamodeld */,
 				5DAE04B92820948E00930A2D /* Preview Content */,
+				5DB4E0C7285001820012F6F4 /* events.json */,
 			);
 			path = hackertracker;
 			sourceTree = "<group>";
@@ -175,6 +187,8 @@
 				5DB4E0AE284E86CC0012F6F4 /* InfoView.swift */,
 				5DB4E0B0284E86D80012F6F4 /* SettingsView.swift */,
 				5DB4E0BD284EA1310012F6F4 /* EventView.swift */,
+				5DB4E0C5285000320012F6F4 /* EventRow.swift */,
+				5DF51AB92850310B007BCB83 /* ConferenceRow.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -186,6 +200,7 @@
 				5DB4E0B7284E9FEF0012F6F4 /* Conference.swift */,
 				5DB4E0B9284EA02C0012F6F4 /* Map.swift */,
 				5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */,
+				5DB4E0C9285002AD0012F6F4 /* ModelData.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -194,8 +209,16 @@
 			isa = PBXGroup;
 			children = (
 				5DB4E0C0284EDA7E0012F6F4 /* Settings.swift */,
+				5DF51AB7285007EC007BCB83 /* DateFormatterUtility.swift */,
 			);
 			path = Utils;
+			sourceTree = "<group>";
+		};
+		5DB4E0C4284FFF090012F6F4 /* DataControllers */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = DataControllers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -311,9 +334,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5DB4E0C8285001820012F6F4 /* events.json in Resources */,
 				5DAE04BB2820948E00930A2D /* Preview Assets.xcassets in Resources */,
 				5DAE04B82820948E00930A2D /* Assets.xcassets in Resources */,
-				5DAE3E952836A18B00F9F845 /* GoogleService-Info.plist in Resources */,
+				5DB4E0C3284FFEF00012F6F4 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,10 +366,14 @@
 				5DB4E0B5284E9F880012F6F4 /* Event.swift in Sources */,
 				5DB4E0BE284EA1310012F6F4 /* EventView.swift in Sources */,
 				5DB4E0B1284E86D80012F6F4 /* SettingsView.swift in Sources */,
+				5DF51ABA2850310B007BCB83 /* ConferenceRow.swift in Sources */,
 				5DB4E0C1284EDA7E0012F6F4 /* Settings.swift in Sources */,
+				5DB4E0CA285002AD0012F6F4 /* ModelData.swift in Sources */,
 				5DB4E0BC284EA0AE0012F6F4 /* Speaker.swift in Sources */,
 				5DB4E0AD284E86AD0012F6F4 /* MapView.swift in Sources */,
+				5DB4E0C6285000320012F6F4 /* EventRow.swift in Sources */,
 				5DAE04C02820948E00930A2D /* hackertracker.xcdatamodeld in Sources */,
+				5DF51AB8285007EC007BCB83 /* DateFormatterUtility.swift in Sources */,
 				5DAE04BD2820948E00930A2D /* Persistence.swift in Sources */,
 				5DAE04B62820948B00930A2D /* ContentView.swift in Sources */,
 				5DB4E0BA284EA02C0012F6F4 /* Map.swift in Sources */,

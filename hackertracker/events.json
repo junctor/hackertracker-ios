@@ -1,0 +1,22 @@
+[
+    {
+        "id": 1,
+        "description": "My first event description",
+        "begin": 1654639227302,
+        "end": 1654642827302,
+        "includes": "",
+        "links": "https://twitter.com/sethlaw",
+        "title": "First Event Title",
+        "location": "your location"
+    },
+    {
+        "id": 2,
+        "description": "My second event description",
+        "begin": 1654639227302,
+        "end": 1654642827302,
+        "includes": "",
+        "links": "https://twitter.com/advice_dog",
+        "title": "Second Event Title",
+        "location": "alternate location"
+    }
+]

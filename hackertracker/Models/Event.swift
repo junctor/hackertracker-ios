@@ -10,7 +10,6 @@ import FirebaseFirestoreSwift
 
 struct Event: Codable {
     var id: Int
-    var conferenceName: String
     var description: String
     var begin: Date
     var end: Date
@@ -18,5 +17,5 @@ struct Event: Codable {
     var links: String
     var title: String
     var location: String
-    var speakers: [Speaker]
+    //var speakers: [Speaker]
 }

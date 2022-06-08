@@ -13,50 +13,62 @@ struct ContentView: View {
     @ObservedObject var settings = Settings()
 
     @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Item.timestamp, ascending: true)],
+        sortDescriptors: [NSSortDescriptor(keyPath: \Bookmarks.id, ascending: true)],
         animation: .default)
-    private var items: FetchedResults<Item>
+    private var bookmarks: FetchedResults<Bookmarks>
     
     var colorScheme: ColorScheme = .dark
 
     var body: some View {
+        NavigationView {
         
-        TabView {
-            ScheduleView()
-                .padding()
-                .tabItem({
-                    Image(systemName: "house")
-                    Text("Main")
-                })
-                .tag(1)
-                .preferredColorScheme(colorScheme)
-            MapView()
-                .padding()
-                .tabItem({
-                    Image(systemName: "map")
-                    Text("Maps")
-                })
-                .tag(2)
-            InfoView()
-                .padding()
-                .tabItem({
-                    Image(systemName: "info.circle")
-                    Text("Info")
-                })
-                .tag(3)
-            SettingsView()
-                .padding()
-                .tabItem({
-                    Image(systemName: "gear")
-                    Text("Settings")
-                })
+            TabView {
+                ScheduleView()
+                    .padding()
+                    .tabItem({
+                        Image(systemName: "house")
+                        Text("Main")
+                    })
+                    .tag(1)
+                    .preferredColorScheme(colorScheme)
+                MapView()
+                    .padding()
+                    .tabItem({
+                        Image(systemName: "map")
+                        Text("Maps")
+                    })
+                    .tag(2)
+                    .preferredColorScheme(colorScheme)
+
+                InfoView()
+                    .padding()
+                    .tabItem({
+                        Image(systemName: "info.circle")
+                        Text("Info")
+                    })
+                    .tag(3)
+                    .preferredColorScheme(colorScheme)
+
+                SettingsView()
+                    .padding()
+                    .tabItem({
+                        Image(systemName: "gear")
+                        Text("Settings")
+                    })
+                    .tag(4)
+
+            }
+            .frame(maxWidth:.infinity)
+            .navigationTitle("DEF CON 30")
         }
+        .frame(width: UIScreen.main.bounds.width,
+               height: UIScreen.main.bounds.height)
+        .navigationViewStyle(.stack)
     }
 
-    private func addItem() {
+    private func addBookmark() {
         withAnimation {
-            let newItem = Item(context: viewContext)
-            newItem.timestamp = Date()
+            let newItem = Bookmarks(context: viewContext)
 
             do {
                 try viewContext.save()
@@ -69,9 +81,9 @@ struct ContentView: View {
         }
     }
 
-    private func deleteItems(offsets: IndexSet) {
+    private func deleteBookmark(offsets: IndexSet) {
         withAnimation {
-            offsets.map { items[$0] }.forEach(viewContext.delete)
+            offsets.map { bookmarks[$0] }.forEach(viewContext.delete)
 
             do {
                 try viewContext.save()
