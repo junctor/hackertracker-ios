@@ -6,21 +6,29 @@
 //
 
 import Foundation
-import Combine
+import CoreData
 
-class Settings: ObservableObject {
-    @Published var isDark: Bool {
-        didSet {
-            UserDefaults.standard.set(isDark, forKey: "isDark")
-        }
+class OldSettings: NSManagedObject, Identifiable {
+    @NSManaged public var conference: String?
+    @NSManaged private var dark: NSNumber?
+    @NSManaged private var hidden: NSNumber?
+    
+    public var isDark: Bool? {
+        get { return Bool(exactly: dark ?? true) }
+        set { dark = NSNumber(booleanLiteral: newValue ?? true) }
     }
     
-    init() {
-        if UserDefaults.standard.object(forKey: "isDark") == nil {
-            self.isDark = true
-            UserDefaults.standard.set(self.isDark, forKey: "isDark")
-        } else {
-            self.isDark = UserDefaults.standard.bool(forKey: "isDark")
-        }
+    public var showHidden: Bool? {
+        get { return Bool(exactly: hidden ?? false) }
+        set { hidden = NSNumber(booleanLiteral: newValue ?? false) }
+    }
+}
+
+extension OldSettings {
+    static func getSettings() -> NSFetchRequest<Settings>{
+        let request: NSFetchRequest<Settings> = Settings.fetchRequest() as! NSFetchRequest<Settings>
+        
+        request.sortDescriptors = [NSSortDescriptor(key: "conference", ascending: true)]
+        return request
     }
 }

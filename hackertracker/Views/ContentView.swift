@@ -11,7 +11,8 @@ import Firebase
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    @ObservedObject var settings = Settings()
+    @FetchRequest(entity: Settings.entity(), sortDescriptors: [])
+        private var settings: FetchedResults<Settings>
 
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Bookmarks.id, ascending: true)],

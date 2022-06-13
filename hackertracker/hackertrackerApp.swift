@@ -17,9 +17,9 @@ struct hackertrackerApp: App {
     }
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup<ContentView> {
             ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .environment(\.managedObjectContext, persistenceController.container.viewContext) as! ContentView
         }
     }
 }

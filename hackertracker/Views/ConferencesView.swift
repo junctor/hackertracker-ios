@@ -14,6 +14,9 @@ struct ConferencesView: View {
         List (viewModel.conferences, id: \.code) { conference in
             if (conference.hidden == false) {
                 ConferenceRow(conference: conference)
+                    .onTapGesture {
+                        print("Tapped \(conference.name)")
+                    }
             }
         }
         .listStyle(.plain)
