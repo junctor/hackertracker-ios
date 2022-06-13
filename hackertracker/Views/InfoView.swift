@@ -9,7 +9,12 @@ import SwiftUI
 
 struct InfoView: View {
     var body: some View {
-        Text("Information View")
+        NavigationView {
+            NavigationLink(destination: Text("Another View")) {
+                Text("Hello, World!")
+            }
+            .navigationTitle("Info")
+        }
     }
 }
 

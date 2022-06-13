@@ -9,9 +9,11 @@ import SwiftUI
 
 struct ScheduleView: View {
     var body: some View {
-        List (events, id: \.id) { event in
+        /*List (events, id: \.id) { event in
             EventRow(event: event)
         }
+        .listStyle(.plain)*/
+        Text("ScheduleView")
     }
 }
 

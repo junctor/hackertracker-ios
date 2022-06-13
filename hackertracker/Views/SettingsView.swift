@@ -9,7 +9,12 @@ import SwiftUI
 
 struct SettingsView: View {
     var body: some View {
-        Text("Settings View")
+        VStack {
+            NavigationLink(destination: ConferencesView()) {
+                Text("Select Conference")
+            }
+        }
+            //ConferencesView()
     }
 }
 

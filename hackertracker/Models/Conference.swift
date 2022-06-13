@@ -5,19 +5,33 @@
 //  Created by Seth W Law on 6/6/22.
 //
 
-import Foundation
+import FirebaseFirestore
 import FirebaseFirestoreSwift
+import Foundation
 
-struct Conference: Codable {
-    var id: Int
+struct Conference: Codable, Identifiable {
+    @DocumentID var id: String?
     var name: String
     var code: String
     var endDate: String
     var startDate: String
-    var timeZone: String
-    var coc: String
+    var timeZone: String?
+    var coc: String?
     var startTimestamp: Date
     var endTimestamp: Date
-    var maps: [Map]
+    var maps: [Map]?
     var hidden: Bool
+
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case code
+        case endDate = "end_date"
+        case startDate = "start_date"
+        case timeZone = "tz"
+        case coc
+        case startTimestamp = "start_timestamp"
+        case endTimestamp = "end_timestamp"
+        case maps
+        case hidden
+    }
 }

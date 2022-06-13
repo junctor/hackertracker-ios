@@ -5,8 +5,9 @@
 //  Created by Seth W Law on 6/6/22.
 //
 
-import Foundation
+import FirebaseFirestore
 import FirebaseFirestoreSwift
+import Foundation
 
 struct Map: Codable {
     var file: String

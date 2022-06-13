@@ -8,15 +8,16 @@
 import SwiftUI
 
 struct ConferenceRow: View {
+    var conference: Conference
+    let dfu = DateFormatterUtility.shared
+    
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 5, content: {
-                Text("Conference Name")
+                Text(conference.name)
                     .font(.title3)
-                    .dynamicTypeSize(.medium)
-                Text("Conference Dates")
+                Text("\(conference.startDate) - \(conference.endDate)")
                     .font(.body)
-                    .dynamicTypeSize(.small)
             })
             .padding()
         }
@@ -26,6 +27,15 @@ struct ConferenceRow: View {
 
 struct ConferenceRow_Previews: PreviewProvider {
     static var previews: some View {
-        ConferenceRow()
+        HStack {
+            VStack(alignment: .leading, spacing: 5, content: {
+                Text("Conference Name")
+                    .font(.title3)
+                Text("Conference Dates")
+                    .font(.body)
+            })
+            .padding()
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

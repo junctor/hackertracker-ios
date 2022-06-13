@@ -7,6 +7,7 @@
 
 import SwiftUI
 import CoreData
+import Firebase
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -24,46 +25,38 @@ struct ContentView: View {
         
             TabView {
                 ScheduleView()
-                    .padding()
                     .tabItem({
                         Image(systemName: "house")
-                        Text("Main")
+                        //Text("Main")
                     })
                     .tag(1)
                     .preferredColorScheme(colorScheme)
                 MapView()
-                    .padding()
                     .tabItem({
                         Image(systemName: "map")
-                        Text("Maps")
+                        //Text("Maps")
                     })
                     .tag(2)
                     .preferredColorScheme(colorScheme)
 
                 InfoView()
-                    .padding()
                     .tabItem({
                         Image(systemName: "info.circle")
-                        Text("Info")
+                        //Text("Info")
                     })
                     .tag(3)
                     .preferredColorScheme(colorScheme)
 
                 SettingsView()
-                    .padding()
                     .tabItem({
                         Image(systemName: "gear")
-                        Text("Settings")
+                        //Text("Settings")
                     })
                     .tag(4)
 
             }
-            .frame(maxWidth:.infinity)
-            .navigationTitle("DEF CON 30")
+            .navigationBarTitle("DEF CON 30", displayMode: .inline)
         }
-        .frame(width: UIScreen.main.bounds.width,
-               height: UIScreen.main.bounds.height)
-        .navigationViewStyle(.stack)
     }
 
     private func addBookmark() {

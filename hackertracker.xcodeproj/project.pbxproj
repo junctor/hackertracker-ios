@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57442857B398001374D4 /* ConferencesView.swift */; };
+		5D9E57472857B876001374D4 /* ConferencesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57462857B876001374D4 /* ConferencesViewModel.swift */; };
 		5DAE04B42820948B00930A2D /* hackertrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04B32820948B00930A2D /* hackertrackerApp.swift */; };
 		5DAE04B62820948B00930A2D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04B52820948B00930A2D /* ContentView.swift */; };
 		5DAE04B82820948E00930A2D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DAE04B72820948E00930A2D /* Assets.xcassets */; };
@@ -33,9 +35,18 @@
 		5DB4E0C3284FFEF00012F6F4 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info.plist */; };
 		5DB4E0C6285000320012F6F4 /* EventRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C5285000320012F6F4 /* EventRow.swift */; };
 		5DB4E0C8285001820012F6F4 /* events.json in Resources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C7285001820012F6F4 /* events.json */; };
-		5DB4E0CA285002AD0012F6F4 /* ModelData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C9285002AD0012F6F4 /* ModelData.swift */; };
 		5DF51AB8285007EC007BCB83 /* DateFormatterUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51AB7285007EC007BCB83 /* DateFormatterUtility.swift */; };
 		5DF51ABA2850310B007BCB83 /* ConferenceRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51AB92850310B007BCB83 /* ConferenceRow.swift */; };
+		5DF51ABC2851203F007BCB83 /* Document.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51ABB2851203F007BCB83 /* Document.swift */; };
+		5DF51AC928514F33007BCB83 /* Article.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51AC828514F33007BCB83 /* Article.swift */; };
+		5DF51ACB28514F70007BCB83 /* EventType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51ACA28514F70007BCB83 /* EventType.swift */; };
+		5DF51ACD2851507E007BCB83 /* Location.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51ACC2851507E007BCB83 /* Location.swift */; };
+		5DF51ACF285151C6007BCB83 /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51ACE285151C6007BCB83 /* Bookmark.swift */; };
+		5DF51AD228515326007BCB83 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 5DF51AD128515326007BCB83 /* FirebaseAuth */; };
+		5DF51AD428515326007BCB83 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 5DF51AD328515326007BCB83 /* FirebaseStorage */; };
+		5DF51AD62851557E007BCB83 /* Vendor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51AD52851557E007BCB83 /* Vendor.swift */; };
+		5DF51AD8285155BC007BCB83 /* FAQ.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51AD7285155BC007BCB83 /* FAQ.swift */; };
+		5DF51AE028526C0C007BCB83 /* UserEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51ADF28526C0C007BCB83 /* UserEvent.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +67,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5D9E57442857B398001374D4 /* ConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesView.swift; sourceTree = "<group>"; };
+		5D9E57462857B876001374D4 /* ConferencesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesViewModel.swift; sourceTree = "<group>"; };
 		5DAE04B02820948B00930A2D /* hackertracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hackertracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DAE04B32820948B00930A2D /* hackertrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hackertrackerApp.swift; sourceTree = "<group>"; };
 		5DAE04B52820948B00930A2D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -81,9 +94,16 @@
 		5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		5DB4E0C5285000320012F6F4 /* EventRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventRow.swift; sourceTree = "<group>"; };
 		5DB4E0C7285001820012F6F4 /* events.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = events.json; sourceTree = "<group>"; };
-		5DB4E0C9285002AD0012F6F4 /* ModelData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelData.swift; sourceTree = "<group>"; };
 		5DF51AB7285007EC007BCB83 /* DateFormatterUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatterUtility.swift; sourceTree = "<group>"; };
 		5DF51AB92850310B007BCB83 /* ConferenceRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceRow.swift; sourceTree = "<group>"; };
+		5DF51ABB2851203F007BCB83 /* Document.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Document.swift; sourceTree = "<group>"; };
+		5DF51AC828514F33007BCB83 /* Article.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Article.swift; sourceTree = "<group>"; };
+		5DF51ACA28514F70007BCB83 /* EventType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventType.swift; sourceTree = "<group>"; };
+		5DF51ACC2851507E007BCB83 /* Location.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Location.swift; sourceTree = "<group>"; };
+		5DF51ACE285151C6007BCB83 /* Bookmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bookmark.swift; sourceTree = "<group>"; };
+		5DF51AD52851557E007BCB83 /* Vendor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vendor.swift; sourceTree = "<group>"; };
+		5DF51AD7285155BC007BCB83 /* FAQ.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAQ.swift; sourceTree = "<group>"; };
+		5DF51ADF28526C0C007BCB83 /* UserEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserEvent.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -92,9 +112,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				5DAE3E9C2836A76000F9F845 /* FirebaseDatabaseSwift in Frameworks */,
+				5DF51AD228515326007BCB83 /* FirebaseAuth in Frameworks */,
 				5DAE3E982836A76000F9F845 /* FirebaseAnalyticsSwift in Frameworks */,
 				5DAE3E9A2836A76000F9F845 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				5DAE3E9E2836A76000F9F845 /* FirebaseFirestoreSwift in Frameworks */,
+				5DF51AD428515326007BCB83 /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,10 +160,10 @@
 		5DAE04B22820948B00930A2D /* hackertracker */ = {
 			isa = PBXGroup;
 			children = (
-				5DB4E0C4284FFF090012F6F4 /* DataControllers */,
-				5DB4E0BF284EDA670012F6F4 /* Utils */,
 				5DB4E0B3284E9F4C0012F6F4 /* Models */,
 				5DB4E0B2284E9F320012F6F4 /* Views */,
+				5DF51AD928516869007BCB83 /* ViewModels */,
+				5DB4E0BF284EDA670012F6F4 /* Utils */,
 				5DAE04B32820948B00930A2D /* hackertrackerApp.swift */,
 				5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info.plist */,
 				5DAE04B72820948E00930A2D /* Assets.xcassets */,
@@ -189,6 +211,7 @@
 				5DB4E0BD284EA1310012F6F4 /* EventView.swift */,
 				5DB4E0C5285000320012F6F4 /* EventRow.swift */,
 				5DF51AB92850310B007BCB83 /* ConferenceRow.swift */,
+				5D9E57442857B398001374D4 /* ConferencesView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -196,11 +219,18 @@
 		5DB4E0B3284E9F4C0012F6F4 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				5DB4E0B4284E9F880012F6F4 /* Event.swift */,
+				5DF51AC828514F33007BCB83 /* Article.swift */,
+				5DF51ACE285151C6007BCB83 /* Bookmark.swift */,
 				5DB4E0B7284E9FEF0012F6F4 /* Conference.swift */,
+				5DF51ABB2851203F007BCB83 /* Document.swift */,
+				5DB4E0B4284E9F880012F6F4 /* Event.swift */,
+				5DF51ACA28514F70007BCB83 /* EventType.swift */,
+				5DF51AD7285155BC007BCB83 /* FAQ.swift */,
+				5DF51ACC2851507E007BCB83 /* Location.swift */,
 				5DB4E0B9284EA02C0012F6F4 /* Map.swift */,
 				5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */,
-				5DB4E0C9285002AD0012F6F4 /* ModelData.swift */,
+				5DF51ADF28526C0C007BCB83 /* UserEvent.swift */,
+				5DF51AD52851557E007BCB83 /* Vendor.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -214,11 +244,12 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
-		5DB4E0C4284FFF090012F6F4 /* DataControllers */ = {
+		5DF51AD928516869007BCB83 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				5D9E57462857B876001374D4 /* ConferencesViewModel.swift */,
 			);
-			path = DataControllers;
+			path = ViewModels;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -242,6 +273,8 @@
 				5DAE3E992836A76000F9F845 /* FirebaseAnalyticsWithoutAdIdSupport */,
 				5DAE3E9B2836A76000F9F845 /* FirebaseDatabaseSwift */,
 				5DAE3E9D2836A76000F9F845 /* FirebaseFirestoreSwift */,
+				5DF51AD128515326007BCB83 /* FirebaseAuth */,
+				5DF51AD328515326007BCB83 /* FirebaseStorage */,
 			);
 			productName = hackertracker;
 			productReference = 5DAE04B02820948B00930A2D /* hackertracker.app */;
@@ -317,6 +350,7 @@
 			mainGroup = 5DAE04A72820948B00930A2D;
 			packageReferences = (
 				5DAE3E962836A76000F9F845 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				5DF51AD028515326007BCB83 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = 5DAE04B12820948B00930A2D /* Products */;
 			projectDirPath = "";
@@ -364,22 +398,31 @@
 			files = (
 				5DB4E0AB284E86900012F6F4 /* ScheduleView.swift in Sources */,
 				5DB4E0B5284E9F880012F6F4 /* Event.swift in Sources */,
+				5DF51AC928514F33007BCB83 /* Article.swift in Sources */,
 				5DB4E0BE284EA1310012F6F4 /* EventView.swift in Sources */,
+				5DF51AD8285155BC007BCB83 /* FAQ.swift in Sources */,
 				5DB4E0B1284E86D80012F6F4 /* SettingsView.swift in Sources */,
 				5DF51ABA2850310B007BCB83 /* ConferenceRow.swift in Sources */,
 				5DB4E0C1284EDA7E0012F6F4 /* Settings.swift in Sources */,
-				5DB4E0CA285002AD0012F6F4 /* ModelData.swift in Sources */,
+				5DF51ACD2851507E007BCB83 /* Location.swift in Sources */,
+				5DF51ACF285151C6007BCB83 /* Bookmark.swift in Sources */,
+				5DF51AE028526C0C007BCB83 /* UserEvent.swift in Sources */,
+				5D9E57472857B876001374D4 /* ConferencesViewModel.swift in Sources */,
 				5DB4E0BC284EA0AE0012F6F4 /* Speaker.swift in Sources */,
 				5DB4E0AD284E86AD0012F6F4 /* MapView.swift in Sources */,
 				5DB4E0C6285000320012F6F4 /* EventRow.swift in Sources */,
 				5DAE04C02820948E00930A2D /* hackertracker.xcdatamodeld in Sources */,
 				5DF51AB8285007EC007BCB83 /* DateFormatterUtility.swift in Sources */,
+				5DF51AD62851557E007BCB83 /* Vendor.swift in Sources */,
 				5DAE04BD2820948E00930A2D /* Persistence.swift in Sources */,
+				5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */,
 				5DAE04B62820948B00930A2D /* ContentView.swift in Sources */,
 				5DB4E0BA284EA02C0012F6F4 /* Map.swift in Sources */,
 				5DB4E0B8284E9FEF0012F6F4 /* Conference.swift in Sources */,
 				5DAE04B42820948B00930A2D /* hackertrackerApp.swift in Sources */,
 				5DB4E0AF284E86CC0012F6F4 /* InfoView.swift in Sources */,
+				5DF51ACB28514F70007BCB83 /* EventType.swift in Sources */,
+				5DF51ABC2851203F007BCB83 /* Document.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -420,6 +463,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
@@ -466,7 +510,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -480,6 +525,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = "";
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
@@ -520,7 +566,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -714,6 +761,14 @@
 				minimumVersion = 9.0.0;
 			};
 		};
+		5DF51AD028515326007BCB83 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -736,6 +791,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5DAE3E962836A76000F9F845 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestoreSwift;
+		};
+		5DF51AD128515326007BCB83 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5DF51AD028515326007BCB83 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		5DF51AD328515326007BCB83 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5DF51AD028515326007BCB83 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 /* End XCSwiftPackageProductDependency section */
 

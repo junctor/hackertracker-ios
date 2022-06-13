@@ -15,15 +15,12 @@ struct EventRow: View {
         HStack {
             Color.accentColor.frame(width: 5, height: 60)
             VStack (alignment: .leading, spacing: 0, content: {
-                Text(dfu.shortDayOfMonthFormatter.string(from: event.begin))
+                Text(dfu.shortDayOfMonthFormatter.string(from: event.beginTimestamp))
                     .font(.caption)
-                    .dynamicTypeSize(.small)
-                Text(dfu.hourMinuteTimeFormatter.string(from: event.begin))
+                Text(dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp))
                     .font(.body)
-                    .dynamicTypeSize(.small)
-                Text(dfu.timezoneFormatter.string(from: event.begin))
+                Text(dfu.timezoneFormatter.string(from: event.beginTimestamp))
                     .font(.caption)
-                    .dynamicTypeSize(.xSmall)
                 
             })
             .padding()
@@ -31,22 +28,25 @@ struct EventRow: View {
             VStack (alignment: .leading, spacing: 0, content: {
                 Text(event.title)
                     .font(.title3)
-                    .dynamicTypeSize(.medium)
                 Text("Speaker Name")
                     .font(.body)
-                    .dynamicTypeSize(.small)
-                Text(event.location)
+                Text(event.location.name)
                     .font(.caption)
-                    .dynamicTypeSize(.xSmall)
             })
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
+            .padding(0)
+            
+            HStack(alignment: .top, spacing: 0, content: {
+                VStack(alignment: .center, spacing: 5, content: {
+                    Image(systemName: "star")
+                })
+            })
         }
     }
 }
 
 struct EventRow_Previews: PreviewProvider {
     static var previews: some View {
-        EventRow(event: events[1])
+        Text("Preview blah")
     }
 }
