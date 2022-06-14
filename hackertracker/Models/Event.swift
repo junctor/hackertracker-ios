@@ -9,7 +9,8 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct Event: Codable {
+struct Event: Codable, Identifiable {
+    @DocumentID var docID: String? 
     var id: Int
     var conferenceName: String?
     var description: String
@@ -21,7 +22,7 @@ struct Event: Codable {
     var links: [Links]
     var title: String
     var location: Location
-    var speakers: [Speaker]
+    var speakers: [EventSpeaker]
     var type: EventType
 
     private enum CodingKeys: String, CodingKey {
@@ -39,6 +40,12 @@ struct Event: Codable {
         case speakers
         case type
     }
+}
+
+struct EventSpeaker: Codable {
+    var id: Int
+    var name: String
+    var title: String?
 }
 
 struct Links: Codable {

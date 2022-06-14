@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct ConferenceRow: View {
+
     var conference: Conference
     var code: String
     

@@ -10,14 +10,8 @@ import CoreData
 import Firebase
 
 struct ContentView: View {
-    @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
-
-    @FetchRequest(
-        sortDescriptors: [NSSortDescriptor(keyPath: \Bookmarks.id, ascending: true)],
-        animation: .default)
-    private var bookmarks: FetchedResults<Bookmarks>
     
     private var colorScheme: ColorScheme = .dark
 
@@ -60,35 +54,6 @@ struct ContentView: View {
         }
     }
 
-    private func addBookmark() {
-        withAnimation {
-            let newItem = Bookmarks(context: viewContext)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
-
-    private func deleteBookmark(offsets: IndexSet) {
-        withAnimation {
-            offsets.map { bookmarks[$0] }.forEach(viewContext.delete)
-
-            do {
-                try viewContext.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nsError = error as NSError
-                fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-            }
-        }
-    }
 }
 
 private let itemFormatter: DateFormatter = {

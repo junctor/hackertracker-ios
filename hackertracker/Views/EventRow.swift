@@ -6,9 +6,13 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct EventRow: View {
+    @Environment(\.managedObjectContext) private var viewContext
+
     var event: Event
+    @State var bookmarks: [Int]
     let dfu = DateFormatterUtility.shared
     
     var body: some View {
@@ -28,8 +32,11 @@ struct EventRow: View {
             VStack (alignment: .leading, spacing: 0, content: {
                 Text(event.title)
                     .font(.title3)
-                Text("Speaker Name")
-                    .font(.body)
+                if event.speakers.count > 0 {
+                    Text(self.speakersString(speakers: event.speakers))
+                        .font(.body)
+                }
+                    
                 Text(event.location.name)
                     .font(.caption)
             })
@@ -38,10 +45,38 @@ struct EventRow: View {
             
             HStack(alignment: .top, spacing: 0, content: {
                 VStack(alignment: .center, spacing: 5, content: {
-                    Image(systemName: "star")
+                    if bookmarks.contains(event.id) {
+                        Image(systemName: "star.fill")
+                            .onTapGesture {
+                                BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
+                                if let index = bookmarks.firstIndex(of: event.id) {
+                                    bookmarks.remove(at: index)
+                                }
+                            }
+                    } else {
+                        Image(systemName: "star")
+                            .onTapGesture {
+                                BookmarkUtility.addBookmark(context: viewContext, id: event.id)
+                                bookmarks.append(event.id)
+                            }
+                    }
                 })
             })
         }
+        .onAppear() {
+            print("Adding event \(event.id):\(event.title)")
+        }
+    }
+    
+    func speakersString(speakers: [EventSpeaker]) -> String {
+        var ret: String = ""
+        speakers.forEach { s in
+            if ret != "" {
+                ret = ret + ", "
+            }
+            ret = ret + s.name
+        }
+        return ret
     }
 }
 
