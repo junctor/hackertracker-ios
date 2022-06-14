@@ -11,15 +11,15 @@ import Firebase
 
 struct ContentView: View {
     @Environment(\.managedObjectContext) private var viewContext
-    @FetchRequest(entity: Settings.entity(), sortDescriptors: [])
-        private var settings: FetchedResults<Settings>
+    @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
+    @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
 
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Bookmarks.id, ascending: true)],
         animation: .default)
     private var bookmarks: FetchedResults<Bookmarks>
     
-    var colorScheme: ColorScheme = .dark
+    private var colorScheme: ColorScheme = .dark
 
     var body: some View {
         NavigationView {
@@ -56,22 +56,7 @@ struct ContentView: View {
                     .tag(4)
 
             }
-            .navigationBarTitle("DEF CON 30", displayMode: .inline)
-            .onAppear() {
-                if settings.isEmpty {
-                    let newSettings = Settings(context: viewContext)
-                    newSettings.dark = true
-                    newSettings.hidden = false
-                    newSettings.conference = "DEFCON30"
-                    do {
-                        try viewContext.save()
-                    } catch {
-                        let error = error as NSError
-                        fatalError("An error occured: \(error)")
-                    }
-                    
-                }
-            }
+            .navigationBarTitle(conferenceName, displayMode: .inline)
         }
     }
 
@@ -115,9 +100,9 @@ private let itemFormatter: DateFormatter = {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        Group {
-            ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-            ContentView().environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
-        }
+        Text("Content View Preview")
+        /*Group {
+            ContentView(settings: Settings()).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
+        }*/
     }
 }

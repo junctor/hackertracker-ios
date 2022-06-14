@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ConferenceRow: View {
     var conference: Conference
-    let dfu = DateFormatterUtility.shared
+    var code: String
     
     var body: some View {
         HStack {
@@ -19,7 +19,9 @@ struct ConferenceRow: View {
                 Text("\(conference.startDate) - \(conference.endDate)")
                     .font(.body)
             })
-            .padding()
+            if (conference.code == code) {
+                Image(systemName: "checkmark")
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

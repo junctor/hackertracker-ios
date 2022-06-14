@@ -6,16 +6,27 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct ConferencesView: View {
     @ObservedObject private var viewModel = ConferencesViewModel()
+    @Environment(\.presentationMode) var presentationMode
+    @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
+    @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
     
     var body: some View {
         List (viewModel.conferences, id: \.code) { conference in
             if (conference.hidden == false) {
-                ConferenceRow(conference: conference)
+                ConferenceRow(conference: conference, code: conferenceCode)
                     .onTapGesture {
-                        print("Tapped \(conference.name)")
+                        if conference.code == conferenceCode {
+                            print("Already selected \(conference.name)")
+                        } else {
+                            print("Tapped \(conference.name)")
+                            conferenceCode = conference.code
+                            conferenceName = conference.name
+                        }
+                        self.presentationMode.wrappedValue.dismiss()
                     }
             }
         }

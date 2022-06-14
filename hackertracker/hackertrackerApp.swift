@@ -12,8 +12,12 @@ import CoreData
 @main
 struct hackertrackerApp: App {
     let persistenceController = PersistenceController.shared
+    
+    // Settings stuff ? Might work?
+    @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(entity: Settings.entity(), sortDescriptors: [])
-        private var settings: FetchedResults<Settings>
+        private var settingsRequest: FetchedResults<Settings>
+    @State var settings: Settings? = nil
     
     init() {
         FirebaseApp.configure()
@@ -25,4 +29,5 @@ struct hackertrackerApp: App {
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
+    
 }

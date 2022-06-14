@@ -26,7 +26,7 @@ class OldSettings: NSManagedObject, Identifiable {
 
 extension OldSettings {
     static func getSettings() -> NSFetchRequest<Settings>{
-        let request: NSFetchRequest<Settings> = Settings.fetchRequest() as! NSFetchRequest<Settings>
+        let request: NSFetchRequest<Settings> = Settings.fetchRequest() 
         
         request.sortDescriptors = [NSSortDescriptor(key: "conference", ascending: true)]
         return request
