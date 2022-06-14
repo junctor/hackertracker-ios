@@ -8,12 +8,18 @@
 import SwiftUI
 
 struct ScheduleView: View {
+    @ObservedObject private var viewModel = ScheduleViewModel()
+    @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
+    @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    
     var body: some View {
-        /*List (events, id: \.id) { event in
+        List (viewModel.events, id: \.id) { event in
             EventRow(event: event)
         }
-        .listStyle(.plain)*/
-        Text("ScheduleView")
+        .onAppear() {
+            self.viewModel.fetchData()
+        }
+        .listStyle(.plain)
     }
 }
 
