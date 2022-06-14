@@ -19,11 +19,17 @@ struct ConferenceRow: View {
                 Text("\(conference.startDate) - \(conference.endDate)")
                     .font(.body)
             })
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(0)
+            
             if (conference.code == code) {
-                Image(systemName: "checkmark")
+                HStack(alignment: .top, spacing: 0, content: {
+                    VStack(alignment: .center, spacing: 5, content: {
+                        Image(systemName: "checkmark")
+                    })
+                })
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

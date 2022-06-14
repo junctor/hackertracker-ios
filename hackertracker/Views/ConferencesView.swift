@@ -13,10 +13,11 @@ struct ConferencesView: View {
     @Environment(\.presentationMode) var presentationMode
     @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    @AppStorage("showHidden") var showHidden: Bool = false
     
     var body: some View {
         List (viewModel.conferences, id: \.code) { conference in
-            if (conference.hidden == false) {
+            if (showHidden == false && conference.hidden == false) {
                 ConferenceRow(conference: conference, code: conferenceCode)
                     .onTapGesture {
                         if conference.code == conferenceCode {
