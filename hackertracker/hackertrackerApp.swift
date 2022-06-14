@@ -7,19 +7,22 @@
 
 import SwiftUI
 import Firebase
+import CoreData
 
 @main
 struct hackertrackerApp: App {
     let persistenceController = PersistenceController.shared
+    @FetchRequest(entity: Settings.entity(), sortDescriptors: [])
+        private var settings: FetchedResults<Settings>
     
     init() {
         FirebaseApp.configure()
     }
 
     var body: some Scene {
-        WindowGroup<ContentView> {
+        WindowGroup {
             ContentView()
-                .environment(\.managedObjectContext, persistenceController.container.viewContext) as! ContentView
+                .environment(\.managedObjectContext, persistenceController.container.viewContext)
         }
     }
 }

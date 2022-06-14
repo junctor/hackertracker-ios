@@ -57,6 +57,21 @@ struct ContentView: View {
 
             }
             .navigationBarTitle("DEF CON 30", displayMode: .inline)
+            .onAppear() {
+                if settings.isEmpty {
+                    let newSettings = Settings(context: viewContext)
+                    newSettings.dark = true
+                    newSettings.hidden = false
+                    newSettings.conference = "DEFCON30"
+                    do {
+                        try viewContext.save()
+                    } catch {
+                        let error = error as NSError
+                        fatalError("An error occured: \(error)")
+                    }
+                    
+                }
+            }
         }
     }
 

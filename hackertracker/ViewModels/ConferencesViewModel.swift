@@ -22,8 +22,6 @@ class ConferencesViewModel: ObservableObject {
             
             self.conferences = documents.compactMap { queryDocumentSnapshot -> Conference? in
                 do {
-                    let con = try queryDocumentSnapshot.data(as: Conference.self)
-                    print("Loading conference: \(con.name)")
                     return try queryDocumentSnapshot.data(as: Conference.self)
                 } catch {
                     print("Error \(error)")
