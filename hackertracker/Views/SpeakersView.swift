@@ -13,7 +13,7 @@ struct SpeakersView: View {
 
     var body: some View {
         List(viewModel.speakers, id: \.id) { speaker in
-            NavigationLink(destination: Text(speaker.name)) {
+            NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                 SpeakerRow(speaker: speaker)
             }
         }
