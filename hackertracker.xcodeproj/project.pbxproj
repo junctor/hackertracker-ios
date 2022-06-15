@@ -11,6 +11,7 @@
 		5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57442857B398001374D4 /* ConferencesView.swift */; };
 		5D9E57472857B876001374D4 /* ConferencesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57462857B876001374D4 /* ConferencesViewModel.swift */; };
 		5D9E57492859037C001374D4 /* BookmarkUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57482859037C001374D4 /* BookmarkUtility.swift */; };
+		5D9E574B28595873001374D4 /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E574A28595873001374D4 /* EventDetailView.swift */; };
 		5DAE04B42820948B00930A2D /* hackertrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04B32820948B00930A2D /* hackertrackerApp.swift */; };
 		5DAE04B62820948B00930A2D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04B52820948B00930A2D /* ContentView.swift */; };
 		5DAE04B82820948E00930A2D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DAE04B72820948E00930A2D /* Assets.xcassets */; };
@@ -72,6 +73,7 @@
 		5D9E57442857B398001374D4 /* ConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesView.swift; sourceTree = "<group>"; };
 		5D9E57462857B876001374D4 /* ConferencesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesViewModel.swift; sourceTree = "<group>"; };
 		5D9E57482859037C001374D4 /* BookmarkUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkUtility.swift; sourceTree = "<group>"; };
+		5D9E574A28595873001374D4 /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		5DAE04B02820948B00930A2D /* hackertracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hackertracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DAE04B32820948B00930A2D /* hackertrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hackertrackerApp.swift; sourceTree = "<group>"; };
 		5DAE04B52820948B00930A2D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -214,6 +216,7 @@
 				5DB4E0C5285000320012F6F4 /* EventRow.swift */,
 				5DF51AB92850310B007BCB83 /* ConferenceRow.swift */,
 				5D9E57442857B398001374D4 /* ConferencesView.swift */,
+				5D9E574A28595873001374D4 /* EventDetailView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -399,6 +402,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D9E574B28595873001374D4 /* EventDetailView.swift in Sources */,
 				5DB4E0AB284E86900012F6F4 /* ScheduleView.swift in Sources */,
 				5DB4E0B5284E9F880012F6F4 /* Event.swift in Sources */,
 				5D9E57492859037C001374D4 /* BookmarkUtility.swift in Sources */,

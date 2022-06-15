@@ -63,9 +63,6 @@ struct EventRow: View {
                 })
             })
         }
-        .onAppear() {
-            print("Adding event \(event.id):\(event.title)")
-        }
     }
     
     func speakersString(speakers: [EventSpeaker]) -> String {

@@ -20,7 +20,9 @@ struct ScheduleView: View {
     
     var body: some View {
         List (viewModel.events, id: \.id) { event in
-            EventRow(event: event, bookmarks: bookmarks)
+            NavigationLink(destination: EventDetailView(event: event, bookmarks: bookmarks)) {
+                EventRow(event: event, bookmarks: bookmarks)
+            }
         }
         .onAppear() {
             self.viewModel.fetchData()
