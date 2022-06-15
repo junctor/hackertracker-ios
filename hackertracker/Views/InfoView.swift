@@ -8,13 +8,32 @@
 import SwiftUI
 
 struct InfoView: View {
+    let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
+
     var body: some View {
-        NavigationView {
-            NavigationLink(destination: Text("Another View")) {
-                Text("Hello, World!")
+        LazyVGrid (columns: gridItemLayout, spacing: 20) {
+            NavigationLink(destination: Text("Speakers List goes here")) {
+                Text("Speakers!")
             }
-            .navigationTitle("Info")
+            
+            NavigationLink(destination: Text("Code of Conduct goes here")) {
+                Text("Code of Conduct")
+            }
+            
+            NavigationLink(destination: Text("Frequently Asked Questions")) {
+                Text("FAQ")
+            }
+            NavigationLink(destination: Text("Vendors")) {
+                Text("Vendors")
+            }
+            NavigationLink(destination: Text("News")) {
+                Text("News")
+            }
+            NavigationLink(destination: Text("Contact Us")) {
+                Text("Contact Us")
+            }
         }
+        .navigationTitle("Info")
     }
 }
 

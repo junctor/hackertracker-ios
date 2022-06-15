@@ -2,25 +2,42 @@
 //  ConferenceViewModel.swift
 //  hackertracker
 //
-//  Created by Seth W Law on 6/8/22.
+//  Created by Seth W Law on 6/14/22.
 //
 
-import Combine
+import Foundation
+import FirebaseFirestore
 
-class ConferenceViewModel: ObservableObject  {
-    private let conferenceRepository = ConferenceRepository()
-    @Published var conference: Conference
+class ConferenceViewModel: ObservableObject {
+    /*@Published var conference: Conference? = nil
     
-    private var cancellables: Set<AnyCancellable> = []
+    private var db = Firestore.firestore()
     
-    var id = 0
-    
-    init(conference: Conference) {
-        self.conference = conference
-        $conference
-            .compactMap { $0.id }
-            .assign(to: \.id, on: self)
-            //.store(in: &cancellables)
-    }
-    
+    func fetchConference(code: String) {
+        db.collection("conferences").document("code", isEqualTo: code).addSnapshotListener { (querySnapshot, error) in
+            guard let document = querySnapshot?.documents else {
+                print("No conforence with code \(code) found.")
+                return
+            }
+            self.conference = documents.items.first
+        }
+        
+        /*
+         let docRef = db.collection("Restaurants").document("PizzaMania")
+
+             docRef.getDocument { (document, error) in
+                 guard error == nil else {
+                     print("error", error ?? "")
+                     return
+                 }
+
+                 if let document = document, document.exists {
+                     let data = document.data()
+                     if let data = data {
+                         print("data", data)
+                         self.restaurant = data["name"] as? String ?? ""
+                     }
+                 }
+         */
+    }*/
 }

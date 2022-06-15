@@ -44,10 +44,11 @@ struct ContentView: View {
 
                 SettingsView()
                     .tabItem({
-                        Image(systemName: "gear")
+                        Image(systemName: "gearshape")
                         //Text("Settings")
                     })
                     .tag(4)
+                    .preferredColorScheme(colorScheme)
 
             }
             .navigationBarTitle(conferenceName, displayMode: .inline)
