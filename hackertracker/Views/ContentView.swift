@@ -12,6 +12,7 @@ import Firebase
 struct ContentView: View {
     @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    @State var conference: Conference?
     @State private var viewModel = ConferencesViewModel()
     
     private var colorScheme: ColorScheme = .dark
@@ -27,7 +28,7 @@ struct ContentView: View {
                     })
                     .tag(1)
                     .preferredColorScheme(colorScheme)
-                MapView()
+                MapView(conference: self.conference)
                     .tabItem({
                         Image(systemName: "map")
                         //Text("Maps")
@@ -56,6 +57,7 @@ struct ContentView: View {
         }
         .onAppear() {
             self.viewModel.fetchData()
+            self.conference = self.viewModel.getConference(code: conferenceCode)
         }
     }
 
