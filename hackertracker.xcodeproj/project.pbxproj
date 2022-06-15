@@ -72,6 +72,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3C92B96B2859DED600523901 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		5D4F07B628583D17006772A2 /* ScheduleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleViewModel.swift; sourceTree = "<group>"; };
 		5D4F07B828598AC8006772A2 /* 404View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = 404View.swift; sourceTree = "<group>"; };
 		5D9E57442857B398001374D4 /* ConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesView.swift; sourceTree = "<group>"; };
@@ -150,6 +151,7 @@
 		5DAE04A72820948B00930A2D = {
 			isa = PBXGroup;
 			children = (
+				3C92B96B2859DED600523901 /* .swiftlint.yml */,
 				5DAE04B22820948B00930A2D /* hackertracker */,
 				5DAE04C82820948F00930A2D /* hackertrackerTests */,
 				5DAE04D22820948F00930A2D /* hackertrackerUITests */,
@@ -277,6 +279,7 @@
 				5DAE04AC2820948B00930A2D /* Sources */,
 				5DAE04AD2820948B00930A2D /* Frameworks */,
 				5DAE04AE2820948B00930A2D /* Resources */,
+				3C92B9692859DAE200523901 /* SwiftLint */,
 			);
 			buildRules = (
 			);
@@ -405,6 +408,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3C92B9692859DAE200523901 /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "export PATH=\"$PATH:/opt/homebrew/bin\"\nif which swiftlint > /dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5DAE04AC2820948B00930A2D /* Sources */ = {

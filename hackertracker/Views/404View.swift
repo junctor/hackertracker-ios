@@ -13,7 +13,7 @@ struct _04View: View {
     var body: some View {
         VStack {
             Image("404")
-                .frame(width:512)
+                .frame(width: 512)
             Text(message)
                 .font(.title)
             Image("skull")
@@ -24,6 +24,6 @@ struct _04View: View {
 
 struct _04View_Previews: PreviewProvider {
     static var previews: some View {
-        _04View(message:"404 not found")
+        _04View(message: "404 not found")
     }
 }

@@ -16,8 +16,8 @@ struct ConferencesView: View {
     @AppStorage("showHidden") var showHidden: Bool = false
     
     var body: some View {
-        List (viewModel.conferences, id: \.code) { conference in
-            if (showHidden == false && conference.hidden == false) {
+        List(viewModel.conferences, id: \.code) { conference in
+            if showHidden == false && conference.hidden == false {
                 ConferenceRow(conference: conference, code: conferenceCode)
                     .onTapGesture {
                         if conference.code == conferenceCode {
@@ -32,7 +32,7 @@ struct ConferencesView: View {
             }
         }
         .listStyle(.plain)
-        .onAppear() {
+        .onAppear {
             self.viewModel.fetchData()
         }
         .navigationBarTitle("Select Conference", displayMode: .inline)
