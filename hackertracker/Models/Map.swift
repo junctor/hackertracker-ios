@@ -11,5 +11,5 @@ import Foundation
 
 struct Map: Codable {
     var file: String
-    var name: String
+    var description: String
 }

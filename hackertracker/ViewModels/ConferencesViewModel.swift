@@ -34,10 +34,8 @@ class ConferencesViewModel: ObservableObject {
     }
     
     func getConference(code: String) -> Conference? {
-        for c in conferences {
-            if c.code == code {
-                return c
-            }
+        for c in conferences where c.code == code {
+            return c
         }
         return nil
     }

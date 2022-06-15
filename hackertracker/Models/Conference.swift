@@ -28,7 +28,7 @@ struct Conference: Codable, Identifiable {
         case endDate = "end_date"
         case startDate = "start_date"
         case timeZone = "tz"
-        case coc
+        case coc = "codeofconduct"
         case startTimestamp = "start_timestamp"
         case endTimestamp = "end_timestamp"
         case maps

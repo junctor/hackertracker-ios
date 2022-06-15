@@ -10,14 +10,16 @@ import SwiftUI
 struct CodeOfConductView: View {
     var codeofconduct: String
     var body: some View {
-        VStack {
-            Text("Code of Conduct")
-                .font(.title)
-            Divider()
-            Text(codeofconduct)
-                .font(.body)
+        ScrollView {
+            VStack {
+                Text("Code of Conduct")
+                    .font(.title)
+                Divider()
+                Text(codeofconduct)
+                    .font(.body)
+            }
+            .padding()
         }
-        .padding()
     }
 }
 
