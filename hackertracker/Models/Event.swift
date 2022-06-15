@@ -42,7 +42,7 @@ struct Event: Codable, Identifiable {
     }
 }
 
-struct EventSpeaker: Codable {
+struct EventSpeaker: Codable, Identifiable {
     var id: Int
     var name: String
     var title: String?

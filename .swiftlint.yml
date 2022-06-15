@@ -1,0 +1,9 @@
+warning_threshold: 10
+included:
+  included: # paths to include during linting. `--path` is ignored if present.
+    - hackertracker
+disabled_rules: # rule identifiers to exclude from running
+  - identifier_name
+  - line_length
+  - type_name
+  - trailing_whitespace

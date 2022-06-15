@@ -15,7 +15,7 @@ struct MapView: View {
         if let con = conference, let maps = con.maps {
             Text("Maps goes here")
         } else {
-            _04View(message:"No Maps Found")
+            _04View(message: "No Maps Found")
         }
     }
 }

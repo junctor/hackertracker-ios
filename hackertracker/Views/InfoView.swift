@@ -8,11 +8,10 @@
 import SwiftUI
 
 struct InfoView: View {
-    var viewModel:ConferencesViewModel
+    var viewModel: ConferencesViewModel
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
     @State var conference: Conference?
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
-
 
     var body: some View {
         VStack {
@@ -20,7 +19,7 @@ struct InfoView: View {
                 .font(.title)
             Divider()
             if let con = conference {
-                LazyVGrid (columns: gridItemLayout, spacing: 20) {
+                LazyVGrid(columns: gridItemLayout, spacing: 20) {
                     NavigationLink(destination: Text("Speakers List goes here")) {
                         Image(systemName: "person.crop.rectangle")
                         Text("Speakers")
@@ -53,7 +52,7 @@ struct InfoView: View {
                 Text(con.name).font(.caption2)
             }
         }
-        .onAppear() {
+        .onAppear {
             conference = self.viewModel.getConference(code: conferenceCode)
         }
     }

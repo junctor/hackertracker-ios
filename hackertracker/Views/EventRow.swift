@@ -18,7 +18,7 @@ struct EventRow: View {
     var body: some View {
         HStack {
             Color.accentColor.frame(width: 5, height: 60)
-            VStack (alignment: .leading, spacing: 0, content: {
+            VStack(alignment: .leading, spacing: 0, content: {
                 Text(dfu.shortDayOfMonthFormatter.string(from: event.beginTimestamp))
                     .font(.caption)
                 Text(dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp))
@@ -29,7 +29,7 @@ struct EventRow: View {
             })
             .padding()
             
-            VStack (alignment: .leading, spacing: 0, content: {
+            VStack(alignment: .leading, spacing: 0, content: {
                 Text(event.title)
                     .font(.title3)
                 if event.speakers.count > 0 {
@@ -69,9 +69,9 @@ struct EventRow: View {
         var ret: String = ""
         speakers.forEach { s in
             if ret != "" {
-                ret = ret + ", "
+                ret += ", "
             }
-            ret = ret + s.name
+            ret += s.name
         }
         return ret
     }

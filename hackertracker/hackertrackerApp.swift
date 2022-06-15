@@ -17,7 +17,7 @@ struct hackertrackerApp: App {
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(entity: Settings.entity(), sortDescriptors: [])
         private var settingsRequest: FetchedResults<Settings>
-    @State var settings: Settings? = nil
+    @State var settings: Settings?
     
     init() {
         FirebaseApp.configure()

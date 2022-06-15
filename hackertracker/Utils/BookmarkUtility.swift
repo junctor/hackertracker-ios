@@ -13,7 +13,7 @@ class BookmarkUtility {
     
     static func addBookmark(context: NSManagedObjectContext, id: Int) {
         let newItem = Bookmarks(context: context)
-        newItem.id = Int64(id)
+        newItem.id = Int32(id)
         print("Adding Bookmark for event \(id)")
 
         do {
@@ -29,10 +29,11 @@ class BookmarkUtility {
         let fr: NSFetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Bookmarks")
         fr.predicate = NSPredicate(format: "id = %d", id)
         do {
-            let res = try context.fetch(fr) as! [NSManagedObject]
-            print("Deleting \(res.count) Bookmarks")
-            for r in res {
-                context.delete(r)
+            if let res = try context.fetch(fr) as? [NSManagedObject] {
+                print("Deleting \(res.count) Bookmarks")
+                for r in res {
+                    context.delete(r)
+                }
             }
             try context.save()
         } catch {
@@ -41,20 +42,20 @@ class BookmarkUtility {
         }
     }
     
-/*
+    /*
+     
+     private func deleteBookmark(offsets: IndexSet) {
+     withAnimation {
+     offsets.map { bookmarks[$0] }.forEach(viewContext.delete)
 
-private func deleteBookmark(offsets: IndexSet) {
-    withAnimation {
-        offsets.map { bookmarks[$0] }.forEach(viewContext.delete)
-
-        do {
-            try viewContext.save()
-        } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-            let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
-        }
-    }
-}*/
+     do {
+     try viewContext.save()
+     } catch {
+     // Replace this implementation with code to handle the error appropriately.
+     // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+     let nsError = error as NSError
+     fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+     }
+     }
+     }*/
 }

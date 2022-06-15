@@ -24,14 +24,14 @@ struct ContentView: View {
                 ScheduleView()
                     .tabItem({
                         Image(systemName: "house")
-                        //Text("Main")
+                        // Text("Main")
                     })
                     .tag(1)
                     .preferredColorScheme(colorScheme)
                 MapView(conference: self.conference)
                     .tabItem({
                         Image(systemName: "map")
-                        //Text("Maps")
+                        // Text("Maps")
                     })
                     .tag(2)
                     .preferredColorScheme(colorScheme)
@@ -39,7 +39,7 @@ struct ContentView: View {
                 InfoView(viewModel: self.viewModel)
                     .tabItem({
                         Image(systemName: "info.circle")
-                        //Text("Info")
+                        // Text("Info")
                     })
                     .tag(3)
                     .preferredColorScheme(colorScheme)
@@ -47,7 +47,7 @@ struct ContentView: View {
                 SettingsView()
                     .tabItem({
                         Image(systemName: "gearshape")
-                        //Text("Settings")
+                        // Text("Settings")
                     })
                     .tag(4)
                     .preferredColorScheme(colorScheme)
@@ -55,7 +55,7 @@ struct ContentView: View {
             }
             .navigationBarTitle(conferenceName, displayMode: .inline)
         }
-        .onAppear() {
+        .onAppear {
             self.viewModel.fetchData()
             self.conference = self.viewModel.getConference(code: conferenceCode)
         }

@@ -18,7 +18,7 @@ class ScheduleViewModel: ObservableObject {
     func fetchData() {
         db.collection("conferences")
             .document(conferenceCode)
-            .collection("events").order(by: "begin", descending: false).addSnapshotListener{ (querySnapshot, error) in
+            .collection("events").order(by: "begin", descending: false).addSnapshotListener { (querySnapshot, error) in
             guard let documents = querySnapshot?.documents else {
                 print("No Events")
                 return

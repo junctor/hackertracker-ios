@@ -19,14 +19,14 @@ struct ScheduleView: View {
     @State var bookmarks: [Int] = []
     
     var body: some View {
-        List (viewModel.events, id: \.id) { event in
+        List(viewModel.events, id: \.id) { event in
             NavigationLink(destination: EventDetailView(event: event, bookmarks: bookmarks)) {
                 EventRow(event: event, bookmarks: bookmarks)
             }
         }
-        .onAppear() {
+        .onAppear {
             self.viewModel.fetchData()
-            bookmarks = bookmarksResults.map{ bookmark -> Int in
+            bookmarks = bookmarksResults.map { bookmark -> Int in
                 return Int(bookmark.id)
             }
         }
