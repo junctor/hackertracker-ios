@@ -21,7 +21,7 @@ class SpeakerViewModel: ObservableObject {
                                      events: [])
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
     
-    private var db = Firestore.firestore()#imageLiteral(resourceName: "simulator_screenshot_00801B67-EB5B-4E4C-A06F-26FD9835598F.png")
+    private var db = Firestore.firestore()
     
     func fetchData(speakerId: String) {
         db.collection("conferences")
