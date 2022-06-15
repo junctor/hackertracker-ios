@@ -170,3 +170,9 @@ class DateFormatterUtility {
         return ret
     }
 }
+
+func dateSection(date: Date) -> String {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "EEE, MMM dd HH:mm"
+    return dateFormatter.string(from: date)
+}
