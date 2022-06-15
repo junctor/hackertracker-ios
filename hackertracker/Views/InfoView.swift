@@ -20,7 +20,7 @@ struct InfoView: View {
             Divider()
             if let con = conference {
                 LazyVGrid(columns: gridItemLayout, spacing: 20) {
-                    NavigationLink(destination: Text("Speakers List goes here")) {
+                    NavigationLink(destination: SpeakersView()) {
                         Image(systemName: "person.crop.rectangle")
                         Text("Speakers")
                     }

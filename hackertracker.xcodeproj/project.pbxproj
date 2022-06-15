@@ -15,7 +15,9 @@
 		5D9E57492859037C001374D4 /* BookmarkUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57482859037C001374D4 /* BookmarkUtility.swift */; };
 		5D9E574B28595873001374D4 /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E574A28595873001374D4 /* EventDetailView.swift */; };
 		5D9E574D28595FA3001374D4 /* CodeOfConductView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E574C28595FA3001374D4 /* CodeOfConductView.swift */; };
-		5D9E574F28596218001374D4 /* ConferenceViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E574E28596218001374D4 /* ConferenceViewModel.swift */; };
+		5D9E5751285A3B60001374D4 /* SpeakersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E5750285A3B60001374D4 /* SpeakersViewModel.swift */; };
+		5D9E5753285A3C25001374D4 /* SpeakersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E5752285A3C25001374D4 /* SpeakersView.swift */; };
+		5D9E5755285A3C86001374D4 /* SpeakerRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E5754285A3C86001374D4 /* SpeakerRow.swift */; };
 		5DAE04B42820948B00930A2D /* hackertrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04B32820948B00930A2D /* hackertrackerApp.swift */; };
 		5DAE04B62820948B00930A2D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04B52820948B00930A2D /* ContentView.swift */; };
 		5DAE04B82820948E00930A2D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DAE04B72820948E00930A2D /* Assets.xcassets */; };
@@ -82,7 +84,9 @@
 		5D9E57482859037C001374D4 /* BookmarkUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkUtility.swift; sourceTree = "<group>"; };
 		5D9E574A28595873001374D4 /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		5D9E574C28595FA3001374D4 /* CodeOfConductView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeOfConductView.swift; sourceTree = "<group>"; };
-		5D9E574E28596218001374D4 /* ConferenceViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferenceViewModel.swift; sourceTree = "<group>"; };
+		5D9E5750285A3B60001374D4 /* SpeakersViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakersViewModel.swift; sourceTree = "<group>"; };
+		5D9E5752285A3C25001374D4 /* SpeakersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakersView.swift; sourceTree = "<group>"; };
+		5D9E5754285A3C86001374D4 /* SpeakerRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerRow.swift; sourceTree = "<group>"; };
 		5DAE04B02820948B00930A2D /* hackertracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hackertracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DAE04B32820948B00930A2D /* hackertrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hackertrackerApp.swift; sourceTree = "<group>"; };
 		5DAE04B52820948B00930A2D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -229,6 +233,8 @@
 				5D9E574A28595873001374D4 /* EventDetailView.swift */,
 				5D9E574C28595FA3001374D4 /* CodeOfConductView.swift */,
 				5D4F07B828598AC8006772A2 /* 404View.swift */,
+				5D9E5752285A3C25001374D4 /* SpeakersView.swift */,
+				5D9E5754285A3C86001374D4 /* SpeakerRow.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -267,7 +273,7 @@
 			children = (
 				5D9E57462857B876001374D4 /* ConferencesViewModel.swift */,
 				5D4F07B628583D17006772A2 /* ScheduleViewModel.swift */,
-				5D9E574E28596218001374D4 /* ConferenceViewModel.swift */,
+				5D9E5750285A3B60001374D4 /* SpeakersViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -438,9 +444,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D9E5751285A3B60001374D4 /* SpeakersViewModel.swift in Sources */,
 				5D9E574B28595873001374D4 /* EventDetailView.swift in Sources */,
 				5DB4E0AB284E86900012F6F4 /* ScheduleView.swift in Sources */,
 				5DB4E0B5284E9F880012F6F4 /* Event.swift in Sources */,
+				5D9E5755285A3C86001374D4 /* SpeakerRow.swift in Sources */,
 				5D9E57492859037C001374D4 /* BookmarkUtility.swift in Sources */,
 				5DF51AC928514F33007BCB83 /* Article.swift in Sources */,
 				5D4F07B728583D17006772A2 /* ScheduleViewModel.swift in Sources */,
@@ -457,7 +465,6 @@
 				5DB4E0AD284E86AD0012F6F4 /* MapView.swift in Sources */,
 				5DB4E0C6285000320012F6F4 /* EventRow.swift in Sources */,
 				5DAE04C02820948E00930A2D /* hackertracker.xcdatamodeld in Sources */,
-				5D9E574F28596218001374D4 /* ConferenceViewModel.swift in Sources */,
 				5DF51AB8285007EC007BCB83 /* DateFormatterUtility.swift in Sources */,
 				5DF51AD62851557E007BCB83 /* Vendor.swift in Sources */,
 				5DAE04BD2820948E00930A2D /* Persistence.swift in Sources */,
@@ -466,6 +473,7 @@
 				5DAE04B62820948B00930A2D /* ContentView.swift in Sources */,
 				5DB4E0BA284EA02C0012F6F4 /* Map.swift in Sources */,
 				5DB4E0B8284E9FEF0012F6F4 /* Conference.swift in Sources */,
+				5D9E5753285A3C25001374D4 /* SpeakersView.swift in Sources */,
 				5D4F07B928598AC8006772A2 /* 404View.swift in Sources */,
 				5DAE04B42820948B00930A2D /* hackertrackerApp.swift in Sources */,
 				5DB4E0AF284E86CC0012F6F4 /* InfoView.swift in Sources */,
