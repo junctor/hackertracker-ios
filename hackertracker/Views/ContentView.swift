@@ -12,6 +12,7 @@ import Firebase
 struct ContentView: View {
     @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    @State private var viewModel = ConferencesViewModel()
     
     private var colorScheme: ColorScheme = .dark
 
@@ -34,7 +35,7 @@ struct ContentView: View {
                     .tag(2)
                     .preferredColorScheme(colorScheme)
 
-                InfoView()
+                InfoView(viewModel: self.viewModel)
                     .tabItem({
                         Image(systemName: "info.circle")
                         //Text("Info")
@@ -52,6 +53,9 @@ struct ContentView: View {
 
             }
             .navigationBarTitle(conferenceName, displayMode: .inline)
+        }
+        .onAppear() {
+            self.viewModel.fetchData()
         }
     }
 

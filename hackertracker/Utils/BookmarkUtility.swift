@@ -13,7 +13,7 @@ class BookmarkUtility {
     
     static func addBookmark(context: NSManagedObjectContext, id: Int) {
         let newItem = Bookmarks(context: context)
-        newItem.id = Int32(id)
+        newItem.id = Int64(id)
         print("Adding Bookmark for event \(id)")
 
         do {

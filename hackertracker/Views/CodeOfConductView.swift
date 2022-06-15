@@ -11,6 +11,8 @@ struct CodeOfConductView: View {
     var codeofconduct: String
     var body: some View {
         VStack {
+            Text("Code of Conduct")
+                .font(.title)
             Divider()
             Text(codeofconduct)
                 .font(.body)
@@ -21,6 +23,6 @@ struct CodeOfConductView: View {
 
 struct CodeOfConductView_Previews: PreviewProvider {
     static var previews: some View {
-        CodeOfConductView(codeofconduct: "Be good to each other")
+        CodeOfConductView(codeofconduct: "Be excellent to each other")
     }
 }
