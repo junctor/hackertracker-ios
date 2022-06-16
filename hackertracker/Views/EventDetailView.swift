@@ -13,7 +13,7 @@ struct EventDetailView: View {
     
     var body: some View {
         ScrollView {
-            VStack {
+            VStack(alignment: .leading) {
                 Text(event.title).font(.largeTitle)
                 HStack {
                     Circle().fill(Color(UIColor(hex: event.type.color) ?? UIColor.blue)).frame(width: 10, height: 10)
