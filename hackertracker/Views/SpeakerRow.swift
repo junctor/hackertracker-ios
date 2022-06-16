@@ -21,15 +21,14 @@ struct SpeakerRow: View {
 }
 
 struct SpeakerRow_Previews: PreviewProvider {
-    
     static var previews: some View {
-        let preview_speaker: Speaker = Speaker(id: 123123,
-                                               conferenceName: "DEF CON 30",
-                                               description: "Description",
-                                               link: "https://twitter.com/defcon",
-                                               name: "Speaker Name",
-                                               twitter: "defcon",
-                                               events: [] )
+        let preview_speaker = Speaker(id: 123_123,
+                                      conferenceName: "DEF CON 30",
+                                      description: "Description",
+                                      link: "https://twitter.com/defcon",
+                                      name: "Speaker Name",
+                                      twitter: "defcon",
+                                      events: [])
         SpeakerRow(speaker: preview_speaker)
     }
 }

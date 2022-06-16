@@ -36,4 +36,8 @@ class SpeakersViewModel: ObservableObject {
             
         }
     }
+
+    func speakerGroup() -> [String.Element: [Speaker]] {
+        return Dictionary(grouping: speakers, by: { $0.name.first ?? "-" })
+    }
 }
