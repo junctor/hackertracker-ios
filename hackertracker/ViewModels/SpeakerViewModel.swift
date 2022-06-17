@@ -10,15 +10,7 @@ import FirebaseFirestore
 import SwiftUI
 
 class SpeakerViewModel: ObservableObject {
-    @Published var speaker = Speaker(docId: nil,
-                                     id: 123,
-                                     conferenceName: "DEFCON 30",
-                                     description: "Description of Speaker background goes here",
-                                     link: "https://defcon.org/",
-                                     name: "Speaker Name",
-                                     title: nil,
-                                     twitter: "defcon",
-                                     events: [])
+    @Published var speaker: Speaker?
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
     
     private var db = Firestore.firestore()

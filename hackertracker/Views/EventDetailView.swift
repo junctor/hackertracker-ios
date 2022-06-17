@@ -35,20 +35,24 @@ struct EventDetailView: View {
 
                 Text(event.description).padding(.top).padding()
 
-                Text("Speakers").font(.headline).padding(.top)
+                if !event.speakers.isEmpty {
+                    Text("Speakers").font(.headline).padding(.top)
 
-                VStack(alignment: .leading) {
-                    ForEach(event.speakers) { speaker in
-                        HStack {
-                            Rectangle().fill(Color.yellow).frame(width: 10, height: .infinity)
-                            VStack(alignment: .leading) {
-                                Text(speaker.name).fontWeight(.bold)
-                                Text(speaker.title ?? "Hacker")
+                    VStack(alignment: .leading) {
+                        ForEach(event.speakers) { speaker in
+                            NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
+                                HStack {
+                                    Rectangle().fill(Color.yellow).frame(width: 10, height: .infinity)
+                                    VStack(alignment: .leading) {
+                                        Text(speaker.name).fontWeight(.bold)
+                                        Text(speaker.title ?? "Hacker")
+                                    }
+                                }
                             }
                         }
                     }
+                    .rectangleBackground()
                 }
-                .rectangleBackground()
 
                 Spacer()
             }
@@ -60,7 +64,7 @@ struct EventDetailView: View {
 struct EventDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ScheduleView().preferredColorScheme(.dark)
+            ScheduleView().preferredColorScheme(.light)
         }
     }
 }

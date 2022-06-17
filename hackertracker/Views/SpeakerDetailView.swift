@@ -9,22 +9,25 @@ import SwiftUI
 
 struct SpeakerDetailView: View {
     @ObservedObject private var viewModel = SpeakerViewModel()
-    var id: Int = 1
-    var speaker: Speaker?
+    var id: Int
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                Text(viewModel.speaker.name).font(.largeTitle)
-                Text(viewModel.speaker.title ?? "Hacker")
+                Text(viewModel.speaker?.name ?? viewModel.speaker?.name ?? "").font(.largeTitle)
+                Text(viewModel.speaker?.title ?? "")
                 Divider()
-                Text(viewModel.speaker.description).padding(.top).padding()
-                Text("Events").font(.headline).padding(.top)
-                VStack(alignment: .leading) {
-                    ForEach(speaker?.events ?? []) { event in
-                        SpeakerEventsView(event: event, bookmarks: [])
+                Text(viewModel.speaker?.description ?? "").padding(.top).padding()
+
+                if !(viewModel.speaker?.events.isEmpty ?? false) {
+                    Text("Events").font(.headline).padding(.top)
+                    VStack(alignment: .leading) {
+                        ForEach(viewModel.speaker?.events ?? []) { event in
+                            SpeakerEventsView(event: event, bookmarks: [])
+                        }
                     }
+                    .rectangleBackground()
                 }
-                .rectangleBackground()
             }
             Spacer()
         }
@@ -40,7 +43,7 @@ struct SpeakerEventsView: View {
 
     var body: some View {
         HStack {
-            Rectangle().fill(Color.yellow).frame(width: 10, height: .infinity)
+            Rectangle().fill(Color.purple).frame(width: 10, height: .infinity)
             VStack(alignment: .leading) {
                 Text(event.title ?? "").fontWeight(.bold)
             }
@@ -50,15 +53,8 @@ struct SpeakerEventsView: View {
 
 struct SpeakerDetailView_Previews: PreviewProvider {
     static var previews: some View {
-        let preview_speaker = Speaker(docId: nil,
-                                      id: 123,
-                                      conferenceName: "DEFCON30",
-                                      description: "Just as short test description. ",
-                                      link: "https://google.com/",
-                                      name: "Speaker Name",
-                                      title: "Chief Hacking Officer",
-                                      twitter: "defcon",
-                                      events: [SpeakerEvent(id: 1337, title: "Speaker event1 title"), SpeakerEvent(id: 1338, title: "Speaker event2 title")])
-        SpeakerDetailView(id: 123, speaker: preview_speaker).preferredColorScheme(.dark)
+        NavigationView {
+            SpeakerDetailView(id: 1).preferredColorScheme(.dark)
+        }
     }
 }
