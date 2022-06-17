@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3C07C209285C6F7600CC9469 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C07C208285C6F7600CC9469 /* Theme.swift */; };
 		3C92B96D2859E51F00523901 /* ColorUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C92B96C2859E51F00523901 /* ColorUtility.swift */; };
+		3CE59E3B285B3ACD00B453C9 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CE59E3A285B3ACD00B453C9 /* ViewModifiers.swift */; };
 		5D4F07B728583D17006772A2 /* ScheduleViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4F07B628583D17006772A2 /* ScheduleViewModel.swift */; };
 		5D4F07B928598AC8006772A2 /* 404View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4F07B828598AC8006772A2 /* 404View.swift */; };
 		5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57442857B398001374D4 /* ConferencesView.swift */; };
@@ -77,8 +79,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3C07C208285C6F7600CC9469 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		3C92B96B2859DED600523901 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		3C92B96C2859E51F00523901 /* ColorUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorUtility.swift; sourceTree = "<group>"; };
+		3CE59E3A285B3ACD00B453C9 /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
 		5D4F07B628583D17006772A2 /* ScheduleViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleViewModel.swift; sourceTree = "<group>"; };
 		5D4F07B828598AC8006772A2 /* 404View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = 404View.swift; sourceTree = "<group>"; };
 		5D9E57442857B398001374D4 /* ConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesView.swift; sourceTree = "<group>"; };
@@ -240,6 +244,7 @@
 				5D9E5752285A3C25001374D4 /* SpeakersView.swift */,
 				5D9E5754285A3C86001374D4 /* SpeakerRow.swift */,
 				5D9E5758285A4710001374D4 /* SpeakerDetailView.swift */,
+				3CE59E3A285B3ACD00B453C9 /* ViewModifiers.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -269,6 +274,7 @@
 				5DF51AB7285007EC007BCB83 /* DateFormatterUtility.swift */,
 				5D9E57482859037C001374D4 /* BookmarkUtility.swift */,
 				3C92B96C2859E51F00523901 /* ColorUtility.swift */,
+				3C07C208285C6F7600CC9469 /* Theme.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -453,6 +459,7 @@
 				5D9E5751285A3B60001374D4 /* SpeakersViewModel.swift in Sources */,
 				5D9E574B28595873001374D4 /* EventDetailView.swift in Sources */,
 				5DB4E0AB284E86900012F6F4 /* ScheduleView.swift in Sources */,
+				3CE59E3B285B3ACD00B453C9 /* ViewModifiers.swift in Sources */,
 				5DB4E0B5284E9F880012F6F4 /* Event.swift in Sources */,
 				5D9E5757285A43ED001374D4 /* SpeakerViewModel.swift in Sources */,
 				5D9E5759285A4710001374D4 /* SpeakerDetailView.swift in Sources */,
@@ -479,6 +486,7 @@
 				5D9E574D28595FA3001374D4 /* CodeOfConductView.swift in Sources */,
 				5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */,
 				5DAE04B62820948B00930A2D /* ContentView.swift in Sources */,
+				3C07C209285C6F7600CC9469 /* Theme.swift in Sources */,
 				5DB4E0BA284EA02C0012F6F4 /* Map.swift in Sources */,
 				5DB4E0B8284E9FEF0012F6F4 /* Conference.swift in Sources */,
 				5D9E5753285A3C25001374D4 /* SpeakersView.swift in Sources */,

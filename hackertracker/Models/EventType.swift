@@ -28,6 +28,6 @@ struct EventType: Codable, Equatable {
 extension EventType {
     var swiftuiColor: Color {
         Color(
-            UIColor(named: color) ?? .purple)
+            UIColor(hex: color) ?? .purple)
     }
 }

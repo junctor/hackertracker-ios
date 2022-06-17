@@ -9,7 +9,7 @@ import SwiftUI
 
 struct _04View: View {
     var message: String
-    
+
     var body: some View {
         VStack {
             Image("404")

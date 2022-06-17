@@ -33,15 +33,15 @@ final class Collection<T: Document> {
     }
 
     var count: Int {
-        return self.items.count
+        return items.count
     }
 
     subscript(index: Int) -> T {
-        return self.items[index]
+        return items[index]
     }
 
     init(query: Query) {
-        self.items = []
+        items = []
         self.query = query
     }
 

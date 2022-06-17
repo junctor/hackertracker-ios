@@ -5,12 +5,12 @@
 //  Created by Seth W Law on 6/6/22.
 //
 
-import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
+import Foundation
 
 struct Event: Codable, Identifiable {
-    @DocumentID var docID: String? 
+    @DocumentID var docID: String?
     var id: Int
     var conferenceName: String?
     var description: String

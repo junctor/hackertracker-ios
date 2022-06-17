@@ -5,8 +5,8 @@
 //  Created by Seth W Law on 6/13/22.
 //
 
-import SwiftUI
 import CoreData
+import SwiftUI
 
 struct ConferencesView: View {
     @ObservedObject private var viewModel = ConferencesViewModel()
@@ -14,7 +14,7 @@ struct ConferencesView: View {
     @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
     @AppStorage("showHidden") var showHidden: Bool = false
-    
+
     var body: some View {
         List(viewModel.conferences, id: \.code) { conference in
             if showHidden == false && conference.hidden == false {
@@ -37,12 +37,10 @@ struct ConferencesView: View {
         }
         .navigationBarTitle("Select Conference", displayMode: .inline)
         .preferredColorScheme(.dark)
-
     }
 }
 
 struct ConferencesView_Previews: PreviewProvider {
-
     static var previews: some View {
         ConferencesView()
     }

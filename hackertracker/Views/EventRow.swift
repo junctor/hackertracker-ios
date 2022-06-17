@@ -5,8 +5,8 @@
 //  Created by Seth W Law on 6/7/22.
 //
 
-import SwiftUI
 import CoreData
+import SwiftUI
 
 struct EventRow: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -14,10 +14,10 @@ struct EventRow: View {
     var event: Event
     @State var bookmarks: [Int]
     let dfu = DateFormatterUtility.shared
-    
+
     var body: some View {
         HStack {
-            Color.accentColor.frame(width: 5, height: 60)
+            Rectangle().fill(event.type.swiftuiColor).frame(width: 10)
             VStack(alignment: .leading, spacing: 0, content: {
                 Text(dfu.shortDayOfMonthFormatter.string(from: event.beginTimestamp))
                     .font(.caption)
@@ -25,10 +25,10 @@ struct EventRow: View {
                     .font(.body)
                 Text(dfu.timezoneFormatter.string(from: event.beginTimestamp))
                     .font(.caption)
-                
+
             })
             .padding()
-            
+
             VStack(alignment: .leading, spacing: 0, content: {
                 Text(event.title)
                     .font(.title3)
@@ -36,13 +36,13 @@ struct EventRow: View {
                     Text(self.speakersString(speakers: event.speakers))
                         .font(.body)
                 }
-                    
+
                 Text(event.location.name)
                     .font(.caption)
             })
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(0)
-            
+
             HStack(alignment: .top, spacing: 0, content: {
                 VStack(alignment: .center, spacing: 5, content: {
                     if bookmarks.contains(event.id) {
@@ -64,9 +64,9 @@ struct EventRow: View {
             })
         }
     }
-    
+
     func speakersString(speakers: [EventSpeaker]) -> String {
-        var ret: String = ""
+        var ret = ""
         speakers.forEach { s in
             if ret != "" {
                 ret += ", "
@@ -79,6 +79,8 @@ struct EventRow: View {
 
 struct EventRow_Previews: PreviewProvider {
     static var previews: some View {
-        Text("Preview blah")
+        NavigationView {
+            ScheduleView()
+        }
     }
 }

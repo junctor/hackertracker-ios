@@ -1,22 +1,24 @@
 //
-    //  EventDetailView.swift
-    //  hackertracker
-    //
-    //  Created by Seth W Law on 6/14/22.
-    //
+//  EventDetailView.swift
+//  hackertracker
+//
+//  Created by Seth W Law on 6/14/22.
+//
 
 import SwiftUI
 
 struct EventDetailView: View {
     var event: Event
     @State var bookmarks: [Int]
-    
+    var theme = Theme()
+    @Environment(\.managedObjectContext) private var viewContext
+
     var body: some View {
         ScrollView {
-            VStack {
+            VStack(alignment: .leading) {
                 Text(event.title).font(.largeTitle)
                 HStack {
-                    Circle().fill(Color(UIColor(hex: event.type.color) ?? UIColor.blue)).frame(width: 10, height: 10)
+                    Circle().fill(event.type.swiftuiColor).frame(width: 10, height: 10)
                     Text(event.type.name)
                 }
                 .rectangleBackground()
@@ -35,46 +37,45 @@ struct EventDetailView: View {
 
                 Text(event.description).padding(.top).padding()
 
-                Text("Speakers").font(.headline).padding(.top)
+                if !event.speakers.isEmpty {
+                    Text("Speakers").font(.headline).padding(.top)
 
-                VStack(alignment: .leading) {
-                    ForEach(event.speakers) { speaker in
-                        HStack {
-                            Rectangle().fill(Color.yellow).frame(width: 10, height: .infinity)
-                            VStack(alignment: .leading) {
-                                Text(speaker.name).fontWeight(.bold)
-                                Text(speaker.title ?? "Hacker")
+                    VStack(alignment: .leading) {
+                        ForEach(event.speakers) { speaker in
+                            NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
+                                HStack {
+                                    Rectangle().fill(theme.carousel()).frame(width: 10)
+                                    VStack(alignment: .leading) {
+                                        Text(speaker.name).fontWeight(.bold)
+                                        Text(speaker.title ?? "Hacker")
+                                    }
+                                }
                             }
                         }
                     }
+                    .rectangleBackground()
                 }
-                .rectangleBackground()
 
                 Spacer()
             }
-            .navigationTitle(event.title)
         }
-    }
-}
-
-struct RectangleBackground: ViewModifier {
-    func body(content: Content) -> some View {
-        content.padding(10).multilineTextAlignment(.leading)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Rectangle().fill(Color(UIColor(hex: "#2d2d2D") ?? UIColor.gray))).cornerRadius(5)
-    }
-}
-
-extension View {
-    func rectangleBackground() -> some View {
-        modifier(RectangleBackground())
+        .navigationTitle(event.title)
+        .navigationBarItems(trailing: bookmarks.contains(event.id) ? Image(systemName: "star.fill").onTapGesture {
+            BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
+            if let index = bookmarks.firstIndex(of: event.id) {
+                bookmarks.remove(at: index)
+            }
+        } : Image(systemName: "star").onTapGesture {
+            BookmarkUtility.addBookmark(context: viewContext, id: event.id)
+            bookmarks.append(event.id)
+        })
     }
 }
 
 struct EventDetailView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ScheduleView().preferredColorScheme(.dark)
+            ScheduleView().preferredColorScheme(.light)
         }
     }
 }

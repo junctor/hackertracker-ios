@@ -10,7 +10,7 @@ import SwiftUI
 struct MapView: View {
     @State var conference: Conference?
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
-    
+
     var body: some View {
         if let con = conference, let maps = con.maps {
             Text("Maps goes here")

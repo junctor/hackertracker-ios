@@ -5,12 +5,11 @@
 //  Created by Seth W Law on 6/14/22.
 //
 
-import Foundation
 import CoreData
+import Foundation
 import SwiftUI
 
 class BookmarkUtility {
-    
     static func addBookmark(context: NSManagedObjectContext, id: Int) {
         let newItem = Bookmarks(context: context)
         newItem.id = Int32(id)
@@ -22,11 +21,10 @@ class BookmarkUtility {
             let nsError = error as NSError
             print("Unresolved error \(nsError), \(nsError.userInfo)")
         }
-
     }
-    
+
     static func deleteBookmark(context: NSManagedObjectContext, id: Int) {
-        let fr: NSFetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Bookmarks")
+        let fr = NSFetchRequest<NSFetchRequestResult>(entityName: "Bookmarks")
         fr.predicate = NSPredicate(format: "id = %d", id)
         do {
             if let res = try context.fetch(fr) as? [NSManagedObject] {
@@ -41,9 +39,9 @@ class BookmarkUtility {
             print("Unresolved error \(nsError), \(nsError.userInfo)")
         }
     }
-    
+
     /*
-     
+
      private func deleteBookmark(offsets: IndexSet) {
      withAnimation {
      offsets.map { bookmarks[$0] }.forEach(viewContext.delete)

@@ -8,10 +8,9 @@
 import SwiftUI
 
 struct ConferenceRow: View {
-
     var conference: Conference
     var code: String
-    
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 5, content: {
@@ -22,7 +21,7 @@ struct ConferenceRow: View {
             })
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(0)
-            
+
             if conference.code == code {
                 HStack(alignment: .top, spacing: 0, content: {
                     VStack(alignment: .center, spacing: 5, content: {

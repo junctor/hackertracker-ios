@@ -11,13 +11,14 @@ struct ScheduleView: View {
     @ObservedObject private var viewModel = ScheduleViewModel()
     @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
-    
+
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Bookmarks.id, ascending: true)],
-        animation: .default)
+        animation: .default
+    )
     private var bookmarksResults: FetchedResults<Bookmarks>
     @State var bookmarks: [Int] = []
-    
+
     var body: some View {
         List(viewModel.events, id: \.id) { event in
             NavigationLink(destination: EventDetailView(event: event, bookmarks: bookmarks)) {
@@ -27,7 +28,7 @@ struct ScheduleView: View {
         .onAppear {
             self.viewModel.fetchData()
             bookmarks = bookmarksResults.map { bookmark -> Int in
-                return Int(bookmark.id)
+                Int(bookmark.id)
             }
         }
         .listStyle(.plain)

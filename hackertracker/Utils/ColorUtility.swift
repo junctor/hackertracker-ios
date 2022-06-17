@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 import UIKit
 
 // modified from https://www.hackingwithswift.com/example-code/uicolor/how-to-convert-a-hex-color-to-a-uicolor
@@ -35,4 +36,8 @@ public extension UIColor {
 
         return nil
     }
+}
+
+func hexSwiftUIColor(hex: String) -> Color {
+    return Color(UIColor(hex: hex) ?? .gray)
 }
