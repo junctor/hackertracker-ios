@@ -10,6 +10,8 @@ import SwiftUI
 struct EventDetailView: View {
     var event: Event
     @State var bookmarks: [Int]
+    var theme = Theme()
+    @Environment(\.managedObjectContext) private var viewContext
 
     var body: some View {
         ScrollView {
@@ -42,7 +44,7 @@ struct EventDetailView: View {
                         ForEach(event.speakers) { speaker in
                             NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                                 HStack {
-                                    Rectangle().fill(Color.yellow).frame(width: 10, height: .infinity)
+                                    Rectangle().fill(theme.carousel()).frame(width: 10)
                                     VStack(alignment: .leading) {
                                         Text(speaker.name).fontWeight(.bold)
                                         Text(speaker.title ?? "Hacker")
@@ -56,8 +58,17 @@ struct EventDetailView: View {
 
                 Spacer()
             }
-            .navigationTitle(event.title)
         }
+        .navigationTitle(event.title)
+        .navigationBarItems(trailing: bookmarks.contains(event.id) ? Image(systemName: "star.fill").onTapGesture {
+            BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
+            if let index = bookmarks.firstIndex(of: event.id) {
+                bookmarks.remove(at: index)
+            }
+        } : Image(systemName: "star").onTapGesture {
+            BookmarkUtility.addBookmark(context: viewContext, id: event.id)
+            bookmarks.append(event.id)
+        })
     }
 }
 
