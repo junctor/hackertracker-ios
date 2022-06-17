@@ -43,7 +43,7 @@ struct SpeakerEventsView: View {
 
     var body: some View {
         HStack {
-            Rectangle().fill(Color.purple).frame(width: 10, height: .infinity)
+            Rectangle().fill(Color.purple).frame(width: 10)
             VStack(alignment: .leading) {
                 Text(event.title ?? "").fontWeight(.bold)
             }
