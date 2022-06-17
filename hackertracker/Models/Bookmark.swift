@@ -13,3 +13,7 @@ struct Bookmark: Codable {
     @DocumentID var id: String?
     var value: Bool
 }
+
+class oBookmarks: ObservableObject {
+    @Published var bookmarks: [Int] = []
+}

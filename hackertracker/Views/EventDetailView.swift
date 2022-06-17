@@ -11,7 +11,7 @@ struct EventDetailView: View {
     @ObservedObject private var viewModel = EventViewModel()
     var id: Int
     
-    @State var bookmarks: [Int]
+    @EnvironmentObject var bookmarks: oBookmarks
     var theme = Theme()
     @Environment(\.managedObjectContext) private var viewContext
 
@@ -66,14 +66,14 @@ struct EventDetailView: View {
             }
         }
         .navigationTitle(viewModel.event?.title ?? "Event Title")
-        .navigationBarItems(trailing: bookmarks.contains(id) ? Image(systemName: "star.fill").onTapGesture {
+        .navigationBarItems(trailing: bookmarks.bookmarks.contains(id) ? Image(systemName: "star.fill").onTapGesture {
             BookmarkUtility.deleteBookmark(context: viewContext, id: id)
-            if let index = bookmarks.firstIndex(of: id) {
-                bookmarks.remove(at: index)
+            if let index = bookmarks.bookmarks.firstIndex(of: id) {
+                bookmarks.bookmarks.remove(at: index)
             }
         } : Image(systemName: "star").onTapGesture {
             BookmarkUtility.addBookmark(context: viewContext, id: id)
-            bookmarks.append(id)
+            bookmarks.bookmarks.append(id)
         })
         .onAppear {
             viewModel.fetchData(eventId: String(id))

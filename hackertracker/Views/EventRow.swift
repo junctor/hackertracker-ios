@@ -12,7 +12,7 @@ struct EventRow: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     var event: Event
-    @State var bookmarks: [Int]
+    @EnvironmentObject var bookmarks: oBookmarks
     let dfu = DateFormatterUtility.shared
 
     var body: some View {
@@ -45,19 +45,19 @@ struct EventRow: View {
 
             HStack(alignment: .top, spacing: 0, content: {
                 VStack(alignment: .center, spacing: 5, content: {
-                    if bookmarks.contains(event.id) {
+                    if bookmarks.bookmarks.contains(event.id) {
                         Image(systemName: "star.fill")
                             .onTapGesture {
                                 BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
-                                if let index = bookmarks.firstIndex(of: event.id) {
-                                    bookmarks.remove(at: index)
+                                if let index = bookmarks.bookmarks.firstIndex(of: event.id) {
+                                    bookmarks.bookmarks.remove(at: index)
                                 }
                             }
                     } else {
                         Image(systemName: "star")
                             .onTapGesture {
                                 BookmarkUtility.addBookmark(context: viewContext, id: event.id)
-                                bookmarks.append(event.id)
+                                bookmarks.bookmarks.append(event.id)
                             }
                     }
                 })

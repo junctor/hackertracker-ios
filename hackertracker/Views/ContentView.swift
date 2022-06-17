@@ -14,6 +14,13 @@ struct ContentView: View {
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
     @State var conference: Conference?
     @State private var viewModel = ConferencesViewModel()
+    
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \Bookmarks.id, ascending: true)],
+        animation: .default
+    )
+    private var bookmarksResults: FetchedResults<Bookmarks>
+    @EnvironmentObject var bookmarks: oBookmarks
 
     private var colorScheme: ColorScheme = .dark
 
@@ -51,11 +58,24 @@ struct ContentView: View {
                     .tag(4)
                     .preferredColorScheme(colorScheme)
             }
-            .navigationBarTitle(conferenceName, displayMode: .inline)
+            .navigationBarTitle(conferenceName)
+            .navigationBarItems(leading: HStack {
+                                    Button(action: {
+                                        print("I'm feeling lucky ;)")
+                                    }) {
+                                        Text(conferenceName)
+                                    }
+                                }
+            )
         }
         .onAppear {
             self.viewModel.fetchData()
             self.conference = self.viewModel.getConference(code: conferenceCode)
+            if bookmarks.bookmarks.count < 1 {
+                bookmarks.bookmarks = bookmarksResults.map { bookmark -> Int in
+                    Int(bookmark.id)
+                }
+            }
         }
     }
 }

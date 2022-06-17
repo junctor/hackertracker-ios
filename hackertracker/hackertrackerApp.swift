@@ -12,12 +12,9 @@ import SwiftUI
 @main
 struct hackertrackerApp: App {
     let persistenceController = PersistenceController.shared
-
-    // Settings stuff ? Might work?
-    @Environment(\.managedObjectContext) private var viewContext
-    @FetchRequest(entity: Settings.entity(), sortDescriptors: [])
-    private var settingsRequest: FetchedResults<Settings>
-    @State var settings: Settings?
+    
+    // Setup for bookmarks object that will be passed around.
+    @StateObject var bookmarks: oBookmarks = oBookmarks()
 
     init() {
         FirebaseApp.configure()
@@ -27,6 +24,7 @@ struct hackertrackerApp: App {
         WindowGroup {
             ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+                .environmentObject(bookmarks)
         }
     }
 }
