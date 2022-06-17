@@ -30,7 +30,7 @@ struct InfoView: View {
                             Text("Code of Conduct")
                         }
                     }
-                    
+
                     NavigationLink(destination: Text("Frequently Asked Questions")) {
                         Image(systemName: "questionmark.app")
                         Text("FAQ")

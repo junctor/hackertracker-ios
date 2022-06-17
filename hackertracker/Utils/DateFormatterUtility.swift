@@ -10,7 +10,7 @@ import Foundation
 class DateFormatterUtility {
     var timeZone = TimeZone(identifier: "America/Los_Angeles")
 
-    /*static let shared : [String:DateFormatterUtility] =
+    /* static let shared : [String:DateFormatterUtility] =
      ["America/Los_Angeles": DateFormatterUtility(identifier: "America/Los_Angeles"),
      "America/Chicago": DateFormatterUtility(identifier: "America/Chicago"),
      "America/Denver": DateFormatterUtility(identifier: "America/Denver"),
@@ -20,7 +20,7 @@ class DateFormatterUtility {
     static let shared = DateFormatterUtility(identifier: "America/Los_Angeles")
 
     init(identifier: String) {
-        self.update(identifier: identifier)
+        update(identifier: identifier)
     }
 
     func update(identifier: String) {
@@ -159,12 +159,12 @@ class DateFormatterUtility {
         var ret: [String] = []
 
         let components = calendar.dateComponents([.day], from: start, to: end)
-        ret.append(self.yearMonthDayFormatter.string(from: start))
+        ret.append(yearMonthDayFormatter.string(from: start))
         var cur = start
         if components.day ?? 1 > 1 {
-            for _ in 1...(components.day ?? 1) {
+            for _ in 1 ... (components.day ?? 1) {
                 cur = calendar.date(byAdding: Calendar.Component.day, value: 1, to: cur) ?? Date()
-                ret.append(self.yearMonthDayFormatter.string(from: cur))
+                ret.append(yearMonthDayFormatter.string(from: cur))
             }
         }
         return ret

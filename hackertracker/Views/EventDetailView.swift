@@ -1,16 +1,16 @@
 //
-    //  EventDetailView.swift
-    //  hackertracker
-    //
-    //  Created by Seth W Law on 6/14/22.
-    //
+//  EventDetailView.swift
+//  hackertracker
+//
+//  Created by Seth W Law on 6/14/22.
+//
 
 import SwiftUI
 
 struct EventDetailView: View {
     var event: Event
     @State var bookmarks: [Int]
-    
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {

@@ -27,7 +27,7 @@ struct Speaker: Codable, Equatable {
             return false
         }
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case id
         case conferenceName = "conference"

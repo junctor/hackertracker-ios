@@ -14,7 +14,7 @@ struct SettingsView: View {
                 Text("Select Conference")
             }
         }
-            // ConferencesView()
+        // ConferencesView()
     }
 }
 
