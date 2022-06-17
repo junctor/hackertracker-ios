@@ -21,7 +21,7 @@ struct ScheduleView: View {
 
     var body: some View {
         List(viewModel.events, id: \.id) { event in
-            NavigationLink(destination: EventDetailView(event: event, bookmarks: bookmarks)) {
+            NavigationLink(destination: EventDetailView(id: event.id, bookmarks: bookmarks)) {
                 EventRow(event: event, bookmarks: bookmarks)
             }
         }
