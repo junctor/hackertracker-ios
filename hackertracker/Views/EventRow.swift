@@ -17,7 +17,7 @@ struct EventRow: View {
     
     var body: some View {
         HStack {
-            Color.accentColor.frame(width: 5, height: 60)
+            Rectangle().fill(event.type.swiftuiColor).frame(width: 10)
             VStack(alignment: .leading, spacing: 0, content: {
                 Text(dfu.shortDayOfMonthFormatter.string(from: event.beginTimestamp))
                     .font(.caption)

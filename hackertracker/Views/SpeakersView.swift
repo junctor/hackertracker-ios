@@ -33,6 +33,7 @@ struct SpeakersView: View {
 struct SpeakerData: View {
     let char: String.Element
     let speakers: [Speaker]
+    var theme = Theme()
 
     var body: some View {
         Section(header: Text(String(char)).padding()
@@ -41,7 +42,7 @@ struct SpeakerData: View {
             .background(Color.black)) {
                 ForEach(speakers, id: \.name) { speaker in
                     NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
-                        SpeakerRow(speaker: speaker)
+                        SpeakerRow(speaker: speaker, themeColor: theme.carousel())
                     }
                 }
             }

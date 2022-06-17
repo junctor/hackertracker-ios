@@ -16,7 +16,7 @@ struct EventDetailView: View {
             VStack(alignment: .leading) {
                 Text(event.title).font(.largeTitle)
                 HStack {
-                    Circle().fill(Color(UIColor(hex: event.type.color) ?? UIColor.blue)).frame(width: 10, height: 10)
+                    Circle().fill(event.type.swiftuiColor).frame(width: 10, height: 10)
                     Text(event.type.name)
                 }
                 .rectangleBackground()

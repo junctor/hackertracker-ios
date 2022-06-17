@@ -9,9 +9,10 @@ import SwiftUI
 
 struct SpeakerRow: View {
     var speaker: Speaker
+    var themeColor: Color
     var body: some View {
         HStack {
-            Rectangle().fill(Color.yellow).frame(width: 10, height: .infinity)
+            Rectangle().fill(themeColor).frame(width: 10, height: .infinity)
             VStack(alignment: .leading) {
                 Text(speaker.name).fontWeight(.bold)
                 Text(speaker.title ?? "Hacker")
@@ -29,6 +30,6 @@ struct SpeakerRow_Previews: PreviewProvider {
                                       name: "Speaker Name",
                                       twitter: "defcon",
                                       events: [])
-        SpeakerRow(speaker: preview_speaker)
+        SpeakerRow(speaker: preview_speaker, themeColor: .purple)
     }
 }
