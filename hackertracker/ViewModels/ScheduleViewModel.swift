@@ -34,4 +34,17 @@ class ScheduleViewModel: ObservableObject {
                 }
             }
     }
+
+    func eventGroup() -> [String: [Event]] {
+        let eventDict = Dictionary(grouping: events, by: { dateSection(date: $0.beginTimestamp) })
+        return eventDict
+    }
+
+    func eventTabs() -> [String] {
+        let tabs = Array(Set(events.map { dateTabs(date: $0.beginTimestamp) })).sorted {
+            (tabToDate(date: $0) ?? Date()) < (tabToDate(date: $1) ?? Date())
+        }
+
+        return tabs
+    }
 }
