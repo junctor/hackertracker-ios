@@ -172,7 +172,27 @@ class DateFormatterUtility {
 }
 
 func dateSection(date: Date) -> String {
-    let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "EEE, MMM dd HH:mm"
-    return dateFormatter.string(from: date)
+    let formatter = DateFormatter()
+    formatter.timeZone = TimeZone(abbreviation: "PDT")
+    formatter.dateFormat = "MMMM d"
+    return formatter.string(from: date)
+}
+
+func dateTabs(date: Date) -> String {
+    let formatter = DateFormatter()
+    formatter.timeZone = TimeZone(abbreviation: "PDT")
+    formatter.dateFormat = "MMM d"
+    return formatter.string(from: date)
+}
+
+func tabToDate(date: String) -> Date? {
+    let formatter = DateFormatter()
+    formatter.timeZone = TimeZone(abbreviation: "PDT")
+    formatter.dateFormat = "MMM d"
+    return formatter.date(from: date)
+}
+
+func toTabId(date: String) -> String {
+    let tabDate = tabToDate(date: date) ?? Date()
+    return dateSection(date: tabDate)
 }
