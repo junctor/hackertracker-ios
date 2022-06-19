@@ -12,6 +12,7 @@ struct ScheduleView: View {
     @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
     @State var activeTab = ""
+    @Environment(\.colorScheme) var colorScheme
 
     @EnvironmentObject var bookmarks: oBookmarks
 
@@ -24,14 +25,15 @@ struct ScheduleView: View {
                             activeTab = tab
                             scroll.scrollTo(toTabId(date: tab), anchor: .top)
                         }
-                    }.padding(6)
-                        .background(activeTab == tab ? ThemeColors.red : ThemeColors.blue)
-                        .foregroundColor(.white)
+                    }.padding(10)
+                        .background(activeTab == tab ? ThemeColors.pink : nil)
+                        .foregroundColor(colorScheme == .dark ? Color.white: ThemeColors.gray)
                         .clipShape(Capsule())
+
                 }.onAppear {
                     activeTab = viewModel.eventTabs().first ?? ""
                 }
-            }
+            }.padding(.top, 5)
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: nil, pinnedViews: .sectionHeaders) {
                     ForEach(viewModel.eventGroup().sorted {
