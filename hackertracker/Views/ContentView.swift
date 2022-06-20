@@ -69,6 +69,12 @@ struct ContentView: View {
             )
         }
         .onAppear {
+            if #available(iOS 15.0, *) {
+                let tabBarAppearance: UITabBarAppearance = .init()
+                tabBarAppearance.configureWithDefaultBackground()
+                UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+            }
+
             self.viewModel.fetchData()
             self.conference = self.viewModel.getConference(code: conferenceCode)
             if bookmarks.bookmarks.count < 1 {

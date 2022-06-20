@@ -29,3 +29,12 @@ struct ThemeFont {
     let regular = "Futura Medium"
     let italic = "Futura Medium Italic"
 }
+
+enum ThemeColors {
+    static let pink = hexSwiftUIColor(hex: "#c16784")
+    static let blue = hexSwiftUIColor(hex: "#326295")
+    static let green = hexSwiftUIColor(hex: "#71cc98")
+    static let drkGreen = hexSwiftUIColor(hex: "#4b9560")
+    static let red = hexSwiftUIColor(hex: "#c04c36")
+    static let gray = hexSwiftUIColor(hex: "#2D2D2D")
+}
