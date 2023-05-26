@@ -6,18 +6,25 @@
 //
 
 import SwiftUI
+import FirebaseFirestoreSwift
 
 struct MapView: View {
-    @State var conference: Conference?
+    @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    @AppStorage("launchScreen") var launchScreen: String = "Map"
 
     var body: some View {
-        if let con = conference, let maps = con.maps {
+        if let con = conferences.first, let maps = con.maps {
             Text("Maps goes here")
         } else {
             _04View(message: "No Maps Found")
         }
     }
+/*
+ .onAppear {
+            $conferences.predicates = [.where("code", isEqualTo: conferenceCode)]
+        }
+ */
 }
 
 struct MapView_Previews: PreviewProvider {

@@ -8,43 +8,61 @@
 import SwiftUI
 
 struct ScheduleView: View {
-    @ObservedObject private var viewModel = ScheduleViewModel()
-    @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
-    @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    var code: String
+    // @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    @StateObject var viewModel = ScheduleViewModel()
+    // viewModel.fetchData(conferenceCode: conference.code)
+    
     @State var activeTab = ""
     @Environment(\.colorScheme) var colorScheme
 
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \Bookmarks.id, ascending: true)],
+        animation: .default
+    )
+    private var bookmarksResults: FetchedResults<Bookmarks>
     @EnvironmentObject var bookmarks: oBookmarks
 
     var body: some View {
         ScrollViewReader { scroll in
-            HStack {
-                ForEach(viewModel.eventTabs(), id: \.self) { tab in
-                    Button(tab) {
-                        withAnimation {
-                            activeTab = tab
-                            scroll.scrollTo(toTabId(date: tab), anchor: .top)
+            // if let events = conference.events {
+                HStack {
+                    ForEach(viewModel.eventTabs(), id: \.self) { tab in
+                        Button(tab) {
+                            withAnimation {
+                                activeTab = tab
+                                scroll.scrollTo(toTabId(date: tab), anchor: .top)
+                            }
+                        }.padding(10)
+                            .background(activeTab == tab ? ThemeColors.pink : nil)
+                            .foregroundColor(colorScheme == .dark ? Color.white: ThemeColors.gray)
+                            .clipShape(Capsule())
+                        
+                    }.onAppear {
+                        activeTab = viewModel.eventTabs().first ?? ""
+                    }
+                }.padding(.top, 5)
+                ScrollView {
+                    LazyVStack(alignment: .leading, spacing: nil, pinnedViews: .sectionHeaders) {
+                        ForEach(viewModel.eventGroup().sorted {
+                            $0.key < $1.key
+                        }, id: \.key) { weekday, events in
+                            EventData(weekday: weekday, events: events).id(weekday)
                         }
-                    }.padding(10)
-                        .background(activeTab == tab ? ThemeColors.pink : nil)
-                        .foregroundColor(colorScheme == .dark ? Color.white: ThemeColors.gray)
-                        .clipShape(Capsule())
-
-                }.onAppear {
-                    activeTab = viewModel.eventTabs().first ?? ""
-                }
-            }.padding(.top, 5)
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: nil, pinnedViews: .sectionHeaders) {
-                    ForEach(viewModel.eventGroup().sorted {
-                        $0.key < $1.key
-                    }, id: \.key) { weekday, events in
-                        EventData(weekday: weekday, events: events).id(weekday)
                     }
                 }
+            // }
+        }
+        .onAppear {
+            viewModel.fetchData(code: code)
+            // $conferences.predicates = [.where("code", isEqualTo: conferenceCode)]
+            // NSLog("Conference: \(conferences.first?.name ?? "No conference found for \(conferenceCode)?")")
+            // NSLog("Conference \(conference.name) Events = \(self.viewModel.events.count)")
+            if bookmarks.bookmarks.count < 1 {
+                bookmarks.bookmarks = bookmarksResults.map { bookmark -> Int in
+                    Int(bookmark.id)
+                }
             }
-        }.onAppear {
-            self.viewModel.fetchData()
         }
     }
 }
@@ -69,7 +87,7 @@ struct EventData: View {
 struct ScheduleView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ScheduleView().environmentObject(oBookmarks())
+            ScheduleView(code: "DEFCON30").environmentObject(oBookmarks())
         }
     }
 }

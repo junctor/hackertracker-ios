@@ -80,7 +80,7 @@ struct EventRow: View {
 struct EventRow_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ScheduleView()
+            //ScheduleView()
         }
     }
 }
