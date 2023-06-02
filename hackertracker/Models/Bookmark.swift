@@ -15,5 +15,5 @@ struct Bookmark: Codable {
 }
 
 class oBookmarks: ObservableObject {
-    @Published var bookmarks: [Int] = []
+    @Published var bookmarks: Set<Int> = []
 }
