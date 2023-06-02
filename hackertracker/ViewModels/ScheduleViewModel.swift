@@ -22,7 +22,7 @@ class ScheduleViewModel: ObservableObject {
                     // NSLog("No Events found!!")
                     return
                 }
-                
+
                 self.events = documents.compactMap { queryDocumentSnapshot -> Event? in
                     do {
                         return try queryDocumentSnapshot.data(as: Event.self)
@@ -36,14 +36,14 @@ class ScheduleViewModel: ObservableObject {
     }
 
     func eventGroup() -> [String: [Event]] {
-        let eventDict = Dictionary(grouping: self.events, by: { dateSection(date: $0.beginTimestamp) })
+        let eventDict = Dictionary(grouping: events, by: { dateSection(date: $0.beginTimestamp) })
         // NSLog("Event Groups: \(eventDict.count)")
         return eventDict
     }
 
     func eventTabs() -> [String] {
         // NSLog("eventTabs - Total Events: \(self.events.count)")
-        let tabs = Array(Set(self.events.map { dateTabs(date: $0.beginTimestamp) })).sorted {
+        let tabs = Array(Set(events.map { dateTabs(date: $0.beginTimestamp) })).sorted {
             (tabToDate(date: $0) ?? Date()) < (tabToDate(date: $1) ?? Date())
         }
         return tabs

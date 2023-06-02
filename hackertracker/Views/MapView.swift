@@ -5,8 +5,8 @@
 //  Created by Seth W Law on 6/6/22.
 //
 
-import SwiftUI
 import FirebaseFirestoreSwift
+import SwiftUI
 
 struct MapView: View {
     @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
@@ -20,11 +20,11 @@ struct MapView: View {
             _04View(message: "No Maps Found")
         }
     }
-/*
- .onAppear {
-            $conferences.predicates = [.where("code", isEqualTo: conferenceCode)]
-        }
- */
+    /*
+     .onAppear {
+                $conferences.predicates = [.where("code", isEqualTo: conferenceCode)]
+            }
+     */
 }
 
 struct MapView_Previews: PreviewProvider {

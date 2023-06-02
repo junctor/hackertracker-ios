@@ -10,12 +10,12 @@ import FirebaseCore
 import SwiftUI
 
 class AppDelegate: NSObject, UIApplicationDelegate {
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [
-                        UIApplication.LaunchOptionsKey: Any
+    func application(_: UIApplication,
+                     didFinishLaunchingWithOptions _: [
+                         UIApplication.LaunchOptionsKey: Any
                      ]? = nil) -> Bool {
-                         FirebaseApp.configure()
-                         return true
+        FirebaseApp.configure()
+        return true
     }
 }
 
@@ -23,9 +23,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct hackertrackerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     let persistenceController = PersistenceController.shared
-    
+
     // Setup for bookmarks object that will be passed around.
-    @StateObject var bookmarks: oBookmarks = oBookmarks()
+    @StateObject var bookmarks: oBookmarks = .init()
 
     var body: some Scene {
         WindowGroup {

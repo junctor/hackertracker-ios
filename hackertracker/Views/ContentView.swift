@@ -6,18 +6,18 @@
 //
 
 import CoreData
-import SwiftUI
 import FirebaseFirestoreSwift
+import SwiftUI
 
 struct ContentView: View {
     @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
-    
+
     @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
 
     // @State var conference: Conference?
     // @State private var viewModel = ConferencesViewModel()
-    
+
     private var colorScheme: ColorScheme = .dark
 
     var body: some View {
@@ -31,7 +31,7 @@ struct ContentView: View {
                         }
                         .tag(3)
                         .preferredColorScheme(colorScheme)
-                    
+
                     ScheduleView(code: con.code)
                         .tabItem {
                             Image(systemName: "calendar")
@@ -46,7 +46,7 @@ struct ContentView: View {
                         }
                         .tag(2)
                         .preferredColorScheme(colorScheme)
-                    
+
                     SettingsView()
                         .tabItem {
                             Image(systemName: "gearshape")
@@ -57,14 +57,14 @@ struct ContentView: View {
                 }
             }
             // .navigationBarTitle(conferenceName, displayMode: .inline)
-/*            .navigationBarItems(leading: HStack {
-                                    Button(action: {
-                                        print("I'm feeling lucky ;)")
-                                    }) {
-                                        Text(conferenceName)
-                                    }
-                                }
-            ) */
+            /*            .navigationBarItems(leading: HStack {
+                                     Button(action: {
+                                         print("I'm feeling lucky ;)")
+                                     }) {
+                                         Text(conferenceName)
+                                     }
+                                 }
+             ) */
         }
         .onAppear {
             if #available(iOS 15.0, *) {

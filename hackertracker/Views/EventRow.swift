@@ -57,7 +57,7 @@ struct EventRow: View {
                         Image(systemName: "star")
                             .onTapGesture {
                                 BookmarkUtility.addBookmark(context: viewContext, id: event.id)
-                                bookmarks.bookmarks.append(event.id)
+                                // bookmarks.bookmarks.append(event.id)
                             }
                     }
                 })
@@ -80,7 +80,7 @@ struct EventRow: View {
 struct EventRow_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            //ScheduleView()
+            // ScheduleView()
         }
     }
 }

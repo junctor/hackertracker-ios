@@ -10,7 +10,7 @@ import SwiftUI
 struct EventDetailView: View {
     @ObservedObject private var viewModel = EventViewModel()
     var id: Int
-    
+
     @EnvironmentObject var bookmarks: oBookmarks
     var theme = Theme()
     @Environment(\.managedObjectContext) private var viewContext
@@ -68,7 +68,7 @@ struct EventDetailView: View {
                         BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
                     } else {
                         BookmarkUtility.addBookmark(context: viewContext, id: event.id)
-                        bookmarks.bookmarks.append(event.id)
+                        // bookmarks.bookmarks.append(event.id)
                     }
                 }
             } label: {
@@ -78,14 +78,14 @@ struct EventDetailView: View {
             }
         }
         /* .navigationBarItems(trailing: bookmarks.bookmarks.contains(id) ? Image(systemName: "star.fill").onTapGesture {
-            BookmarkUtility.deleteBookmark(context: viewContext, id: id)
-            if let index = bookmarks.bookmarks.firstIndex(of: id) {
-                bookmarks.bookmarks.remove(at: index)
-            }
-        } : Image(systemName: "star").onTapGesture {
-            BookmarkUtility.addBookmark(context: viewContext, id: id)
-            bookmarks.bookmarks.append(id)
-        }) */
+             BookmarkUtility.deleteBookmark(context: viewContext, id: id)
+             if let index = bookmarks.bookmarks.firstIndex(of: id) {
+                 bookmarks.bookmarks.remove(at: index)
+             }
+         } : Image(systemName: "star").onTapGesture {
+             BookmarkUtility.addBookmark(context: viewContext, id: id)
+             bookmarks.bookmarks.append(id)
+         }) */
         .onAppear {
             viewModel.fetchData(eventId: String(id))
         }

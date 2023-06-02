@@ -5,7 +5,6 @@
 //  Created by Seth W Law on 6/17/22.
 //
 
-import Foundation
 import FirebaseFirestore
 import Foundation
 import SwiftUI

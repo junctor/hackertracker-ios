@@ -40,12 +40,12 @@ struct SpeakerData: View {
             .frame(maxWidth: .infinity)
             .border(Color.white, width: 3)
             .background(Color.black)) {
-                ForEach(speakers, id: \.name) { speaker in
-                    NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
-                        SpeakerRow(speaker: speaker, themeColor: theme.carousel())
-                    }
+            ForEach(speakers, id: \.name) { speaker in
+                NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
+                    SpeakerRow(speaker: speaker, themeColor: theme.carousel())
                 }
             }
+        }
     }
 }
 
