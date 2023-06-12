@@ -16,8 +16,8 @@ struct _04View: View {
                 .frame(width: 512)
             Text(message)
                 .font(.title)
-            Image("skull")
-                .frame(width: 50)
+            Image("beezle")
+                .frame(width: 25)
         }
     }
 }

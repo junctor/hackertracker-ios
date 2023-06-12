@@ -19,7 +19,7 @@ struct ScheduleView: View {
     @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Bookmarks.id, ascending: true)],
         animation: .default
-    )
+    )   
     private var bookmarksResults: FetchedResults<Bookmarks>
     @EnvironmentObject var bookmarks: oBookmarks
 
@@ -36,6 +36,7 @@ struct ScheduleView: View {
                     })
                 }
             }
+            .environmentObject(bookmarks)
     }
 }
 

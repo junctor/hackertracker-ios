@@ -10,22 +10,22 @@ import SwiftUI
 
 struct ConferencesView: View {
     @ObservedObject private var viewModel = ConferencesViewModel()
+    @EnvironmentObject var selected: SelectedConference
     @Environment(\.presentationMode) var presentationMode
-    @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
     @AppStorage("showHidden") var showHidden: Bool = false
 
     var body: some View {
         List(viewModel.conferences, id: \.code) { conference in
             if showHidden == false && conference.hidden == false {
-                ConferenceRow(conference: conference, code: conferenceCode)
+                ConferenceRow(conference: conference, code: selected.code)
                     .onTapGesture {
-                        if conference.code == conferenceCode {
+                        if conference.code == selected.code {
                             print("Already selected \(conference.name)")
                         } else {
-                            print("Tapped \(conference.name)")
+                            print("Selected \(conference.name)")
+                            selected.code = conference.code
                             conferenceCode = conference.code
-                            conferenceName = conference.name
                         }
                         self.presentationMode.wrappedValue.dismiss()
                     }
@@ -35,7 +35,7 @@ struct ConferencesView: View {
         .onAppear {
             self.viewModel.fetchData()
         }
-        .navigationBarTitle("Select Conference", displayMode: .inline)
+        .navigationBarTitle("Change Conference", displayMode: .inline)
         .preferredColorScheme(.dark)
     }
 }

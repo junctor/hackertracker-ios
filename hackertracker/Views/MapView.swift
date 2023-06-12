@@ -9,16 +9,25 @@ import FirebaseFirestoreSwift
 import SwiftUI
 
 struct MapView: View {
-    @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
-    @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
-    @AppStorage("launchScreen") var launchScreen: String = "Map"
+    var conference: Conference
+    @ObservedObject private var viewModel = MapViewModel()
+    @AppStorage("launchScreen") var launchScreen: String = "Maps"
+
 
     var body: some View {
-        if let con = conferences.first, let maps = con.maps {
-            Text("Maps goes here")
-        } else {
-            _04View(message: "No Maps Found")
+        ScrollView {
+            if conference.maps.count > 0 {
+                Text("Conference has \(conference.maps.count) maps")
+            } else {
+                _04View(message: "No Maps Found")
+            }
         }
+        .onAppear {
+            launchScreen = "Maps"
+        }
+        /* .onAppear {
+            viewModel.fetchData(code: conference.code)
+        } */
     }
     /*
      .onAppear {

@@ -8,13 +8,16 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("launchScreen") var launchScreen: String = "Info"
+    @AppStorage("launchScreen") var launchScreen: String = "Settings"
 
     var body: some View {
         VStack {
             NavigationLink(destination: ConferencesView()) {
                 Text("Select Conference")
             }
+        }
+        .onAppear {
+            launchScreen = "Settings"
         }
         // ConferencesView()
     }

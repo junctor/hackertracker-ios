@@ -13,6 +13,7 @@ struct EventCell: View {
     func bookmarkAction() {
         if bookmarks.bookmarks.contains(event.id) {
             bookmarks.bookmarks.remove(event.id)
+            
         } else {
             bookmarks.bookmarks.insert(event.id)
         }

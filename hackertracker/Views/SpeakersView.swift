@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SpeakersView: View {
     @ObservedObject private var viewModel = SpeakersViewModel()
-    @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
 
     var body: some View {
         VStack {

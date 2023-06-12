@@ -9,7 +9,7 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 import Foundation
 
-struct Article: Codable {
+struct Article: Codable, Identifiable {
     @DocumentID var id: String?
     var name: String
     var text: String

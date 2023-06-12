@@ -9,9 +9,13 @@ import CoreData
 import FirebaseFirestoreSwift
 import SwiftUI
 
+class SelectedConference: ObservableObject {
+    @Published var code = "DEFCON30"
+}
+
 struct ContentView: View {
-    @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    @ObservedObject var selected = SelectedConference()
 
     @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
 
@@ -39,7 +43,7 @@ struct ContentView: View {
                         }
                         .tag(1)
                         .preferredColorScheme(colorScheme)
-                    MapView()
+                    MapView(conference: con)
                         .tabItem {
                             Image(systemName: "map")
                             // Text("Maps")
@@ -67,18 +71,21 @@ struct ContentView: View {
              ) */
         }
         .onAppear {
+            
             if #available(iOS 15.0, *) {
                 let tabBarAppearance: UITabBarAppearance = .init()
                 tabBarAppearance.configureWithDefaultBackground()
                 UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
             }
 
-            $conferences.predicates = [.where("code", isEqualTo: conferenceCode)]
+            print("ContentView: Selected Conference \(selected.code)")
+            $conferences.predicates = [.where("code", isEqualTo: selected.code)]
             // NSLog("ContentView: Conference - \(conferences.first?.name ?? "None found")")
 
             // self.viewModel.fetchData()
             // self.conference = self.viewModel.getConference(code: conferenceCode)
         }
+        .environmentObject(selected)
     }
 }
 

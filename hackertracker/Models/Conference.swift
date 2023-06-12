@@ -19,7 +19,8 @@ struct Conference: Codable, Identifiable {
     var coc: String?
     var startTimestamp: Date
     var endTimestamp: Date
-    var maps: [Map]?
+    var maps: [Map]
+    var documents: [Document]?
     var hidden: Bool
 
     private enum CodingKeys: String, CodingKey {
@@ -32,6 +33,7 @@ struct Conference: Codable, Identifiable {
         case startTimestamp = "start_timestamp"
         case endTimestamp = "end_timestamp"
         case maps
+        case documents
         case hidden
     }
 }
