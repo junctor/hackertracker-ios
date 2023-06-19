@@ -24,10 +24,14 @@ struct InfoView: View {
         ScrollView {
             VStack(alignment: .center) {
                 VStack(alignment: .center) {
-                    Text(conference.name)
-                        .font(.largeTitle)
-                        .bold()
-                        .padding(.trailing, 15)
+                    NavigationLink(destination: ConferencesView()) {
+                        Text(conference.name)
+                            .font(.largeTitle)
+                            .bold()
+                            .foregroundColor(.white)
+                        Image(systemName: "chevron.right")
+                    }
+                    .padding(.trailing, 15)
                     Text("August 4 - August 7, 2023")
                         .font(.headline)
                         .bold()
@@ -59,6 +63,10 @@ struct InfoView: View {
                 Text("Searchable")
                     .font(.subheadline)
                 LazyVGrid(columns: gridItemLayout, spacing: 20) {
+                    NavigationLink(destination: Text("Global Search")) {
+                        Image(systemName: "magnifyingglass")
+                        Text("Search")
+                    }
                     NavigationLink(destination: SpeakersView()) {
                         Image(systemName: "person.crop.rectangle")
                         Text("Speakers")
