@@ -92,6 +92,12 @@ struct InfoView: View {
                         Image(systemName: "person.crop.rectangle")
                         Text("Speakers")
                     }
+                    if self.viewModel.locations.count > 0 {
+                        NavigationLink(destination: LocationView(locations: self.viewModel.locations)) {
+                            Image(systemName: "mappin.and.ellipse")
+                            Text("Locations")
+                        }
+                    }
                     if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga"}) {
                         ForEach(ott.tags, id: \.id) { tag in
                             NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id)) {

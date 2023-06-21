@@ -30,6 +30,7 @@
 		5D4F07B928598AC8006772A2 /* 404View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4F07B828598AC8006772A2 /* 404View.swift */; };
 		5D642D1F2A43561B0064492D /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D1E2A43561B0064492D /* ContentViewModel.swift */; };
 		5D642D232A4388D50064492D /* PDFView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D222A4388D50064492D /* PDFView.swift */; };
+		5D642D252A438FB50064492D /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D242A438FB50064492D /* LocationView.swift */; };
 		5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57442857B398001374D4 /* ConferencesView.swift */; };
 		5D9E57472857B876001374D4 /* ConferencesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57462857B876001374D4 /* ConferencesViewModel.swift */; };
 		5D9E57492859037C001374D4 /* BookmarkUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57482859037C001374D4 /* BookmarkUtility.swift */; };
@@ -119,6 +120,7 @@
 		5D4F07B828598AC8006772A2 /* 404View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = 404View.swift; sourceTree = "<group>"; };
 		5D642D1E2A43561B0064492D /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		5D642D222A4388D50064492D /* PDFView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFView.swift; sourceTree = "<group>"; };
+		5D642D242A438FB50064492D /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		5D9E57442857B398001374D4 /* ConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesView.swift; sourceTree = "<group>"; };
 		5D9E57462857B876001374D4 /* ConferencesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesViewModel.swift; sourceTree = "<group>"; };
 		5D9E57482859037C001374D4 /* BookmarkUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkUtility.swift; sourceTree = "<group>"; };
@@ -286,6 +288,7 @@
 				5D9E5752285A3C25001374D4 /* SpeakersView.swift */,
 				3CE59E3A285B3ACD00B453C9 /* ViewModifiers.swift */,
 				5D0A5A672A352FD500BD5ECE /* TextListView.swift */,
+				5D642D242A438FB50064492D /* LocationView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -533,6 +536,7 @@
 				5DF51ABA2850310B007BCB83 /* ConferenceRow.swift in Sources */,
 				5DF51ACD2851507E007BCB83 /* Location.swift in Sources */,
 				3C92B96D2859E51F00523901 /* ColorUtility.swift in Sources */,
+				5D642D252A438FB50064492D /* LocationView.swift in Sources */,
 				5DF51ACF285151C6007BCB83 /* Bookmark.swift in Sources */,
 				3CD532DB2A29A9A9009D17F3 /* EventsView.swift in Sources */,
 				5D0A5A682A352FD500BD5ECE /* TextListView.swift in Sources */,

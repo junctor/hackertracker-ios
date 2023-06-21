@@ -12,6 +12,7 @@ import SwiftUI
 class InfoViewModel: ObservableObject {
     @Published var documents = [Document]()
     @Published var tagtypes = [TagType]()
+    @Published var locations = [Location]()
     @Published var conference: Conference?
 
     private var db = Firestore.firestore()
@@ -67,6 +68,23 @@ class InfoViewModel: ObservableObject {
                         return nil
                     }
                 }
+            }
+        db.collection("conferences/\(code)/locations")
+            .addSnapshotListener { querySnapshot, error in
+                guard let docs = querySnapshot?.documents else {
+                    print("No Tags")
+                    return
+                }
+
+                self.locations = docs.compactMap { queryDocumentSnapshot -> Location? in
+                    do {
+                        return try queryDocumentSnapshot.data(as: Location.self)
+                    } catch {
+                        print("Error \(error)")
+                        return nil
+                    }
+                }
+                print("InfoViewModel: \(self.locations.count) locations")
             }
     }
 }
