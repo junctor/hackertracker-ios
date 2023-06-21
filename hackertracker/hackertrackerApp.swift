@@ -26,7 +26,7 @@ struct hackertrackerApp: App {
 
     // Setup for bookmarks object that will be passed around.
     @StateObject var bookmarks: oBookmarks = .init()
-
+    
     var body: some Scene {
         WindowGroup {
             ContentView()

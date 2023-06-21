@@ -12,10 +12,29 @@ import SwiftUI
 class InfoViewModel: ObservableObject {
     @Published var documents = [Document]()
     @Published var tagtypes = [TagType]()
+    @Published var conference: Conference?
 
     private var db = Firestore.firestore()
 
     func fetchData(code: String) {
+        db.collection("conferences").whereField("code", isEqualTo: code)
+            .addSnapshotListener { querySnapshot, error in
+                guard let docs = querySnapshot?.documents else {
+                    print("No Documents")
+                    return
+                }
+
+                let conferences = docs.compactMap { queryDocumentSnapshot -> Conference? in
+                    do {
+                        return try queryDocumentSnapshot.data(as: Conference.self)
+                    } catch {
+                        print("Error \(error)")
+                        return nil
+                    }
+                }
+                self.conference = conferences.first
+                // NSLog("InfoViewModel: Documents: \(self.documents.count)")
+            }
         db.collection("conferences/\(code)/documents")
             .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {

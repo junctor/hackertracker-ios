@@ -11,10 +11,30 @@ import SwiftUI
 
 class ScheduleViewModel: ObservableObject {
     @Published var events = [Event]()
+    @Published var conference: Conference?
 
     private var db = Firestore.firestore()
 
     func fetchData(code: String) {
+        db.collection("conferences").whereField("code", isEqualTo: code)
+            .addSnapshotListener { querySnapshot, error in
+                guard let docs = querySnapshot?.documents else {
+                    print("No Documents")
+                    return
+                }
+
+                var conferences = docs.compactMap { queryDocumentSnapshot -> Conference? in
+                    do {
+                        return try queryDocumentSnapshot.data(as: Conference.self)
+                    } catch {
+                        print("Error \(error)")
+                        return nil
+                    }
+                }
+                self.conference = conferences.first
+                // NSLog("InfoViewModel: Documents: \(self.documents.count)")
+            }
+        
         db.collection("conferences/\(code)/events")
             .order(by: "begin", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let documents = querySnapshot?.documents else {
@@ -31,7 +51,7 @@ class ScheduleViewModel: ObservableObject {
                         return nil
                     }
                 }
-                // NSLog("Events for \(code): \(self.events.count)")
+                print("ScheduleViewModel: Events for \(code): \(self.events.count)")
             }
     }
 

@@ -8,6 +8,7 @@ import SwiftUI
 
 struct EventsView: View {
     let events: [Event]
+    let conference: Conference?
     @State private var eventDay = ""
     @State private var searchText = ""
     @State private var filters: Set<Int> = []
@@ -18,7 +19,7 @@ struct EventsView: View {
                 .filters(typeIds: filters)
                 .search(text: searchText)
                 .eventDayGroup(), dayTag: eventDay)
-                .navigationTitle("DEF CON 30")
+            .navigationTitle(conference?.name ?? "Schedule")
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         Menu {

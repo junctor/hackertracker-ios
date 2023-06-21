@@ -15,11 +15,11 @@ struct Conference: Codable, Identifiable {
     var code: String
     var endDate: String
     var startDate: String
-    var timeZone: String?
+    var timezone: String?
     var coc: String?
     var startTimestamp: Date
     var endTimestamp: Date
-    var maps: [Map]
+    var maps: [Map]?
     var documents: [Document]?
     var hidden: Bool
 
@@ -28,7 +28,7 @@ struct Conference: Codable, Identifiable {
         case code
         case endDate = "end_date"
         case startDate = "start_date"
-        case timeZone = "tz"
+        case timezone
         case coc = "codeofconduct"
         case startTimestamp = "start_timestamp"
         case endTimestamp = "end_timestamp"

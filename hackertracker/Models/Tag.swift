@@ -34,6 +34,6 @@ struct Tag: Codable {
     var label: String
     var sort_order: Int
     var description: String
-    var color_background: String
-    var color_foreground: String
+    // var color_background: String
+    // var color_foreground: String
 }

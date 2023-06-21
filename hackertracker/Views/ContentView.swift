@@ -15,9 +15,11 @@ class SelectedConference: ObservableObject {
 
 struct ContentView: View {
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    @StateObject private var viewModel = ContentViewModel()
+
     @ObservedObject var selected = SelectedConference()
 
-    @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
+    // @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
 
     // @State var conference: Conference?
     // @State private var viewModel = ConferencesViewModel()
@@ -25,32 +27,30 @@ struct ContentView: View {
     private var colorScheme: ColorScheme = .dark
 
     var body: some View {
-        NavigationView {
-            TabView {
-                if let con = conferences.first {
-                    InfoView(conference: con)
+        if let con = viewModel.conference {
+            NavigationView {
+                TabView {
+                    InfoView()
                         .tabItem {
                             Image(systemName: "house")
                             // Text("Info")
                         }
                         .tag(3)
                         .preferredColorScheme(colorScheme)
-
-                    ScheduleView(code: con.code)
+                    ScheduleView()
                         .tabItem {
                             Image(systemName: "calendar")
                             // Text("Main")
                         }
                         .tag(1)
                         .preferredColorScheme(colorScheme)
-                    MapView(conference: con)
+                    MapView()
                         .tabItem {
                             Image(systemName: "map")
                             // Text("Maps")
                         }
                         .tag(2)
                         .preferredColorScheme(colorScheme)
-
                     SettingsView()
                         .tabItem {
                             Image(systemName: "gearshape")
@@ -60,32 +60,26 @@ struct ContentView: View {
                         .preferredColorScheme(colorScheme)
                 }
             }
-            // .navigationBarTitle(conferenceName, displayMode: .inline)
-            /*            .navigationBarItems(leading: HStack {
-                                     Button(action: {
-                                         print("I'm feeling lucky ;)")
-                                     }) {
-                                         Text(conferenceName)
-                                     }
-                                 }
-             ) */
-        }
-        .onAppear {
-            
-            if #available(iOS 15.0, *) {
-                let tabBarAppearance: UITabBarAppearance = .init()
-                tabBarAppearance.configureWithDefaultBackground()
-                UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+            .onAppear {
+                
+                if #available(iOS 15.0, *) {
+                    let tabBarAppearance: UITabBarAppearance = .init()
+                    tabBarAppearance.configureWithDefaultBackground()
+                    UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+                }
             }
-
-            print("ContentView: Selected Conference \(selected.code)")
-            $conferences.predicates = [.where("code", isEqualTo: selected.code)]
-            // NSLog("ContentView: Conference - \(conferences.first?.name ?? "None found")")
-
-            // self.viewModel.fetchData()
-            // self.conference = self.viewModel.getConference(code: conferenceCode)
+            .environmentObject(selected)
+        } else {
+            Text("loading")
+                .onAppear {
+                    print("ContentView: Selected Conference \(selected.code), Conference Code: \(conferenceCode)")
+                    if selected.code != conferenceCode {
+                        print("ContentView: Switching to conference from AppStorage - \(conferenceCode)")
+                        selected.code = conferenceCode
+                    }
+                    self.viewModel.fetchData(code: conferenceCode)
+                }
         }
-        .environmentObject(selected)
     }
 }
 

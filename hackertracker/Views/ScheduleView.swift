@@ -8,42 +8,41 @@
 import SwiftUI
 
 struct ScheduleView: View {
-    var code: String
-    // @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
-    @StateObject var viewModel = ScheduleViewModel()
+    @EnvironmentObject var selected: SelectedConference
+    @ObservedObject var viewModel = ScheduleViewModel()
     // viewModel.fetchData(conferenceCode: conference.code)
 
-    @State var activeTab = ""
     @Environment(\.colorScheme) var colorScheme
 
-    @FetchRequest(
+    /* @FetchRequest(
         sortDescriptors: [NSSortDescriptor(keyPath: \Bookmarks.id, ascending: true)],
         animation: .default
-    )   
+    )
     private var bookmarksResults: FetchedResults<Bookmarks>
-    @EnvironmentObject var bookmarks: oBookmarks
+    @EnvironmentObject var bookmarks: oBookmarks */
 
     var body: some View {
-        EventsView(events: viewModel.events)
+        EventsView(events: viewModel.events, conference: viewModel.conference)
             .onAppear {
-                viewModel.fetchData(code: code)
-                // $conferences.predicates = [.where("code", isEqualTo: conferenceCode)]
-                // NSLog("Conference: \(conferences.first?.name ?? "No conference found for \(conferenceCode)?")")
-                // NSLog("Conference \(conference.name) Events = \(self.viewModel.events.count)")
-                if bookmarks.bookmarks.count < 1 {
-                    bookmarks.bookmarks = Set(bookmarksResults.map { bookmark -> Int in
-                        Int(bookmark.id)
-                    })
-                }
+                print("ScheduleView: Getting Schedule for \(selected.code)")
+                viewModel.fetchData(code: selected.code)
+                    // $conferences.predicates = [.where("code", isEqualTo: conferenceCode)]
+                    // NSLog("Conference: \(conferences.first?.name ?? "No conference found for \(conferenceCode)?")")
+                    // NSLog("Conference \(conference.name) Events = \(self.viewModel.events.count)")
+                    /* if bookmarks.bookmarks.count < 1 {
+                     bookmarks.bookmarks = Set(bookmarksResults.map { bookmark -> Int in
+                     Int(bookmark.id)
+                     })
+                    } */
             }
-            .environmentObject(bookmarks)
+
     }
 }
 
 struct ScheduleView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            ScheduleView(code: "DEFCON30").environmentObject(oBookmarks())
+            ScheduleView()
         }
     }
 }

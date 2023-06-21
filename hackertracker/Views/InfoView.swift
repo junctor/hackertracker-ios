@@ -10,9 +10,10 @@ import SwiftUI
 import WebKit
 
 struct InfoView: View {
-    var conference: Conference
+    // var conference: Conference
     @ObservedObject private var viewModel = InfoViewModel()
     @AppStorage("launchScreen") var launchScreen: String = "Info"
+    @EnvironmentObject var selected: SelectedConference
 
     // @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
     // var viewModel: ConferencesViewModel
@@ -24,45 +25,65 @@ struct InfoView: View {
         ScrollView {
             VStack(alignment: .center) {
                 VStack(alignment: .center) {
-                    NavigationLink(destination: ConferencesView()) {
-                        Text(conference.name)
-                            .font(.largeTitle)
-                            .bold()
-                            .foregroundColor(.white)
-                        Image(systemName: "chevron.right")
-                    }
-                    .padding(.trailing, 15)
-                    Text("August 4 - August 7, 2023")
-                        .font(.headline)
-                        .bold()
+                    if let con = viewModel.conference {
+                        NavigationLink(destination: ConferencesView()) {
+                            Text(con.name)
+                                .font(.largeTitle)
+                                .bold()
+                                .foregroundColor(.white)
+                            Image(systemName: "chevron.right")
+                        }
                         .padding(.trailing, 15)
-                    Text("Las Vegas, NV (American/Los_Angeles")
-                        .font(.subheadline)
-                        .bold()
-                    Divider()
-                    Text("Welcome to [DEF CON](https://defcon.org/) - the largest hacker conference in the world.")
-                        .font(.subheadline)
+                        if con.startDate == con.endDate {
+                            Text(DateFormatterUtility.shared.monthDayYearFormatter.string(from: con.endTimestamp))
+                                .font(.headline)
+                                .bold()
+                                .padding(.trailing, 15)
+                        } else {
+                            Text("\(DateFormatterUtility.shared.monthDayFormatter.string(from: con.startTimestamp)) - \(DateFormatterUtility.shared.monthDayYearFormatter.string(from: con.endTimestamp))")
+                                .font(.headline)
+                                .bold()
+                                .padding(.trailing, 15)
+                        }
+                        if let tz = con.timezone {
+                            Text(tz)
+                                .font(.subheadline)
+                                .bold()
+                        }
+                        Divider()
+                        Text("Welcome to [DEF CON](https://defcon.org/) - the largest hacker conference in the world.")
+                            .font(.subheadline)
+                    } else {
+                        Text("Loading")
+                            .onAppear {
+                                print("InfoView: Need to fetch data for \(selected.code)")
+                                viewModel.fetchData(code: selected.code)
+                            }
+                    }
+                    
                     
                 }
                 .cornerRadius(15)
-                .padding()
+                .padding(20)
                 .overlay(
                     RoundedRectangle(cornerRadius: 15)
                         .strokeBorder(.gray, lineWidth: 1)
                 )
-                Text("Documents")
-                    .font(.subheadline)
-                LazyVGrid(columns: gridItemLayout, spacing: 20) {
-                    ForEach(self.viewModel.documents, id: \.id) { doc in
-                        NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
-                            Text(doc.title)
+                if self.viewModel.documents.count > 0 {
+                    Text("Documents")
+                        .font(.subheadline)
+                    LazyVGrid(columns: gridItemLayout, alignment: .leading, spacing: 20) {
+                        ForEach(self.viewModel.documents, id: \.id) { doc in
+                            NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
+                                Text(doc.title)
+                            }
                         }
                     }
+                    Divider()
                 }
-                Divider()
                 Text("Searchable")
                     .font(.subheadline)
-                LazyVGrid(columns: gridItemLayout, spacing: 20) {
+                LazyVGrid(columns: gridItemLayout, alignment: .leading, spacing: 20) {
                     NavigationLink(destination: Text("Global Search")) {
                         Image(systemName: "magnifyingglass")
                         Text("Search")
@@ -83,10 +104,6 @@ struct InfoView: View {
                         Image(systemName: "questionmark.app")
                         Text("FAQ")
                     }
-                    /* NavigationLink(destination: OrgsView(title: "Vendors")) {
-                        Image(systemName: "bag")
-                        Text("Vendors")
-                    } */
                     NavigationLink(destination: TextListView(type: "news")) {
                         Image(systemName: "newspaper")
                         Text("News")
@@ -112,10 +129,9 @@ struct InfoView: View {
                 }
             }
             .onAppear {
-                viewModel.fetchData(code: conference.code)
+                print("InfoView: selectedCode: \(selected.code)")
+                viewModel.fetchData(code: selected.code)
                 launchScreen = "Info"
-                // $conferences.predicates = [.where("code", isEqualTo: conferenceCode)]
-                // conference = self.viewModel.getConference(code: conferenceCode)
             }
         }
     }

@@ -9,31 +9,39 @@ import FirebaseFirestoreSwift
 import SwiftUI
 
 struct MapView: View {
-    var conference: Conference
-    @ObservedObject private var viewModel = MapViewModel()
+    @ObservedObject private var viewModel = ContentViewModel()
     @AppStorage("launchScreen") var launchScreen: String = "Maps"
-
+    @EnvironmentObject var selected: SelectedConference
 
     var body: some View {
-        ScrollView {
-            if conference.maps.count > 0 {
-                Text("Conference has \(conference.maps.count) maps")
+        VStack {
+            if let con = viewModel.conference {
+                if let maps = con.maps, maps.count > 0 {
+                    TabView {
+                        ForEach(maps, id: \.id) { map in
+                            if let map_url = URL(string: map.url) {
+                                PDFView(url: map_url)
+                                    .onAppear{
+                                        print("MapView: Loading")
+                                    }
+                                    .scaledToFit()
+                            }
+                        }
+                    }
+                    .tabViewStyle(.page)
+                    .scaledToFill()
+                } else {
+                    _04View(message: "No Maps Found")
+                }
             } else {
-                _04View(message: "No Maps Found")
+                Text("loading...")
             }
         }
         .onAppear {
             launchScreen = "Maps"
+            viewModel.fetchData(code: selected.code)
         }
-        /* .onAppear {
-            viewModel.fetchData(code: conference.code)
-        } */
     }
-    /*
-     .onAppear {
-                $conferences.predicates = [.where("code", isEqualTo: conferenceCode)]
-            }
-     */
 }
 
 struct MapView_Previews: PreviewProvider {
