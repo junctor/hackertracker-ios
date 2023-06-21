@@ -23,7 +23,7 @@ class ScheduleViewModel: ObservableObject {
                     return
                 }
 
-                var conferences = docs.compactMap { queryDocumentSnapshot -> Conference? in
+                let conferences = docs.compactMap { queryDocumentSnapshot -> Conference? in
                     do {
                         return try queryDocumentSnapshot.data(as: Conference.self)
                     } catch {

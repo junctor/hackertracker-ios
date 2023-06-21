@@ -21,7 +21,7 @@ struct Event: Codable, Identifiable {
     var includes: String
     var links: [Links]
     var title: String
-    var location: Location
+    var location: EventLocation
     var speakers: [EventSpeaker]
     var type: EventType
 
@@ -46,6 +46,11 @@ struct EventSpeaker: Codable, Identifiable {
     var id: Int
     var name: String
     var title: String?
+}
+
+struct EventLocation: Codable, Identifiable {
+    var id: Int
+    var name: String
 }
 
 struct Links: Codable {

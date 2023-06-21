@@ -14,7 +14,7 @@ struct Location: Codable, Identifiable {
     var id: Int
     var name: String
     var hotel: String
-    var defaultStatus: String
+    var defaultStatus: String?
     var schedule: [Schedule]
     var hierExtentLeft: Int
     var hierExtentRight: Int
