@@ -43,6 +43,7 @@ class DateFormatterUtility {
         dayOfWeekTimeFormatter.timeZone = timeZone
         hourMinuteTimeFormatter.timeZone = timeZone
         monthDayYearFormatter.timeZone = timeZone
+        locationTimeFormatter.timeZone = timeZone
     }
 
     func preferLocalTime() -> Bool {
@@ -160,6 +161,15 @@ class DateFormatterUtility {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+    
+    // UTC location time format
+    let locationTimeFormatter = { () -> DateFormatter in
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
     }()
 

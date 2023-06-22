@@ -92,6 +92,12 @@ struct InfoView: View {
                         Image(systemName: "person.crop.rectangle")
                         Text("Speakers")
                     }
+                    if self.viewModel.products.count > 0 {
+                        NavigationLink(destination: ProductsView(title: "Merch", products: self.viewModel.products)) {
+                            Image(systemName: "cart")
+                            Text("Merch")
+                        }
+                    }
                     if self.viewModel.locations.count > 0 {
                         NavigationLink(destination: LocationView(locations: self.viewModel.locations)) {
                             Image(systemName: "mappin.and.ellipse")

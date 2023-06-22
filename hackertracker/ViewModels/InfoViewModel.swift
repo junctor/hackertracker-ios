@@ -13,6 +13,7 @@ class InfoViewModel: ObservableObject {
     @Published var documents = [Document]()
     @Published var tagtypes = [TagType]()
     @Published var locations = [Location]()
+    @Published var products = [Product]()
     @Published var conference: Conference?
 
     private var db = Firestore.firestore()
@@ -80,11 +81,28 @@ class InfoViewModel: ObservableObject {
                     do {
                         return try queryDocumentSnapshot.data(as: Location.self)
                     } catch {
-                        print("Error \(error)")
+                        print("Location Parsing Error: \(error)")
                         return nil
                     }
                 }
                 print("InfoViewModel: \(self.locations.count) locations")
+            }
+        db.collection("conferences/\(code)/products")
+            .order(by: "sort_order", descending: false).addSnapshotListener { querySnapshot, error in
+                guard let docs = querySnapshot?.documents else {
+                    print("No Tags")
+                    return
+                }
+
+                self.products = docs.compactMap { queryDocumentSnapshot -> Product? in
+                    do {
+                        return try queryDocumentSnapshot.data(as: Product.self)
+                    } catch {
+                        print("Error \(error)")
+                        return nil
+                    }
+                }
+                print("InfoViewModel: \(self.products.count) products")
             }
     }
 }
