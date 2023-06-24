@@ -14,7 +14,7 @@ struct SpeakerDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
-                Text(viewModel.speaker?.name ?? viewModel.speaker?.name ?? "").font(.largeTitle)
+                Text(viewModel.speaker?.name ?? viewModel.speaker?.name ?? "").font(.largeTitle).fontWeight(.semibold)
                 Text(viewModel.speaker?.title ?? "")
                 Divider()
                 Text(viewModel.speaker?.description ?? "").padding(.top).padding()

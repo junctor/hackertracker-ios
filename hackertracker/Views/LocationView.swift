@@ -49,7 +49,10 @@ struct LocationCell: View {
                     Text(location.shortName).font(heirFont(heirDepth: location.hierDepth)).fixedSize(horizontal: false, vertical: true).multilineTextAlignment(.leading)
                     Spacer()
                     if !(childLocations[location.id]?.isEmpty ?? false) {
-                        showChildren ? Image(systemName: "chevron.down") : Image(systemName: "chevron.left")
+                        showChildren ? Image(systemName: "chevron.down") : Image(systemName: "chevron.right")
+                    }
+                    if location.hierDepth != 1 {
+                        Spacer().frame(width: 10)
                     }
                 }.padding(.leading, CGFloat(location.hierDepth - 1) * 20.0)
             }).disabled(childLocations[location.id]?.isEmpty ?? true).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)

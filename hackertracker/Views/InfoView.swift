@@ -72,7 +72,7 @@ struct InfoView: View {
                 if self.viewModel.documents.count > 0 {
                     Text("Documents")
                         .font(.subheadline)
-                    LazyVGrid(columns: gridItemLayout, alignment: .leading, spacing: 20) {
+                    LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                         ForEach(self.viewModel.documents, id: \.id) { doc in
                             NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
                                 Text(doc.title)
@@ -83,7 +83,7 @@ struct InfoView: View {
                 }
                 Text("Searchable")
                     .font(.subheadline)
-                LazyVGrid(columns: gridItemLayout, alignment: .leading, spacing: 20) {
+                LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                     NavigationLink(destination: Text("Global Search")) {
                         Image(systemName: "magnifyingglass")
                         Text("Search")

@@ -9,12 +9,13 @@ import SwiftUI
 
 struct SpeakersView: View {
     @ObservedObject private var viewModel = SpeakersViewModel()
-
+    
     var body: some View {
         VStack {
             ScrollView {
                 ScrollViewReader { _ in
                     LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
+                        
                         ForEach(viewModel.speakerGroup().sorted {
                             $0.key < $1.key
                         }, id: \.key) { char, speakers in
@@ -23,18 +24,22 @@ struct SpeakersView: View {
                     }
                 }
             }
+            .searchable(text: $viewModel.searchText)
         }.onAppear {
             self.viewModel.fetchData()
         }
     }
+    
 }
+
 
 struct SpeakerData: View {
     let char: String.Element
     let speakers: [Speaker]
     var theme = Theme()
-
+    
     var body: some View {
+        
         Section(header: Text(String(char)).padding()
             .frame(maxWidth: .infinity)
             .border(Color.white, width: 3)
@@ -55,3 +60,5 @@ struct SpeakersView_Previews: PreviewProvider {
         }
     }
 }
+
+

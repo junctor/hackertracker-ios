@@ -11,7 +11,17 @@ import SwiftUI
 
 class SpeakersViewModel: ObservableObject {
     @Published var speakers = [Speaker]()
+    @Published var searchText = ""
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    
+    var filteredSpeakers: [Speaker] {
+        guard !searchText.isEmpty else {
+            return speakers
+        }
+        return speakers.filter {
+            speakers in speakers.name.lowercased().contains(searchText.lowercased())
+        }
+    }
 
     private var db = Firestore.firestore()
 
@@ -36,6 +46,7 @@ class SpeakersViewModel: ObservableObject {
     }
 
     func speakerGroup() -> [String.Element: [Speaker]] {
-        return Dictionary(grouping: speakers, by: { $0.name.first ?? "-" })
+        
+        return Dictionary(grouping: filteredSpeakers, by: { $0.name.first ?? "-" })
     }
 }
