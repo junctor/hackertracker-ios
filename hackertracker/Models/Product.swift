@@ -58,20 +58,23 @@ struct Media: Codable {
     }
 }
 
-struct Variant: Codable  {
+struct Variant: Codable, Identifiable {
+    var id = UUID()
     var code: String
     var price: Int
     var sortOrder: Int
     var stockStatus: String
-    var variantId: Int
     var tags: [Int]
+    var title: String
+    var variantId: Int
     
     private enum CodingKeys: String, CodingKey {
         case code
         case price
         case sortOrder = "sort_order"
         case stockStatus = "stock_status"
-        case variantId = "variant_id"
         case tags
+        case title
+        case variantId = "variant_id"
     }
 }

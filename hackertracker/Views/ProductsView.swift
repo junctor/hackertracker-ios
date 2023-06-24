@@ -13,7 +13,15 @@ struct ProductsView: View {
     var body: some View {
         List {
             ForEach(products) { product in
-                Text("\(product.title) - \(product.code)")
+                NavigationLink(destination: ProductView(product: product)) {
+                    VStack(alignment: .leading) {
+                        Text(product.title)
+                            .font(.headline)
+                        Text("$\(product.priceMin/100) - $\(product.priceMax/100)")
+                            .font(.caption)
+                    }
+                }
+                // ProductRow(product: product)
             }
         }.navigationTitle(title)
     }
