@@ -12,6 +12,7 @@ struct MapView: View {
     @ObservedObject private var viewModel = ContentViewModel()
     @AppStorage("launchScreen") var launchScreen: String = "Maps"
     @EnvironmentObject var selected: SelectedConference
+    let screenSize = UIScreen.main.bounds.size
 
     var body: some View {
         VStack {
@@ -24,7 +25,7 @@ struct MapView: View {
                                     .onAppear{
                                         print("MapView: Loading")
                                     }
-                                    .scaledToFit()
+                                    .frame(width: screenSize.width)
                             }
                         }
                     }
@@ -37,6 +38,7 @@ struct MapView: View {
                 Text("loading...")
             }
         }
+    
         .onAppear {
             launchScreen = "Maps"
             viewModel.fetchData(code: selected.code)
