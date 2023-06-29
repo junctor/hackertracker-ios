@@ -73,7 +73,7 @@ struct EventDetailView: View {
                 }
             } label: {
                 if let event = viewModel.event {
-                    Image(systemName: bookmarks.bookmarks.contains(event.id) ? "star.fill" : "star")
+                    Image(systemName: bookmarks.bookmarks.contains(event.id) ? "bookmark.fill" : "bookmark")
                 }
             }
         }

@@ -8,14 +8,16 @@ import SwiftUI
 
 struct EventCell: View {
     let event: Event
-    @EnvironmentObject var bookmarks: oBookmarks
+    let bookmarks: [Int32]
+    @Environment(\.managedObjectContext) private var viewContext
 
     func bookmarkAction() {
-        if bookmarks.bookmarks.contains(event.id) {
-            bookmarks.bookmarks.remove(event.id)
-            
+        if bookmarks.contains(Int32(event.id)) {
+            print("EventCellView: Removing Bookmark \(event.id)")
+            BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
         } else {
-            bookmarks.bookmarks.insert(event.id)
+            print("EventCellView: Adding Bookmark \(event.id)")
+            BookmarkUtility.addBookmark(context: viewContext, id: event.id)
         }
     }
 
@@ -44,17 +46,17 @@ struct EventCell: View {
                     Button {
                         bookmarkAction()
                     } label: {
-                        Image(systemName: bookmarks.bookmarks.contains(event.id) ? "star.fill" : "star")
+                        Image(systemName: bookmarks.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
                     }
                 }
                 .buttonStyle(PlainButtonStyle())
             }
 
         }.swipeActions {
-            Button(bookmarks.bookmarks.contains(event.id) ? "Remove Bookmark" : "Bookmark") {
+            Button(bookmarks.contains(Int32(event.id)) ? "Remove Bookmark" : "Bookmark") {
                 bookmarkAction()
             }.buttonStyle(DefaultButtonStyle())
-                .tint(bookmarks.bookmarks.contains(event.id) ? .red : .yellow)
+                .tint(bookmarks.contains(Int32(event.id)) ? .red : .yellow)
         }
     }
 }

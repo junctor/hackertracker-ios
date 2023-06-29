@@ -10,6 +10,9 @@ import SwiftUI
 struct ScheduleView: View {
     @EnvironmentObject var selected: SelectedConference
     @ObservedObject var viewModel = ScheduleViewModel()
+    @Environment(\.managedObjectContext) private var viewContext
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+
     // viewModel.fetchData(conferenceCode: conference.code)
 
     @Environment(\.colorScheme) var colorScheme
@@ -22,7 +25,7 @@ struct ScheduleView: View {
     @EnvironmentObject var bookmarks: oBookmarks */
 
     var body: some View {
-        EventsView(events: viewModel.events, conference: viewModel.conference)
+        EventsView(events: viewModel.events, conference: viewModel.conference, bookmarks: bookmarks.map{ $0.id })
             .onAppear {
                 print("ScheduleView: Getting Schedule for \(selected.code)")
                 viewModel.fetchData(code: selected.code)

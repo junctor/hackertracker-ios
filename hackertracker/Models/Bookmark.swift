@@ -10,8 +10,7 @@ import FirebaseFirestoreSwift
 import Foundation
 
 struct Bookmark: Codable {
-    @DocumentID var id: String?
-    var value: Bool
+    var id: Int
 }
 
 class oBookmarks: ObservableObject {

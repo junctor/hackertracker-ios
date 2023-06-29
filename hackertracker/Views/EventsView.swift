@@ -9,6 +9,7 @@ import SwiftUI
 struct EventsView: View {
     let events: [Event]
     let conference: Conference?
+    let bookmarks: [Int32]
     @State private var eventDay = ""
     @State private var searchText = ""
     @State private var filters: Set<Int> = []
@@ -18,7 +19,7 @@ struct EventsView: View {
             EventScrollView(events: events
                 .filters(typeIds: filters)
                 .search(text: searchText)
-                .eventDayGroup(), dayTag: eventDay)
+                .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay)
             .navigationTitle(conference?.name ?? "Schedule")
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
@@ -89,6 +90,7 @@ struct EventFilters: View {
 
 struct EventScrollView: View {
     let events: [Date: [Event]]
+    let bookmarks: [Int32]
     let dayTag: String
 
     var body: some View {
@@ -96,7 +98,7 @@ struct EventScrollView: View {
             List(events.sorted {
                 $0.key < $1.key
             }, id: \.key) { weekday, events in
-                EventData(weekday: weekday, events: events)
+                EventData(weekday: weekday, events: events, bookmarks: bookmarks)
                     .id(weekday.formatted(.dateTime.weekday()))
             }
             .listStyle(.plain)
@@ -110,6 +112,7 @@ struct EventScrollView: View {
 struct EventData: View {
     let weekday: Date
     let events: [Event]
+    let bookmarks: [Int32]
 
     var body: some View {
         Section(header: Text(weekday.formatted(.dateTime.month(.wide).day()))) {
@@ -120,8 +123,8 @@ struct EventData: View {
                     ForEach(timeEvents.sorted {
                         $0.beginTimestamp < $1.beginTimestamp
                     }, id: \.id) { event in
-                        NavigationLink(destination: EventDetailView2(event: event)) {
-                            EventCell(event: event)
+                        NavigationLink(destination: EventDetailView2(event: event, bookmarks: bookmarks)) {
+                            EventCell(event: event, bookmarks: bookmarks)
                         }
                     }
                 }

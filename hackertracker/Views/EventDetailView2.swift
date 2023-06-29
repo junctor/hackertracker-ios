@@ -8,7 +8,8 @@ import SwiftUI
 
 struct EventDetailView2: View {
     let event: Event
-    @EnvironmentObject var bookmarks: oBookmarks
+    let bookmarks: [Int32]
+    @Environment(\.managedObjectContext) private var viewContext
 
     let columns = [
         GridItem(.flexible()),
@@ -77,13 +78,13 @@ struct EventDetailView2: View {
         }.toolbar {
             ShareView(event: event)
             Button {
-                if bookmarks.bookmarks.contains(event.id) {
-                    bookmarks.bookmarks.remove(event.id)
+                if bookmarks.contains(Int32(event.id)) {
+                    BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
                 } else {
-                    bookmarks.bookmarks.insert(event.id)
+                    BookmarkUtility.addBookmark(context: viewContext, id: event.id)
                 }
             } label: {
-                Image(systemName: bookmarks.bookmarks.contains(event.id) ? "star.fill" : "star")
+                Image(systemName: bookmarks.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
             }
             MoreMenu(event: event)
         }
@@ -98,7 +99,7 @@ struct EventDetailView2_Previews: PreviewProvider {
         let event = ScheduleViewModel().events[202]
 
         var body: some View {
-            EventDetailView2(event: self.event).preferredColorScheme(.dark)
+            EventDetailView2(event: self.event, bookmarks: [1,99]).preferredColorScheme(.dark)
         }
     }
 
