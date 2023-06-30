@@ -22,7 +22,7 @@ struct MapView: View {
                         ForEach(maps, id: \.id) { map in
                             if let map_url = URL(string: map.url) {
                                 PDFView(url: map_url)
-                                    .onAppear{
+                                    .onAppear {
                                         print("MapView: Loading")
                                     }
                                     .frame(width: screenSize.width)

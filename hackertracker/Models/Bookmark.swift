@@ -12,7 +12,3 @@ import Foundation
 struct Bookmark: Codable {
     var id: Int
 }
-
-class oBookmarks: ObservableObject {
-    @Published var bookmarks: Set<Int> = []
-}

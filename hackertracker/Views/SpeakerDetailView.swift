@@ -9,6 +9,8 @@ import SwiftUI
 
 struct SpeakerDetailView: View {
     @ObservedObject private var viewModel = SpeakerViewModel()
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+
     var id: Int
 
     var body: some View {
@@ -23,8 +25,8 @@ struct SpeakerDetailView: View {
                     Text("Events").font(.headline).padding(.top)
                     VStack(alignment: .leading) {
                         ForEach(viewModel.speaker?.events ?? []) { event in
-                            NavigationLink(destination: EventDetailView(id: event.id)) {
-                                SpeakerEventsView(event: event, bookmarks: [])
+                            NavigationLink(destination: EventDetailView2(eventId: event.id, bookmarks: bookmarks.map { $0.id })) {
+                                SpeakerEventsView(event: event)
                             }
                         }
                     }
@@ -41,7 +43,6 @@ struct SpeakerDetailView: View {
 
 struct SpeakerEventsView: View {
     var event: SpeakerEvent
-    @State var bookmarks: [Int]
 
     var body: some View {
         HStack {

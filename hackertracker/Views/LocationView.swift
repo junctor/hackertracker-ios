@@ -71,7 +71,6 @@ func childrenLocations(locations: [Location]) -> [Int: [Location]] {
     }
 }
 
-
 func circleStatus(location: Location) -> Color {
     let schedule = location.schedule
     let curDate = Date()

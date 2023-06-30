@@ -27,7 +27,7 @@ struct ContentView: View {
     private var colorScheme: ColorScheme = .dark
 
     var body: some View {
-        if let _ = viewModel.conference {
+        if viewModel.conference != nil {
             NavigationView {
                 TabView {
                     InfoView()

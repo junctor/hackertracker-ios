@@ -123,7 +123,7 @@ struct EventData: View {
                     ForEach(timeEvents.sorted {
                         $0.beginTimestamp < $1.beginTimestamp
                     }, id: \.id) { event in
-                        NavigationLink(destination: EventDetailView2(event: event, bookmarks: bookmarks)) {
+                        NavigationLink(destination: EventDetailView2(eventId: event.id, bookmarks: bookmarks)) {
                             EventCell(event: event, bookmarks: bookmarks)
                         }
                     }

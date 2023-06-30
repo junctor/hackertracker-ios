@@ -11,15 +11,14 @@ import SwiftUI
 
 class EventViewModel: ObservableObject {
     @Published var event: Event?
-    @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
 
     private var db = Firestore.firestore()
 
-    func fetchData(eventId: String) {
+    func fetchData(code: String, eventId: Int) {
         db.collection("conferences")
-            .document(conferenceCode)
+            .document(code)
             .collection("events")
-            .document(eventId)
+            .document(String(eventId))
             .addSnapshotListener { documentSnapshot, error in
                 guard let document = documentSnapshot else {
                     print("Error fetching document: \(error!)")
@@ -29,7 +28,7 @@ class EventViewModel: ObservableObject {
                 do {
                     self.event = try document.data(as: Event.self)
                 } catch {
-                    print("Error decoding speaker data")
+                    print("Error decoding event data")
                 }
             }
     }

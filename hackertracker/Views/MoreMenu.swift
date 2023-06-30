@@ -8,13 +8,14 @@ import SwiftUI
 
 struct MoreMenu: View {
     let event: Event
-    @EnvironmentObject var bookmarks: oBookmarks
+    let bookmarks: [Int32]
+    @Environment(\.managedObjectContext) private var viewContext
 
     func bookmarkAction() {
-        if bookmarks.bookmarks.contains(event.id) {
-            bookmarks.bookmarks.remove(event.id)
+        if bookmarks.contains(Int32(event.id)) {
+            BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
         } else {
-            bookmarks.bookmarks.insert(event.id)
+            BookmarkUtility.addBookmark(context: viewContext, id: event.id)
         }
     }
 
@@ -22,8 +23,8 @@ struct MoreMenu: View {
         Menu {
             ShareView(event: event, title: true)
             Button { bookmarkAction() } label: {
-                Label(bookmarks.bookmarks.contains(event.id) ? "Remove Bookmark" : "Bookmark",
-                      systemImage: bookmarks.bookmarks.contains(event.id) ? "star.fill" : "star")
+                Label(bookmarks.contains(Int32(event.id)) ? "Remove Bookmark" : "Bookmark",
+                      systemImage: bookmarks.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
             }
             Button {} label: {
                 Label("Save to Calendar", systemImage: "calendar")

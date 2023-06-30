@@ -44,7 +44,6 @@ struct ProductView: View {
                     .padding(10)
                 }
                 ForEach(product.variants, id: \.variantId) { variant in
-                    //Text("\(variant.code)")
                     VariantRow(variant: variant)
                 }
                 Text("Add to cart")
@@ -63,12 +62,11 @@ struct VariantRow: View {
     var body: some View {
         HStack {
             Text("$\(variant.price/100).00 -")
-            Stepper("Size: \(variant.code)",value: $value)
+            Stepper("Size: \(variant.code)", value: $value)
             Text("\(value)")
         }
     }
 }
-
 
 struct ProductView_Previews: PreviewProvider {
     static var previews: some View {

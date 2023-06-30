@@ -32,7 +32,6 @@ struct SpeakersView: View {
     
 }
 
-
 struct SpeakerData: View {
     let char: String.Element
     let speakers: [Speaker]
@@ -60,5 +59,3 @@ struct SpeakersView_Previews: PreviewProvider {
         }
     }
 }
-
-

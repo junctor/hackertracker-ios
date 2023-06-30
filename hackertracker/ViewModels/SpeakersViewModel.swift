@@ -18,8 +18,8 @@ class SpeakersViewModel: ObservableObject {
         guard !searchText.isEmpty else {
             return speakers
         }
-        return speakers.filter {
-            speakers in speakers.name.lowercased().contains(searchText.lowercased())
+        return speakers.filter { speakers in
+            speakers.name.lowercased().contains(searchText.lowercased())
         }
     }
 

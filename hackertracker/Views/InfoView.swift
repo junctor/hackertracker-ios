@@ -60,8 +60,6 @@ struct InfoView: View {
                                 viewModel.fetchData(code: selected.code)
                             }
                     }
-                    
-                    
                 }
                 .cornerRadius(15)
                 .padding(20)

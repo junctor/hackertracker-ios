@@ -16,6 +16,7 @@ class SpeakerViewModel: ObservableObject {
     private var db = Firestore.firestore()
 
     func fetchData(speakerId: String) {
+        // Get Speakers
         db.collection("conferences")
             .document(conferenceCode)
             .collection("speakers")
@@ -28,24 +29,11 @@ class SpeakerViewModel: ObservableObject {
 
                 do {
                     self.speaker = try document.data(as: Speaker.self)
+                    
                 } catch {
                     print("Error decoding speaker data")
                 }
-            }
-        /*
-         .addSnapshotListener { documentSnapshot, error in
-             guard let document = documentSnapshot else {
-                 print("Error fetching document: \(error!)")
-                 return
-             }
-             guard let data = document.data() else {
-                 print("Document data was empty.")
-                 return
-             }
-
-             print("Current data: \(data)")
-             speaker = data as Speaker
-
-         } */
+        }
     }
+    
 }
