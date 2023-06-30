@@ -95,41 +95,23 @@ struct EventDetailView2: View {
             }
         }
         .toolbar {
-            Button {
+            ToolbarItemGroup {
                 if let event = viewModel.event {
-                    if bookmarks.contains(Int32(event.id)) {
-                        BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
-                    } else {
-                        BookmarkUtility.addBookmark(context: viewContext, id: event.id)
+                    Button {
+                        if bookmarks.contains(Int32(event.id)) {
+                            BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
+                        } else {
+                            BookmarkUtility.addBookmark(context: viewContext, id: event.id)
+                        }
+                    } label: {
+                        if let event = viewModel.event {
+                            Image(systemName: bookmarks.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                        }
                     }
-                }
-            } label: {
-                if let event = viewModel.event {
-                    Image(systemName: bookmarks.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                    MoreMenu(event: event)
                 }
             }
         }
-        /* .toolbar {
-            if let e = viewModel.event {
-                ToolbarItem {
-                    ShareView(event: e)
-                }
-                Button {
-                    if bookmarks.contains(Int32(eventId)) {
-                        BookmarkUtility.deleteBookmark(context: viewContext, id: eventId)
-                    } else {
-                        BookmarkUtility.addBookmark(context: viewContext, id: eventId)
-                    }
-                } label: {
-                    if bookmarks.contains(Int32(eventId)) {
-                        Image(systemName: "bookmark.fill")
-                    } else {
-                        Image(systemName: "bookmark")
-                    }
-                }
-                MoreMenu(event: e)
-            }
-        } */
         .navigationBarTitle(Text(""), displayMode: .inline)
         .toolbar(.hidden, for: .tabBar)
                 
