@@ -14,6 +14,7 @@ struct InfoView: View {
     @ObservedObject private var viewModel = InfoViewModel()
     @AppStorage("launchScreen") var launchScreen: String = "Info"
     @EnvironmentObject var selected: SelectedConference
+    var theme = Theme()
 
     // @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
     // var viewModel: ConferencesViewModel
@@ -73,7 +74,7 @@ struct InfoView: View {
                     LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                         ForEach(self.viewModel.documents, id: \.id) { doc in
                             NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
-                                Text(doc.title)
+                                CardView(systemImage: "doc", text: doc.title, color: theme.carousel())
                             }
                         }
                     }
@@ -83,40 +84,33 @@ struct InfoView: View {
                     .font(.subheadline)
                 LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                     NavigationLink(destination: Text("Global Search")) {
-                        Image(systemName: "magnifyingglass")
-                        Text("Search")
+                        CardView(systemImage: "magnifyingglass", text: "Search", color: theme.carousel())
                     }
                     NavigationLink(destination: SpeakersView()) {
-                        Image(systemName: "person.crop.rectangle")
-                        Text("Speakers")
+                        CardView(systemImage: "person.crop.rectangle", text: "Speakers", color: theme.carousel())
                     }
                     if self.viewModel.products.count > 0 {
                         NavigationLink(destination: ProductsView(title: "Merch", products: self.viewModel.products)) {
-                            Image(systemName: "cart")
-                            Text("Merch")
+                            CardView(systemImage: "cart", text: "Merch", color: theme.carousel())
                         }
                     }
                     if self.viewModel.locations.count > 0 {
                         NavigationLink(destination: LocationView(locations: self.viewModel.locations)) {
-                            Image(systemName: "mappin.and.ellipse")
-                            Text("Locations")
+                            CardView(systemImage: "mappin.and.ellipse", text: "Locations", color: theme.carousel())
                         }
                     }
                     if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga"}) {
                         ForEach(ott.tags, id: \.id) { tag in
                             NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id)) {
-                                Image(systemName: "bag")
-                                Text(tag.label)
+                                CardView(systemImage: "bag", text: tag.label, color: theme.carousel())
                             }
                         }
                     }
                     NavigationLink(destination: TextListView(type: "faqs")) {
-                        Image(systemName: "questionmark.app")
-                        Text("FAQ")
+                        CardView(systemImage: "questionmark.app", text: "FAQ", color: theme.carousel())
                     }
                     NavigationLink(destination: TextListView(type: "news")) {
-                        Image(systemName: "newspaper")
-                        Text("News")
+                        CardView(systemImage: "newspaper", text: "News", color: theme.carousel())
                     }
                     /*Link(destination: URL(string: "mailto://hackertracker@defcon.org")!) {
                         Image(systemName: "square.and.pencil")
@@ -153,6 +147,25 @@ struct InfoView: View {
             rick = 0
             // Implement Rick
         }
+    }
+}
+
+struct CardView: View {
+    var systemImage: String
+    var text: String
+    var color: Color
+    
+    var body: some View {
+        HStack {
+            Image(systemName: systemImage)
+            Text(text)
+        }
+        .padding(10)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(.foreground, lineWidth: 0.8)
+        )
+        .foregroundColor(color)
     }
 }
 
