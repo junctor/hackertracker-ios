@@ -17,14 +17,14 @@ struct EventsView: View {
     var body: some View {
         NavigationStack {
             EventScrollView(events: events
-                .filters(typeIds: filters)
+                .filters(typeIds: filters, bookmarks: bookmarks)
                 .search(text: searchText)
                 .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay)
             .navigationTitle(conference?.name ?? "Schedule")
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         Menu {
-                            ForEach(events.filters(typeIds: filters).eventDayGroup().sorted {
+                            ForEach(events.filters(typeIds: filters, bookmarks: bookmarks).eventDayGroup().sorted {
                                 $0.key < $1.key
                             }, id: \.key) { day, _ in
                                 Button(day.formatted(.dateTime.month().day().weekday())) {

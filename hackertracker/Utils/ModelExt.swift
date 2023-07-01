@@ -28,11 +28,11 @@ extension [Event] {
         }
     }
 
-    func filters(typeIds: Set<Int>) -> Self {
+    func filters(typeIds: Set<Int>, bookmarks: [Int32]) -> Self {
         if typeIds.isEmpty {
             return self
         } else {
-            return self.filter { typeIds.contains($0.type.id) }
+            return self.filter { typeIds.contains($0.type.id) || (typeIds.contains(1337) && bookmarks.contains(Int32($0.id))) }
         }
     }
 
