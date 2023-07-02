@@ -14,8 +14,15 @@ struct SpeakerRow: View {
         HStack {
             Rectangle().fill(themeColor).frame(width: 10, height: .infinity)
             VStack(alignment: .leading) {
-                Text(speaker.name).fontWeight(.bold)
-                Text(speaker.title ?? "Hacker")
+                Text(speaker.name)
+                    .font(.headline)
+                    .foregroundColor(.white)
+                if let title = speaker.title {
+                        Text(title)
+                            .font(.subheadline)
+                            .multilineTextAlignment(.leading)
+                            .foregroundColor(.gray)
+                }
             }
         }
     }

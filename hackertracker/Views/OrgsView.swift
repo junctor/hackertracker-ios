@@ -13,8 +13,9 @@ struct OrgsView: View {
     var tagId: Int
     @EnvironmentObject var selected: SelectedConference
     @ObservedObject private var viewModel = OrgsViewModel()
+    var theme = Theme()
     
-    let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
+    let gridItemLayout = [GridItem(.flexible(), alignment: .top), GridItem(.flexible(), alignment: .top)]
     
     var body: some View {
         ScrollView {
@@ -22,55 +23,42 @@ struct OrgsView: View {
                 ForEach(self.viewModel.orgs, id: \.id) { org in
                     if org.tag_ids.contains(tagId) {
                         NavigationLink(destination: DocumentView(title_text: org.name, body_text: org.description)) {
-                            VStack {
                                 if let l = org.logo, let lurl = l.url, let logo_url = URL(string: lurl) {
-                                    AsyncImage(url: logo_url) { phase in
-                                        switch phase {
-                                        case .success(let image):
-                                            image
-                                                .resizable()
-                                                .aspectRatio(contentMode: .fit)
-                                        default:
-                                            if let f = org.name.first {
-                                                Text(f.uppercased())
-                                                    .padding()
-                                                    .font(.largeTitle)
-                                                    .background(Color.gray)
+                                    VStack {
+                                        Text(org.name)
+                                            .font(.caption)
+                                            .foregroundColor(.white)
+                                        AsyncImage(url: logo_url) { phase in
+                                            switch phase {
+                                            case .success(let image):
+                                                image
+                                                    .resizable()
+                                                    .frame(maxWidth: .infinity)
+                                                    .aspectRatio(contentMode: .fit)
+                                                    .cornerRadius(15)
+                                            default:
+                                                Text(org.name)
                                                     .foregroundColor(.white)
-                                                    .frame(width: 125, height: 100)
-                                            } else {
-                                                Text("X")
-                                                    .padding()
-                                                    .font(.largeTitle)
-                                                    .background(Color.gray)
-                                                    .foregroundColor(.white)
-                                                    .frame(width: 125, height: 100)
+                                                    .background(theme.carousel().gradient)
+                                                    .cornerRadius(15)
                                             }
                                         }
+                                        
                                     }
-                                    .frame(width: 125)
-                                    .padding(10)
+                                    .padding(5)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    .background(theme.carousel().gradient)
+                                    .cornerRadius(15)
                                     
                                 } else {
-                                    if let f = org.name.first {
-                                        Text(f.uppercased())
-                                            .padding()
-                                            .font(.largeTitle)
-                                            .background(Color.gray)
-                                            .foregroundColor(.white)
-                                            .frame(width: 125, height: 100)
-                                    } else {
-                                        Text("X")
-                                            .padding()
-                                            .font(.largeTitle)
-                                            .background(Color.gray)
-                                            .foregroundColor(.white)
-                                            .frame(width: 125, height: 100)
-                                    }
+                                    Text(org.name)
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .padding(15)
+                                        .background(theme.carousel().gradient)
+                                        .cornerRadius(15)
                                 }
-                                Text(org.name)
-                                    .font(.caption)
-                            }
+
                         }
                     }
                 }
@@ -78,6 +66,8 @@ struct OrgsView: View {
             }
             
         }
+        // Need to figure out search here
+        // .searchable(text: $viewModel.searchText)
         .navigationTitle(title)
         .onAppear {
             viewModel.fetchData(code: selected.code)

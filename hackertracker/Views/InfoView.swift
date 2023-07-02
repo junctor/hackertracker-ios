@@ -34,7 +34,6 @@ struct InfoView: View {
                                 .foregroundColor(.white)
                             Image(systemName: "chevron.right")
                         }
-                        .padding(.trailing, 15)
                         if con.startDate == con.endDate {
                             Text(DateFormatterUtility.shared.monthDayYearFormatter.string(from: con.endTimestamp))
                                 .font(.headline)
@@ -51,9 +50,11 @@ struct InfoView: View {
                                 .font(.subheadline)
                                 .bold()
                         }
-                        Divider()
-                        Text("Welcome to [DEF CON](https://defcon.org/) - the largest hacker conference in the world.")
-                            .font(.subheadline)
+                        if let tagline = con.tagline {
+                            Divider()
+                            Text(tagline)
+                                .font(.subheadline)
+                        }
                     } else {
                         Text("Loading")
                             .onAppear {
@@ -62,6 +63,7 @@ struct InfoView: View {
                             }
                     }
                 }
+                .frame(maxWidth: .infinity)
                 .cornerRadius(15)
                 .padding(20)
                 .overlay(
@@ -160,12 +162,11 @@ struct CardView: View {
             Image(systemName: systemImage)
             Text(text)
         }
-        .padding(10)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(.foreground, lineWidth: 0.8)
-        )
-        .foregroundColor(color)
+        .foregroundColor(.white)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(15)
+        .background(color.gradient)
+        .cornerRadius(15)
     }
 }
 

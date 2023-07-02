@@ -12,6 +12,7 @@ import Foundation
 struct Conference: Codable, Identifiable {
     @DocumentID var id: String?
     var name: String
+    var description: String
     var code: String
     var endDate: String
     var startDate: String
@@ -22,9 +23,11 @@ struct Conference: Codable, Identifiable {
     var maps: [Map]?
     var documents: [Document]?
     var hidden: Bool
+    var tagline: String?
 
     private enum CodingKeys: String, CodingKey {
         case name
+        case description
         case code
         case endDate = "end_date"
         case startDate = "start_date"
@@ -35,5 +38,6 @@ struct Conference: Codable, Identifiable {
         case maps
         case documents
         case hidden
+        case tagline
     }
 }

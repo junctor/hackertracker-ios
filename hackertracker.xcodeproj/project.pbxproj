@@ -35,6 +35,7 @@
 		5D642D292A44A1960064492D /* ProductsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D282A44A1960064492D /* ProductsView.swift */; };
 		5D642D2B2A44DF840064492D /* ProductRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D2A2A44DF840064492D /* ProductRow.swift */; };
 		5D642D2D2A44F3AF0064492D /* ProductView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D2C2A44F3AF0064492D /* ProductView.swift */; };
+		5D642D312A4F9F0E0064492D /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 5D642D302A4F9F0E0064492D /* FirebaseMessaging */; };
 		5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57442857B398001374D4 /* ConferencesView.swift */; };
 		5D9E57472857B876001374D4 /* ConferencesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57462857B876001374D4 /* ConferencesViewModel.swift */; };
 		5D9E57492859037C001374D4 /* BookmarkUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57482859037C001374D4 /* BookmarkUtility.swift */; };
@@ -176,6 +177,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5D642D312A4F9F0E0064492D /* FirebaseMessaging in Frameworks */,
 				5DAE3E9C2836A76000F9F845 /* FirebaseDatabaseSwift in Frameworks */,
 				5D0A5A662A35293000BD5ECE /* MarkdownUI in Frameworks */,
 				5DF51AD228515326007BCB83 /* FirebaseAuth in Frameworks */,
@@ -203,6 +205,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5D642D2F2A4F9F0E0064492D /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		5DAE04A72820948B00930A2D = {
 			isa = PBXGroup;
 			children = (
@@ -211,6 +220,7 @@
 				5DAE04C82820948F00930A2D /* hackertrackerTests */,
 				5DAE04D22820948F00930A2D /* hackertrackerUITests */,
 				5DAE04B12820948B00930A2D /* Products */,
+				5D642D2F2A4F9F0E0064492D /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -376,6 +386,7 @@
 				5DF51AD128515326007BCB83 /* FirebaseAuth */,
 				5DF51AD328515326007BCB83 /* FirebaseStorage */,
 				5D0A5A652A35293000BD5ECE /* MarkdownUI */,
+				5D642D302A4F9F0E0064492D /* FirebaseMessaging */,
 			);
 			productName = hackertracker;
 			productReference = 5DAE04B02820948B00930A2D /* hackertracker.app */;
@@ -940,6 +951,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5D0A5A642A35293000BD5ECE /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		5D642D302A4F9F0E0064492D /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5DAE3E962836A76000F9F845 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
 		};
 		5DAE3E972836A76000F9F845 /* FirebaseAnalyticsSwift */ = {
 			isa = XCSwiftPackageProductDependency;
