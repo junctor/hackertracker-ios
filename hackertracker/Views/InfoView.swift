@@ -10,15 +10,12 @@ import SwiftUI
 import WebKit
 
 struct InfoView: View {
-    // var conference: Conference
-    @ObservedObject private var viewModel = InfoViewModel()
-    @AppStorage("launchScreen") var launchScreen: String = "Info"
+    @EnvironmentObject var viewModel: InfoViewModel
+    @AppStorage("launchScreen") var launchScreen: String = "Main"
     @EnvironmentObject var selected: SelectedConference
     @Environment(\.openURL) private var openURL
     var theme = Theme()
 
-    // @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
-    // var viewModel: ConferencesViewModel
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
     @State var rick: Int = 0
@@ -28,7 +25,7 @@ struct InfoView: View {
             VStack(alignment: .center) {
                 VStack(alignment: .center) {
                     if let con = viewModel.conference {
-                        NavigationLink(destination: ConferencesView(conferences: viewModel.conferences)) {
+                        NavigationLink(destination: ConferencesView()) {
                             Text(con.name)
                                 .font(.largeTitle)
                                 .bold()
@@ -64,13 +61,11 @@ struct InfoView: View {
                             }
                     }
                 }
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
+                .padding(15)
+                .background(Color(.systemGray6))
                 .cornerRadius(15)
-                .padding(20)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 15)
-                        .strokeBorder(.gray, lineWidth: 1)
-                )
                 if self.viewModel.documents.count > 0 {
                     Text("Documents")
                         .font(.subheadline)
@@ -104,21 +99,21 @@ struct InfoView: View {
                     }
                     if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga"}) {
                         ForEach(ott.tags, id: \.id) { tag in
-                            NavigationLink(destination: OrgsView(orgs: viewModel.orgs, title: tag.label, tagId: tag.id)) {
+                            NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id)) {
                                 CardView(systemImage: "bag", text: tag.label, color: theme.carousel())
                             }
                         }
                     }
-                    NavigationLink(destination: TextListView(type: "faqs")) {
-                        CardView(systemImage: "questionmark.app", text: "FAQ", color: theme.carousel())
+                    if viewModel.faqs.count > 0 {
+                        NavigationLink(destination: FAQListView()) {
+                            CardView(systemImage: "questionmark.app", text: "FAQ", color: theme.carousel())
+                        }
                     }
-                    NavigationLink(destination: TextListView(type: "news")) {
-                        CardView(systemImage: "newspaper", text: "News", color: theme.carousel())
+                    if viewModel.news.count > 0 {
+                        NavigationLink(destination: NewsListView()) {
+                            CardView(systemImage: "newspaper", text: "News", color: theme.carousel())
+                        }
                     }
-                    /*Link(destination: URL(string: "mailto://hackertracker@defcon.org")!) {
-                        Image(systemName: "square.and.pencil")
-                        Text("Contact Us")
-                    }*/
                 }
                 Divider()
                 if let url = URL(string: "mailto:hackertracker@defcon.org") {
@@ -155,8 +150,9 @@ struct InfoView: View {
             .padding(5)
             .onAppear {
                 print("InfoView: selectedCode: \(selected.code)")
-                viewModel.fetchData(code: selected.code)
-                launchScreen = "Info"
+                print("ScheduleView: Current launchscreen is: \(launchScreen)")
+                // viewModel.fetchData(code: selected.code)
+                launchScreen = "Main"
             }
         }
     }

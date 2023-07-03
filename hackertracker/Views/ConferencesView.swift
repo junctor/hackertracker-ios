@@ -10,15 +10,16 @@ import FirebaseStorage
 import SwiftUI
 
 struct ConferencesView: View {
-    var conferences: [Conference]
+    // var conferences: [Conference]
     @EnvironmentObject var selected: SelectedConference
+    @EnvironmentObject var viewModel: InfoViewModel
     @Environment(\.presentationMode) var presentationMode
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
     @AppStorage("showHidden") var showHidden: Bool = false
 
     var body: some View {
-        if conferences.count > 0 {
-            List(conferences, id: \.code) { conference in
+        if viewModel.conferences.count > 0 {
+            List(viewModel.conferences, id: \.code) { conference in
                 ConferenceRow(conference: conference, code: selected.code)
                     .onTapGesture {
                         if conference.code == selected.code {
@@ -27,6 +28,7 @@ struct ConferencesView: View {
                             print("Selected \(conference.name)")
                             selected.code = conference.code
                             conferenceCode = conference.code
+                            viewModel.fetchData(code: conference.code)
                         }
                         
                         let fileManager = FileManager.default
@@ -41,13 +43,13 @@ struct ConferencesView: View {
                                     let mLocal = docDir.appendingPathComponent(path)
                                     if fileManager.fileExists(atPath: mLocal.path) {
                                         // TODO: Add logic to check md5 hash and re-update if it has changed
-                                        print("ConferencesView: Map file (\(path)) already exists")
+                                        print("ConferencesView (\(selected.code): Map file (\(path)) already exists")
                                     } else {
                                         _ = mRef.write(toFile: mLocal) { _, error in
                                             if let error = error {
-                                                print("ConferencesView: Error \(error) retrieving \(path)")
+                                                print("ConferencesView (\(selected.code)): Error \(error) retrieving \(path)")
                                             } else {
-                                                print("ConferencesView: Got map \(path)")
+                                                print("ConferencesView (\(selected.code)): Got map \(path)")
                                             }
                                         }
                                     }
@@ -67,6 +69,6 @@ struct ConferencesView: View {
 
 struct ConferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        ConferencesView(conferences: [])
+        ConferencesView()
     }
 }

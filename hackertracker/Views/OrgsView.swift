@@ -9,9 +9,9 @@ import SwiftUI
 import FirebaseFirestoreSwift
 
 struct OrgsView: View {
-    var orgs: [Organization]
     var title: String
     var tagId: Int
+    @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var selected: SelectedConference
     @State private var searchText = ""
     var theme = Theme()
@@ -20,9 +20,9 @@ struct OrgsView: View {
     
     var filteredOrgs: [Organization] {
         guard !searchText.isEmpty else {
-            return orgs
+            return viewModel.orgs
         }
-        return orgs.filter { orgs in
+        return viewModel.orgs.filter { orgs in
             orgs.name.lowercased().contains(searchText.lowercased())
         }
     }
@@ -82,6 +82,6 @@ struct OrgsView: View {
 
 struct OrgsView_Previews: PreviewProvider {
     static var previews: some View {
-        OrgsView(orgs: [], title: "Vendors", tagId: 45695)
+        OrgsView(title: "Vendors", tagId: 45695)
     }
 }

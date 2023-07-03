@@ -19,6 +19,8 @@ class InfoViewModel: ObservableObject {
     @Published var events = [Event]()
     @Published var speakers = [Speaker]()
     @Published var orgs = [Organization]()
+    @Published var faqs = [FAQ]()
+    @Published var news = [Article]()
 
     private var db = Firestore.firestore()
 
@@ -32,6 +34,7 @@ class InfoViewModel: ObservableObject {
         self.fetchEvents(code: code)
         self.fetchSpeakers(code: code)
         self.fetchOrgs(code: code)
+        self.fetchLists(code: code)
     }
     
     func fetchConference(code: String) {
@@ -213,6 +216,43 @@ class InfoViewModel: ObservableObject {
                     }
                 }
                 print("InfoViewModel: \(self.orgs.count) organizations")
+            }
+    }
+    
+    func fetchLists(code: String) {
+        db.collection("conferences/\(code)/faqs")
+            .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
+                guard let docs = querySnapshot?.documents else {
+                    print("No Documents")
+                    return
+                }
+
+                self.faqs = docs.compactMap { queryDocumentSnapshot -> FAQ? in
+                    do {
+                        return try queryDocumentSnapshot.data(as: FAQ.self)
+                    } catch {
+                        print("Error \(error)")
+                        return nil
+                    }
+                }
+                // NSLog("InfoViewModel: Documents: \(self.documents.count)")
+            }
+        db.collection("conferences/\(code)/articles")
+            .order(by: "updated_at", descending: true).addSnapshotListener { querySnapshot, error in
+                guard let docs = querySnapshot?.documents else {
+                    print("No Documents")
+                    return
+                }
+
+                self.news = docs.compactMap { queryDocumentSnapshot -> Article? in
+                    do {
+                        return try queryDocumentSnapshot.data(as: Article.self)
+                    } catch {
+                        print("Error \(error)")
+                        return nil
+                    }
+                }
+                // NSLog("InfoViewModel: Documents: \(self.documents.count)")
             }
     }
 }

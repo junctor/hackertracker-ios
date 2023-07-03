@@ -15,41 +15,39 @@ class SelectedConference: ObservableObject {
 
 struct ContentView: View {
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
-    @StateObject private var viewModel = ContentViewModel()
+    @AppStorage("launchScreen") var launchScreen: String = "Main"
 
-    @ObservedObject var selected = SelectedConference()
-
-    // @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
-
-    // @State var conference: Conference?
-    // @State private var viewModel = ConferencesViewModel()
+    @StateObject var selected = SelectedConference()
+    @StateObject var viewModel = InfoViewModel()
+    
+    @State private var tabSelection = 1
 
     private var colorScheme: ColorScheme = .dark
 
     var body: some View {
         if viewModel.conference != nil {
             NavigationView {
-                TabView {
+                TabView (selection: $tabSelection){
                     InfoView()
                         .tabItem {
                             Image(systemName: "house")
                             // Text("Info")
                         }
-                        .tag(3)
+                        .tag(1)
                         .preferredColorScheme(colorScheme)
                     ScheduleView()
                         .tabItem {
                             Image(systemName: "calendar")
                             // Text("Main")
                         }
-                        .tag(1)
+                        .tag(2)
                         .preferredColorScheme(colorScheme)
                     MapView()
                         .tabItem {
                             Image(systemName: "map")
                             // Text("Maps")
                         }
-                        .tag(2)
+                        .tag(3)
                         .preferredColorScheme(colorScheme)
                     SettingsView()
                         .tabItem {
@@ -67,8 +65,21 @@ struct ContentView: View {
                     tabBarAppearance.configureWithDefaultBackground()
                     UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
                 }
+                print("ContentView: selectedCode: \(selected.code)")
+                print("ContentView: launchScreen: \(launchScreen)")
+                switch launchScreen {
+                case "Maps":
+                    self.tabSelection = 3
+                case "Schedule":
+                    self.tabSelection = 2
+                default:
+                    self.tabSelection = 1
+                }
+                
+                // viewModel.fetchData(code: selected.code)
             }
             .environmentObject(selected)
+            .environmentObject(viewModel)
         } else {
             Text("loading")
                 .onAppear {

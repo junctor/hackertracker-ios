@@ -135,7 +135,7 @@ struct EventDetailView2: View {
 
 struct EventDetailView2_Previews: PreviewProvider {
     struct EventDetailPreview: View {
-        let event = ScheduleViewModel().events[202]
+        let event = InfoViewModel().events[202]
 
         var body: some View {
             EventDetailView2(eventId: 48508, bookmarks: [1, 99]).preferredColorScheme(.dark)

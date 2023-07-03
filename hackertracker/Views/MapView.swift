@@ -9,9 +9,10 @@ import FirebaseFirestoreSwift
 import SwiftUI
 
 struct MapView: View {
-    @ObservedObject private var viewModel = ContentViewModel()
-    @AppStorage("launchScreen") var launchScreen: String = "Maps"
+    @AppStorage("launchScreen") var launchScreen: String = "Main"
     @EnvironmentObject var selected: SelectedConference
+    @EnvironmentObject var viewModel: InfoViewModel
+
     let screenSize = UIScreen.main.bounds.size
 
     var body: some View {
@@ -22,7 +23,6 @@ struct MapView: View {
                         ForEach(maps, id: \.id) { map in
                             if let file = map.file {
                                 let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                                let fileManager = FileManager.default
                                 let mLocal = docDir.appendingPathComponent("\(con.code)/\(file)")
                                 
                                 PDFView(url: mLocal)
@@ -44,8 +44,8 @@ struct MapView: View {
         }
     
         .onAppear {
-            launchScreen = "Maps"
-            viewModel.fetchData(code: selected.code)
+            print("MapView: Current launchscreen is: \(launchScreen)")
+            // viewModel.fetchData(code: selected.code)
         }
     }
 }
