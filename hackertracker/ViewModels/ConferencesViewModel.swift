@@ -13,8 +13,10 @@ class ConferencesViewModel: ObservableObject {
 
     private var db = Firestore.firestore()
 
-    func fetchData() {
-        db.collection("conferences").order(by: "start_date", descending: true).addSnapshotListener { querySnapshot, error in
+    func fetchData(hidden: Bool) {
+        db.collection("conferences")
+            .whereField("hidden", isEqualTo: hidden)
+            .order(by: "start_date", descending: true).addSnapshotListener { querySnapshot, error in
             guard let documents = querySnapshot?.documents else {
                 print("No Conferences")
                 return
@@ -28,6 +30,7 @@ class ConferencesViewModel: ObservableObject {
                     return nil
                 }
             }
+            print("ConferencesViewModel: \(self.conferences.count) conferences")
         }
     }
 

@@ -8,7 +8,21 @@
 import SwiftUI
 
 struct SpeakersView: View {
-    @ObservedObject private var viewModel = SpeakersViewModel()
+    var speakers: [Speaker]
+    @State private var searchText = ""
+
+    var filteredSpeakers: [Speaker] {
+        guard !searchText.isEmpty else {
+            return speakers
+        }
+        return speakers.filter { speakers in
+            speakers.name.lowercased().contains(searchText.lowercased())
+        }
+    }
+    
+    func speakerGroup() -> [String.Element: [Speaker]] {
+        return Dictionary(grouping: filteredSpeakers, by: { $0.name.first ?? "-" })
+    }
     
     var body: some View {
         VStack {
@@ -16,7 +30,7 @@ struct SpeakersView: View {
                 ScrollViewReader { _ in
                     LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
                         
-                        ForEach(viewModel.speakerGroup().sorted {
+                        ForEach(self.speakerGroup().sorted {
                             $0.key < $1.key
                         }, id: \.key) { char, speakers in
                             SpeakerData(char: char, speakers: speakers)
@@ -24,9 +38,7 @@ struct SpeakersView: View {
                     }
                 }
             }
-            .searchable(text: $viewModel.searchText)
-        }.onAppear {
-            self.viewModel.fetchData()
+            .searchable(text: $searchText)
         }
     }
     
@@ -55,7 +67,7 @@ struct SpeakerData: View {
 struct SpeakersView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
-            SpeakersView().preferredColorScheme(.dark)
+            SpeakersView(speakers: []).preferredColorScheme(.dark)
         }
     }
 }

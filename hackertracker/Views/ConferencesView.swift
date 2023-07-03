@@ -6,18 +6,19 @@
 //
 
 import CoreData
+import FirebaseStorage
 import SwiftUI
 
 struct ConferencesView: View {
-    @ObservedObject private var viewModel = ConferencesViewModel()
+    var conferences: [Conference]
     @EnvironmentObject var selected: SelectedConference
     @Environment(\.presentationMode) var presentationMode
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
     @AppStorage("showHidden") var showHidden: Bool = false
 
     var body: some View {
-        List(viewModel.conferences, id: \.code) { conference in
-            if showHidden == false && conference.hidden == false {
+        if conferences.count > 0 {
+            List(conferences, id: \.code) { conference in
                 ConferenceRow(conference: conference, code: selected.code)
                     .onTapGesture {
                         if conference.code == selected.code {
@@ -27,21 +28,45 @@ struct ConferencesView: View {
                             selected.code = conference.code
                             conferenceCode = conference.code
                         }
+                        
+                        let fileManager = FileManager.default
+                        let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                        let storageRef = Storage.storage().reference()
+                        
+                        if let maps = conference.maps, maps.count > 0 {
+                            for map in maps {
+                                if let file = map.file {
+                                    let path = "\(conference.code)/\(file)"
+                                    let mRef = storageRef.child(path)
+                                    let mLocal = docDir.appendingPathComponent(path)
+                                    if fileManager.fileExists(atPath: mLocal.path) {
+                                        // TODO: Add logic to check md5 hash and re-update if it has changed
+                                        print("ConferencesView: Map file (\(path)) already exists")
+                                    } else {
+                                        _ = mRef.write(toFile: mLocal) { _, error in
+                                            if let error = error {
+                                                print("ConferencesView: Error \(error) retrieving \(path)")
+                                            } else {
+                                                print("ConferencesView: Got map \(path)")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         self.presentationMode.wrappedValue.dismiss()
                     }
             }
+            .listStyle(.plain)
+            .navigationBarTitle("Select Conference", displayMode: .inline)
+        } else {
+            Text("no conferences found")
         }
-        .listStyle(.plain)
-        .onAppear {
-            self.viewModel.fetchData()
-        }
-        .navigationBarTitle("Change Conference", displayMode: .inline)
-        .preferredColorScheme(.dark)
     }
 }
 
 struct ConferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        ConferencesView()
+        ConferencesView(conferences: [])
     }
 }

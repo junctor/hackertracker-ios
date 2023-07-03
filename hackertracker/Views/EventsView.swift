@@ -14,6 +14,7 @@ struct EventsView: View {
     @State private var searchText = ""
     @State private var filters: Set<Int> = []
     @State private var showFilters = false
+    @State private var showOld = false
     var body: some View {
         NavigationStack {
             EventScrollView(events: events
@@ -22,6 +23,16 @@ struct EventsView: View {
                 .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay)
             .navigationTitle(conference?.name ?? "Schedule")
                 .toolbar {
+                    ToolbarItemGroup(placement: .navigationBarLeading) {
+                        Menu {
+                            Toggle(isOn: $showOld) {
+                                Label("Show Past Events", systemImage: "calendar")
+                            }
+                            .toggleStyle(.automatic)
+                        } label: {
+                          Image(systemName: "ellipsis")
+                        }
+                    }
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         Menu {
                             ForEach(events.filters(typeIds: filters, bookmarks: bookmarks).eventDayGroup().sorted {

@@ -20,10 +20,14 @@ struct MapView: View {
                 if let maps = con.maps, maps.count > 0 {
                     TabView {
                         ForEach(maps, id: \.id) { map in
-                            if let map_url = URL(string: map.url) {
-                                PDFView(url: map_url)
+                            if let file = map.file {
+                                let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                                let fileManager = FileManager.default
+                                let mLocal = docDir.appendingPathComponent("\(con.code)/\(file)")
+                                
+                                PDFView(url: mLocal)
                                     .onAppear {
-                                        print("MapView: Loading")
+                                        print("MapView: Loading \(mLocal)")
                                     }
                                     .frame(width: screenSize.width)
                             }

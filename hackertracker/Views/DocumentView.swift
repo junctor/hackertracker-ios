@@ -8,32 +8,29 @@
 import SwiftUI
 import MarkdownUI
 
-extension String {
-    func markdownToAttributed() -> AttributedString {
-        do {
-            return try AttributedString(markdown: self) /// convert to AttributedString
-        } catch {
-            return AttributedString("Error parsing markdown: \(error)")
-        }
-    }
-}
-
 struct DocumentView: View {
     var title_text: String
     var body_text: String
+    var theme = Theme()
     
     var body: some View {
         ScrollView {
             VStack {
-                Text(title_text)
-                    .font(.title)
-                    .rectangleBackground()
+                HStack {
+                    Text(title_text)
+                        .font(.title)
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(15)
+                .background(theme.carousel().gradient)
+                .cornerRadius(15)
                 Divider()
                 Markdown(body_text)
-                /* (body_text.markdownToAttributed())
-                    .font(.body) */
+                Divider()
             }
         }
+        .padding(5)
     }
 }
 

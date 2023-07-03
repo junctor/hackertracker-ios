@@ -38,6 +38,6 @@ struct Conference: Codable, Identifiable {
         case maps
         case documents
         case hidden
-        case tagline
+        case tagline = "tagline_text"
     }
 }

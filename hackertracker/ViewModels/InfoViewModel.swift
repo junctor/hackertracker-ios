@@ -11,23 +11,27 @@ import SwiftUI
 
 class InfoViewModel: ObservableObject {
     @Published var conference: Conference?
+    @Published var conferences = [Conference]()
     @Published var documents = [Document]()
     @Published var tagtypes = [TagType]()
     @Published var locations = [Location]()
     @Published var products = [Product]()
     @Published var events = [Event]()
     @Published var speakers = [Speaker]()
+    @Published var orgs = [Organization]()
 
     private var db = Firestore.firestore()
 
-    func fetchData(code: String) {
+    func fetchData(code: String, hidden: Bool = false) {
         self.fetchConference(code: code)
+        self.fetchConferences(hidden: hidden)
         self.fetchDocuments(code: code)
         self.fetchTagTypes(code: code)
         self.fetchLocations(code: code)
         self.fetchProducts(code: code)
         self.fetchEvents(code: code)
         self.fetchSpeakers(code: code)
+        self.fetchOrgs(code: code)
     }
     
     func fetchConference(code: String) {
@@ -49,6 +53,27 @@ class InfoViewModel: ObservableObject {
                 self.conference = conferences.first
                 print("InfoViewModel: Conference selected: \(self.conference?.name ?? "none")")
             }
+    }
+    
+    func fetchConferences(hidden: Bool) {
+        db.collection("conferences")
+            .whereField("hidden", isEqualTo: hidden)
+            .order(by: "start_date", descending: true).addSnapshotListener { querySnapshot, error in
+            guard let documents = querySnapshot?.documents else {
+                print("No Conferences")
+                return
+            }
+
+            self.conferences = documents.compactMap { queryDocumentSnapshot -> Conference? in
+                do {
+                    return try queryDocumentSnapshot.data(as: Conference.self)
+                } catch {
+                    print("Error \(error)")
+                    return nil
+                }
+            }
+            print("InfoViewModel: \(self.conferences.count) conferences")
+        }
     }
     
     func fetchDocuments(code: String) {
@@ -168,6 +193,26 @@ class InfoViewModel: ObservableObject {
                     }
                 }
                 print("InfoViewModel: \(self.speakers.count) speakers")
+            }
+    }
+    
+    func fetchOrgs(code: String) {
+        db.collection("conferences/\(code)/organizations")
+            .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
+                guard let docs = querySnapshot?.documents else {
+                    print("No Documents")
+                    return
+                }
+
+                self.orgs = docs.compactMap { queryDocumentSnapshot -> Organization? in
+                    do {
+                        return try queryDocumentSnapshot.data(as: Organization.self)
+                    } catch {
+                        print("Error \(error)")
+                        return nil
+                    }
+                }
+                print("InfoViewModel: \(self.orgs.count) organizations")
             }
     }
 }

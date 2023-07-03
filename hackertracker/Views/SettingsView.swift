@@ -12,7 +12,7 @@ struct SettingsView: View {
 
     var body: some View {
         VStack {
-            NavigationLink(destination: ConferencesView()) {
+            NavigationLink(destination: ConferencesView(conferences: [])) {
                 Text("Select Conference")
             }
         }

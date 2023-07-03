@@ -11,13 +11,15 @@ import Foundation
 
 struct Map: Codable, Identifiable {
     @DocumentID var docID: String?
-    var id: Int
-    var url: String
-    var description: String
+    var id: Int?
+    var url: String?
+    var description: String?
+    var file: String?
     
     private enum CodingKeys: String, CodingKey {
         case id
         case url
         case description
+        case file
     }
 }

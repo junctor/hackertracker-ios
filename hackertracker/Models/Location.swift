@@ -15,7 +15,7 @@ struct Location: Codable, Identifiable {
     var name: String
     var hotel: String
     var defaultStatus: String
-    var schedule: [Schedule]
+    var schedule: [Schedule]?
     var hierExtentLeft: Int
     var hierExtentRight: Int
     var hierDepth: Int
@@ -67,10 +67,10 @@ struct Location: Codable, Identifiable {
 }
 
 struct Schedule: Codable {
-    var begin: Date
-    var end: Date
-    var notes: String
-    var status: String
+    var begin: Date?
+    var end: Date?
+    var notes: String?
+    var status: String?
     
     init?(dictionary: [String: Any]) {
         let dfu = DateFormatterUtility.shared

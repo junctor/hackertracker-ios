@@ -5,6 +5,7 @@
 //
 
 import SwiftUI
+import MarkdownUI
 
 struct EventDetailView2: View {
     let eventId: Int
@@ -63,25 +64,39 @@ struct EventDetailView2: View {
                     .cornerRadius(15)
                 }
                 VStack(alignment: .leading) {
-                    Text(event.description).padding()
+                    Markdown(event.description).padding()
                 }
                 VStack {
                     if event.speakers.count > 0 {
                         VStack(alignment: .center) {
                             Text("\(event.speakers.count > 1 ? "Speakers" : "Speaker")").font(.headline)
                         }.padding(.vertical)
-                        LazyVGrid(columns: columns, spacing: 20) {
-                            ForEach(event.speakers, id: \.id) { speaker in
-                                NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
-                                    Text(speaker.name)
-                                        .padding(10)
-                                        .overlay(
-                                            RoundedRectangle(cornerRadius: 8)
-                                                .stroke(.foreground, lineWidth: 0.8)
-                                        )
-                                        .foregroundColor(theme.carousel())
+                        if event.speakers.count > 1 {
+                            LazyVGrid(columns: columns, spacing: 20) {
+                                ForEach(event.speakers, id: \.id) { speaker in
+                                    HStack {
+                                        NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
+                                            Text(speaker.name)
+                                        }
+                                    }
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    .padding(15)
+                                    .background(theme.carousel().gradient )
+                                    .cornerRadius(15)
                                 }
                             }
+                        } else {
+                            HStack {
+                                NavigationLink(destination: SpeakerDetailView(id: event.speakers[0].id)) {
+                                    Text(event.speakers[0].name)
+                                }
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding(15)
+                            .background(theme.carousel().gradient )
+                            .cornerRadius(15)
                         }
                     }
                 }

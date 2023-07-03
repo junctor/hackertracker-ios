@@ -11,16 +11,16 @@ import SwiftUI
 
 class OrgsViewModel: ObservableObject {
     @Published var orgs = [Organization]()
-    @Published var searchText = ""
+    // @Published var searchText = ""
     
-    var filteredOrganizations: [Organization] {
+    /* var filteredOrganizations: [Organization] {
         guard !searchText.isEmpty else {
             return orgs
         }
         return orgs.filter { orgs in
             orgs.name.lowercased().contains(searchText.lowercased())
         }
-    }
+    } */
 
     private var db = Firestore.firestore()
 
@@ -40,11 +40,11 @@ class OrgsViewModel: ObservableObject {
                         return nil
                     }
                 }
+                print("OrgsViewModel: \(self.orgs.count) organizations")
             }
     }
     
-    func organizationGroup() -> [String.Element: [Organization]] {
-        
+    /* func organizationGroup() -> [String.Element: [Organization]] {
         return Dictionary(grouping: filteredOrganizations, by: { $0.name.first ?? "-" })
-    }
+    } */
 }

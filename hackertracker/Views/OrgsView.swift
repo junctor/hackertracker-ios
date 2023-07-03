@@ -9,18 +9,28 @@ import SwiftUI
 import FirebaseFirestoreSwift
 
 struct OrgsView: View {
+    var orgs: [Organization]
     var title: String
     var tagId: Int
     @EnvironmentObject var selected: SelectedConference
-    @ObservedObject private var viewModel = OrgsViewModel()
+    @State private var searchText = ""
     var theme = Theme()
     
     let gridItemLayout = [GridItem(.flexible(), alignment: .top), GridItem(.flexible(), alignment: .top)]
     
+    var filteredOrgs: [Organization] {
+        guard !searchText.isEmpty else {
+            return orgs
+        }
+        return orgs.filter { orgs in
+            orgs.name.lowercased().contains(searchText.lowercased())
+        }
+    }
+    
     var body: some View {
         ScrollView {
             LazyVGrid(columns: gridItemLayout, spacing: 20) {
-                ForEach(self.viewModel.orgs, id: \.id) { org in
+                ForEach(self.filteredOrgs, id: \.id) { org in
                     if org.tag_ids.contains(tagId) {
                         NavigationLink(destination: DocumentView(title_text: org.name, body_text: org.description)) {
                                 if let l = org.logo, let lurl = l.url, let logo_url = URL(string: lurl) {
@@ -39,8 +49,6 @@ struct OrgsView: View {
                                             default:
                                                 Text(org.name)
                                                     .foregroundColor(.white)
-                                                    .background(theme.carousel().gradient)
-                                                    .cornerRadius(15)
                                             }
                                         }
                                         
@@ -66,17 +74,14 @@ struct OrgsView: View {
             }
             
         }
-        // Need to figure out search here
-        // .searchable(text: $viewModel.searchText)
+        .searchable(text: $searchText)
         .navigationTitle(title)
-        .onAppear {
-            viewModel.fetchData(code: selected.code)
-        }
+
     }
 }
 
 struct OrgsView_Previews: PreviewProvider {
     static var previews: some View {
-        OrgsView(title: "Vendors", tagId: 45695)
+        OrgsView(orgs: [], title: "Vendors", tagId: 45695)
     }
 }

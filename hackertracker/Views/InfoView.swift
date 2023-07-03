@@ -14,6 +14,7 @@ struct InfoView: View {
     @ObservedObject private var viewModel = InfoViewModel()
     @AppStorage("launchScreen") var launchScreen: String = "Info"
     @EnvironmentObject var selected: SelectedConference
+    @Environment(\.openURL) private var openURL
     var theme = Theme()
 
     // @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
@@ -27,7 +28,7 @@ struct InfoView: View {
             VStack(alignment: .center) {
                 VStack(alignment: .center) {
                     if let con = viewModel.conference {
-                        NavigationLink(destination: ConferencesView()) {
+                        NavigationLink(destination: ConferencesView(conferences: viewModel.conferences)) {
                             Text(con.name)
                                 .font(.largeTitle)
                                 .bold()
@@ -88,7 +89,7 @@ struct InfoView: View {
                     NavigationLink(destination: Text("Global Search")) {
                         CardView(systemImage: "magnifyingglass", text: "Search", color: theme.carousel())
                     }
-                    NavigationLink(destination: SpeakersView()) {
+                    NavigationLink(destination: SpeakersView(speakers: viewModel.speakers)) {
                         CardView(systemImage: "person.crop.rectangle", text: "Speakers", color: theme.carousel())
                     }
                     if self.viewModel.products.count > 0 {
@@ -103,7 +104,7 @@ struct InfoView: View {
                     }
                     if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga"}) {
                         ForEach(ott.tags, id: \.id) { tag in
-                            NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id)) {
+                            NavigationLink(destination: OrgsView(orgs: viewModel.orgs, title: tag.label, tagId: tag.id)) {
                                 CardView(systemImage: "bag", text: tag.label, color: theme.carousel())
                             }
                         }
@@ -120,6 +121,23 @@ struct InfoView: View {
                     }*/
                 }
                 Divider()
+                if let url = URL(string: "mailto:hackertracker@defcon.org") {
+                    HStack {
+                        Button {
+                            openURL(url)
+                        } label: {
+                            Label("Contact Us", systemImage: "person.fill.questionmark")
+                        }
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(15)
+                    .background(.gray.gradient)
+                    .cornerRadius(15)
+                    /* NavigationLink(destination: openURL(url)) {
+                        CardView(systemImage: "square.and.pencil", text: "Contact Us", color: theme.carousel())
+                    } */
+                }
                 if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
                     Text("#hackertracker iOS v\(v)")
                         .font(.caption2)
@@ -134,6 +152,7 @@ struct InfoView: View {
                         }
                 }
             }
+            .padding(5)
             .onAppear {
                 print("InfoView: selectedCode: \(selected.code)")
                 viewModel.fetchData(code: selected.code)
@@ -165,7 +184,7 @@ struct CardView: View {
         .foregroundColor(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(15)
-        .background(color.gradient)
+        .background(color.gradient )
         .cornerRadius(15)
     }
 }
