@@ -65,7 +65,7 @@ struct InfoView: View {
                 .padding(15)
                 .background(Color(.systemGray6))
                 .cornerRadius(15)
-                
+
                 if self.viewModel.documents.count > 0 {
                     Text("Documents")
                         .font(.subheadline)
@@ -97,7 +97,7 @@ struct InfoView: View {
                             CardView(systemImage: "mappin.and.ellipse", text: "Locations", color: theme.carousel())
                         }
                     }
-                    if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga"}) {
+                    if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga" }) {
                         ForEach(ott.tags, id: \.id) { tag in
                             NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id)) {
                                 CardView(systemImage: "bag", text: tag.label, color: theme.carousel())
@@ -130,8 +130,8 @@ struct InfoView: View {
                     .background(.gray.gradient)
                     .cornerRadius(15)
                     /* NavigationLink(destination: openURL(url)) {
-                        CardView(systemImage: "square.and.pencil", text: "Contact Us", color: theme.carousel())
-                    } */
+                         CardView(systemImage: "square.and.pencil", text: "Contact Us", color: theme.carousel())
+                     } */
                 }
                 if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
                     Text("#hackertracker iOS v\(v)")
@@ -171,7 +171,7 @@ struct CardView: View {
     var systemImage: String
     var text: String
     var color: Color
-    
+
     var body: some View {
         HStack {
             Image(systemName: systemImage)
@@ -180,7 +180,7 @@ struct CardView: View {
         .foregroundColor(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(15)
-        .background(color.gradient )
+        .background(color.gradient)
         .cornerRadius(15)
     }
 }

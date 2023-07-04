@@ -5,14 +5,14 @@
 //  Created by Seth W Law on 6/9/23.
 //
 
-import SwiftUI
 import MarkdownUI
+import SwiftUI
 
 struct DocumentView: View {
     var title_text: String
     var body_text: String
     var theme = Theme()
-    
+
     var body: some View {
         ScrollView {
             VStack {

@@ -12,7 +12,7 @@ struct SettingsView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     let startScreens = ["Main", "Schedule", "Maps"]
-    
+
     var theme = Theme()
 
     var body: some View {

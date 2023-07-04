@@ -21,7 +21,7 @@ struct EventsView: View {
                 .filters(typeIds: filters, bookmarks: bookmarks)
                 .search(text: searchText)
                 .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay)
-            .navigationTitle(conference?.name ?? "Schedule")
+                .navigationTitle(conference?.name ?? "Schedule")
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarLeading) {
                         Menu {
@@ -30,7 +30,7 @@ struct EventsView: View {
                             }
                             .toggleStyle(.automatic)
                         } label: {
-                          Image(systemName: "ellipsis")
+                            Image(systemName: "ellipsis")
                         }
                     }
                     ToolbarItemGroup(placement: .navigationBarTrailing) {

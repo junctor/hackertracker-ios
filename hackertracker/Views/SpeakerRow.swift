@@ -20,10 +20,10 @@ struct SpeakerRow: View {
                     .font(.headline)
                     .foregroundColor(.white)
                 if let title = speaker.title {
-                        Text(title)
-                            .font(.subheadline)
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(.gray)
+                    Text(title)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.leading)
+                        .foregroundColor(.gray)
                 }
             }
         }

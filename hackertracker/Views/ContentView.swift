@@ -20,7 +20,7 @@ struct ContentView: View {
 
     @StateObject var selected = SelectedConference()
     @StateObject var viewModel = InfoViewModel()
-    
+
     @State private var tabSelection = 1
     @State private var isInit: Bool = false
 
@@ -76,7 +76,7 @@ struct ContentView: View {
                 default:
                     self.tabSelection = 1
                 }
-                
+
                 // viewModel.fetchData(code: selected.code)
             }
             .environmentObject(selected)

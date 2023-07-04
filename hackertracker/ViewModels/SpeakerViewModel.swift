@@ -29,11 +29,10 @@ class SpeakerViewModel: ObservableObject {
 
                 do {
                     self.speaker = try document.data(as: Speaker.self)
-                    
+
                 } catch {
                     print("Error decoding speaker data")
                 }
-        }
+            }
     }
-    
 }

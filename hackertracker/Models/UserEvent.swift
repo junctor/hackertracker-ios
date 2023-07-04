@@ -16,7 +16,8 @@ struct UserEvent: Codable, Equatable {
     static func == (lhs: UserEvent, rhs: UserEvent) -> Bool {
         if lhs.event.id == rhs.event.id,
            lhs.event.title == rhs.event.title,
-           lhs.event.description == rhs.event.description {
+           lhs.event.description == rhs.event.description
+        {
             return true
         } else {
             return false

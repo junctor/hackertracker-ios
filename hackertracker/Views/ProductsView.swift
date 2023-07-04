@@ -17,7 +17,7 @@ struct ProductsView: View {
                     VStack(alignment: .leading) {
                         Text(product.title)
                             .font(.headline)
-                        Text("$\(product.priceMin/100) - $\(product.priceMax/100)")
+                        Text("$\(product.priceMin / 100) - $\(product.priceMax / 100)")
                             .font(.caption)
                     }
                 }

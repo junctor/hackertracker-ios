@@ -15,7 +15,7 @@ struct Map: Codable, Identifiable {
     var url: String?
     var description: String?
     var file: String?
-    
+
     private enum CodingKeys: String, CodingKey {
         case id
         case url

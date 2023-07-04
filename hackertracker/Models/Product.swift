@@ -48,7 +48,7 @@ struct Media: Codable {
     var name: String
     var sortOrder: Int
     var url: String
-    
+
     private enum CodingKeys: String, CodingKey {
         case assetId = "asset_id"
         case filetype
@@ -67,7 +67,7 @@ struct Variant: Codable, Identifiable {
     var tags: [Int]
     var title: String
     var variantId: Int
-    
+
     private enum CodingKeys: String, CodingKey {
         case code
         case price

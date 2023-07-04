@@ -39,7 +39,7 @@ class BookmarkUtility {
             print("Unresolved error \(nsError), \(nsError.userInfo)")
         }
     }
-    
+
     static func getBookmarks(context: NSManagedObjectContext) -> [Int] {
         let fr = NSFetchRequest<NSFetchRequestResult>(entityName: "Bookmarks")
         do {

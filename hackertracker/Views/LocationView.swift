@@ -10,7 +10,7 @@ import SwiftUI
 struct LocationView: View {
     var locations: [Location]
     var childLocations: [Int: [Location]]
-    
+
     var body: some View {
         VStack {
             List {
@@ -23,7 +23,7 @@ struct LocationView: View {
             .accentColor(Color.white)
             .navigationTitle("Locations")
     }
-    
+
     init(locations: [Location]) {
         self.locations = locations
         childLocations = childrenLocations(locations: locations)

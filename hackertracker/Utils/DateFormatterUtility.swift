@@ -82,7 +82,7 @@ class DateFormatterUtility {
         formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
     }()
-    
+
     // Month/Day/Year
     let monthDayFormatter = { () -> DateFormatter in
         let formatter = DateFormatter()
@@ -163,7 +163,7 @@ class DateFormatterUtility {
         formatter.dateFormat = "HH:mm"
         return formatter
     }()
-    
+
     // UTC location time format
     let locationTimeFormatter = { () -> DateFormatter in
         let formatter = DateFormatter()

@@ -24,7 +24,7 @@ struct MapView: View {
                             if let file = map.file {
                                 let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
                                 let mLocal = docDir.appendingPathComponent("\(con.code)/\(file)")
-                                
+
                                 PDFView(url: mLocal)
                                     .onAppear {
                                         print("MapView: Loading \(mLocal)")
@@ -42,7 +42,7 @@ struct MapView: View {
                 Text("loading...")
             }
         }
-    
+
         .onAppear {
             print("MapView: Current launchscreen is: \(launchScreen)")
             // viewModel.fetchData(code: selected.code)
