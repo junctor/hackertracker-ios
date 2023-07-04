@@ -5,34 +5,45 @@
 //  Created by Seth Law on 7/3/23.
 //
 
+import MarkdownUI
 import SwiftUI
 
 struct FAQListView: View {
     @EnvironmentObject var viewModel: InfoViewModel
-    
+
     @State private var searchText = ""
-    
-    var filteredFaqs: [FAQ] {
-        guard !searchText.isEmpty else {
-            return viewModel.faqs
-        }
-        return viewModel.faqs.filter { faqs in
-            faqs.question.lowercased().contains(searchText.lowercased()) || faqs.answer.lowercased().contains(searchText.lowercased())
-        }
-    }
-    
+
     var body: some View {
         List {
-            ForEach(self.filteredFaqs) { faq in
-                HStack {
-                    NavigationLink(destination: DocumentView(title_text: faq.question, body_text: faq.answer)) {
-                        Text(faq.question)
-                    }
-                }
+            ForEach(self.viewModel.faqs.search(text: searchText)) { faq in
+                faqRow(faq: faq)
             }
         }
         .searchable(text: $searchText)
         .navigationTitle("FAQs")
+    }
+}
+
+struct faqRow: View {
+    let faq: FAQ
+    @State private var showAnswer = false
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                showAnswer.toggle()
+            }, label: {
+                HStack {
+                    Text(faq.question).font(.subheadline).fontWeight(.bold).multilineTextAlignment(.leading)
+                    Spacer()
+                    showAnswer ? Image(systemName: "chevron.down") : Image(systemName: "chevron.right")
+                }
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+
+            if showAnswer {
+                Markdown(faq.answer).padding(.vertical)
+            }
+        }
     }
 }
 

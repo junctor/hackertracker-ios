@@ -36,15 +36,6 @@ extension [Event] {
         }
     }
 
-    func search(text: String) -> Self {
-        if text.isEmpty {
-            return self
-        } else {
-            let lowerText = text.lowercased()
-            return self.filter { $0.title.lowercased().contains(lowerText) }
-        }
-    }
-
     func eventDayGroup() -> [Date: [Event]] {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:00.000-0000"

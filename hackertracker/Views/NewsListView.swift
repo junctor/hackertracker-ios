@@ -5,37 +5,53 @@
 //  Created by Seth Law on 7/3/23.
 //
 
+import MarkdownUI
 import SwiftUI
 
 struct NewsListView: View {
     @EnvironmentObject var viewModel: InfoViewModel
-    
+
     @State private var searchText = ""
-    
-    var filteredNews: [Article] {
-        guard !searchText.isEmpty else {
-            return viewModel.news
-        }
-        return viewModel.news.filter { news in
-            news.name.lowercased().contains(searchText.lowercased()) || news.text.lowercased().contains(searchText.lowercased())
-        }
-    }
 
     var body: some View {
         List {
-            ForEach(self.filteredNews) { article in
-                NavigationLink(destination: DocumentView(title_text: article.name, body_text: article.text)) {
-                    VStack(alignment: .leading) {
-                        Text(article.name)
-                        
-                        Text(DateFormatterUtility.shared.monthDayTimeFormatter.string(from: article.updatedAt))
-                            .font(.caption2)
-                    }
-                }
+            ForEach(self.viewModel.news.search(text: searchText).sorted {
+                $0.updatedAt < $1.updatedAt
+            }) { article in
+                articleRow(article: article)
             }
         }
         .searchable(text: $searchText)
         .navigationTitle("News")
+    }
+}
+
+struct articleRow: View {
+    let article: Article
+    @State private var showText = false
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                showText.toggle()
+            }, label: {
+                HStack {
+                    VStack(alignment: .leading) {
+                        Text(article.name).font(.subheadline).fontWeight(.bold).multilineTextAlignment(.leading)
+
+                        Text(DateFormatterUtility.shared.monthDayTimeFormatter.string(from: article.updatedAt))
+                            .font(.caption2)
+                    }
+
+                    Spacer()
+                    showText ? Image(systemName: "chevron.down") : Image(systemName: "chevron.right")
+                }
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+
+            if showText {
+                Markdown(article.text).padding(.vertical)
+            }
+        }
     }
 }
 

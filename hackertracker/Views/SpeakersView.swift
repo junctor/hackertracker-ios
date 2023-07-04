@@ -11,25 +11,15 @@ struct SpeakersView: View {
     var speakers: [Speaker]
     @State private var searchText = ""
 
-    var filteredSpeakers: [Speaker] {
-        guard !searchText.isEmpty else {
-            return speakers
-        }
-        return speakers.filter { speakers in
-            speakers.name.lowercased().contains(searchText.lowercased())
-        }
-    }
-    
     func speakerGroup() -> [String.Element: [Speaker]] {
-        return Dictionary(grouping: filteredSpeakers, by: { $0.name.first ?? "-" })
+        return Dictionary(grouping: speakers.search(text: searchText), by: { $0.name.first ?? "-" })
     }
-    
+
     var body: some View {
         VStack {
             ScrollView {
                 ScrollViewReader { _ in
                     LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
-                        
                         ForEach(self.speakerGroup().sorted {
                             $0.key < $1.key
                         }, id: \.key) { char, speakers in
@@ -41,20 +31,19 @@ struct SpeakersView: View {
             .searchable(text: $searchText)
         }
     }
-    
 }
 
 struct SpeakerData: View {
     let char: String.Element
     let speakers: [Speaker]
     var theme = Theme()
-    
+
     var body: some View {
-        
         Section(header: Text(String(char)).padding()
             .frame(maxWidth: .infinity)
             .border(Color.white, width: 3)
-            .background(Color.black)) {
+            .background(Color.black))
+        {
             ForEach(speakers, id: \.name) { speaker in
                 NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                     SpeakerRow(speaker: speaker, themeColor: theme.carousel())
