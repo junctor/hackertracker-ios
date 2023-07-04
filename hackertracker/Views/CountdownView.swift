@@ -16,21 +16,22 @@ struct CountdownView: View {
     var body: some View {
         VStack(alignment: .center) {
             HStack {
-                Text("\(countdownTimer?.days ?? 0)").font(.largeTitle).foregroundColor(ThemeColors.pink)
+                Text("\(countdownTimer?.days ?? 0)").font(.title).foregroundColor(ThemeColors.pink)
                 Text("days").font(.caption).foregroundColor(Color.white)
 
-                Text("\(countdownTimer?.hours ?? 0)").font(.largeTitle).foregroundColor(ThemeColors.blue)
+                Text("\(countdownTimer?.hours ?? 0)").font(.title).foregroundColor(ThemeColors.blue)
                 Text("hours").font(.caption).foregroundColor(Color.white)
 
-                Text("\(countdownTimer?.minutes ?? 0)").font(.largeTitle).foregroundColor(ThemeColors.green)
+                Text("\(countdownTimer?.minutes ?? 0)").font(.title).foregroundColor(ThemeColors.green)
                 Text("min").font(.caption).foregroundColor(Color.white)
 
-                Text("\(countdownTimer?.seconds ?? 0)").font(.largeTitle).foregroundColor(ThemeColors.red)
+                Text("\(countdownTimer?.seconds ?? 0)").font(.title).foregroundColor(ThemeColors.red)
                 Text("sec").font(.caption).foregroundColor(Color.white)
             }
-        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+        }.frame(maxWidth: .infinity)
             .accentColor(Color.white)
-            .background(Color(.systemGray4))
+            .background(Color(.systemGray5))
+            .cornerRadius(5)
             .onAppear {
                 countdownTimer = getCountdown(start: start)
             }

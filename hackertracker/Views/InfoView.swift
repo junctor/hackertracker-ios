@@ -18,6 +18,7 @@ struct InfoView: View {
 
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
+    @State var currentColor: Int = 0
     @State var rick: Int = 0
 
     var body: some View {
@@ -43,15 +44,14 @@ struct InfoView: View {
                                 .bold()
                                 .padding(.trailing, 15)
                         }
-                        if let tz = con.timezone {
-                            Text(tz)
-                                .font(.subheadline)
-                                .bold()
-                        }
                         if let tagline = con.tagline {
                             Divider()
                             Text(tagline)
                                 .font(.subheadline)
+                        }
+                        if let con = viewModel.conference, Date() <= con.kickoffTimestamp {
+                            Divider()
+                            CountdownView(start: con.startTimestamp)
                         }
                     } else {
                         Text("Loading")
@@ -66,10 +66,7 @@ struct InfoView: View {
                 .padding(15)
                 .background(Color(.systemGray6))
                 .cornerRadius(15)
-                if let con = viewModel.conference, Date() <= con.kickoffTimestamp {
-                    CountdownView(start: con.startTimestamp)
-                        .cornerRadius(15)
-                }
+                
                 if self.viewModel.documents.count > 0 {
                     Text("Documents")
                         .font(.subheadline)
