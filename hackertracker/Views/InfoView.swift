@@ -81,7 +81,7 @@ struct InfoView: View {
                 Text("Searchable")
                     .font(.subheadline)
                 LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
-                    NavigationLink(destination: Text("Global Search")) {
+                    NavigationLink(destination: GlobalSearchView(viewModel: viewModel)) {
                         CardView(systemImage: "magnifyingglass", text: "Search", color: theme.carousel())
                     }
                     NavigationLink(destination: SpeakersView(speakers: viewModel.speakers)) {
