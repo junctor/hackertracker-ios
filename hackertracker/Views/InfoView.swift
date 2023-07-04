@@ -66,6 +66,10 @@ struct InfoView: View {
                 .padding(15)
                 .background(Color(.systemGray6))
                 .cornerRadius(15)
+                if let con = viewModel.conference, Date() <= con.kickoffTimestamp {
+                    CountdownView(start: con.startTimestamp)
+                        .cornerRadius(15)
+                }
                 if self.viewModel.documents.count > 0 {
                     Text("Documents")
                         .font(.subheadline)

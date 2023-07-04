@@ -32,6 +32,7 @@
 		5D642D312A4F9F0E0064492D /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 5D642D302A4F9F0E0064492D /* FirebaseMessaging */; };
 		5D642D352A534BCF0064492D /* FAQListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D342A534BCF0064492D /* FAQListView.swift */; };
 		5D642D372A534BE00064492D /* NewsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D362A534BE00064492D /* NewsListView.swift */; };
+		5D642D392A539C370064492D /* CountdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D382A539C370064492D /* CountdownView.swift */; };
 		5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57442857B398001374D4 /* ConferencesView.swift */; };
 		5D9E57492859037C001374D4 /* BookmarkUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57482859037C001374D4 /* BookmarkUtility.swift */; };
 		5D9E5753285A3C25001374D4 /* SpeakersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E5752285A3C25001374D4 /* SpeakersView.swift */; };
@@ -119,6 +120,7 @@
 		5D642D2E2A4F7D1F0064492D /* hackertracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = hackertracker.entitlements; sourceTree = "<group>"; };
 		5D642D342A534BCF0064492D /* FAQListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAQListView.swift; sourceTree = "<group>"; };
 		5D642D362A534BE00064492D /* NewsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsListView.swift; sourceTree = "<group>"; };
+		5D642D382A539C370064492D /* CountdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownView.swift; sourceTree = "<group>"; };
 		5D9E57442857B398001374D4 /* ConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesView.swift; sourceTree = "<group>"; };
 		5D9E57482859037C001374D4 /* BookmarkUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkUtility.swift; sourceTree = "<group>"; };
 		5D9E5752285A3C25001374D4 /* SpeakersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakersView.swift; sourceTree = "<group>"; };
@@ -294,6 +296,7 @@
 				3CE59E3A285B3ACD00B453C9 /* ViewModifiers.swift */,
 				5D642D2A2A44DF840064492D /* ProductRow.swift */,
 				5D642D2C2A44F3AF0064492D /* ProductView.swift */,
+				5D642D382A539C370064492D /* CountdownView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -550,6 +553,7 @@
 				5D0A5A612A33E65900BD5ECE /* Organization.swift in Sources */,
 				5DF51AD62851557E007BCB83 /* Vendor.swift in Sources */,
 				5DAE04BD2820948E00930A2D /* Persistence.swift in Sources */,
+				5D642D392A539C370064492D /* CountdownView.swift in Sources */,
 				5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */,
 				5D642D292A44A1960064492D /* ProductsView.swift in Sources */,
 				5DAE04B62820948B00930A2D /* ContentView.swift in Sources */,
@@ -725,7 +729,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23070301;
+				CURRENT_PROJECT_VERSION = 23070303;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
@@ -755,7 +759,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23070301;
+				CURRENT_PROJECT_VERSION = 23070303;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;

@@ -10,24 +10,26 @@ import FirebaseFirestoreSwift
 import SwiftUI
 
 class SelectedConference: ObservableObject {
-    @Published var code = "DEFCON30"
+    @Published var code = "INIT"
 }
 
 struct ContentView: View {
-    @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
     @AppStorage("launchScreen") var launchScreen: String = "Main"
+    @AppStorage("showHidden") var showHidden: Bool = false
 
     @StateObject var selected = SelectedConference()
     @StateObject var viewModel = InfoViewModel()
     
     @State private var tabSelection = 1
+    @State private var isInit: Bool = false
 
     private var colorScheme: ColorScheme = .dark
 
     var body: some View {
         if viewModel.conference != nil {
             NavigationView {
-                TabView (selection: $tabSelection){
+                TabView(selection: $tabSelection) {
                     InfoView()
                         .tabItem {
                             Image(systemName: "house")
@@ -59,7 +61,6 @@ struct ContentView: View {
                 }
             }
             .onAppear {
-                
                 if #available(iOS 15.0, *) {
                     let tabBarAppearance: UITabBarAppearance = .init()
                     tabBarAppearance.configureWithDefaultBackground()
@@ -81,15 +82,22 @@ struct ContentView: View {
             .environmentObject(selected)
             .environmentObject(viewModel)
         } else {
-            Text("loading")
-                .onAppear {
-                    print("ContentView: Selected Conference \(selected.code), Conference Code: \(conferenceCode)")
-                    if selected.code != conferenceCode {
-                        print("ContentView: Switching to conference from AppStorage - \(conferenceCode)")
-                        selected.code = conferenceCode
+            if conferenceCode == "INIT" {
+                ConferencesView()
+                    .preferredColorScheme(colorScheme)
+                    .environmentObject(selected)
+                    .environmentObject(viewModel)
+            } else {
+                Text("loading")
+                    .onAppear {
+                        print("ContentView: Selected Conference \(selected.code), Conference Code: \(conferenceCode)")
+                        if selected.code != conferenceCode {
+                            print("ContentView: Switching to conference from AppStorage - \(conferenceCode)")
+                            selected.code = conferenceCode
+                        }
+                        self.viewModel.fetchData(code: conferenceCode)
                     }
-                    self.viewModel.fetchData(code: conferenceCode)
-                }
+            }
         }
     }
 }
