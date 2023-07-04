@@ -4,10 +4,10 @@
 //  Created by Caleb Kinney on 3/27/23.
 //
 
-import SwiftUI
 import MarkdownUI
+import SwiftUI
 
-struct EventDetailView2: View {
+struct EventDetailView: View {
     let eventId: Int
     let bookmarks: [Int32]
     @EnvironmentObject var selected: SelectedConference
@@ -19,7 +19,7 @@ struct EventDetailView2: View {
 
     let columns = [
         GridItem(.flexible()),
-        GridItem(.flexible())
+        GridItem(.flexible()),
     ]
 
     var body: some View {
@@ -82,7 +82,7 @@ struct EventDetailView2: View {
                                     .foregroundColor(.white)
                                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                                     .padding(15)
-                                    .background(theme.carousel().gradient )
+                                    .background(theme.carousel().gradient)
                                     .cornerRadius(15)
                                 }
                             }
@@ -95,13 +95,13 @@ struct EventDetailView2: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .padding(15)
-                            .background(theme.carousel().gradient )
+                            .background(theme.carousel().gradient)
                             .cornerRadius(15)
                         }
                     }
                 }
                 .padding(.horizontal, 15)
-                
+
             } else {
                 Text("...")
                     .onAppear {
@@ -129,16 +129,15 @@ struct EventDetailView2: View {
         }
         .navigationBarTitle(Text(""), displayMode: .inline)
         .toolbar(.hidden, for: .tabBar)
-                
     }
 }
 
-struct EventDetailView2_Previews: PreviewProvider {
+struct EventDetailView_Previews: PreviewProvider {
     struct EventDetailPreview: View {
         let event = InfoViewModel().events[202]
 
         var body: some View {
-            EventDetailView2(eventId: 48508, bookmarks: [1, 99]).preferredColorScheme(.dark)
+            EventDetailView(eventId: 48508, bookmarks: [1, 99]).preferredColorScheme(.dark)
         }
     }
 
