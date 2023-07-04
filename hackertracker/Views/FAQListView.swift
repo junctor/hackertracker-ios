@@ -10,9 +10,20 @@ import SwiftUI
 struct FAQListView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     
+    @State private var searchText = ""
+    
+    var filteredFaqs: [FAQ] {
+        guard !searchText.isEmpty else {
+            return viewModel.faqs
+        }
+        return viewModel.faqs.filter { faqs in
+            faqs.question.lowercased().contains(searchText.lowercased()) || faqs.answer.lowercased().contains(searchText.lowercased())
+        }
+    }
+    
     var body: some View {
         List {
-            ForEach(viewModel.faqs) { faq in
+            ForEach(self.filteredFaqs) { faq in
                 HStack {
                     NavigationLink(destination: DocumentView(title_text: faq.question, body_text: faq.answer)) {
                         Text(faq.question)
@@ -20,6 +31,7 @@ struct FAQListView: View {
                 }
             }
         }
+        .searchable(text: $searchText)
         .navigationTitle("FAQs")
     }
 }
