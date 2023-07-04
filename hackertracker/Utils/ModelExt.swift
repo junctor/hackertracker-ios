@@ -37,21 +37,19 @@ extension [Event] {
     }
 
     func eventDayGroup() -> [Date: [Event]] {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:00.000-0000"
+        let dfu = DateFormatterUtility.shared
 
         let eventDict = Dictionary(grouping: self, by: {
-            dateFormatter.date(from: $0.begin)?.dayOfDate() ?? Date()
+            dfu.iso8601Formatter.date(from: $0.begin)?.dayOfDate() ?? Date()
         })
         return eventDict
     }
 
     func eventDateTimeGroup() -> [Date: [Event]] {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:00.000-0000"
+        let dfu = DateFormatterUtility.shared
 
         let eventDict = Dictionary(grouping: self, by: {
-            dateFormatter.date(from: $0.begin) ?? Date()
+            dfu.iso8601Formatter.date(from: $0.begin) ?? Date()
         })
         return eventDict
     }

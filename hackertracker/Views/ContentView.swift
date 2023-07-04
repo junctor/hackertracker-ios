@@ -17,6 +17,7 @@ struct ContentView: View {
     @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     @AppStorage("showHidden") var showHidden: Bool = false
+    @AppStorage("showLocaltime") var showLocaltime: Bool = false
 
     @StateObject var selected = SelectedConference()
     @StateObject var viewModel = InfoViewModel()

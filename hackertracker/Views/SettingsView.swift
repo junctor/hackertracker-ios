@@ -11,6 +11,7 @@ struct SettingsView: View {
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var viewModel: InfoViewModel
     @AppStorage("launchScreen") var launchScreen: String = "Main"
+    @AppStorage("showLocaltime") var showLocaltime: Bool = false
     let startScreens = ["Main", "Schedule", "Maps"]
 
     var theme = Theme()
@@ -51,6 +52,15 @@ struct SettingsView: View {
                 }
                 .pickerStyle(.segmented)
             }
+            Divider()
+            VStack {
+                Toggle("Show Local Timezone", isOn: $showLocaltime)
+                Text("Show event times in current localtime instead of conference time")
+                    .font(.caption)
+            }
+            .padding(5)
+            Divider()
+
         }
         .padding(10)
         .onAppear {

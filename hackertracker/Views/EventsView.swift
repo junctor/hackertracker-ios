@@ -10,6 +10,8 @@ struct EventsView: View {
     let events: [Event]
     let conference: Conference?
     let bookmarks: [Int32]
+    @AppStorage("showLocaltime") var showLocaltime: Bool = false
+
     @State private var eventDay = ""
     @State private var searchText = ""
     @State private var filters: Set<Int> = []
@@ -25,6 +27,9 @@ struct EventsView: View {
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarLeading) {
                         Menu {
+                            Toggle(isOn: $showLocaltime) {
+                                Label("Display Localtime", systemImage: "clock")
+                            }
                             Toggle(isOn: $showOld) {
                                 Label("Show Past Events", systemImage: "calendar")
                             }
