@@ -25,7 +25,7 @@ struct SpeakerDetailView: View {
                     Text("Events").font(.headline).padding(.top)
                     VStack(alignment: .leading) {
                         ForEach(viewModel.speaker?.events ?? []) { event in
-                            NavigationLink(destination: EventDetailView2(eventId: event.id, bookmarks: bookmarks.map { $0.id })) {
+                            NavigationLink(destination: EventDetailView(eventId: event.id, bookmarks: bookmarks.map { $0.id })) {
                                 SpeakerEventsView(event: event)
                             }
                         }
