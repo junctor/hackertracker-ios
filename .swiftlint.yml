@@ -7,3 +7,5 @@ disabled_rules: # rule identifiers to exclude from running
   - line_length
   - type_name
   - trailing_whitespace
+  - void_function_in_ternary
+
