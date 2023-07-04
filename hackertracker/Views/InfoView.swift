@@ -14,11 +14,10 @@ struct InfoView: View {
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     @EnvironmentObject var selected: SelectedConference
     @Environment(\.openURL) private var openURL
-    var theme = Theme()
+    @State var theme = Theme()
 
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
-    @State var currentColor: Int = 0
     @State var rick: Int = 0
 
     var body: some View {

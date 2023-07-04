@@ -8,7 +8,7 @@
 import SwiftUI
 
 class Theme {
-    let colors = ["#c16784", "#326295", "#71cc98", "#4b9560", "#c04c36"]
+    let colors = ["#326295", "#71cc98", "#c16784", "#4b9560", "#c04c36"]
     let font = ThemeFont()
     var index = 0
 
