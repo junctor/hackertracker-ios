@@ -17,18 +17,23 @@ class DateFormatterUtility {
      "America/New_York": DateFormatterUtility(identifier: "America/New_York")
      ] */
 
-    static let shared = DateFormatterUtility(identifier: "America/Los_Angeles")
+    static let shared = DateFormatterUtility(tz: TimeZone(identifier: "America/Los_Angeles"))
 
-    init(identifier: String) {
-        update(identifier: identifier)
+    init(tz: TimeZone?) {
+        if let zone = tz {
+            update(tz: zone)
+        } else {
+            if let zone = timeZone {
+                update(tz: zone)
+            } else {
+                print("DateFormatterUtility: Set timezone failed.")
+            }
+        }
     }
 
-    func update(identifier: String) {
-        if preferLocalTime() {
-            timeZone = .current
-        } else {
-            timeZone = TimeZone(identifier: identifier)
-        }
+    func update(tz: TimeZone?) {
+        print("DateFormatterUtility: Updating timezone to \(tz?.identifier ?? "error")")
+        timeZone = tz
 
         yearMonthDayTimeFormatter.timeZone = timeZone
         timezoneFormatter.timeZone = timeZone
@@ -47,7 +52,7 @@ class DateFormatterUtility {
     }
 
     func preferLocalTime() -> Bool {
-        UserDefaults.standard.bool(forKey: "PreferLocalTime")
+        UserDefaults.standard.bool(forKey: "showLocaltime")
     }
 
     // time format
@@ -136,7 +141,7 @@ class DateFormatterUtility {
     let dayMonthDayOfWeekFormatter = { () -> DateFormatter in
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "EEEE, MMM d"
+        formatter.dateFormat = "EE, MMM d"
         return formatter
     }()
 

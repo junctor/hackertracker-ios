@@ -13,6 +13,7 @@ struct SettingsView: View {
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     let startScreens = ["Main", "Schedule", "Maps"]
+    let dfu = DateFormatterUtility.shared
 
     var theme = Theme()
 
@@ -55,6 +56,15 @@ struct SettingsView: View {
             Divider()
             VStack {
                 Toggle("Show Local Timezone", isOn: $showLocaltime)
+                    .onChange(of: showLocaltime) { value in
+                        print("SettingsView: Changing to showLocaltime = \(value)")
+                        viewModel.showLocaltime = value
+                        if value {
+                            dfu.update(tz: TimeZone.current)
+                        } else {
+                            dfu.update(tz: TimeZone(identifier: viewModel.conference?.timezone ?? "America/Los_Angeles"))
+                        }
+                    }
                 Text("Show event times in current localtime instead of conference time")
                     .font(.caption)
             }

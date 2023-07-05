@@ -13,13 +13,14 @@ struct EventDetailView: View {
     @EnvironmentObject var selected: SelectedConference
     @ObservedObject var viewModel = EventViewModel()
     var theme = Theme()
+    let dfu = DateFormatterUtility.shared
     // let event: Event
 
     @Environment(\.managedObjectContext) private var viewContext
 
     let columns = [
         GridItem(.flexible()),
-        GridItem(.flexible()),
+        GridItem(.flexible())
     ]
 
     var body: some View {
@@ -36,7 +37,7 @@ struct EventDetailView: View {
                             }
                             HStack {
                                 Image(systemName: "clock")
-                                Text("\(event.beginTimestamp.formatted(.dateTime.month().day().hour().minute())) - \(event.endTimestamp.formatted(.dateTime.month().day().hour().minute()))")
+                                Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.beginTimestamp)) - \(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.endTimestamp))")
                                     .font(.subheadline).bold()
                             }
                             .padding(.leading, 10)

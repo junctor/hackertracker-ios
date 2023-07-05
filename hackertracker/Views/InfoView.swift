@@ -12,6 +12,7 @@ import WebKit
 struct InfoView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @AppStorage("launchScreen") var launchScreen: String = "Main"
+    @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @EnvironmentObject var selected: SelectedConference
     @Environment(\.openURL) private var openURL
     @State var theme = Theme()
@@ -151,8 +152,8 @@ struct InfoView: View {
             .onAppear {
                 print("InfoView: selectedCode: \(selected.code)")
                 print("ScheduleView: Current launchscreen is: \(launchScreen)")
-                // viewModel.fetchData(code: selected.code)
                 launchScreen = "Main"
+                viewModel.showLocaltime = showLocaltime
             }
         }
     }

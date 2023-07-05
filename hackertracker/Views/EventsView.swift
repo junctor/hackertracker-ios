@@ -11,6 +11,8 @@ struct EventsView: View {
     let conference: Conference?
     let bookmarks: [Int32]
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
+    @EnvironmentObject var viewModel: InfoViewModel
+    let dfu = DateFormatterUtility.shared
 
     @State private var eventDay = ""
     @State private var searchText = ""
@@ -30,6 +32,15 @@ struct EventsView: View {
                             Toggle(isOn: $showLocaltime) {
                                 Label("Display Localtime", systemImage: "clock")
                             }
+                            .onChange(of: showLocaltime) { value in
+                                print("Changing to showLocaltime = \(value)")
+                                viewModel.showLocaltime = value
+                                if showLocaltime {
+                                    dfu.update(tz: TimeZone.current)
+                                } else {
+                                    dfu.update(tz: TimeZone(identifier: conference?.timezone ?? "America/Los_Angeles"))
+                                }
+                            }
                             Toggle(isOn: $showOld) {
                                 Label("Show Past Events", systemImage: "calendar")
                             }
@@ -43,8 +54,8 @@ struct EventsView: View {
                             ForEach(events.filters(typeIds: filters, bookmarks: bookmarks).eventDayGroup().sorted {
                                 $0.key < $1.key
                             }, id: \.key) { day, _ in
-                                Button(day.formatted(.dateTime.month().day().weekday())) {
-                                    eventDay = day.formatted(.dateTime.weekday())
+                                Button(dfu.dayMonthDayOfWeekFormatter.string(from: day)) {
+                                    eventDay = dfu.dayOfWeekFormatter.string(from: day) // day.formatted(.dateTime.weekday())
                                 }
                             }
 
@@ -108,6 +119,7 @@ struct EventScrollView: View {
     let events: [Date: [Event]]
     let bookmarks: [Int32]
     let dayTag: String
+    let dfu = DateFormatterUtility.shared
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -115,7 +127,7 @@ struct EventScrollView: View {
                 $0.key < $1.key
             }, id: \.key) { weekday, events in
                 EventData(weekday: weekday, events: events, bookmarks: bookmarks)
-                    .id(weekday.formatted(.dateTime.weekday()))
+                    .id(dfu.dayOfWeekFormatter.string(from: weekday))
             }
             .listStyle(.plain)
             .onChange(of: dayTag) { changedValue in
@@ -129,13 +141,14 @@ struct EventData: View {
     let weekday: Date
     let events: [Event]
     let bookmarks: [Int32]
+    let dfu = DateFormatterUtility.shared
 
     var body: some View {
         Section(header: Text(weekday.formatted(.dateTime.month(.wide).day()))) {
             ForEach(events.eventDateTimeGroup().sorted {
                 $0.key < $1.key
             }, id: \.key) { time, timeEvents in
-                Section(header: Text(time.formatted(.dateTime.hour().minute()))) {
+                Section(header: Text(dfu.hourMinuteTimeFormatter.string(from: time))) {
                     ForEach(timeEvents.sorted {
                         $0.beginTimestamp < $1.beginTimestamp
                     }, id: \.id) { event in
