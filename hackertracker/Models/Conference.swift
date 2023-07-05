@@ -9,7 +9,11 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 import Foundation
 
-struct Conference: Codable, Identifiable {
+struct Conference: Codable, Identifiable, Equatable {
+    static func == (lhs: Conference, rhs: Conference) -> Bool {
+        lhs.code == rhs.code
+    }
+    
     @DocumentID var id: String?
     var name: String
     var description: String

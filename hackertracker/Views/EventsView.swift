@@ -25,7 +25,7 @@ struct EventsView: View {
                 .filters(typeIds: filters, bookmarks: bookmarks)
                 .search(text: searchText)
                 .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay)
-                .navigationTitle(conference?.name ?? "Schedule")
+            .navigationTitle(viewModel.conference?.name ?? "Schedule")
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarLeading) {
                         Menu {
@@ -77,6 +77,10 @@ struct EventsView: View {
         }
         .sheet(isPresented: $showFilters) {
             EventFilters(types: events.types(), showFilters: $showFilters, filters: $filters)
+        }
+        .onChange(of: viewModel.conference) { con in
+            print("EventsView.onChange(of: conference) == \(con?.name ?? "not found")")
+            self.filters = []
         }
     }
 }
@@ -144,7 +148,7 @@ struct EventData: View {
     let dfu = DateFormatterUtility.shared
 
     var body: some View {
-        Section(header: Text(weekday.formatted(.dateTime.month(.wide).day()))) {
+        Section(header: Text(dfu.longMonthDayFormatter.string(from: weekday))) {
             ForEach(events.eventDateTimeGroup().sorted {
                 $0.key < $1.key
             }, id: \.key) { time, timeEvents in

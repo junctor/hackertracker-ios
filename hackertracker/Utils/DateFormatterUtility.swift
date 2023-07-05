@@ -88,10 +88,18 @@ class DateFormatterUtility {
         return formatter
     }()
 
-    // Month/Day/Year
+    // Aug 11
     let monthDayFormatter = { () -> DateFormatter in
         let formatter = DateFormatter()
         formatter.dateFormat = "MMM d"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter
+    }()
+    
+    // August 11
+    let longMonthDayFormatter = { () -> DateFormatter in
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d"
         formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
     }()
