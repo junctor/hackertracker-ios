@@ -8,18 +8,18 @@
 import SwiftUI
 
 struct GlobalSearchView: View {
-    let bookmarks: [Int32] = .init()
     let viewModel: InfoViewModel
     @State private var searchText = ""
     var theme = Theme()
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
 
     var body: some View {
             List {
                 if !searchText.isEmpty {
                     Section(header: Text("Events")) {
                         ForEach(viewModel.events.search(text: searchText), id: \.id) { event in
-                            NavigationLink(destination: EventDetailView(eventId: event.id, bookmarks: bookmarks)) {
-                                EventCell(event: event, bookmarks: bookmarks)
+                            NavigationLink(destination: EventDetailView(eventId: event.id, bookmarks: bookmarks.map { $0.id })) {
+                                EventCell(event: event, bookmarks: bookmarks.map { $0.id })
                             }
                         }
                     }
