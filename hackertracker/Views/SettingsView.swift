@@ -12,6 +12,7 @@ struct SettingsView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
+    @AppStorage("showPastEvents") var showPastEvents: Bool = true
     let startScreens = ["Main", "Schedule", "Maps"]
     let dfu = DateFormatterUtility.shared
 
@@ -66,6 +67,17 @@ struct SettingsView: View {
                         }
                     }
                 Text("Show event times in current localtime instead of conference time")
+                    .font(.caption)
+            }
+            .padding(5)
+            Divider()
+            VStack {
+                Toggle("Show Past Events", isOn: $showPastEvents)
+                    .onChange(of: showPastEvents) { value in
+                        print("SettingsView: Changing to showPastEvents = \(value)")
+                        viewModel.showPastEvents = value
+                    }
+                Text("Show or hide past events in the conference schedule")
                     .font(.caption)
             }
             .padding(5)

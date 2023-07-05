@@ -22,6 +22,7 @@ class InfoViewModel: ObservableObject {
     @Published var faqs = [FAQ]()
     @Published var news = [Article]()
     @Published var showLocaltime = false
+    @Published var showPastEvents = true
 
     private var db = Firestore.firestore()
 

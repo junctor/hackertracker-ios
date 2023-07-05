@@ -11,6 +11,7 @@ struct EventsView: View {
     let conference: Conference?
     let bookmarks: [Int32]
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
+    @AppStorage("showPastEvents") var showPastEvents: Bool = true
     @EnvironmentObject var viewModel: InfoViewModel
     let dfu = DateFormatterUtility.shared
 
@@ -18,13 +19,12 @@ struct EventsView: View {
     @State private var searchText = ""
     @State private var filters: Set<Int> = []
     @State private var showFilters = false
-    @State private var showOld = false
     var body: some View {
         NavigationStack {
             EventScrollView(events: events
                 .filters(typeIds: filters, bookmarks: bookmarks)
                 .search(text: searchText)
-                .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay)
+                .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents)
             .navigationTitle(viewModel.conference?.name ?? "Schedule")
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarLeading) {
@@ -33,7 +33,7 @@ struct EventsView: View {
                                 Label("Display Localtime", systemImage: "clock")
                             }
                             .onChange(of: showLocaltime) { value in
-                                print("Changing to showLocaltime = \(value)")
+                                print("EventsView: Changing to showLocaltime = \(value)")
                                 viewModel.showLocaltime = value
                                 if showLocaltime {
                                     dfu.update(tz: TimeZone.current)
@@ -41,8 +41,12 @@ struct EventsView: View {
                                     dfu.update(tz: TimeZone(identifier: conference?.timezone ?? "America/Los_Angeles"))
                                 }
                             }
-                            Toggle(isOn: $showOld) {
+                            Toggle(isOn: $showPastEvents) {
                                 Label("Show Past Events", systemImage: "calendar")
+                            }
+                            .onChange(of: showPastEvents) { value in
+                                print("EventsView: Changing to showPastEvents = \(value)")
+                                viewModel.showPastEvents = value
                             }
                             .toggleStyle(.automatic)
                         } label: {
@@ -123,6 +127,7 @@ struct EventScrollView: View {
     let events: [Date: [Event]]
     let bookmarks: [Int32]
     let dayTag: String
+    let showPastEvents: Bool
     let dfu = DateFormatterUtility.shared
 
     var body: some View {
@@ -130,8 +135,10 @@ struct EventScrollView: View {
             List(events.sorted {
                 $0.key < $1.key
             }, id: \.key) { weekday, events in
-                EventData(weekday: weekday, events: events, bookmarks: bookmarks)
-                    .id(dfu.dayOfWeekFormatter.string(from: weekday))
+                if showPastEvents || weekday >= Date() {
+                    EventData(weekday: weekday, events: events, bookmarks: bookmarks, showPastEvents: showPastEvents)
+                        .id(dfu.dayOfWeekFormatter.string(from: weekday))
+                }
             }
             .listStyle(.plain)
             .onChange(of: dayTag) { changedValue in
@@ -145,6 +152,7 @@ struct EventData: View {
     let weekday: Date
     let events: [Event]
     let bookmarks: [Int32]
+    let showPastEvents: Bool
     let dfu = DateFormatterUtility.shared
 
     var body: some View {
@@ -152,12 +160,16 @@ struct EventData: View {
             ForEach(events.eventDateTimeGroup().sorted {
                 $0.key < $1.key
             }, id: \.key) { time, timeEvents in
-                Section(header: Text(dfu.hourMinuteTimeFormatter.string(from: time))) {
-                    ForEach(timeEvents.sorted {
-                        $0.beginTimestamp < $1.beginTimestamp
-                    }, id: \.id) { event in
-                        NavigationLink(destination: EventDetailView(eventId: event.id, bookmarks: bookmarks)) {
-                            EventCell(event: event, bookmarks: bookmarks)
+                if showPastEvents || time >= Date() {
+                    Section(header: Text(dfu.hourMinuteTimeFormatter.string(from: time))) {
+                        ForEach(timeEvents.sorted {
+                            $0.beginTimestamp < $1.beginTimestamp
+                        }, id: \.id) { event in
+                            if showPastEvents || event.beginTimestamp >= Date() {
+                                NavigationLink(destination: EventDetailView(eventId: event.id, bookmarks: bookmarks)) {
+                                    EventCell(event: event, bookmarks: bookmarks)
+                                }
+                            }
                         }
                     }
                 }
