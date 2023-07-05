@@ -14,7 +14,6 @@ struct GlobalSearchView: View {
     var theme = Theme()
 
     var body: some View {
-        NavigationStack {
             List {
                 if !searchText.isEmpty {
                     Section(header: Text("Events")) {
@@ -42,7 +41,7 @@ struct GlobalSearchView: View {
                                     $0.name < $1.name
                                 }, id: \.id) { org in
                                     NavigationLink(destination: DocumentView(title_text: org.name, body_text: org.description)) {
-                                        orgRow(org: org, theme: theme)
+                                        orgSearchRow(org: org, themeColor: theme.carousel())
                                     }
                                 }
                             }
@@ -67,8 +66,8 @@ struct GlobalSearchView: View {
                         }
                     }
                 }
-            }.listStyle(SidebarListStyle())
         }
+            .listStyle(SidebarListStyle())
         .navigationTitle("Global Search")
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
     }

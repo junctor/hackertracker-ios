@@ -18,6 +18,7 @@ struct ContentView: View {
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     @AppStorage("showHidden") var showHidden: Bool = false
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
+    @AppStorage("showNews") var showNews: Bool = true
 
     @StateObject var selected = SelectedConference()
     @StateObject var viewModel = InfoViewModel()
@@ -77,6 +78,7 @@ struct ContentView: View {
                 default:
                     self.tabSelection = 1
                 }
+                viewModel.showNews = showNews
 
                 // viewModel.fetchData(code: selected.code)
             }

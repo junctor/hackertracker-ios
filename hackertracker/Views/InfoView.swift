@@ -66,6 +66,22 @@ struct InfoView: View {
                 .padding(15)
                 .background(Color(.systemGray6))
                 .cornerRadius(15)
+                
+                if viewModel.showNews, let article = viewModel.news.first {
+                    VStack {
+                        Text("Latest News")
+                            .font(.headline)
+                        Divider()
+                        HStack {
+                            articleRow(article: article)
+                        }
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(15)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(15)
+                }
 
                 if self.viewModel.documents.count > 0 {
                     Text("Documents")

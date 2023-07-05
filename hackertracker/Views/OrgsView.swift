@@ -33,6 +33,20 @@ struct OrgsView: View {
     }
 }
 
+struct orgSearchRow: View {
+    let org: Organization
+    let themeColor: Color
+    
+    var body: some View {
+        HStack {
+            Rectangle().fill(themeColor)
+                .frame(width: 6)
+                .frame(maxHeight: .infinity)
+            Text(org.name)
+        }
+    }
+}
+
 struct orgRow: View {
     let org: Organization
     var theme: Theme

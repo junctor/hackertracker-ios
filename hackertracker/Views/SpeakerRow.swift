@@ -13,7 +13,7 @@ struct SpeakerRow: View {
     var body: some View {
         HStack {
             Rectangle().fill(themeColor)
-                .frame(width: 10)
+                .frame(width: 6)
                 .frame(maxHeight: .infinity)
             VStack(alignment: .leading) {
                 Text(speaker.name)
