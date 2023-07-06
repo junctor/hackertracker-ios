@@ -37,6 +37,7 @@ struct SpeakerRow_Previews: PreviewProvider {
                                       description: "Description",
                                       link: "https://twitter.com/defcon",
                                       name: "Speaker Name",
+                                      pronouns: "they/them",
                                       twitter: "defcon",
                                       events: [])
         SpeakerRow(speaker: preview_speaker, themeColor: .purple)

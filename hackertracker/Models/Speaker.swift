@@ -16,6 +16,7 @@ struct Speaker: Codable, Equatable {
     var description: String
     var link: String
     var name: String
+    var pronouns: String?
     var title: String?
     var twitter: String
     var events: [SpeakerEvent]
@@ -34,6 +35,7 @@ struct Speaker: Codable, Equatable {
         case description
         case link
         case name
+        case pronouns
         case title
         case twitter
         case events
