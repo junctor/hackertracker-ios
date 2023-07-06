@@ -30,7 +30,7 @@ struct SettingsView: View {
                         Text("(\(viewModel.conference?.name ?? selected.code))")
                             .font(.caption)
                     }
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(5)
                     Image(systemName: "chevron.right")
                         .padding(5)
@@ -55,17 +55,23 @@ struct AboutSettingsView: View {
     
     var body: some View {
         HStack {
-            NavigationLink(destination: DocumentView(title_text: "About", body_text: "")) {
-                Image(systemName: "info.circle")
-                .padding(5)
-                Text("About")
-                        .bold()
-                        .frame(maxWidth: .infinity)
+            if let v1 = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, let v2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+                NavigationLink(destination: DocumentView(title_text: "About", body_text: "# Hackertracker (iOS)\n#### Version \(v1) Build \(v2)\nHackertracker is a conference scheduling application \n\n## Developers\n * [l4wke](https://twitter.com/sethlaw)\n * [cak](https://github.com/cak)")) {
+                    Image(systemName: "info.circle")
                         .padding(5)
-                Image(systemName: "chevron.right")
+                    VStack(alignment: .leading) {
+                        Text("About")
+                            .bold()
+                        Text("\(v1) (\(v2))")
+                            .font(.caption)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(5)
+                    Image(systemName: "chevron.right")
+                        .padding(5)
+                }
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: .infinity)
         }
         .foregroundColor(.white)
         .frame(maxWidth: .infinity)
