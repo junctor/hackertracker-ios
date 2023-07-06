@@ -19,6 +19,7 @@ struct SettingsView: View {
             Text("Settings")
                 .font(.title)
             Divider()
+            AboutSettingsView()
             HStack {
                 NavigationLink(destination: ConferencesView()) {
                     Image(systemName: "list.bullet")
@@ -47,6 +48,30 @@ struct SettingsView: View {
             ShowNewsSettingsView()
         }
         .padding(10)
+    }
+}
+
+struct AboutSettingsView: View {
+    
+    var body: some View {
+        HStack {
+            NavigationLink(destination: DocumentView(title_text: "About", body_text: "")) {
+                Image(systemName: "info.circle")
+                .padding(5)
+                Text("About")
+                        .bold()
+                        .frame(maxWidth: .infinity)
+                        .padding(5)
+                Image(systemName: "chevron.right")
+                    .padding(5)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .foregroundColor(.white)
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemGray6))
+        .cornerRadius(5)
+        Divider()
     }
 }
 

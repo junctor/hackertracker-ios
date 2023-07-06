@@ -12,7 +12,7 @@ struct SpeakersView: View {
     @State private var searchText = ""
 
     func speakerGroup() -> [String.Element: [Speaker]] {
-        return Dictionary(grouping: speakers.search(text: searchText), by: { $0.name.first ?? "-" })
+        return Dictionary(grouping: speakers.search(text: searchText), by: { $0.name.lowercased().first ?? "-" })
     }
 
     var body: some View {
@@ -39,11 +39,12 @@ struct SpeakerData: View {
     var theme = Theme()
 
     var body: some View {
-        Section(header: Text(String(char)).padding()
+        Section(header: Text(String(char.uppercased()))
+            .font(.subheadline)
+            .padding(1)
             .frame(maxWidth: .infinity)
-            .border(Color.white, width: 3)
-            .background(Color.black))
-        {
+            .background(Color(.systemGray6))
+        ) {
             ForEach(speakers, id: \.name) { speaker in
                 NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                     SpeakerRow(speaker: speaker, themeColor: theme.carousel())

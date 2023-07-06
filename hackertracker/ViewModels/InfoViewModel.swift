@@ -184,7 +184,7 @@ class InfoViewModel: ObservableObject {
 
     func fetchSpeakers(code: String) {
         db.collection("conferences/\(code)/speakers")
-            .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
+            .order(by: "name", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
                     print("No Speakers")
                     return
@@ -198,7 +198,7 @@ class InfoViewModel: ObservableObject {
                         return nil
                     }
                 }
-                print("InfoViewModel: \(self.speakers.count) speakers")
+                self.speakers.sort(using: KeyPathComparator(\.self.name, comparator: .localizedStandard))
             }
     }
 

@@ -144,7 +144,7 @@ struct InfoView: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(.gray.gradient)
+                    .background(Color(.systemGray6))
                     .cornerRadius(15)
                     /* NavigationLink(destination: openURL(url)) {
                          CardView(systemImage: "square.and.pencil", text: "Contact Us", color: theme.carousel())
