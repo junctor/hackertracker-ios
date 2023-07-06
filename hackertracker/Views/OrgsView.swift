@@ -7,6 +7,7 @@
 
 import FirebaseFirestoreSwift
 import SwiftUI
+import Kingfisher
 
 struct OrgsView: View {
     var title: String
@@ -57,19 +58,11 @@ struct orgRow: View {
                 Text(org.name)
                     .font(.caption)
                     .foregroundColor(.white)
-                AsyncImage(url: logo_url) { phase in
-                    switch phase {
-                    case let .success(image):
-                        image
-                            .resizable()
-                            .frame(maxWidth: .infinity)
-                            .aspectRatio(contentMode: .fit)
-                            .cornerRadius(15)
-                    default:
-                        Text(org.name)
-                            .foregroundColor(.white)
-                    }
-                }
+                KFImage(logo_url)
+                    .resizable()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .aspectRatio(contentMode: .fit)
+                    .cornerRadius(15)
             }
             .padding(5)
             .frame(maxWidth: .infinity, maxHeight: .infinity)

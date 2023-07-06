@@ -40,6 +40,7 @@ class DateFormatterUtility {
         yearMonthDayFormatter.timeZone = timeZone
         monthDayTimeFormatter.timeZone = timeZone
         monthDayFormatter.timeZone = timeZone
+        iso8601Formatter.timeZone = timeZone
         yearMonthDayNoTimeZoneTimeFormatter.timeZone = timeZone
         dayOfWeekFormatter.timeZone = timeZone
         shortDayOfMonthFormatter.timeZone = timeZone
@@ -115,7 +116,7 @@ class DateFormatterUtility {
     // UTC iso8601 time format
     let iso8601Formatter = { () -> DateFormatter in
         let formatter = DateFormatter()
-        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        formatter.timeZone = TimeZone(abbreviation: "PDT")
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.sZ"
         formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter

@@ -10,6 +10,7 @@ struct EventCell: View {
     let event: Event
     let bookmarks: [Int32]
     @Environment(\.managedObjectContext) private var viewContext
+    let dfu = DateFormatterUtility.shared
 
     func bookmarkAction() {
         if bookmarks.contains(Int32(event.id)) {
@@ -26,6 +27,10 @@ struct EventCell: View {
             HStack(alignment: .center) {
                 Rectangle().fill(event.type.swiftuiColor)
                     .frame(width: 6)
+                VStack {
+                    Text(dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp))
+                        .font(.subheadline)
+                }
                 VStack(alignment: .leading, spacing: 3) {
                     Text(event.title).font(.headline)
                     if !event.speakers.isEmpty {

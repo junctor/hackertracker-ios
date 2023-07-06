@@ -16,6 +16,7 @@ struct Speaker: Codable, Equatable {
     var description: String
     var link: String
     var links: [SpeakerLink]
+    var media: [SpeakerMedia]?
     var name: String
     var pronouns: String?
     var title: String?
@@ -36,11 +37,30 @@ struct Speaker: Codable, Equatable {
         case description
         case link
         case links
+        case media
         case name
         case pronouns
         case title
         case twitter
         case events
+    }
+}
+
+struct SpeakerMedia: Codable {
+    var assetId: Int
+    var filetype: String
+    var md5: String
+    var name: String
+    var sortOrder: Int
+    var url: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case assetId = "asset_id"
+        case filetype
+        case md5 = "hash_md5"
+        case name
+        case sortOrder = "sort_order"
+        case url
     }
 }
 

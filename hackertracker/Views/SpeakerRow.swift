@@ -37,6 +37,7 @@ struct SpeakerRow_Previews: PreviewProvider {
                                       description: "Description",
                                       link: "https://twitter.com/defcon",
                                       links: [],
+                                      media: [],
                                       name: "Speaker Name",
                                       pronouns: "they/them",
                                       twitter: "defcon",

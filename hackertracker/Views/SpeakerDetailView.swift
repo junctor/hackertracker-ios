@@ -7,11 +7,13 @@
 
 import SwiftUI
 import MarkdownUI
+import Kingfisher
 
 struct SpeakerDetailView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @Environment(\.openURL) private var openURL
+    var theme = Theme()
 
     var id: Int
 
@@ -22,7 +24,7 @@ struct SpeakerDetailView: View {
                     VStack(alignment: .leading) {
                         Text(speaker.name)
                             .font(.title)
-                        if let title = speaker.title {
+                        if let title = speaker.title, title != "" {
                             Text(title)
                                 .font(.subheadline)
                         }
@@ -37,16 +39,30 @@ struct SpeakerDetailView: View {
                     .padding(15)
                     .background(Color(.systemGray6))
                     .cornerRadius(15)
+                    if speaker.media?.count ?? 0 > 0, let media = speaker.media {
+                        HStack {
+                            ForEach(media, id: \.assetId) { m in
+                                if let url = URL(string: m.url) {
+                                    KFImage(url)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 150)
+                                        .cornerRadius(15)
+                                }
+                            }
+                        }
+                    }
                     
-                    Markdown(speaker.description).padding(.top).padding()
+                    Markdown(speaker.description)
                     
                     if speaker.events.count > 0 {
+                        Divider()
                         Text("Events").font(.headline).padding(.top)
                         VStack {
                             ForEach(speaker.events) { event in
                                 NavigationLink(destination: EventDetailView(eventId: event.id, bookmarks: bookmarks.map { $0.id })) {
                                     if let ev = viewModel.events.first(where: { $0.id == event.id }) {
-                                        SpeakerEventView(event: ev, bookmarks: bookmarks.map{ $0.id })
+                                        SpeakerEventView(event: ev, bookmarks: bookmarks.map { $0.id })
                                             .foregroundColor(.white)
                                     }
                                 }
@@ -56,11 +72,11 @@ struct SpeakerDetailView: View {
                     }
                     if speaker.links.count > 0 {
                         VStack(alignment: .leading) {
-                            Text("Links").font(.headline).padding(.top)
+                            Divider()
+                            Text("Links").font(.headline).padding(5)
                             VStack(alignment: .leading) {
                                 ForEach(speaker.links, id: \.title) { link in
                                     if let url = URL(string: link.url) {
-                                        // Text(link.title)
                                         Button {
                                             openURL(url)
                                         } label: {
@@ -70,7 +86,12 @@ struct SpeakerDetailView: View {
                                                 Label(link.url, systemImage: "link")
                                             }
                                         }
+                                        .foregroundColor(.white)
                                         .frame(maxWidth: .infinity)
+                                        .padding(15)
+                                        .background(theme.carousel())
+                                        .cornerRadius(15)
+                                        
                                     }
                                 }
                             }

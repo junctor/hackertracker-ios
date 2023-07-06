@@ -172,6 +172,7 @@ struct EventData: View {
                             }
                         }
                     }
+                    .listStyle(.plain)
                 }
             }
         }
