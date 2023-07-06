@@ -15,6 +15,7 @@ struct Speaker: Codable, Equatable {
     var conferenceName: String
     var description: String
     var link: String
+    var links: [SpeakerLink]
     var name: String
     var pronouns: String?
     var title: String?
@@ -34,11 +35,24 @@ struct Speaker: Codable, Equatable {
         case conferenceName = "conference"
         case description
         case link
+        case links
         case name
         case pronouns
         case title
         case twitter
         case events
+    }
+}
+
+struct SpeakerLink: Codable {
+    var title: String
+    var url: String
+    var sortOrder: Int
+    
+    private enum CodingKeys: String, CodingKey {
+        case title
+        case url
+        case sortOrder = "sort_order"
     }
 }
 

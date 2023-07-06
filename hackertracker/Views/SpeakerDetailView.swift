@@ -11,6 +11,7 @@ import MarkdownUI
 struct SpeakerDetailView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    @Environment(\.openURL) private var openURL
 
     var id: Int
 
@@ -36,6 +37,7 @@ struct SpeakerDetailView: View {
                     .padding(15)
                     .background(Color(.systemGray6))
                     .cornerRadius(15)
+                    
                     Markdown(speaker.description).padding(.top).padding()
                     
                     if speaker.events.count > 0 {
@@ -51,6 +53,30 @@ struct SpeakerDetailView: View {
                             }
                         }
                         .rectangleBackground()
+                    }
+                    if speaker.links.count > 0 {
+                        VStack(alignment: .leading) {
+                            Text("Links").font(.headline).padding(.top)
+                            VStack(alignment: .leading) {
+                                ForEach(speaker.links, id: \.title) { link in
+                                    if let url = URL(string: link.url) {
+                                        // Text(link.title)
+                                        Button {
+                                            openURL(url)
+                                        } label: {
+                                            if link.title != "" {
+                                                Label(link.title, systemImage: "arrow.up.right.square")
+                                            } else {
+                                                Label(link.url, systemImage: "link")
+                                            }
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                    }
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                        .frame(maxWidth: .infinity)
                     }
                 }
                 .padding(15)
