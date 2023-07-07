@@ -204,7 +204,7 @@ class InfoViewModel: ObservableObject {
 
     func fetchOrgs(code: String) {
         db.collection("conferences/\(code)/organizations")
-            .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
+            .order(by: "name", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
                     print("No Documents")
                     return

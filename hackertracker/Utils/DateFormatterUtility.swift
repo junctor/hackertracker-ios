@@ -10,13 +10,6 @@ import Foundation
 class DateFormatterUtility {
     var timeZone = TimeZone(identifier: "America/Los_Angeles")
 
-    /* static let shared : [String:DateFormatterUtility] =
-     ["America/Los_Angeles": DateFormatterUtility(identifier: "America/Los_Angeles"),
-     "America/Chicago": DateFormatterUtility(identifier: "America/Chicago"),
-     "America/Denver": DateFormatterUtility(identifier: "America/Denver"),
-     "America/New_York": DateFormatterUtility(identifier: "America/New_York")
-     ] */
-
     static let shared = DateFormatterUtility(tz: TimeZone(identifier: "America/Los_Angeles"))
 
     init(tz: TimeZone?) {

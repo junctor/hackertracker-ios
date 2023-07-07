@@ -16,6 +16,7 @@ extension Date {
         components.hour = 0
         components.minute = 0
         components.second = 0
+        components.timeZone = DateFormatterUtility.shared.timeZone
 
         return calendar.date(from: components)
     }
@@ -37,19 +38,15 @@ extension [Event] {
     }
 
     func eventDayGroup() -> [Date: [Event]] {
-        let dfu = DateFormatterUtility.shared
-
         let eventDict = Dictionary(grouping: self, by: {
-            dfu.iso8601Formatter.date(from: $0.begin)?.dayOfDate() ?? Date()
+            $0.beginTimestamp.dayOfDate() ?? Date()
         })
         return eventDict
     }
 
     func eventDateTimeGroup() -> [Date: [Event]] {
-        let dfu = DateFormatterUtility.shared
-
         let eventDict = Dictionary(grouping: self, by: {
-            dfu.iso8601Formatter.date(from: $0.begin) ?? Date()
+            $0.beginTimestamp.dayOfDate() ?? Date()
         })
         return eventDict
     }

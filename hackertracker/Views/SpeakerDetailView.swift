@@ -28,6 +28,15 @@ struct SpeakerDetailView: View {
                             Text(title)
                                 .font(.subheadline)
                         }
+                        if speaker.affiliations?.count ?? 0 > 0, let affiliations = speaker.affiliations {
+                            ForEach(affiliations, id: \.organization) { affiliation in
+                                /*@START_MENU_TOKEN@*/Text(affiliation.organization)/*@END_MENU_TOKEN@*/
+                                if affiliation.title != "" {
+                                    Text(affiliation.title)
+                                        .font(.caption)
+                                }
+                            }
+                        }
                         if let pronouns = speaker.pronouns {
                             Text("(\(pronouns))")
                                 .font(.caption)
