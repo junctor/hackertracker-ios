@@ -40,6 +40,7 @@ struct Speaker: Codable, Equatable {
         case links
         case media
         case name
+        case affiliations
         case pronouns
         case title
         case twitter

@@ -23,6 +23,7 @@ struct Event: Codable, Identifiable {
     var title: String
     var location: EventLocation
     var speakers: [EventSpeaker]
+    var people: [Person]
     var type: EventType
 
     private enum CodingKeys: String, CodingKey {
@@ -38,7 +39,20 @@ struct Event: Codable, Identifiable {
         case title
         case location
         case speakers
+        case people
         case type
+    }
+}
+
+struct Person: Codable, Identifiable {
+    var id: Int
+    var sortOrder: Int
+    var tagId: Int
+    
+    private enum CodingKeys: String, CodingKey {
+        case id = "person_id"
+        case sortOrder = "sort_order"
+        case tagId = "tag_id"
     }
 }
 

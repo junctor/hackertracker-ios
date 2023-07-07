@@ -11,7 +11,6 @@ import Kingfisher
 
 struct SpeakerDetailView: View {
     @EnvironmentObject var viewModel: InfoViewModel
-    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @Environment(\.openURL) private var openURL
     var theme = Theme()
 
@@ -28,15 +27,6 @@ struct SpeakerDetailView: View {
                             Text(title)
                                 .font(.subheadline)
                         }
-                        if speaker.affiliations?.count ?? 0 > 0, let affiliations = speaker.affiliations {
-                            ForEach(affiliations, id: \.organization) { affiliation in
-                                /*@START_MENU_TOKEN@*/Text(affiliation.organization)/*@END_MENU_TOKEN@*/
-                                if affiliation.title != "" {
-                                    Text(affiliation.title)
-                                        .font(.caption)
-                                }
-                            }
-                        }
                         if let pronouns = speaker.pronouns {
                             Text("(\(pronouns))")
                                 .font(.caption)
@@ -48,7 +38,7 @@ struct SpeakerDetailView: View {
                     .padding(15)
                     .background(Color(.systemGray6))
                     .cornerRadius(15)
-                    if speaker.media?.count ?? 0 > 0, let media = speaker.media {
+                    if let media = speaker.media, media.count > 0 {
                         HStack {
                             ForEach(media, id: \.assetId) { m in
                                 if let url = URL(string: m.url) {
@@ -64,55 +54,138 @@ struct SpeakerDetailView: View {
                     
                     Markdown(speaker.description)
                     
+                    Divider()
                     if speaker.events.count > 0 {
-                        Divider()
-                        Text("Events").font(.headline).padding(.top)
-                        VStack {
-                            ForEach(speaker.events) { event in
-                                NavigationLink(destination: EventDetailView(eventId: event.id, bookmarks: bookmarks.map { $0.id })) {
-                                    if let ev = viewModel.events.first(where: { $0.id == event.id }) {
-                                        SpeakerEventView(event: ev, bookmarks: bookmarks.map { $0.id })
-                                            .foregroundColor(.white)
-                                    }
-                                }
-                            }
-                        }
-                        .rectangleBackground()
+                        showEvents(events: speaker.events)
                     }
+                    Divider()
+                    if let affiliations = speaker.affiliations {
+                        showAffiliations(affiliations: affiliations)
+                    }
+                    Divider()
                     if speaker.links.count > 0 {
-                        VStack(alignment: .leading) {
-                            Divider()
-                            Text("Links").font(.headline).padding(5)
-                            VStack(alignment: .leading) {
-                                ForEach(speaker.links, id: \.title) { link in
-                                    if let url = URL(string: link.url) {
-                                        Button {
-                                            openURL(url)
-                                        } label: {
-                                            if link.title != "" {
-                                                Label(link.title, systemImage: "arrow.up.right.square")
-                                            } else {
-                                                Label(link.url, systemImage: "link")
-                                            }
-                                        }
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity)
-                                        .padding(15)
-                                        .background(theme.carousel())
-                                        .cornerRadius(15)
-                                        
-                                    }
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .frame(maxWidth: .infinity)
+                        showLinks(links: speaker.links)
                     }
                 }
                 .padding(15)
             }
         } else {
             _04View(message: "Speaker \(id) not found")
+        }
+    }
+}
+
+struct showLinks: View {
+    var links: [SpeakerLink]
+    @Environment(\.openURL) private var openURL
+    @State private var collapsed = false
+    var theme = Theme()
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                collapsed.toggle()
+            }, label: {
+                HStack {
+                    Text("Links")
+                        .font(.headline).padding(.top)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                }
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+            if !collapsed {
+                VStack(alignment: .leading) {
+                    ForEach(links, id: \.title) { link in
+                        if let url = URL(string: link.url) {
+                            Button {
+                                openURL(url)
+                            } label: {
+                                if link.title != "" {
+                                    Label(link.title, systemImage: "arrow.up.right.square")
+                                } else {
+                                    Label(link.url, systemImage: "link")
+                                }
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(15)
+                            .background(theme.carousel())
+                            .cornerRadius(15)
+                            
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+}
+
+struct showEvents: View {
+    var events: [SpeakerEvent]
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    @EnvironmentObject var viewModel: InfoViewModel
+    @State private var collapsed = false
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                collapsed.toggle()
+            }, label: {
+                HStack {
+                    Text("Events")
+                        .font(.headline).padding(.top)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                }
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+            if !collapsed {
+                VStack {
+                    ForEach(events) { event in
+                        NavigationLink(destination: EventDetailView(eventId: event.id, bookmarks: bookmarks.map { $0.id })) {
+                            if let ev = viewModel.events.first(where: { $0.id == event.id }) {
+                                SpeakerEventView(event: ev, bookmarks: bookmarks.map { $0.id })
+                                    .foregroundColor(.white)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct showAffiliations: View {
+    let affiliations: [SpeakerAffiliation]
+    @State private var collapsed = true
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                collapsed.toggle()
+            }, label: {
+                HStack {
+                    Text("Affiliations")
+                        .font(.headline).padding(.top)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                }
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+
+            if !collapsed {
+                Divider()
+                ForEach(affiliations, id: \.organization) { affiliation in
+                    VStack(alignment: .leading) {
+                        /*@START_MENU_TOKEN@*/Text(affiliation.organization)/*@END_MENU_TOKEN@*/
+                        if affiliation.title != "" {
+                            Text(affiliation.title)
+                                .font(.caption)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                Divider()
+            }
         }
     }
 }

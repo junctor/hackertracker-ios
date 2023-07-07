@@ -9,31 +9,40 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 import Foundation
 
-struct TagType: Codable {
-    @DocumentID var id: String?
+struct TagType: Codable, Identifiable {
+    var id: Int
     var category: String
-    var is_browsable: Bool
-    var is_single_valued: Bool
+    var isBrowsable: Bool
+    var isSingleValued: Bool
     var label: String
-    var sort_order: Int
+    var sortOrder: Int
     var tags: [Tag]
 
     private enum CodingKeys: String, CodingKey {
         case id
         case category
-        case is_browsable
-        case is_single_valued
+        case isBrowsable = "is_browsable"
+        case isSingleValued = "is_single_valued"
         case label
-        case sort_order
+        case sortOrder = "sort_order"
         case tags
     }
 }
 
-struct Tag: Codable {
+struct Tag: Codable, Identifiable {
     var id: Int
     var label: String
-    var sort_order: Int
+    var sortOrder: Int
     var description: String
-    // var color_background: String
-    // var color_foreground: String
+    var colorBackground: String
+    var colorForeground: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case label
+        case sortOrder = "sort_order"
+        case description
+        case colorBackground = "color_background"
+        case colorForeground = "color_foreground"
+    }
 }

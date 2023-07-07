@@ -68,29 +68,39 @@ struct EventDetailView: View {
                     Markdown(event.description).padding()
                 }
                 VStack {
-                    if event.speakers.count > 0 {
-                        VStack(alignment: .center) {
-                            Text("\(event.speakers.count > 1 ? "Speakers" : "Speaker")").font(.headline)
-                        }.padding(.vertical)
-                        if event.speakers.count > 1 {
+                    if event.people.count > 0 {
+                        let people = event.people.sorted { $0.sortOrder > $1.sortOrder }
+                        if people.count > 1 {
                             LazyVGrid(columns: columns, spacing: 20) {
-                                ForEach(event.speakers, id: \.id) { speaker in
-                                    HStack {
-                                        NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
-                                            Text(speaker.name)
+                                ForEach(people, id: \.id) { person in
+                                    if let speaker = viewModel.speakers.first(where: {$0.id == person.id}) {
+                                        HStack {
+                                            NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
+                                                VStack {
+                                                    Text(speaker.name)
+                                                    if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == person.tagId}) {
+                                                        Text(tag.label).font(.caption)
+                                                    }
+                                                }
+                                            }
                                         }
+                                        .foregroundColor(.white)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                        .padding(15)
+                                        .background(theme.carousel().gradient)
+                                        .cornerRadius(15)
                                     }
-                                    .foregroundColor(.white)
-                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                    .padding(15)
-                                    .background(theme.carousel().gradient)
-                                    .cornerRadius(15)
                                 }
                             }
                         } else {
                             HStack {
                                 NavigationLink(destination: SpeakerDetailView(id: event.speakers[0].id)) {
-                                    Text(event.speakers[0].name)
+                                    VStack {
+                                        Text(event.speakers[0].name)
+                                        if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == people[0].tagId}) {
+                                            Text(tag.label).font(.caption)
+                                        }
+                                    }
                                 }
                             }
                             .foregroundColor(.white)
