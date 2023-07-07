@@ -18,6 +18,7 @@ struct Speaker: Codable, Equatable {
     var links: [SpeakerLink]
     var media: [SpeakerMedia]?
     var name: String
+    var affiliations: [SpeakerAffiliation]?
     var pronouns: String?
     var title: String?
     var twitter: String
@@ -43,6 +44,16 @@ struct Speaker: Codable, Equatable {
         case title
         case twitter
         case events
+    }
+}
+
+struct SpeakerAffiliation: Codable {
+    var organization: String
+    var title: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case organization
+        case title
     }
 }
 

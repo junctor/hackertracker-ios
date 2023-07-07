@@ -11,7 +11,7 @@ struct EventDetailView: View {
     let eventId: Int
     let bookmarks: [Int32]
     @EnvironmentObject var selected: SelectedConference
-    @ObservedObject var viewModel = EventViewModel()
+    @EnvironmentObject var viewModel: InfoViewModel
     var theme = Theme()
     let dfu = DateFormatterUtility.shared
     // let event: Event
@@ -25,7 +25,7 @@ struct EventDetailView: View {
 
     var body: some View {
         ScrollView {
-            if let event = viewModel.event {
+            if let event = viewModel.events.first(where: { $0.id == eventId }) {
                 VStack(alignment: .leading) {
                     VStack(alignment: .center) {
                         Text(event.title).font(.largeTitle).bold()
@@ -102,17 +102,11 @@ struct EventDetailView: View {
                     }
                 }
                 .padding(.horizontal, 15)
-
-            } else {
-                Text("...")
-                    .onAppear {
-                        viewModel.fetchData(code: selected.code, eventId: eventId)
-                    }
             }
         }
         .toolbar {
             ToolbarItemGroup {
-                if let event = viewModel.event {
+                if let event = viewModel.events.first(where: { $0.id == eventId }) {
                     Button {
                         if bookmarks.contains(Int32(event.id)) {
                             BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
@@ -120,7 +114,7 @@ struct EventDetailView: View {
                             BookmarkUtility.addBookmark(context: viewContext, id: event.id)
                         }
                     } label: {
-                        if let event = viewModel.event {
+                        if let event = viewModel.events.first(where: { $0.id == eventId }) {
                             Image(systemName: bookmarks.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
                         }
                     }

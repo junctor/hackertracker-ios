@@ -64,7 +64,7 @@ struct EventsView: View {
                             }
 
                         } label: {
-                            Image(systemName: "calendar")
+                            Image(systemName: "chevron.up.chevron.down")
                         }
 
                         Button {
@@ -161,7 +161,7 @@ struct EventData: View {
                 $0.key < $1.key
             }, id: \.key) { time, timeEvents in
                 if showPastEvents || time >= Date() {
-                    Section(header: Text(dfu.hourMinuteTimeFormatter.string(from: time))) {
+                    Section {
                         ForEach(timeEvents.sorted {
                             $0.beginTimestamp < $1.beginTimestamp
                         }, id: \.id) { event in
