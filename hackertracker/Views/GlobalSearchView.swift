@@ -10,7 +10,7 @@ import SwiftUI
 struct GlobalSearchView: View {
     let viewModel: InfoViewModel
     @State private var searchText = ""
-    var theme = Theme()
+    @EnvironmentObject var theme: Theme
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
 
     var body: some View {

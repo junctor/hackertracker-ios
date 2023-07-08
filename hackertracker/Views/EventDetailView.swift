@@ -12,7 +12,7 @@ struct EventDetailView: View {
     let bookmarks: [Int32]
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var viewModel: InfoViewModel
-    var theme = Theme()
+    @EnvironmentObject var theme: Theme
     let dfu = DateFormatterUtility.shared
     // let event: Event
 

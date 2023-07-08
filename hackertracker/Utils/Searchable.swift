@@ -13,6 +13,12 @@ extension [Event] {
     }
 }
 
+extension [Product] {
+    func search(text: String) -> Self {
+        text.isEmpty ? self : self.filter { $0.title.lowercased().contains(text.lowercased()) }
+    }
+}
+
 extension [Speaker] {
     func search(text: String) -> Self {
         text.isEmpty ? self : self.filter { $0.name.lowercased().contains(text.lowercased()) }

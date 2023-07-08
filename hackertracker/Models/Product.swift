@@ -58,7 +58,7 @@ struct Media: Codable {
     }
 }
 
-struct Variant: Codable, Identifiable {
+struct Variant: Codable, Identifiable, Hashable {
     var id = UUID()
     var code: String
     var price: Int
@@ -77,4 +77,19 @@ struct Variant: Codable, Identifiable {
         case title
         case variantId = "variant_id"
     }
+}
+
+struct QRCart: Codable {
+    var txn: String = ""
+    var i: [QRItem]
+    
+    private enum CodingKeys: String, CodingKey {
+        case txn
+        case i
+    }
+}
+
+struct QRItem: Codable {
+    var v: Int
+    var q: Int
 }

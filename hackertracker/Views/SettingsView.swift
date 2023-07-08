@@ -10,10 +10,9 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var viewModel: InfoViewModel
+    @EnvironmentObject var theme: Theme
     @AppStorage("showNews") var showNews: Bool = true
     
-    var theme = Theme()
-
     var body: some View {
         ScrollView {
             Text("Settings")

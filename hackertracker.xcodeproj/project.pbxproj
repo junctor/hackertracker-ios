@@ -36,6 +36,9 @@
 		5D642D372A534BE00064492D /* NewsListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D362A534BE00064492D /* NewsListView.swift */; };
 		5D642D392A539C370064492D /* CountdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D382A539C370064492D /* CountdownView.swift */; };
 		5D642D3E2A5725D80064492D /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 5D642D3D2A5725D80064492D /* Kingfisher */; };
+		5D642D422A59C1710064492D /* CartUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D412A59C1710064492D /* CartUtility.swift */; };
+		5D642D442A59E8EE0064492D /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D432A59E8EE0064492D /* QRCodeView.swift */; };
+		5D642D462A59F0B50064492D /* CartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D452A59F0B50064492D /* CartView.swift */; };
 		5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57442857B398001374D4 /* ConferencesView.swift */; };
 		5D9E57492859037C001374D4 /* BookmarkUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57482859037C001374D4 /* BookmarkUtility.swift */; };
 		5D9E5753285A3C25001374D4 /* SpeakersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E5752285A3C25001374D4 /* SpeakersView.swift */; };
@@ -125,6 +128,9 @@
 		5D642D342A534BCF0064492D /* FAQListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAQListView.swift; sourceTree = "<group>"; };
 		5D642D362A534BE00064492D /* NewsListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewsListView.swift; sourceTree = "<group>"; };
 		5D642D382A539C370064492D /* CountdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownView.swift; sourceTree = "<group>"; };
+		5D642D412A59C1710064492D /* CartUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartUtility.swift; sourceTree = "<group>"; };
+		5D642D432A59E8EE0064492D /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
+		5D642D452A59F0B50064492D /* CartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartView.swift; sourceTree = "<group>"; };
 		5D9E57442857B398001374D4 /* ConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesView.swift; sourceTree = "<group>"; };
 		5D9E57482859037C001374D4 /* BookmarkUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkUtility.swift; sourceTree = "<group>"; };
 		5D9E5752285A3C25001374D4 /* SpeakersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakersView.swift; sourceTree = "<group>"; };
@@ -279,29 +285,31 @@
 				5DF51AB92850310B007BCB83 /* ConferenceRow.swift */,
 				5D9E57442857B398001374D4 /* ConferencesView.swift */,
 				5DAE04B52820948B00930A2D /* ContentView.swift */,
+				5D642D382A539C370064492D /* CountdownView.swift */,
 				5D0A5A582A33BC1D00BD5ECE /* DocumentView.swift */,
 				3CD532D62A29A992009D17F3 /* EventCellView.swift */,
+				3C0E05CA2A53E5F500E7154F /* EventDetailView.swift */,
 				3CD532DA2A29A9A9009D17F3 /* EventsView.swift */,
+				5D642D342A534BCF0064492D /* FAQListView.swift */,
+				3C0E05CC2A53E6AD00E7154F /* GlobalSearchView.swift */,
 				5DB4E0AE284E86CC0012F6F4 /* InfoView.swift */,
 				5D642D242A438FB50064492D /* LocationView.swift */,
 				5DB4E0AC284E86AD0012F6F4 /* MapView.swift */,
 				3CD532E62A29B0F0009D17F3 /* MoreMenu.swift */,
+				5D642D362A534BE00064492D /* NewsListView.swift */,
 				5D0A5A5C2A33D8C600BD5ECE /* OrgsView.swift */,
+				5D642D2A2A44DF840064492D /* ProductRow.swift */,
 				5D642D282A44A1960064492D /* ProductsView.swift */,
+				5D642D2C2A44F3AF0064492D /* ProductView.swift */,
 				5DB4E0AA284E86900012F6F4 /* ScheduleView.swift */,
 				5DB4E0B0284E86D80012F6F4 /* SettingsView.swift */,
 				3CD532DE2A29AC33009D17F3 /* ShareView.swift */,
 				5D9E5758285A4710001374D4 /* SpeakerDetailView.swift */,
 				5D9E5754285A3C86001374D4 /* SpeakerRow.swift */,
 				5D9E5752285A3C25001374D4 /* SpeakersView.swift */,
-				5D642D342A534BCF0064492D /* FAQListView.swift */,
-				5D642D362A534BE00064492D /* NewsListView.swift */,
 				3CE59E3A285B3ACD00B453C9 /* ViewModifiers.swift */,
-				5D642D2A2A44DF840064492D /* ProductRow.swift */,
-				5D642D2C2A44F3AF0064492D /* ProductView.swift */,
-				5D642D382A539C370064492D /* CountdownView.swift */,
-				3C0E05CA2A53E5F500E7154F /* EventDetailView.swift */,
-				3C0E05CC2A53E6AD00E7154F /* GlobalSearchView.swift */,
+				5D642D432A59E8EE0064492D /* QRCodeView.swift */,
+				5D642D452A59F0B50064492D /* CartView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -338,6 +346,7 @@
 				3C07C208285C6F7600CC9469 /* Theme.swift */,
 				5D642D222A4388D50064492D /* PDFView.swift */,
 				3C0E05CE2A53E70200E7154F /* Searchable.swift */,
+				5D642D412A59C1710064492D /* CartUtility.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -531,6 +540,7 @@
 				5D0A5A592A33BC1D00BD5ECE /* DocumentView.swift in Sources */,
 				5D0A5A572A32BD8F00BD5ECE /* InfoViewModel.swift in Sources */,
 				5D642D352A534BCF0064492D /* FAQListView.swift in Sources */,
+				5D642D422A59C1710064492D /* CartUtility.swift in Sources */,
 				5DB4E0B5284E9F880012F6F4 /* Event.swift in Sources */,
 				5D642D2B2A44DF840064492D /* ProductRow.swift in Sources */,
 				5D0A5A632A34EECD00BD5ECE /* Tag.swift in Sources */,
@@ -557,6 +567,7 @@
 				5DF51AB8285007EC007BCB83 /* DateFormatterUtility.swift in Sources */,
 				5D642D272A43AEA00064492D /* Product.swift in Sources */,
 				5D642D2D2A44F3AF0064492D /* ProductView.swift in Sources */,
+				5D642D462A59F0B50064492D /* CartView.swift in Sources */,
 				5D0A5A612A33E65900BD5ECE /* Organization.swift in Sources */,
 				5DF51AD62851557E007BCB83 /* Vendor.swift in Sources */,
 				5DAE04BD2820948E00930A2D /* Persistence.swift in Sources */,
@@ -573,6 +584,7 @@
 				5D4F07B928598AC8006772A2 /* 404View.swift in Sources */,
 				5DAE04B42820948B00930A2D /* hackertrackerApp.swift in Sources */,
 				5DB4E0AF284E86CC0012F6F4 /* InfoView.swift in Sources */,
+				5D642D442A59E8EE0064492D /* QRCodeView.swift in Sources */,
 				5DF51ACB28514F70007BCB83 /* EventType.swift in Sources */,
 				5D642D232A4388D50064492D /* PDFView.swift in Sources */,
 				5DF51ABC2851203F007BCB83 /* Document.swift in Sources */,

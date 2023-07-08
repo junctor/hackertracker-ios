@@ -12,7 +12,7 @@ import Kingfisher
 struct SpeakerDetailView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @Environment(\.openURL) private var openURL
-    var theme = Theme()
+    @EnvironmentObject var theme: Theme
 
     var id: Int
 
@@ -23,14 +23,13 @@ struct SpeakerDetailView: View {
                     VStack(alignment: .leading) {
                         Text(speaker.name)
                             .font(.title)
-                        if let title = speaker.title, title != "" {
-                            Text(title)
-                                .font(.subheadline)
-                        }
                         if let pronouns = speaker.pronouns {
                             Text("(\(pronouns))")
                                 .font(.caption)
                                 .foregroundColor(.gray)
+                        }
+                        if let affiliations = speaker.affiliations {
+                            showAffiliations(affiliations: affiliations)
                         }
                     }
                     .foregroundColor(.white)
@@ -59,10 +58,6 @@ struct SpeakerDetailView: View {
                         showEvents(events: speaker.events)
                     }
                     Divider()
-                    if let affiliations = speaker.affiliations {
-                        showAffiliations(affiliations: affiliations)
-                    }
-                    Divider()
                     if speaker.links.count > 0 {
                         showLinks(links: speaker.links)
                     }
@@ -79,8 +74,8 @@ struct showLinks: View {
     var links: [SpeakerLink]
     @Environment(\.openURL) private var openURL
     @State private var collapsed = false
-    var theme = Theme()
-    
+    @EnvironmentObject var theme: Theme
+
     var body: some View {
         VStack(alignment: .leading) {
             Button(action: {
@@ -160,32 +155,16 @@ struct showAffiliations: View {
     @State private var collapsed = true
 
     var body: some View {
-        VStack(alignment: .leading) {
-            Button(action: {
-                collapsed.toggle()
-            }, label: {
-                HStack {
-                    Text("Affiliations")
-                        .font(.headline).padding(.top)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+        Divider()
+        ForEach(affiliations, id: \.organization) { affiliation in
+            VStack(alignment: .leading) {
+                /*@START_MENU_TOKEN@*/Text(affiliation.organization)/*@END_MENU_TOKEN@*/
+                if affiliation.title != "" {
+                    Text(affiliation.title)
+                        .font(.subheadline)
                 }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
-
-            if !collapsed {
-                Divider()
-                ForEach(affiliations, id: \.organization) { affiliation in
-                    VStack(alignment: .leading) {
-                        /*@START_MENU_TOKEN@*/Text(affiliation.organization)/*@END_MENU_TOKEN@*/
-                        if affiliation.title != "" {
-                            Text(affiliation.title)
-                                .font(.caption)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                Divider()
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }

@@ -36,7 +36,7 @@ struct SpeakersView: View {
 struct SpeakerData: View {
     let char: String.Element
     let speakers: [Speaker]
-    var theme = Theme()
+    @EnvironmentObject var theme: Theme
 
     var body: some View {
         Section(header: Text(String(char.uppercased()))

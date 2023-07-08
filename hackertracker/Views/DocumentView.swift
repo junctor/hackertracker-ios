@@ -11,7 +11,7 @@ import SwiftUI
 struct DocumentView: View {
     var title_text: String
     var body_text: String
-    var theme = Theme()
+    @EnvironmentObject var theme: Theme
 
     var body: some View {
         ScrollView {

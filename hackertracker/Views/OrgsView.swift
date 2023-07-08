@@ -12,7 +12,7 @@ import Kingfisher
 struct OrgsView: View {
     var title: String
     var tagId: Int
-    var theme = Theme()
+    @EnvironmentObject var theme: Theme
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var selected: SelectedConference
     @State private var searchText = ""

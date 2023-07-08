@@ -14,8 +14,9 @@ struct InfoView: View {
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @EnvironmentObject var selected: SelectedConference
+    @EnvironmentObject var theme: Theme
     @Environment(\.openURL) private var openURL
-    @State var theme = Theme()
+    @FetchRequest(sortDescriptors: []) var cart: FetchedResults<Cart>
 
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
@@ -104,11 +105,6 @@ struct InfoView: View {
                     NavigationLink(destination: SpeakersView(speakers: viewModel.speakers)) {
                         CardView(systemImage: "person.crop.rectangle", text: "Speakers", color: theme.carousel())
                     }
-                    if self.viewModel.products.count > 0 {
-                        NavigationLink(destination: ProductsView(title: "Merch", products: self.viewModel.products)) {
-                            CardView(systemImage: "cart", text: "Merch", color: theme.carousel())
-                        }
-                    }
                     if self.viewModel.locations.count > 0 {
                         NavigationLink(destination: LocationView(locations: self.viewModel.locations)) {
                             CardView(systemImage: "mappin.and.ellipse", text: "Locations", color: theme.carousel())
@@ -133,6 +129,19 @@ struct InfoView: View {
                     }
                 }
                 Divider()
+                if self.viewModel.products.count > 0 {
+                    Text("Shopping")
+                        .font(.subheadline)
+                    LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
+                        NavigationLink(destination: ProductsView()) {
+                            CardView(systemImage: "dollarsign", text: "Merch", color: theme.carousel())
+                        }
+                        NavigationLink(destination: CartView()) {
+                            CardView(systemImage: (cart.count > 0) ? "cart.badge.plus" : "cart", text: "Cart", color: theme.carousel())
+                        }
+                        Divider()
+                    }
+                }
                 if let url = URL(string: "mailto:hackertracker@defcon.org") {
                     HStack {
                         Button {

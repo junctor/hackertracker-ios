@@ -134,7 +134,9 @@ class InfoViewModel: ObservableObject {
                     do {
                         return try queryDocumentSnapshot.data(as: Location.self)
                     } catch {
-                        print("Location Parsing Error: \(error)")
+                        print("fetchLocations: Location Parsing Error: \(error)")
+                        print("fetchLocations: Code: \(code)")
+                        print("fetchLocations: qds: \(queryDocumentSnapshot)")
                         return nil
                     }
                 }

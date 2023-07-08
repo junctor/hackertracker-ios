@@ -26,7 +26,7 @@ struct ContentView: View {
     @State private var tabSelection = 1
     @State private var isInit: Bool = false
 
-    private var colorScheme: ColorScheme = .dark
+    private var theme = Theme()
 
     var body: some View {
         if viewModel.conference != nil {
@@ -38,28 +38,28 @@ struct ContentView: View {
                             // Text("Info")
                         }
                         .tag(1)
-                        .preferredColorScheme(colorScheme)
+                        .preferredColorScheme(theme.colorScheme)
                     ScheduleView()
                         .tabItem {
                             Image(systemName: "calendar")
                             // Text("Main")
                         }
                         .tag(2)
-                        .preferredColorScheme(colorScheme)
+                        .preferredColorScheme(theme.colorScheme)
                     MapView()
                         .tabItem {
                             Image(systemName: "map")
                             // Text("Maps")
                         }
                         .tag(3)
-                        .preferredColorScheme(colorScheme)
+                        .preferredColorScheme(theme.colorScheme)
                     SettingsView()
                         .tabItem {
                             Image(systemName: "gearshape")
                             // Text("Settings")
                         }
                         .tag(4)
-                        .preferredColorScheme(colorScheme)
+                        .preferredColorScheme(theme.colorScheme)
                 }
             }
             .onAppear {
@@ -84,10 +84,11 @@ struct ContentView: View {
             }
             .environmentObject(selected)
             .environmentObject(viewModel)
+            .environmentObject(theme)
         } else {
             if conferenceCode == "INIT" {
                 ConferencesView()
-                    .preferredColorScheme(colorScheme)
+                    .preferredColorScheme(theme.colorScheme)
                     .environmentObject(selected)
                     .environmentObject(viewModel)
             } else {
