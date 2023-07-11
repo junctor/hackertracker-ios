@@ -14,39 +14,41 @@ struct SettingsView: View {
     @AppStorage("showNews") var showNews: Bool = true
     
     var body: some View {
-        ScrollView {
-            Text("Settings")
-                .font(.title)
-            Divider()
-            AboutSettingsView()
-            HStack {
-                NavigationLink(destination: ConferencesView()) {
-                    Image(systemName: "list.bullet")
+        NavigationView {
+            ScrollView {
+                Text("Settings")
+                    .font(.title)
+                Divider()
+                AboutSettingsView()
+                HStack {
+                    NavigationLink(destination: ConferencesView()) {
+                        Image(systemName: "list.bullet")
+                            .padding(5)
+                        VStack(alignment: .leading) {
+                            Text("Select Conference")
+                                .bold()
+                            Text("(\(viewModel.conference?.name ?? selected.code))")
+                                .font(.caption)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(5)
-                    VStack(alignment: .leading) {
-                        Text("Select Conference")
-                            .bold()
-                        Text("(\(viewModel.conference?.name ?? selected.code))")
-                            .font(.caption)
+                        Image(systemName: "chevron.right")
+                            .padding(5)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(5)
-                    Image(systemName: "chevron.right")
-                        .padding(5)
+                    .frame(maxWidth: .infinity)
                 }
+                .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
+                .background(Color(.systemGray6))
+                .cornerRadius(5)
+                Divider()
+                StartScreenSettingsView()
+                ShowLocaltimeSettingsView()
+                ShowPastEventsSettingsView()
+                ShowNewsSettingsView()
             }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity)
-            .background(Color(.systemGray6))
-            .cornerRadius(5)
-            Divider()
-            StartScreenSettingsView()
-            ShowLocaltimeSettingsView()
-            ShowPastEventsSettingsView()
-            ShowNewsSettingsView()
+            .padding(10)
         }
-        .padding(10)
     }
 }
 

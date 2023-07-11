@@ -45,13 +45,15 @@ struct Product: Codable, Identifiable {
 struct Media: Codable {
     var assetId: Int
     var filetype: String
+    var md5: String
     var name: String
     var sortOrder: Int
     var url: String
-
+    
     private enum CodingKeys: String, CodingKey {
         case assetId = "asset_id"
         case filetype
+        case md5 = "hash_md5"
         case name
         case sortOrder = "sort_order"
         case url

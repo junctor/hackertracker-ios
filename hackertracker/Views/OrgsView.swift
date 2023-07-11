@@ -23,7 +23,7 @@ struct OrgsView: View {
         ScrollView {
             LazyVGrid(columns: gridItemLayout, spacing: 20) {
                 ForEach(self.viewModel.orgs.filter { $0.tag_ids.contains(tagId) }.search(text: searchText), id: \.id) { org in
-                    NavigationLink(destination: DocumentView(title_text: org.name, body_text: org.description)) {
+                    NavigationLink(destination: OrgView(org: org)) {
                         orgRow(org: org, theme: theme)
                     }
                 }

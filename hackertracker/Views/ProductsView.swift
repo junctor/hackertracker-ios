@@ -10,6 +10,7 @@ import Kingfisher
 
 struct ProductsView: View {
     @EnvironmentObject var viewModel: InfoViewModel
+
     @State private var searchText = ""
 
     var body: some View {
@@ -39,7 +40,7 @@ struct ProductsView: View {
         .navigationTitle("Merch")
         .toolbar {
             NavigationLink(destination: CartView()) {
-                    Image(systemName: "cart")
+                Image(systemName: "qrcode")
             }
         }
     }

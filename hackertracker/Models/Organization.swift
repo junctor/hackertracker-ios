@@ -15,6 +15,7 @@ struct Organization: Codable, Identifiable {
     var description: String
     var logo: Logo?
     var links: [Link]
+    var media: [Media]
     var tag_ids: [Int]
 
     private enum CodingKeys: String, CodingKey {
@@ -23,14 +24,21 @@ struct Organization: Codable, Identifiable {
         case description
         case logo
         case links
+        case media
         case tag_ids
     }
 }
 
 struct Link: Codable {
     var label: String
-    var type: String
     var url: String
+    var type: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case label
+        case url
+        case type
+    }
 }
 
 struct Logo: Codable {

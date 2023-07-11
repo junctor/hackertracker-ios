@@ -30,37 +30,35 @@ struct ContentView: View {
 
     var body: some View {
         if viewModel.conference != nil {
-            NavigationView {
-                TabView(selection: $tabSelection) {
-                    InfoView()
-                        .tabItem {
-                            Image(systemName: "house")
-                            // Text("Info")
-                        }
-                        .tag(1)
-                        .preferredColorScheme(theme.colorScheme)
-                    ScheduleView()
-                        .tabItem {
-                            Image(systemName: "calendar")
-                            // Text("Main")
-                        }
-                        .tag(2)
-                        .preferredColorScheme(theme.colorScheme)
-                    MapView()
-                        .tabItem {
-                            Image(systemName: "map")
-                            // Text("Maps")
-                        }
-                        .tag(3)
-                        .preferredColorScheme(theme.colorScheme)
-                    SettingsView()
-                        .tabItem {
-                            Image(systemName: "gearshape")
-                            // Text("Settings")
-                        }
-                        .tag(4)
-                        .preferredColorScheme(theme.colorScheme)
-                }
+            TabView(selection: $tabSelection) {
+                InfoView()
+                    .tabItem {
+                        Image(systemName: "house")
+                        // Text("Info")
+                    }
+                    .tag(1)
+                    .preferredColorScheme(theme.colorScheme)
+                ScheduleView()
+                    .tabItem {
+                        Image(systemName: "calendar")
+                        // Text("Main")
+                    }
+                    .tag(2)
+                    .preferredColorScheme(theme.colorScheme)
+                MapView()
+                    .tabItem {
+                        Image(systemName: "map")
+                        // Text("Maps")
+                    }
+                    .tag(3)
+                    .preferredColorScheme(theme.colorScheme)
+                SettingsView()
+                    .tabItem {
+                        Image(systemName: "gearshape")
+                        // Text("Settings")
+                    }
+                    .tag(4)
+                    .preferredColorScheme(theme.colorScheme)
             }
             .onAppear {
                 if #available(iOS 15.0, *) {

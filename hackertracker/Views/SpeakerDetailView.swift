@@ -53,13 +53,13 @@ struct SpeakerDetailView: View {
                     
                     Markdown(speaker.description)
                     
-                    Divider()
-                    if speaker.events.count > 0 {
-                        showEvents(events: speaker.events)
+                    if speaker.eventIds.count > 0 {
+                        Divider()
+                        showEvents(eventIds: speaker.eventIds)
                     }
-                    Divider()
                     if speaker.links.count > 0 {
-                        showLinks(links: speaker.links)
+                        Divider()
+                        showSpeakerLinks(links: speaker.links)
                     }
                 }
                 .padding(15)
@@ -70,7 +70,7 @@ struct SpeakerDetailView: View {
     }
 }
 
-struct showLinks: View {
+struct showSpeakerLinks: View {
     var links: [SpeakerLink]
     @Environment(\.openURL) private var openURL
     @State private var collapsed = false
@@ -117,7 +117,7 @@ struct showLinks: View {
 }
 
 struct showEvents: View {
-    var events: [SpeakerEvent]
+    var eventIds: [Int]
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @EnvironmentObject var viewModel: InfoViewModel
     @State private var collapsed = false
@@ -136,9 +136,9 @@ struct showEvents: View {
             }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
             if !collapsed {
                 VStack {
-                    ForEach(events) { event in
-                        NavigationLink(destination: EventDetailView(eventId: event.id, bookmarks: bookmarks.map { $0.id })) {
-                            if let ev = viewModel.events.first(where: { $0.id == event.id }) {
+                    ForEach(eventIds, id: \.self) { eventId in
+                        NavigationLink(destination: EventDetailView(eventId: eventId)) {
+                            if let ev = viewModel.events.first(where: { $0.id == eventId }) {
                                 SpeakerEventView(event: ev, bookmarks: bookmarks.map { $0.id })
                                     .foregroundColor(.white)
                             }

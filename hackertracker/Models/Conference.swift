@@ -28,6 +28,7 @@ struct Conference: Codable, Identifiable, Equatable {
     var maps: [Map]?
     var documents: [Document]?
     var hidden: Bool
+    var enableMerch: Bool
     var tagline: String?
 
     private enum CodingKeys: String, CodingKey {
@@ -44,6 +45,7 @@ struct Conference: Codable, Identifiable, Equatable {
         case maps
         case documents
         case hidden
+        case enableMerch = "enable_merch"
         case tagline = "tagline_text"
     }
 }

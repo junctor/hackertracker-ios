@@ -41,7 +41,7 @@ struct SpeakerRow_Previews: PreviewProvider {
                                       name: "Speaker Name",
                                       pronouns: "they/them",
                                       twitter: "defcon",
-                                      events: [])
+                                      eventIds: [99, 23])
         SpeakerRow(speaker: preview_speaker, themeColor: .purple)
     }
 }

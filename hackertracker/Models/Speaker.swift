@@ -16,13 +16,13 @@ struct Speaker: Codable, Equatable {
     var description: String
     var link: String
     var links: [SpeakerLink]
-    var media: [SpeakerMedia]?
+    var media: [Media]?
     var name: String
     var affiliations: [SpeakerAffiliation]?
     var pronouns: String?
     var title: String?
     var twitter: String
-    var events: [SpeakerEvent]
+    var eventIds: [Int]
 
     static func == (lhs: Speaker, rhs: Speaker) -> Bool {
         if lhs.id == rhs.id, lhs.name == rhs.name, lhs.description == rhs.description {
@@ -44,7 +44,7 @@ struct Speaker: Codable, Equatable {
         case pronouns
         case title
         case twitter
-        case events
+        case eventIds = "event_ids"
     }
 }
 
@@ -55,24 +55,6 @@ struct SpeakerAffiliation: Codable {
     private enum CodingKeys: String, CodingKey {
         case organization
         case title
-    }
-}
-
-struct SpeakerMedia: Codable {
-    var assetId: Int
-    var filetype: String
-    var md5: String
-    var name: String
-    var sortOrder: Int
-    var url: String
-    
-    private enum CodingKeys: String, CodingKey {
-        case assetId = "asset_id"
-        case filetype
-        case md5 = "hash_md5"
-        case name
-        case sortOrder = "sort_order"
-        case url
     }
 }
 

@@ -12,13 +12,16 @@ struct ProductView: View {
     var product: Product
     @Environment(\.managedObjectContext) private var viewContext
     @EnvironmentObject var viewModel: InfoViewModel
-    @State private var selectedVariant: Int = 0
+    @FetchRequest(sortDescriptors: []) var cart: FetchedResults<Cart>
+    @State private var selectedVariant: Int
     @State private var count: Int = 0
+    @State private var showAlert: Bool = false
+    @State private var message = ""
 
-    /* init(product: Product) {
+    init(product: Product) {
         self.product = product
-        _selectedVariant = State(initialValue: product.variants[0])
-    } */
+        _selectedVariant = State(initialValue: product.variants[0].variantId)
+    }
     
     var body: some View {
         ScrollView {
@@ -55,67 +58,76 @@ struct ProductView: View {
                     .padding(10)
                 }
                 HStack {
-                    Picker("Options", selection: $selectedVariant) {
-                        ForEach(product.variants, id: \.variantId) { variant in
-                            Text("Size: \(variant.code) - $\(variant.price/100)")
-                                .foregroundColor(.white)
-                                .tag(variant.variantId)
-                                .onTapGesture {
-                                    selectedVariant = variant.variantId
-                                }
+                    VStack(alignment: .leading) {
+                        Picker("Options", selection: $selectedVariant) {
+                            ForEach(product.variants, id: \.variantId) { variant in
+                                Text("\(variant.code) - $\(variant.price/100)\((variant.stockStatus == "LOW") ? " - Low Stock" : "" )\((variant.stockStatus == "OUT") ? " - Out of Stock" : "" )")
+                                    .tag(variant.variantId)
+                            }
                         }
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .labelsHidden()
                     }
                     .frame(maxWidth: .infinity)
-                    Stepper("", value: $count)
+                    Stepper("Quantity: \(count)", value: $count)
+                        .fixedSize()
                 }
-                /* ForEach(product.variants, id: \.variantId) { variant in
-                    VariantRow(variant: variant)
-                } */
                 
                 HStack {
-                    Button {
-                        if count > 0 {
-                            CartUtility.addItem(context: viewContext, variantId: selectedVariant, count: count)
-                            print("ProductView: Add \(selectedVariant) - \(count) to cart")
+                    if let v = product.variants.first(where: { $0.variantId == selectedVariant }) {
+                        if v.stockStatus == "OUT" {
+                            Button { } label: {
+                                Text("Out of stock")
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding(15)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(15)
                         } else {
-                            print("Add item failed: \(selectedVariant) - \(count)")
-                        }
-                    } label: {
-                        if count > 0 {
-                            Text("Add to cart (\(count))")
-                        } else {
-                            Text("Add to cart")
-                        }
+                            Button {
+                                if count > 0 {
+                                    CartUtility.addItem(context: viewContext, variantId: selectedVariant, count: count)
+                                    print("ProductView: Add \(selectedVariant) - \(count) to list")
+                                    message = "Added \(count) \(v.code) \(product.title) to list"
+                                } else {
+                                    showAlert = true
+                                }
+                            } label: {
+                                Text("Add to List")
+                            }
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .padding(15)
+                            .background(ThemeColors.blue.gradient)
+                            .cornerRadius(15)
+                            .alert("Select Quantity before Adding", isPresented: $showAlert) {
+                                Button("Ok") { }
+                            }
+                         }
                     }
                 }
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(15)
-                .background(ThemeColors.blue.gradient)
-                .cornerRadius(15)
                 
+                Text(message.uppercased())
+                    .foregroundColor(.gray)
+                    .font(.caption)
             }
         }
         .onAppear {
             self.selectedVariant = self.product.variants[0].variantId
         }
+        .toolbar {
+            NavigationLink(destination: CartView()) {
+                ZStack {
+                    Image(systemName: "qrcode")
+                }
+            }
+        }
     }
     
     func addToCart(variant: Variant) {
         print("ProductView: Add \(variant.variantId) to cart")
-    }
-}
-
-struct VariantRow: View {
-    var variant: Variant
-    @State var value: Int = 0
-
-    var body: some View {
-        HStack {
-            Text("$\(variant.price / 100).00 -")
-            Stepper("Size: \(variant.code)", value: $value)
-            Text("\(value)")
-        }
     }
 }
 

@@ -10,6 +10,10 @@ import CoreData
 
 class CartUtility {
     static func addItem(context: NSManagedObjectContext, variantId: Int, count: Int) {
+        let curCount = itemExists(context: context, variantId: variantId)
+        if curCount > 0 {
+            return updateItem(context: context, variantId: variantId, count: curCount + count)
+        }
         let newItem = Cart(context: context)
         newItem.variantId = Int32(variantId)
         newItem.count = Int32(count)
@@ -23,13 +27,28 @@ class CartUtility {
         }
     }
     
+    static func itemExists(context: NSManagedObjectContext, variantId: Int) -> Int {
+        let fr = NSFetchRequest<Cart>(entityName: "Cart")
+        fr.predicate = NSPredicate(format: "variantId = %d", variantId)
+        do {
+            let res = try context.fetch(fr)
+            if res.count > 0 {
+                return Int(res[0].count)
+            }
+        } catch {
+            let nsError = error as NSError
+            print("Unresolved error \(nsError), \(nsError.userInfo)")
+        }
+        return 0
+    }
+    
     static func updateItem(context: NSManagedObjectContext, variantId: Int, count: Int) {
         let fr = NSFetchRequest<Cart>(entityName: "Cart")
         fr.predicate = NSPredicate(format: "variantId = %d", variantId)
         do {
             let res = try context.fetch(fr)
             if res.count > 0 {
-                var item = res[0]
+                let item = res[0]
                 print("Updating \(item.variantId) Cart Item to \(count)")
                 item.count = Int32(count)
             }            

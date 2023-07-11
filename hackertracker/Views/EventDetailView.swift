@@ -9,12 +9,11 @@ import SwiftUI
 
 struct EventDetailView: View {
     let eventId: Int
-    let bookmarks: [Int32]
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
     let dfu = DateFormatterUtility.shared
-    // let event: Event
 
     @Environment(\.managedObjectContext) private var viewContext
 
@@ -24,21 +23,28 @@ struct EventDetailView: View {
     ]
 
     var body: some View {
-        ScrollView {
-            if let event = viewModel.events.first(where: { $0.id == eventId }) {
+        if let event = viewModel.events.first(where: { $0.id == eventId }) {
+            ScrollView {
                 VStack(alignment: .leading) {
                     VStack(alignment: .center) {
                         Text(event.title).font(.largeTitle).bold()
                         VStack(alignment: .leading) {
                             HStack {
                                 Circle().foregroundColor(event.type.swiftuiColor)
-                                    .frame(width: 15, height: 15, alignment: .center)
+                                   .frame(width: 15, height: 15, alignment: .center)
                                 Text(event.type.name).font(.subheadline).bold()
                             }
+                            .padding(.leading, 10)
+                            .padding(.trailing, 5)
+                            .padding(.vertical, 5)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(.background)
+                            .cornerRadius(10)
+                            .padding(.bottom, 5)
                             HStack {
                                 Image(systemName: "clock")
                                 Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.beginTimestamp)) - \(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.endTimestamp))")
-                                    .font(.subheadline).bold()
+                                   .font(.subheadline).bold()
                             }
                             .padding(.leading, 10)
                             .padding(.trailing, 5)
@@ -61,7 +67,7 @@ struct EventDetailView: View {
                         }
                     }
                     .padding()
-                    .background(event.type.swiftuiColor.gradient)
+                    .background(Color(.systemGray6))
                     .cornerRadius(15)
                 }
                 VStack(alignment: .leading) {
@@ -69,7 +75,7 @@ struct EventDetailView: View {
                 }
                 VStack {
                     if event.people.count > 0 {
-                        let people = event.people.sorted { $0.sortOrder > $1.sortOrder }
+                        let people = event.people.sorted { $0.sortOrder < $1.sortOrder }
                         if people.count > 1 {
                             LazyVGrid(columns: columns, spacing: 20) {
                                 ForEach(people, id: \.id) { person in
@@ -113,36 +119,39 @@ struct EventDetailView: View {
                 }
                 .padding(.horizontal, 15)
             }
-        }
-        .toolbar {
-            ToolbarItemGroup {
-                if let event = viewModel.events.first(where: { $0.id == eventId }) {
-                    Button {
-                        if bookmarks.contains(Int32(event.id)) {
-                            BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
-                        } else {
-                            BookmarkUtility.addBookmark(context: viewContext, id: event.id)
+            .toolbar {
+                ToolbarItemGroup {
+                    if let event = viewModel.events.first(where: { $0.id == eventId }) {
+                        Button {
+                            if bookmarks.map({ $0.id }).contains(Int32(event.id)) {
+                                BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
+                            } else {
+                                BookmarkUtility.addBookmark(context: viewContext, id: event.id)
+                            }
+                        } label: {
+                            if let event = viewModel.events.first(where: { $0.id == eventId }) {
+                                Image(systemName: bookmarks.map({ $0.id }).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                            }
                         }
-                    } label: {
-                        if let event = viewModel.events.first(where: { $0.id == eventId }) {
-                            Image(systemName: bookmarks.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
-                        }
+                        MoreMenu(event: event)
                     }
-                    MoreMenu(event: event)
                 }
             }
+            .navigationBarTitle(Text(""), displayMode: .inline)
+            .toolbar(.hidden, for: .tabBar)
+        } else {
+            _04View(message: "Event \(eventId) found")
         }
-        .navigationBarTitle(Text(""), displayMode: .inline)
-        .toolbar(.hidden, for: .tabBar)
+
     }
 }
 
 struct EventDetailView_Previews: PreviewProvider {
     struct EventDetailPreview: View {
-        let event = InfoViewModel().events[202]
+        // let event = InfoViewModel().events[202]
 
         var body: some View {
-            EventDetailView(eventId: 48508, bookmarks: [1, 99]).preferredColorScheme(.dark)
+            EventDetailView(eventId: 48508).preferredColorScheme(.dark)
         }
     }
 

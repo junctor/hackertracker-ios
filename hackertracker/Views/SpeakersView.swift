@@ -45,7 +45,7 @@ struct SpeakerData: View {
             .frame(maxWidth: .infinity)
             .background(Color(.systemGray6))
         ) {
-            ForEach(speakers, id: \.name) { speaker in
+            ForEach(speakers, id: \.id) { speaker in
                 NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                     SpeakerRow(speaker: speaker, themeColor: theme.carousel())
                 }

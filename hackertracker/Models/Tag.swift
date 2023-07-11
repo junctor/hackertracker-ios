@@ -34,8 +34,8 @@ struct Tag: Codable, Identifiable {
     var label: String
     var sortOrder: Int
     var description: String
-    var colorBackground: String
-    var colorForeground: String
+    var colorBackground: String?
+    var colorForeground: String?
     
     private enum CodingKeys: String, CodingKey {
         case id
