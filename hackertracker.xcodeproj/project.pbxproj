@@ -39,7 +39,8 @@
 		5D642D442A59E8EE0064492D /* QRCodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D432A59E8EE0064492D /* QRCodeView.swift */; };
 		5D642D462A59F0B50064492D /* CartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D452A59F0B50064492D /* CartView.swift */; };
 		5D642D482A5CB3110064492D /* OrgView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D472A5CB3110064492D /* OrgView.swift */; };
-		5D642D4C2A5CBE3D0064492D /* CalendarUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D4B2A5CBE3D0064492D /* CalendarUtility.swift */; };
+		5D642D4F2A5DDB8D0064492D /* AddEventController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D4E2A5DDB8D0064492D /* AddEventController.swift */; };
+		5D642D512A5DDBD20064492D /* AddEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D502A5DDBD20064492D /* AddEventView.swift */; };
 		5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57442857B398001374D4 /* ConferencesView.swift */; };
 		5D9E57492859037C001374D4 /* BookmarkUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57482859037C001374D4 /* BookmarkUtility.swift */; };
 		5D9E5753285A3C25001374D4 /* SpeakersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E5752285A3C25001374D4 /* SpeakersView.swift */; };
@@ -132,7 +133,9 @@
 		5D642D432A59E8EE0064492D /* QRCodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QRCodeView.swift; sourceTree = "<group>"; };
 		5D642D452A59F0B50064492D /* CartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CartView.swift; sourceTree = "<group>"; };
 		5D642D472A5CB3110064492D /* OrgView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrgView.swift; sourceTree = "<group>"; };
-		5D642D4B2A5CBE3D0064492D /* CalendarUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarUtility.swift; sourceTree = "<group>"; };
+		5D642D4D2A5DD1BC0064492D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		5D642D4E2A5DDB8D0064492D /* AddEventController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventController.swift; sourceTree = "<group>"; };
+		5D642D502A5DDBD20064492D /* AddEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventView.swift; sourceTree = "<group>"; };
 		5D9E57442857B398001374D4 /* ConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesView.swift; sourceTree = "<group>"; };
 		5D9E57482859037C001374D4 /* BookmarkUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkUtility.swift; sourceTree = "<group>"; };
 		5D9E5752285A3C25001374D4 /* SpeakersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakersView.swift; sourceTree = "<group>"; };
@@ -239,6 +242,7 @@
 		5DAE04B22820948B00930A2D /* hackertracker */ = {
 			isa = PBXGroup;
 			children = (
+				5D642D4D2A5DD1BC0064492D /* Info.plist */,
 				5D642D2E2A4F7D1F0064492D /* hackertracker.entitlements */,
 				5DB4E0B3284E9F4C0012F6F4 /* Models */,
 				5DB4E0B2284E9F320012F6F4 /* Views */,
@@ -284,6 +288,9 @@
 			isa = PBXGroup;
 			children = (
 				5D4F07B828598AC8006772A2 /* 404View.swift */,
+				5D642D4E2A5DDB8D0064492D /* AddEventController.swift */,
+				5D642D502A5DDBD20064492D /* AddEventView.swift */,
+				5D642D452A59F0B50064492D /* CartView.swift */,
 				5DF51AB92850310B007BCB83 /* ConferenceRow.swift */,
 				5D9E57442857B398001374D4 /* ConferencesView.swift */,
 				5DAE04B52820948B00930A2D /* ContentView.swift */,
@@ -300,8 +307,10 @@
 				3CD532E62A29B0F0009D17F3 /* MoreMenu.swift */,
 				5D642D362A534BE00064492D /* NewsListView.swift */,
 				5D0A5A5C2A33D8C600BD5ECE /* OrgsView.swift */,
+				5D642D472A5CB3110064492D /* OrgView.swift */,
 				5D642D282A44A1960064492D /* ProductsView.swift */,
 				5D642D2C2A44F3AF0064492D /* ProductView.swift */,
+				5D642D432A59E8EE0064492D /* QRCodeView.swift */,
 				5DB4E0AA284E86900012F6F4 /* ScheduleView.swift */,
 				5DB4E0B0284E86D80012F6F4 /* SettingsView.swift */,
 				3CD532DE2A29AC33009D17F3 /* ShareView.swift */,
@@ -309,9 +318,6 @@
 				5D9E5754285A3C86001374D4 /* SpeakerRow.swift */,
 				5D9E5752285A3C25001374D4 /* SpeakersView.swift */,
 				3CE59E3A285B3ACD00B453C9 /* ViewModifiers.swift */,
-				5D642D432A59E8EE0064492D /* QRCodeView.swift */,
-				5D642D452A59F0B50064492D /* CartView.swift */,
-				5D642D472A5CB3110064492D /* OrgView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -349,7 +355,6 @@
 				5D642D222A4388D50064492D /* PDFView.swift */,
 				3C0E05CE2A53E70200E7154F /* Searchable.swift */,
 				5D642D412A59C1710064492D /* CartUtility.swift */,
-				5D642D4B2A5CBE3D0064492D /* CalendarUtility.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -559,12 +564,12 @@
 				5DF51ACD2851507E007BCB83 /* Location.swift in Sources */,
 				3C92B96D2859E51F00523901 /* ColorUtility.swift in Sources */,
 				5D642D252A438FB50064492D /* LocationView.swift in Sources */,
+				5D642D4F2A5DDB8D0064492D /* AddEventController.swift in Sources */,
 				5DF51ACF285151C6007BCB83 /* Bookmark.swift in Sources */,
 				3CD532DB2A29A9A9009D17F3 /* EventsView.swift in Sources */,
 				5DF51AE028526C0C007BCB83 /* UserEvent.swift in Sources */,
 				5DB4E0BC284EA0AE0012F6F4 /* Speaker.swift in Sources */,
 				3CD532DF2A29AC33009D17F3 /* ShareView.swift in Sources */,
-				5D642D4C2A5CBE3D0064492D /* CalendarUtility.swift in Sources */,
 				5DB4E0AD284E86AD0012F6F4 /* MapView.swift in Sources */,
 				5DAE04C02820948E00930A2D /* hackertracker.xcdatamodeld in Sources */,
 				5D642D372A534BE00064492D /* NewsListView.swift in Sources */,
@@ -588,6 +593,7 @@
 				5D4F07B928598AC8006772A2 /* 404View.swift in Sources */,
 				5DAE04B42820948B00930A2D /* hackertrackerApp.swift in Sources */,
 				5DB4E0AF284E86CC0012F6F4 /* InfoView.swift in Sources */,
+				5D642D512A5DDBD20064492D /* AddEventView.swift in Sources */,
 				5D642D442A59E8EE0064492D /* QRCodeView.swift in Sources */,
 				5DF51ACB28514F70007BCB83 /* EventType.swift in Sources */,
 				5D642D232A4388D50064492D /* PDFView.swift in Sources */,
@@ -753,11 +759,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23071101;
+				CURRENT_PROJECT_VERSION = 23071102;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = hackertracker/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = NSCalendarsWriteOnlyAccessUsageDescription;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -783,11 +792,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 23071101;
+				CURRENT_PROJECT_VERSION = 23071102;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = hackertracker/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_NSCalendarsUsageDescription = NSCalendarsWriteOnlyAccessUsageDescription;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

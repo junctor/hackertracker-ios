@@ -22,6 +22,16 @@ extension Date {
     }
 }
 
+extension [TagType] {
+    func tags(category: String) -> [Tag] {
+        var retArray: [Tag] = []
+        for tagtype in self.filter({$0.category == category}) {
+            retArray.append(contentsOf: tagtype.tags)
+        }
+        return retArray
+    }
+}
+
 extension [Event] {
     func types() -> [Int: EventType] {
         return self.reduce(into: [:]) { tags, event in
@@ -33,7 +43,7 @@ extension [Event] {
         if typeIds.isEmpty {
             return self
         } else {
-            return self.filter { typeIds.contains($0.type.id) || (typeIds.contains(1337) && bookmarks.contains(Int32($0.id))) }
+            return self.filter { $0.tagIds.filter({ typeIds.contains($0) }).count > 0 || (typeIds.contains(1337) && bookmarks.contains(Int32($0.id))) }
         }
     }
 

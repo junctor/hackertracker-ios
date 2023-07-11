@@ -90,7 +90,7 @@ struct ContentView: View {
                     .environmentObject(selected)
                     .environmentObject(viewModel)
             } else {
-                Text("loading")
+                _04View(message: "Loading", show404: false).preferredColorScheme(.dark)
                     .onAppear {
                         print("ContentView: Selected Conference \(selected.code), Conference Code: \(conferenceCode)")
                         if selected.code != conferenceCode {

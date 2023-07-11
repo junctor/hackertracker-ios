@@ -25,6 +25,7 @@ struct Event: Codable, Identifiable {
     var speakers: [EventSpeaker]
     var people: [Person]
     var type: EventType
+    var tagIds: [Int]
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -41,6 +42,7 @@ struct Event: Codable, Identifiable {
         case speakers
         case people
         case type
+        case tagIds = "tag_ids"
     }
 }
 

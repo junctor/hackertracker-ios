@@ -80,7 +80,7 @@ struct EventsView: View {
                 .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
         }
         .sheet(isPresented: $showFilters) {
-            EventFilters(types: events.types(), showFilters: $showFilters, filters: $filters)
+            EventFilters(tagtypes: viewModel.tagtypes.filter({$0.category == "content"}), showFilters: $showFilters, filters: $filters)
         }
         .onChange(of: viewModel.conference) { con in
             print("EventsView.onChange(of: conference) == \(con?.name ?? "not found")")
@@ -90,7 +90,8 @@ struct EventsView: View {
 }
 
 struct EventFilters: View {
-    let types: [Int: EventType]
+    let tagtypes: [TagType]
+    // let types: [Int: EventType]
     @Binding var showFilters: Bool
     @Binding var filters: Set<Int>
 
@@ -99,13 +100,20 @@ struct EventFilters: View {
             List {
                 FilterRow(id: 1337, name: "Bookmarks", color: .primary, filters: $filters)
 
-                Section(header: Text("Event Category")) {
+                ForEach(tagtypes.sorted { $0.sortOrder < $1.sortOrder }) { tagtype in
+                    Section(header: Text(tagtype.label)) {
+                        ForEach(tagtype.tags.sorted { $0.sortOrder < $1.sortOrder }) { tag in
+                            FilterRow(id: tag.id, name: tag.label, color: Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple), filters: $filters)
+                        }
+                    }
+                }.headerProminence(.increased)
+                /* Section(header: Text("Event Category")) {
                     ForEach(types.sorted {
                         $0.value.name < $1.value.name
                     }, id: \.key) { id, type in
                         FilterRow(id: id, name: type.name, color: type.swiftuiColor, filters: $filters)
                     }
-                }.headerProminence(.increased)
+                }.headerProminence(.increased)*/
             }
             .listStyle(.plain)
             .navigationTitle("Filters")

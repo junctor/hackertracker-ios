@@ -64,7 +64,7 @@ struct ConferencesView: View {
             }
             .listStyle(.plain)
         } else {
-            Text("loading")
+            _04View(message: "Loading", show404: false).preferredColorScheme(.dark)
                 .onAppear {
                     viewModel.fetchConferences(hidden: showHidden)
                 }

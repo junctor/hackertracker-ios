@@ -39,7 +39,7 @@ struct MapView: View {
                     _04View(message: "No Maps Found")
                 }
             } else {
-                Text("loading...")
+                _04View(message: "Loading", show404: false).preferredColorScheme(.dark)
             }
         }
 
