@@ -80,7 +80,7 @@ struct EventsView: View {
                 .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
         }
         .sheet(isPresented: $showFilters) {
-            EventFilters(tagtypes: viewModel.tagtypes.filter({$0.category == "content"}), showFilters: $showFilters, filters: $filters)
+            EventFilters(tagtypes: viewModel.tagtypes.filter({$0.category == "content" && $0.isBrowsable == true}), showFilters: $showFilters, filters: $filters)
         }
         .onChange(of: viewModel.conference) { con in
             print("EventsView.onChange(of: conference) == \(con?.name ?? "not found")")

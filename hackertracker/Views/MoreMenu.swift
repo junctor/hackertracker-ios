@@ -12,6 +12,7 @@ struct MoreMenu: View {
     let event: Event
     let dfu = DateFormatterUtility.shared
     @State var showAddEventModal = false
+    @Binding var showingAlert: Bool
 
     var body: some View {
         Menu {
@@ -21,9 +22,12 @@ struct MoreMenu: View {
             } label: {
                 Label("Save to Calendar", systemImage: "calendar")
             }
-            Button {} label: {
-                Label("Alert", systemImage: "bell")
+            Button {
+                showingAlert = true
+            } label: {
+                Label("Add Notification", systemImage: NotificationUtility.notificationExists(event: event) ? "bell.fill" : "bell")
             }
+            
         } label: {
             Image(systemName: "ellipsis")
         }
@@ -44,14 +48,5 @@ struct MoreMenu: View {
         event.timeZone = dfu.timeZone
         event.location = htEvent.location.name
         event.notes = htEvent.description
-
-        // Create a view controller
-        /* let eventEditViewController = EKEventEditViewController()
-        eventEditViewController.event = event
-        eventEditViewController.eventStore = store
-        eventEditViewController.editViewDelegate = self
-
-        // Present the view controller
-        present(eventEditViewController, animated: true) */
     }
 }

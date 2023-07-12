@@ -46,9 +46,47 @@ struct SettingsView: View {
                 ShowLocaltimeSettingsView()
                 ShowPastEventsSettingsView()
                 ShowNewsSettingsView()
+                NotificationSettingsView()
             }
             .padding(10)
         }
+    }
+}
+
+struct NotificationSettingsView: View {
+    @EnvironmentObject var viewModel: InfoViewModel
+    @AppStorage("notifyAt") var notifyAt: Int = 10
+    @State private var showingAlert = false
+
+    var body: some View {
+        Text("Notifications")
+            .font(.headline)
+        VStack(alignment: .leading) {
+                Stepper("Before Event: \(notifyAt)", value: $notifyAt)
+                Text("Notification time in minutes")
+                    .font(.caption)
+        }
+        .padding(5)
+        HStack {
+            Button {
+                showingAlert = true
+            } label: {
+                Text("Remove all notifications")
+                Image(systemName: "trash")
+            }
+            .alert("Are you sure", isPresented: $showingAlert) {
+                Button("Yes") {
+                    NotificationUtility.removeAllNotifications()
+                }
+                Button("No", role: .cancel) { }
+            }
+        }
+        .foregroundColor(.white)
+        .frame(maxWidth: .infinity)
+        .padding(5)
+        .background(ThemeColors.red)
+        .cornerRadius(5)
+        Divider()
     }
 }
 
@@ -87,7 +125,7 @@ struct ShowNewsSettingsView: View {
     @AppStorage("showNews") var showNews: Bool = true
     
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
                 Toggle("News on Home Screen", isOn: $showNews)
                     .onChange(of: showNews) { value in
                         print("SettingsView: Changing to showNews = \(value)")
@@ -106,7 +144,7 @@ struct ShowPastEventsSettingsView: View {
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
     
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Toggle("Show Past Events", isOn: $showPastEvents)
                 .onChange(of: showPastEvents) { value in
                     print("SettingsView: Changing to showPastEvents = \(value)")
@@ -125,7 +163,7 @@ struct StartScreenSettingsView: View {
     let startScreens = ["Main", "Schedule", "Maps"]
 
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Text("Start Screen")
             Picker("Start Screen", selection: $launchScreen) {
                 ForEach(startScreens, id: \.self) {

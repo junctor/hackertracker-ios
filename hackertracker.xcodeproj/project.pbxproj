@@ -82,6 +82,7 @@
 		5DF51AD62851557E007BCB83 /* Vendor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51AD52851557E007BCB83 /* Vendor.swift */; };
 		5DF51AD8285155BC007BCB83 /* FAQ.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51AD7285155BC007BCB83 /* FAQ.swift */; };
 		5DF51AE028526C0C007BCB83 /* UserEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51ADF28526C0C007BCB83 /* UserEvent.swift */; };
+		5DF82B262A5F3B29001395C7 /* NotificationUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF82B252A5F3B29001395C7 /* NotificationUtility.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -174,6 +175,7 @@
 		5DF51AD52851557E007BCB83 /* Vendor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Vendor.swift; sourceTree = "<group>"; };
 		5DF51AD7285155BC007BCB83 /* FAQ.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FAQ.swift; sourceTree = "<group>"; };
 		5DF51ADF28526C0C007BCB83 /* UserEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserEvent.swift; sourceTree = "<group>"; };
+		5DF82B252A5F3B29001395C7 /* NotificationUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationUtility.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -355,6 +357,7 @@
 				5D642D222A4388D50064492D /* PDFView.swift */,
 				3C0E05CE2A53E70200E7154F /* Searchable.swift */,
 				5D642D412A59C1710064492D /* CartUtility.swift */,
+				5DF82B252A5F3B29001395C7 /* NotificationUtility.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -570,6 +573,7 @@
 				5DF51AE028526C0C007BCB83 /* UserEvent.swift in Sources */,
 				5DB4E0BC284EA0AE0012F6F4 /* Speaker.swift in Sources */,
 				3CD532DF2A29AC33009D17F3 /* ShareView.swift in Sources */,
+				5DF82B262A5F3B29001395C7 /* NotificationUtility.swift in Sources */,
 				5DB4E0AD284E86AD0012F6F4 /* MapView.swift in Sources */,
 				5DAE04C02820948E00930A2D /* hackertracker.xcdatamodeld in Sources */,
 				5D642D372A534BE00064492D /* NewsListView.swift in Sources */,

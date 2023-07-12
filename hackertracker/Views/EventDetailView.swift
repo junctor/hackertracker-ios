@@ -14,8 +14,10 @@ struct EventDetailView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
     let dfu = DateFormatterUtility.shared
+    @State var showingAlert = false
 
     @Environment(\.managedObjectContext) private var viewContext
+    @AppStorage("notifyAt") var notifyAt: Int = 10
 
     let columns = [
         GridItem(.flexible()),
@@ -133,7 +135,14 @@ struct EventDetailView: View {
                                 Image(systemName: bookmarks.map({ $0.id }).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
                             }
                         }
-                        MoreMenu(event: event)
+                        MoreMenu(event: event, showingAlert: $showingAlert)
+                            .alert("Add an notication for \(event.title)", isPresented: $showingAlert) {
+                                Button("Yes") {
+                                    let notDate = event.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
+                                    NotificationUtility.scheduleNotification(date: notDate, event: event)
+                                }
+                                Button("No", role: .cancel) { }
+                            }
                     }
                 }
             }
