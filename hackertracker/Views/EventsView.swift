@@ -94,26 +94,23 @@ struct EventFilters: View {
     // let types: [Int: EventType]
     @Binding var showFilters: Bool
     @Binding var filters: Set<Int>
+    
+    let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
         NavigationStack {
-            List {
-                FilterRow(id: 1337, name: "Bookmarks", color: .primary, filters: $filters)
+            ScrollView {
+                FilterRow(id: 1337, name: "Bookmarks", color: ThemeColors.blue, filters: $filters)
 
                 ForEach(tagtypes.sorted { $0.sortOrder < $1.sortOrder }) { tagtype in
                     Section(header: Text(tagtype.label)) {
-                        ForEach(tagtype.tags.sorted { $0.sortOrder < $1.sortOrder }) { tag in
-                            FilterRow(id: tag.id, name: tag.label, color: Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple), filters: $filters)
+                        LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
+                            ForEach(tagtype.tags.sorted { $0.sortOrder < $1.sortOrder }) { tag in
+                                FilterRow(id: tag.id, name: tag.label, color: Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple), filters: $filters)
+                            }
                         }
                     }
                 }.headerProminence(.increased)
-                /* Section(header: Text("Event Category")) {
-                    ForEach(types.sorted {
-                        $0.value.name < $1.value.name
-                    }, id: \.key) { id, type in
-                        FilterRow(id: id, name: type.name, color: type.swiftuiColor, filters: $filters)
-                    }
-                }.headerProminence(.increased)*/
             }
             .listStyle(.plain)
             .navigationTitle("Filters")
@@ -127,6 +124,7 @@ struct EventFilters: View {
                     }
                 }
             }
+            .padding(5)
         }
     }
 }
@@ -195,25 +193,68 @@ struct FilterRow: View {
     @Binding var filters: Set<Int>
 
     var body: some View {
-        HStack {
-            if !filters.contains(id) {
-                Circle()
-                    .strokeBorder(color, lineWidth: 5)
-                    .frame(width: 25, height: 25).padding()
-            } else {
-                Circle()
-                    .fill(color)
-                    .frame(width: 25, height: 25)
-                    .padding()
+        if !filters.contains(id) {
+            VStack(alignment: .leading) {
+                HStack {
+                    /* if !filters.contains(id) {
+                        Circle()
+                            .strokeBorder(color, lineWidth: 3)
+                            .frame(width: 20, height: 20)
+                            .padding(5)
+                    } else {
+                        Circle()
+                            .fill(color)
+                            .frame(width: 20, height: 20)
+                            .padding(5)
+                    } */
+                    Text(name)
+                        .font(.subheadline)
+                        .padding(5)
+                }
             }
-            Text(name)
-        }
-        .contentShape(Rectangle())
-        .onTapGesture {
-            if filters.contains(id) {
-                filters.remove(id)
-            } else {
-                filters.insert(id)
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .padding(5)
+            // .border(color, width: 2, cornerRadius: 10)
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(color, lineWidth: 2))
+            // .cornerRadius(10)
+            .onTapGesture {
+                if filters.contains(id) {
+                    filters.remove(id)
+                } else {
+                    filters.insert(id)
+                }
+            }
+        } else {
+            VStack(alignment: .leading) {
+                HStack {
+                    /* if !filters.contains(id) {
+                        Circle()
+                            .strokeBorder(color, lineWidth: 3)
+                            .frame(width: 20, height: 20)
+                            .padding(5)
+                    } else {
+                        Circle()
+                            .fill(color)
+                            .frame(width: 20, height: 20)
+                            .padding(5)
+                    } */
+                    Text(name)
+                        .font(.subheadline)
+                        .padding(5)
+                }
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .padding(5)
+            .background(color)
+            .cornerRadius(10)
+            .onTapGesture {
+                if filters.contains(id) {
+                    filters.remove(id)
+                } else {
+                    filters.insert(id)
+                }
             }
         }
     }
