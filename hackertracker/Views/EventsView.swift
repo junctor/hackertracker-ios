@@ -196,17 +196,6 @@ struct FilterRow: View {
         if !filters.contains(id) {
             VStack(alignment: .leading) {
                 HStack {
-                    /* if !filters.contains(id) {
-                        Circle()
-                            .strokeBorder(color, lineWidth: 3)
-                            .frame(width: 20, height: 20)
-                            .padding(5)
-                    } else {
-                        Circle()
-                            .fill(color)
-                            .frame(width: 20, height: 20)
-                            .padding(5)
-                    } */
                     Text(name)
                         .font(.subheadline)
                         .padding(5)
@@ -215,9 +204,7 @@ struct FilterRow: View {
             .foregroundColor(.white)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .padding(5)
-            // .border(color, width: 2, cornerRadius: 10)
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(color, lineWidth: 2))
-            // .cornerRadius(10)
             .onTapGesture {
                 if filters.contains(id) {
                     filters.remove(id)
@@ -228,17 +215,6 @@ struct FilterRow: View {
         } else {
             VStack(alignment: .leading) {
                 HStack {
-                    /* if !filters.contains(id) {
-                        Circle()
-                            .strokeBorder(color, lineWidth: 3)
-                            .frame(width: 20, height: 20)
-                            .padding(5)
-                    } else {
-                        Circle()
-                            .fill(color)
-                            .frame(width: 20, height: 20)
-                            .padding(5)
-                    } */
                     Text(name)
                         .font(.subheadline)
                         .padding(5)
