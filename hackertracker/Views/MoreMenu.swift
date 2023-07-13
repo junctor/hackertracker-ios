@@ -25,7 +25,7 @@ struct MoreMenu: View {
             Button {
                 showingAlert = true
             } label: {
-                Label("Add Notification", systemImage: NotificationUtility.notificationExists(event: event) ? "bell.fill" : "bell")
+//                Label("Add Notification", systemImage: NotificationUtility.notificationExists(event: event) ? "bell.fill" : "bell")
             }
             
         } label: {
