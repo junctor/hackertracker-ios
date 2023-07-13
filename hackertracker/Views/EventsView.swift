@@ -17,8 +17,9 @@ struct EventsView: View {
 
     @State private var eventDay = ""
     @State private var searchText = ""
-    @State private var filters: Set<Int> = []
+    @Binding var filters: Set<Int>
     @State private var showFilters = false
+    
     var body: some View {
         NavigationStack {
             EventScrollView(events: events
