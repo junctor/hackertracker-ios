@@ -13,6 +13,7 @@ struct MoreMenu: View {
     let dfu = DateFormatterUtility.shared
     @State var showAddEventModal = false
     @Binding var showingAlert: Bool
+    @Binding var notExists: Bool
 
     var body: some View {
         Menu {
@@ -25,7 +26,7 @@ struct MoreMenu: View {
             Button {
                 showingAlert = true
             } label: {
-//                Label("Add Notification", systemImage: NotificationUtility.notificationExists(event: event) ? "bell.fill" : "bell")
+                Label(notExists ? "Remove Alert" : "Add Alert", systemImage: notExists ? "bell.fill" : "bell")
             }
             
         } label: {
@@ -36,17 +37,4 @@ struct MoreMenu: View {
         }
     }
     
-    func addEvent(htEvent: Event) {
-        // Create an event store
-        let store = EKEventStore()
-
-        // Create an event
-        let event = EKEvent(eventStore: store)
-        event.title = htEvent.title
-        event.startDate = htEvent.beginTimestamp
-        event.endDate = htEvent.endTimestamp
-        event.timeZone = dfu.timeZone
-        event.location = htEvent.location.name
-        event.notes = htEvent.description
-    }
 }

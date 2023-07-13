@@ -80,16 +80,6 @@ enum NotificationUtility {
 
         NotificationUtility.addNotification(request: request)
     }
-    
-    func notificationExists(event: Event, completion: @escaping (Bool) -> ()) {
-        var retVal = false
-        UNUserNotificationCenter.current().getPendingNotificationRequests(completionHandler: { notificationRequests in
-            for nr in notificationRequests where nr.identifier == "hackertracker-\(event.id)" {
-                    retVal = true
-            }
-            completion(retVal)
-        })
-    }
 
     static func removeNotification(event: Event) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["hackertracker-\(event.id)"])

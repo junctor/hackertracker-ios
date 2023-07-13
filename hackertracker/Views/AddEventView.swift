@@ -11,7 +11,7 @@ struct AddEvent: UIViewControllerRepresentable {
     var event: Event
     
     func makeUIViewController(context: Context) -> AddEventController {
-        var aev = AddEventController()
+        let aev = AddEventController()
         aev.setEvent(newEvent: event)
         return aev
     }

@@ -55,7 +55,7 @@ struct SettingsView: View {
 
 struct NotificationSettingsView: View {
     @EnvironmentObject var viewModel: InfoViewModel
-    @AppStorage("notifyAt") var notifyAt: Int = 10
+    @AppStorage("notifyAt") var notifyAt: Int = 20
     @State private var showingAlert = false
 
     var body: some View {

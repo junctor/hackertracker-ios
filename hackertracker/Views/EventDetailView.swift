@@ -15,9 +15,10 @@ struct EventDetailView: View {
     @EnvironmentObject var theme: Theme
     let dfu = DateFormatterUtility.shared
     @State var showingAlert = false
+    @State var nExists = false
 
     @Environment(\.managedObjectContext) private var viewContext
-    @AppStorage("notifyAt") var notifyAt: Int = 10
+    @AppStorage("notifyAt") var notifyAt: Int = 20
 
     let columns = [
         GridItem(.flexible()),
@@ -135,13 +136,26 @@ struct EventDetailView: View {
                                 Image(systemName: bookmarks.map({ $0.id }).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
                             }
                         }
-                        MoreMenu(event: event, showingAlert: $showingAlert)
-                            .alert("Add an notication for \(event.title)", isPresented: $showingAlert) {
-                                Button("Yes") {
-                                    let notDate = event.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
-                                    NotificationUtility.scheduleNotification(date: notDate, event: event)
-                                }
-                                Button("No", role: .cancel) { }
+                        MoreMenu(event: event, showingAlert: $showingAlert, notExists: $nExists)
+                            .onAppear {
+                                self.notificationExists()
+                            }
+                            .alert(isPresented: $showingAlert) {
+                                Alert(
+                                    title: Text(nExists ? "Remove Alert" : "Add Alert"),
+                                    message: Text(nExists ? "Remove local alert for \(event.title)" : "Add local alert \(notifyAt) minutes before start of \(event.title)"),
+                                    primaryButton: Alert.Button.default(Text("Yes")) {
+                                        if nExists {
+                                            NotificationUtility.removeNotification(event: event)
+                                            nExists = false
+                                        } else {
+                                            let notDate = event.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
+                                            NotificationUtility.scheduleNotification(date: notDate, event: event)
+                                            nExists = true
+                                        }
+                                    },
+                                    secondaryButton: .cancel(Text("No"))
+                                )
                             }
                     }
                 }
@@ -152,6 +166,15 @@ struct EventDetailView: View {
             _04View(message: "Event \(eventId) found")
         }
 
+    }
+    
+    func notificationExists() {
+        print("Checking for existence of notification for \(eventId)")
+        UNUserNotificationCenter.current().getPendingNotificationRequests(completionHandler: { notificationRequests in
+            for nr in notificationRequests where nr.identifier == "hackertracker-\(self.eventId)" {
+                self.nExists = true
+            }
+        })
     }
 }
 

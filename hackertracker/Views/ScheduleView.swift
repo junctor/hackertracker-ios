@@ -17,7 +17,6 @@ struct ScheduleView: View {
     
     @StateObject var filters: Filters
     
-    
     init(tagIds: [Int] = []) {
         _filters = StateObject(wrappedValue: Filters(filters: Set(tagIds)))
     }
