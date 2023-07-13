@@ -14,7 +14,7 @@ struct ProductView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @FetchRequest(sortDescriptors: []) var cart: FetchedResults<Cart>
     @State private var selectedVariant: Int
-    @State private var count: Int = 0
+    @State private var count: Int = 1
     @State private var showAlert: Bool = false
     @State private var message = ""
 
@@ -70,7 +70,7 @@ struct ProductView: View {
                         .labelsHidden()
                     }
                     .frame(maxWidth: .infinity)
-                    Stepper("Quantity: \(count)", value: $count)
+                    Stepper("Quantity: \(count)", value: $count, in: 1...100)
                         .fixedSize()
                 }
                 
@@ -102,7 +102,7 @@ struct ProductView: View {
                             .padding(15)
                             .background(ThemeColors.blue.gradient)
                             .cornerRadius(15)
-                            .alert("Select Quantity before Adding", isPresented: $showAlert) {
+                            .alert("Quantity must be 1 or more", isPresented: $showAlert) {
                                 Button("Ok") { }
                             }
                          }

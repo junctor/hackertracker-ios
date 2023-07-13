@@ -133,16 +133,11 @@ struct InfoView: View {
                     Divider()
                     if self.viewModel.conference?.enableMerch ?? false {
                         Text("Merch")
-                            .font(.subheadline)
-                        LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
-                            NavigationLink(destination: ProductsView()) {
-                                CardView(systemImage: "dollarsign", text: "Merch", color: ThemeColors.drkGreen)
-                            }
-                            NavigationLink(destination: CartView()) {
-                                CardView(systemImage: "qrcode", text: "QR Code", color: ThemeColors.red)
-                            }
-                            Divider()
+                        .font(.subheadline)
+                        NavigationLink(destination: ProductsView()) {
+                            CardView(systemImage: "dollarsign", text: "Merch", color: ThemeColors.drkGreen)
                         }
+                        Divider()
                     }
                     if let url = URL(string: "mailto:hackertracker@defcon.org") {
                         HStack {
@@ -157,9 +152,6 @@ struct InfoView: View {
                         .padding(15)
                         .background(Color(.systemGray6))
                         .cornerRadius(15)
-                        /* NavigationLink(destination: openURL(url)) {
-                         CardView(systemImage: "square.and.pencil", text: "Contact Us", color: theme.carousel())
-                         } */
                     }
                     if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
                         Text("#hackertracker iOS v\(v)")

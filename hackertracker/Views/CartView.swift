@@ -79,17 +79,21 @@ struct CartView: View {
             totalItems = mytotalItems
         }
         .onChange(of: totalItems) { _ in
-            outOfStock = false
-            for item in cart {
-                let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) })[0]
-                let variant = product.variants.filter({$0.variantId == item.variantId})[0]
-                if variant.stockStatus == "OUT" {
-                    outOfStock = true
-                }
-            }
+            checkOutOfStock()
         }
         .navigationTitle("Merch")
         .padding(15)
+    }
+    
+    func checkOutOfStock() {
+        outOfStock = false
+        for item in cart {
+            let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) })[0]
+            let variant = product.variants.filter({$0.variantId == item.variantId})[0]
+            if variant.stockStatus == "OUT" {
+                outOfStock = true
+            }
+        }
     }
     
     func generateQRValue() -> String {

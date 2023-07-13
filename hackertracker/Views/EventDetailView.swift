@@ -33,18 +33,6 @@ struct EventDetailView: View {
                         Text(event.title).font(.largeTitle).bold()
                         VStack(alignment: .leading) {
                             HStack {
-                                Circle().foregroundColor(event.type.swiftuiColor)
-                                   .frame(width: 15, height: 15, alignment: .center)
-                                Text(event.type.name).font(.subheadline).bold()
-                            }
-                            .padding(.leading, 10)
-                            .padding(.trailing, 5)
-                            .padding(.vertical, 5)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(.background)
-                            .cornerRadius(10)
-                            .padding(.bottom, 5)
-                            HStack {
                                 Image(systemName: "clock")
                                 Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.beginTimestamp)) - \(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.endTimestamp))")
                                    .font(.subheadline).bold()
@@ -67,6 +55,9 @@ struct EventDetailView: View {
                             .background(.background)
                             .cornerRadius(10)
                             .padding(.bottom, 5)
+                            if event.tagIds.count > 0 {
+                                showTags(tagIds: event.tagIds)
+                            }
                         }
                     }
                     .padding()
@@ -78,6 +69,10 @@ struct EventDetailView: View {
                 }
                 VStack {
                     if event.people.count > 0 {
+                        Divider()
+                        Text("People")
+                            .font(.headline).padding(.top)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         let people = event.people.sorted { $0.sortOrder < $1.sortOrder }
                         if people.count > 1 {
                             LazyVGrid(columns: columns, spacing: 20) {
@@ -121,6 +116,11 @@ struct EventDetailView: View {
                     }
                 }
                 .padding(.horizontal, 15)
+                if event.links.count > 0 {
+                    Divider()
+                    showLinks(links: event.links)
+                        .padding(15)
+                }
             }
             .toolbar {
                 ToolbarItemGroup {
@@ -175,6 +175,48 @@ struct EventDetailView: View {
                 self.nExists = true
             }
         })
+    }
+}
+
+struct showTags: View {
+    var tagIds: [Int]
+    @EnvironmentObject var viewModel: InfoViewModel
+    @State private var collapsed = false
+    let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                collapsed.toggle()
+            }, label: {
+                HStack {
+                    Text("Tags")
+                        .font(.headline).padding(.top)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                }
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+            if !collapsed {
+                VStack(alignment: .leading) {
+                    LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
+                        ForEach(tagIds, id: \.self) { tagId in
+                            if let tagtype = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == tagId})}), let tag = tagtype.tags.first(where: {$0.id == tagId}) {
+                                VStack {
+                                    HStack {
+                                        Text(tag.label).font(.subheadline)
+                                    }
+                                }
+                                .padding(5)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
+                                .cornerRadius(10)
+                            }
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
     }
 }
 
