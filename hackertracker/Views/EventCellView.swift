@@ -10,6 +10,7 @@ struct EventCell: View {
     let event: Event
     let bookmarks: [Int32]
     @Environment(\.managedObjectContext) private var viewContext
+    @EnvironmentObject var viewModel: InfoViewModel
     let dfu = DateFormatterUtility.shared
 
     func bookmarkAction() {
@@ -25,7 +26,7 @@ struct EventCell: View {
     var body: some View {
         VStack(alignment: .leading) {
             HStack(alignment: .center) {
-                Rectangle().fill(event.type.swiftuiColor)
+                Rectangle().fill(getEventTagColorBackground())
                     .frame(width: 6)
                 VStack {
                     Text(dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp))
@@ -37,14 +38,7 @@ struct EventCell: View {
                         Text(event.speakers.map { $0.name }.joined(separator: ", ")).font(.subheadline)
                     }
                     Text(event.location.name).font(.caption2)
-                    VStack(alignment: .leading) {
-                        HStack {
-                            Circle().foregroundColor(event.type.swiftuiColor)
-                                .frame(width: 8, height: 8, alignment: .center)
-                            Text(event.type.name).font(.caption)
-                            Spacer()
-                        }
-                    }.frame(minWidth: 0, maxWidth: .infinity)
+                    ShowEventCellTags(tagIds: event.tagIds)
                 }
 
                 HStack(alignment: .center) {
@@ -63,5 +57,38 @@ struct EventCell: View {
             }.buttonStyle(DefaultButtonStyle())
                 .tint(bookmarks.contains(Int32(event.id)) ? .red : .yellow)
         }
+    }
+    
+    func getEventTagColorBackground() -> Color {
+        var colorHex = "#2c8f07"
+        if let tagtype = viewModel.tagtypes.first(where: {$0.tags.contains(where: {$0.id == event.tagIds[0]})}),
+           let tag = tagtype.tags.first(where: { $0.id == event.tagIds[0]}),
+           let colorHex = tag.colorBackground, let uicolor = UIColor(hex: colorHex) {
+            return Color(uiColor: uicolor)
+        }
+        return .purple
+    }
+}
+
+struct ShowEventCellTags: View {
+    var tagIds: [Int]
+    @EnvironmentObject var viewModel: InfoViewModel
+    let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
+
+    var body: some View {
+        LazyVGrid(columns: gridItemLayout, alignment: .leading, spacing: 2) {
+            ForEach(tagIds, id: \.self) { tagId in
+                if let tagtype = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == tagId})}), let tag = tagtype.tags.first(where: {$0.id == tagId}) {
+                    VStack {
+                        HStack {
+                            Circle().foregroundColor(Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
+                                .frame(width: 8, height: 8, alignment: .center)
+                            Text(tag.label).font(.caption)
+                        }
+                    }
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
