@@ -14,6 +14,8 @@ struct EventsView: View {
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
     @EnvironmentObject var viewModel: InfoViewModel
     let dfu = DateFormatterUtility.shared
+    var includeNav: Bool = true
+    var navTitle: String = ""
 
     @State private var eventDay = ""
     @State private var searchText = ""
@@ -21,12 +23,13 @@ struct EventsView: View {
     @State private var showFilters = false
     
     var body: some View {
-        NavigationStack {
-            EventScrollView(events: events
-                .filters(typeIds: filters, bookmarks: bookmarks)
-                .search(text: searchText)
-                .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents)
-            .navigationTitle(viewModel.conference?.name ?? "Schedule")
+        if includeNav {
+            NavigationStack {
+                EventScrollView(events: events
+                    .filters(typeIds: filters, bookmarks: bookmarks)
+                    .search(text: searchText)
+                    .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents)
+                .navigationTitle(viewModel.conference?.name ?? "Schedule")
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarLeading) {
                         Menu {
@@ -63,29 +66,58 @@ struct EventsView: View {
                                     eventDay = dfu.dayOfWeekFormatter.string(from: day) // day.formatted(.dateTime.weekday())
                                 }
                             }
-
+                            
                         } label: {
                             Image(systemName: "chevron.up.chevron.down")
                         }
-
+                        
                         Button {
                             showFilters.toggle()
                         } label: {
                             Image(systemName: filters
                                 .isEmpty
-                                ? "line.3.horizontal.decrease.circle"
-                                : "line.3.horizontal.decrease.circle.fill")
+                                  ? "line.3.horizontal.decrease.circle"
+                                  : "line.3.horizontal.decrease.circle.fill")
                         }
                     }
                 }
                 .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
-        }
-        .sheet(isPresented: $showFilters) {
-            EventFilters(tagtypes: viewModel.tagtypes.filter({$0.category == "content" && $0.isBrowsable == true}), showFilters: $showFilters, filters: $filters)
-        }
-        .onChange(of: viewModel.conference) { con in
-            print("EventsView.onChange(of: conference) == \(con?.name ?? "not found")")
-            self.filters = []
+            }
+            .sheet(isPresented: $showFilters) {
+                EventFilters(tagtypes: viewModel.tagtypes.filter({$0.category == "content" && $0.isBrowsable == true}), showFilters: $showFilters, filters: $filters)
+            }
+            .onChange(of: viewModel.conference) { con in
+                print("EventsView.onChange(of: conference) == \(con?.name ?? "not found")")
+                self.filters = []
+            }
+        } else {
+            VStack {
+                EventScrollView(events: events
+                    .filters(typeIds: filters, bookmarks: bookmarks)
+                    .search(text: searchText)
+                    .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents)
+                .navigationTitle(navTitle)
+                .toolbar {
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                        Menu {
+                            ForEach(events.filters(typeIds: filters, bookmarks: bookmarks).eventDayGroup().sorted {
+                                $0.key < $1.key
+                            }, id: \.key) { day, _ in
+                                Button(dfu.dayMonthDayOfWeekFormatter.string(from: day)) {
+                                    eventDay = dfu.dayOfWeekFormatter.string(from: day) // day.formatted(.dateTime.weekday())
+                                }
+                            }
+                            
+                        } label: {
+                            Image(systemName: "chevron.up.chevron.down")
+                        }
+                    }
+                }
+                .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+            }
+            .onChange(of: viewModel.conference) { con in
+                print("EventsView.onChange(of: conference) == \(con?.name ?? "not found")")
+            }
         }
     }
 }

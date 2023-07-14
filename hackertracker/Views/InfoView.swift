@@ -128,7 +128,12 @@ struct InfoView: View {
                                 }
                             }
                         }
-                        
+                        let kidsTags = getKidsTags()
+                        if kidsTags.count > 0 {
+                            NavigationLink(destination: ScheduleView(tagIds: kidsTags, includeNav: false, navTitle: "Kids Content")) {
+                                CardView(systemImage: "figure.and.child.holdinghands", text: "Kids Content", color: theme.carousel())
+                            }
+                        }
                     }
                     Divider()
                     if self.viewModel.conference?.enableMerch ?? false {
@@ -178,13 +183,31 @@ struct InfoView: View {
         }
         .navigationViewStyle(.stack)
     }
+    
+    func getKidsTags() -> [Int] {
+        var kidsTags: [Int] = []
+        for kidstype in viewModel.tagtypes.filter({$0.category == "content" && $0.isBrowsable == true}) {
+            do {
+                let re = try Regex("[Kk]id")
+                for tag in kidstype.tags.filter({$0.label.contains(re)}) {
+                    kidsTags.append(tag.id)
+                }
+            } catch {
+                print("Regex failed")
+            }
+        }
+        print("KidsTags: \(kidsTags)")
+        return kidsTags
+    }
 
     func tapped() {
         rick += 1
         if rick >= 7 {
             print("Roll away!")
+            if let url = URL(string: "https://www.youtube.com/watch?v=xMHJGd3wwZk") {
+                openURL(url)
+            }
             rick = 0
-            // Implement Rick
         }
     }
 }

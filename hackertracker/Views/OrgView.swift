@@ -11,6 +11,7 @@ import SwiftUI
 
 struct OrgView: View {
     var org: Organization
+    @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
 
     var body: some View {
@@ -40,15 +41,17 @@ struct OrgView: View {
                     }
                 }
                 Markdown(org.description)
-                NavigationLink(destination: ScheduleView(tagId: org.tag_id_as_organizer)) {
-                    Label("Events", systemImage: "calendar")
-
-                }.buttonStyle(.plain)
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(15)
-                    .background(theme.carousel())
-                    .cornerRadius(15)
+                if let _ = viewModel.events.first(where: { $0.tagIds.contains(org.tag_id_as_organizer)}) {
+                    NavigationLink(destination: ScheduleView(tagId: org.tag_id_as_organizer, includeNav: false, navTitle: org.name)) {
+                        Label("Events", systemImage: "calendar")
+                        
+                    }.buttonStyle(.plain)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(15)
+                        .background(theme.carousel())
+                        .cornerRadius(15)
+                }
 
                 Divider()
                 if org.links.count > 0 {

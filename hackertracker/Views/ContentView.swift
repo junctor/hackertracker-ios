@@ -38,7 +38,7 @@ struct ContentView: View {
                     }
                     .tag(1)
                     .preferredColorScheme(theme.colorScheme)
-                ScheduleView()
+                ScheduleView(tagIds: [])
                     .tabItem {
                         Image(systemName: "calendar")
                         // Text("Main")
