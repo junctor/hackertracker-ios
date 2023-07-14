@@ -5,9 +5,9 @@
 //  Created by Seth W Law on 7/10/23.
 //
 
+import Kingfisher
 import MarkdownUI
 import SwiftUI
-import Kingfisher
 
 struct OrgView: View {
     var org: Organization
@@ -40,18 +40,16 @@ struct OrgView: View {
                     }
                 }
                 Markdown(org.description)
-                if !org.tag_ids.isEmpty {
-                    NavigationLink(destination: ScheduleView(tagIds: org.tag_ids)) {
-                                Label("Events", systemImage: "calendar")
-                            
-                    }.buttonStyle(.plain)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(15)
-                        .background(theme.carousel())
-                        .cornerRadius(15)
+                NavigationLink(destination: ScheduleView(tagId: org.tag_id_as_organizer)) {
+                    Label("Events", systemImage: "calendar")
 
-                }
+                }.buttonStyle(.plain)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(15)
+                    .background(theme.carousel())
+                    .cornerRadius(15)
+
                 Divider()
                 if org.links.count > 0 {
                     showLinks(links: org.links)
@@ -98,7 +96,6 @@ struct showLinks: View {
                             .padding(15)
                             .background(theme.carousel())
                             .cornerRadius(15)
-                            
                         }
                     }
                 }

@@ -14,25 +14,21 @@ struct ScheduleView: View {
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
 
     @Environment(\.colorScheme) var colorScheme
-    
+
     @StateObject var filters: Filters
-    
-    init(tagIds: [Int] = []) {
-        _filters = StateObject(wrappedValue: Filters(filters: Set(tagIds)))
+
+    init(tagId: Int? = nil) {
+        if let tagId = tagId {
+            _filters = StateObject(wrappedValue: Filters(filters: Set([tagId])))
+        } else {
+            _filters = StateObject(wrappedValue: Filters(filters: Set<Int>()))
+        }
     }
-    
+
     var body: some View {
         EventsView(events: viewModel.events, conference: viewModel.conference, bookmarks: bookmarks.map { $0.id }, filters: $filters.filters)
             .onAppear {
                 print("ScheduleView: Current launchscreen is: \(launchScreen)")
             }
-    }
-}
-
-struct ScheduleView_Previews: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            ScheduleView()
-        }
     }
 }
