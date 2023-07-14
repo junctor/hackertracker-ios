@@ -17,7 +17,7 @@ struct Organization: Codable, Identifiable {
     var links: [Link]
     var media: [Media]
     var tag_ids: [Int]
-    var tag_id_as_organizer: Int
+    var tag_id_as_organizer: Int?
 
     private enum CodingKeys: String, CodingKey {
         case id

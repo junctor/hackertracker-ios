@@ -123,8 +123,10 @@ struct InfoView: View {
                         if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga" }) {
                             let sortedTags = ott.tags.sorted { $0.sortOrder < $1.sortOrder }
                             ForEach(sortedTags, id: \.id) { tag in
-                                NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id)) {
-                                    CardView(systemImage: "bag", text: tag.label, color: theme.carousel())
+                                if let _ = viewModel.orgs.first(where: {$0.tag_ids.contains(tag.id)}) {
+                                    NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id)) {
+                                        CardView(systemImage: "bag", text: tag.label, color: theme.carousel())
+                                    }
                                 }
                             }
                         }

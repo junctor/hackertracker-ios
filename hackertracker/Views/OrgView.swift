@@ -41,8 +41,8 @@ struct OrgView: View {
                     }
                 }
                 Markdown(org.description)
-                if let _ = viewModel.events.first(where: { $0.tagIds.contains(org.tag_id_as_organizer)}) {
-                    NavigationLink(destination: ScheduleView(tagId: org.tag_id_as_organizer, includeNav: false, navTitle: org.name)) {
+                if let org_tag_id = org.tag_id_as_organizer,  let _ = viewModel.events.first(where: { $0.tagIds.contains(org_tag_id)}) {
+                    NavigationLink(destination: ScheduleView(tagId: org_tag_id, includeNav: false, navTitle: org.name)) {
                         Label("Events", systemImage: "calendar")
                         
                     }.buttonStyle(.plain)
