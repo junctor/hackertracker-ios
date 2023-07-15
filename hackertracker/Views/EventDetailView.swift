@@ -67,55 +67,9 @@ struct EventDetailView: View {
                 VStack(alignment: .leading) {
                     Markdown(event.description).padding()
                 }
-                VStack {
-                    if event.people.count > 0 {
-                        Divider()
-                        Text("People")
-                            .font(.headline).padding(.top)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        let people = event.people.sorted { $0.sortOrder < $1.sortOrder }
-                        if people.count > 1 {
-                            LazyVGrid(columns: columns, spacing: 20) {
-                                ForEach(people, id: \.id) { person in
-                                    if let speaker = viewModel.speakers.first(where: {$0.id == person.id}) {
-                                        HStack {
-                                            NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
-                                                VStack {
-                                                    Text(speaker.name)
-                                                    if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == person.tagId}) {
-                                                        Text(tag.label).font(.caption)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        .foregroundColor(.white)
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                        .padding(15)
-                                        .background(theme.carousel().gradient)
-                                        .cornerRadius(15)
-                                    }
-                                }
-                            }
-                        } else {
-                            HStack {
-                                NavigationLink(destination: SpeakerDetailView(id: event.speakers[0].id)) {
-                                    VStack {
-                                        Text(event.speakers[0].name)
-                                        if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == people[0].tagId}) {
-                                            Text(tag.label).font(.caption)
-                                        }
-                                    }
-                                }
-                            }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .padding(15)
-                            .background(theme.carousel().gradient)
-                            .cornerRadius(15)
-                        }
-                    }
+                if event.people.count > 0 {
+                    showSpeakers(event: event)
                 }
-                .padding(.horizontal, 15)
                 if event.links.count > 0 {
                     Divider()
                     showLinks(links: event.links)
@@ -161,7 +115,7 @@ struct EventDetailView: View {
                 }
             }
             .navigationBarTitle(Text(""), displayMode: .inline)
-            .toolbar(.hidden, for: .tabBar)
+            //.toolbar(.hidden, for: .tabBar)
         } else {
             _04View(message: "Event \(eventId) found")
         }
@@ -176,6 +130,74 @@ struct EventDetailView: View {
             }
         })
     }
+}
+
+struct showSpeakers: View {
+    var event: Event
+    @EnvironmentObject var viewModel: InfoViewModel
+    @EnvironmentObject var theme: Theme
+    @State private var collapsed = false
+    let columns = [GridItem(.flexible()), GridItem(.flexible())]
+
+    var body: some View {
+        Divider()
+        VStack(alignment: .leading) {
+            Button(action: {
+                collapsed.toggle()
+            }, label: {
+                HStack {
+                    Text("People")
+                        .font(.headline).padding(.top)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                }
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
+            if !collapsed {
+                let people = event.people.sorted { $0.sortOrder < $1.sortOrder }
+                if people.count > 1 {
+                    LazyVGrid(columns: columns, spacing: 20) {
+                        ForEach(people, id: \.id) { person in
+                            if let speaker = viewModel.speakers.first(where: {$0.id == person.id}) {
+                                HStack {
+                                    NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
+                                        VStack {
+                                            Text(speaker.name)
+                                            if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == person.tagId}) {
+                                                Text(tag.label).font(.caption)
+                                            }
+                                        }
+                                    }
+                                }
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .padding(15)
+                                .background(theme.carousel().gradient)
+                                .cornerRadius(15)
+                            }
+                        }
+                    }
+                } else {
+                    HStack {
+                        NavigationLink(destination: SpeakerDetailView(id: event.speakers[0].id)) {
+                            VStack {
+                                Text(event.speakers[0].name)
+                                if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == people[0].tagId}) {
+                                    Text(tag.label).font(.caption)
+                                }
+                            }
+                        }
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(15)
+                    .background(theme.carousel().gradient)
+                    .cornerRadius(15)
+                }
+            }
+        }
+        .padding(15)
+    }
+
 }
 
 struct showTags: View {

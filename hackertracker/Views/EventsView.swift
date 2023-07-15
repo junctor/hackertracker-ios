@@ -24,7 +24,7 @@ struct EventsView: View {
     
     var body: some View {
         if includeNav {
-            NavigationStack {
+            NavigationView {
                 EventScrollView(events: events
                     .filters(typeIds: filters, bookmarks: bookmarks)
                     .search(text: searchText)

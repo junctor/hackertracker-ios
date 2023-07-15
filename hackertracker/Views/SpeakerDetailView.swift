@@ -64,6 +64,7 @@ struct SpeakerDetailView: View {
                 }
                 .padding(15)
             }
+            .navigationBarTitle(Text(""), displayMode: .inline)
         } else {
             _04View(message: "Speaker \(id) not found")
         }
