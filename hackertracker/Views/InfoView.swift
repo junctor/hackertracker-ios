@@ -31,7 +31,7 @@ struct InfoView: View {
                                 Text(con.name)
                                     .font(.largeTitle)
                                     .bold()
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                                 Image(systemName: "chevron.right")
                             }
                             if con.startDate == con.endDate {
@@ -62,7 +62,7 @@ struct InfoView: View {
                                 }
                         }
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                     .frame(maxWidth: .infinity)
                     .padding(15)
                     .background(Color(.systemGray6))
@@ -77,7 +77,7 @@ struct InfoView: View {
                                 articleRow(article: article)
                             }
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .frame(maxWidth: .infinity)
                         .padding(15)
                         .background(Color(.systemGray6))
@@ -154,7 +154,7 @@ struct InfoView: View {
                                 Label("Contact Us", systemImage: "person.fill.questionmark")
                             }
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(15)
                         .background(Color(.systemGray6))

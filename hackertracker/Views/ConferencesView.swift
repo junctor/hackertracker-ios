@@ -45,7 +45,7 @@ struct ConferencesView: View {
                                     let mRef = storageRef.child(path)
                                     let mLocal = docDir.appendingPathComponent(path)
                                     if fileManager.fileExists(atPath: mLocal.path) {
-                                        // TODO: Add logic to check md5 hash and re-update if it has changed
+                                        // Add logic to check md5 hash and re-update if it has changed
                                         print("ConferencesView (\(selected.code): Map file (\(path)) already exists")
                                     } else {
                                         _ = mRef.write(toFile: mLocal) { _, error in

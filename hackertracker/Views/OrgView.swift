@@ -21,7 +21,7 @@ struct OrgView: View {
                     Text(org.name)
                         .font(.title)
                 }
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(15)
                 .background(Color(.systemGray6))
@@ -33,15 +33,17 @@ struct OrgView: View {
                             if let url = URL(string: m.url) {
                                 KFImage(url)
                                     .resizable()
+                                    .scaledToFit()
                                     .aspectRatio(contentMode: .fit)
-                                    .frame(width: .infinity)
                                     .cornerRadius(15)
+                                    .padding(.leading, 15)
+                                    .padding(.trailing, 15)
                             }
                         }
                     }
                 }
                 Markdown(org.description)
-                if let org_tag_id = org.tag_id_as_organizer,  let _ = viewModel.events.first(where: { $0.tagIds.contains(org_tag_id)}) {
+                if let org_tag_id = org.tag_id_as_organizer, viewModel.events.first(where: { $0.tagIds.contains(org_tag_id)}) != nil {
                     NavigationLink(destination: ScheduleView(tagId: org_tag_id, includeNav: false, navTitle: org.name)) {
                         Label("Events", systemImage: "calendar")
                         
@@ -80,7 +82,7 @@ struct showLinks: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
                 }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
             if !collapsed {
                 VStack(alignment: .leading) {
                     ForEach(links, id: \.label) { link in

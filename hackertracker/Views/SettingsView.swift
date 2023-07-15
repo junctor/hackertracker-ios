@@ -37,7 +37,7 @@ struct SettingsView: View {
                     }
                     .frame(maxWidth: .infinity)
                 }
-                .foregroundColor(.white)
+                .foregroundColor(.primary)
                 .frame(maxWidth: .infinity)
                 .background(Color(.systemGray6))
                 .cornerRadius(5)
@@ -95,7 +95,7 @@ struct AboutSettingsView: View {
     var body: some View {
         HStack {
             if let v1 = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, let v2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-                NavigationLink(destination: DocumentView(title_text: "About", body_text: "# Hackertracker (iOS)\n#### Version \(v1) Build \(v2)\nHackertracker is a conference scheduling application \n\n## Developers\n * [l4wke](https://twitter.com/sethlaw)\n * [cak](https://github.com/cak)")) {
+                NavigationLink(destination: DocumentView(title_text: "About", body_text: "# HackerTracker (iOS)\n#### Version \(v1) Build \(v2)\nHackerTracker is a conference scheduling application \n\n## iOS Developers\n * l4wke - [Twitter (@sethlaw)](https://twitter.com/sethlaw) | [GitHub](https://github.com/sethlaw)\n * derail - [Github](https://github.com/cak)\n\n## Android Developer\n * advice - [Twitter (@_advice_dog)](https://twitter.com/_advice_dog)\n\n## Data Wrangler\n * aNullValue - [@aNullValue@defcon.social](https://defcon.social/@anullvalue)\n")) {
                     Image(systemName: "info.circle")
                         .padding(5)
                     VStack(alignment: .leading) {
@@ -112,7 +112,7 @@ struct AboutSettingsView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .foregroundColor(.white)
+        .foregroundColor(.primary)
         .frame(maxWidth: .infinity)
         .background(Color(.systemGray6))
         .cornerRadius(5)

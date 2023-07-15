@@ -7,6 +7,7 @@
 
 import FirebaseFirestore
 import Foundation
+import FirebaseStorage
 import SwiftUI
 
 class InfoViewModel: ObservableObject {
@@ -47,7 +48,7 @@ class InfoViewModel: ObservableObject {
                     print("No Documents")
                     return
                 }
-
+                
                 let conferences = docs.compactMap { queryDocumentSnapshot -> Conference? in
                     do {
                         return try queryDocumentSnapshot.data(as: Conference.self)
@@ -58,6 +59,31 @@ class InfoViewModel: ObservableObject {
                 }
                 self.conference = conferences.first
                 print("InfoViewModel: Conference selected: \(self.conference?.name ?? "none")")
+                if let conference = self.conference, let maps = conference.maps, maps.count > 0 {
+                    let fileManager = FileManager.default
+                    let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                    let storageRef = Storage.storage().reference()
+                    
+                    for map in maps {
+                        if let file = map.file {
+                            let path = "\(conference.code)/\(file)"
+                            let mRef = storageRef.child(path)
+                            let mLocal = docDir.appendingPathComponent(path)
+                            if fileManager.fileExists(atPath: mLocal.path) {
+                                // Add logic to check md5 hash and re-update if it has changed
+                                print("InfoViewModel: (\(conference.code): Map file (\(path)) already exists")
+                            } else {
+                                _ = mRef.write(toFile: mLocal) { _, error in
+                                    if let error = error {
+                                        print("InfoViewModel: (\(conference.code)): Error \(error) retrieving \(path)")
+                                    } else {
+                                        print("InfoViewModel: (\(conference.code)): Got map \(path)")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
     }
 
@@ -136,7 +162,7 @@ class InfoViewModel: ObservableObject {
                     } catch {
                         print("fetchLocations: Location Parsing Error: \(error)")
                         print("fetchLocations: Code: \(code)")
-                        print("fetchLocations: qds: \(queryDocumentSnapshot)")
+                        print("fetchLocations: qds: \(queryDocumentSnapshot.data())")
                         return nil
                     }
                 }
@@ -220,6 +246,7 @@ class InfoViewModel: ObservableObject {
                         return nil
                     }
                 }
+                self.orgs.sort(using: KeyPathComparator(\.self.name, comparator: .localizedStandard))
                 print("InfoViewModel: \(self.orgs.count) organizations")
             }
     }

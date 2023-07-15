@@ -38,7 +38,7 @@ struct faqRow: View {
                     Spacer()
                     showAnswer ? Image(systemName: "chevron.down") : Image(systemName: "chevron.right")
                 }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
 
             if showAnswer {
                 Markdown(faq.answer).padding(.vertical)

@@ -62,7 +62,7 @@ struct FilterRow: View {
                         .padding(5)
                 }
             }
-            .foregroundColor(.white)
+            .foregroundColor(.primary)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .padding(5)
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(color, lineWidth: 2))

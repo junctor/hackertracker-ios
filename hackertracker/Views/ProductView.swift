@@ -33,7 +33,7 @@ struct ProductView: View {
                     Text(product.description)
                 }
             }
-            .foregroundColor(.white)
+            .foregroundColor(.primary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(15)
             .background(Color(.systemGray6))
@@ -65,7 +65,7 @@ struct ProductView: View {
                                     .tag(variant.variantId)
                             }
                         }
-                        .foregroundColor(.white)
+                        .foregroundColor(.primary)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .labelsHidden()
                     }
@@ -80,7 +80,7 @@ struct ProductView: View {
                             Button { } label: {
                                 Text("Out of stock")
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(.primary)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .padding(15)
                             .background(Color(.systemGray6))

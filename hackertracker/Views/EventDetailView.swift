@@ -195,7 +195,7 @@ struct showTags: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
                 }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
             if !collapsed {
                 VStack(alignment: .leading) {
                     LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
@@ -203,7 +203,9 @@ struct showTags: View {
                             if let tagtype = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == tagId})}), let tag = tagtype.tags.first(where: {$0.id == tagId}) {
                                 VStack {
                                     HStack {
-                                        Text(tag.label).font(.subheadline)
+                                        Text(tag.label)
+                                            .font(.subheadline)
+                                            .foregroundColor(.white)
                                     }
                                 }
                                 .padding(5)

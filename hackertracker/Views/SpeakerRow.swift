@@ -18,7 +18,7 @@ struct SpeakerRow: View {
             VStack(alignment: .leading) {
                 Text(speaker.name)
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                 if let title = speaker.title {
                     Text(title)
                         .font(.subheadline)

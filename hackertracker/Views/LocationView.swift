@@ -20,7 +20,7 @@ struct LocationView: View {
                 }.listRowBackground(Color.clear)
             }
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
-            .accentColor(Color.white)
+            .accentColor(.primary)
             .navigationTitle("Locations")
     }
 
@@ -55,7 +55,7 @@ struct LocationCell: View {
                         Spacer().frame(width: 10)
                     }
                 }.padding(.leading, CGFloat(location.hierDepth - 1) * 20.0)
-            }).disabled(childLocations[location.id]?.isEmpty ?? true).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+            }).disabled(childLocations[location.id]?.isEmpty ?? true).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
             if showChildren {
                 ForEach(childLocations[location.id] ?? []) { loc in
                     LocationCell(location: loc, childLocations: childLocations)

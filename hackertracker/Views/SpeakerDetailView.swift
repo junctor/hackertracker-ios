@@ -32,7 +32,7 @@ struct SpeakerDetailView: View {
                             showAffiliations(affiliations: affiliations)
                         }
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(15)
                     .background(Color(.systemGray6))
@@ -87,7 +87,7 @@ struct showSpeakerLinks: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
                 }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
             if !collapsed {
                 VStack(alignment: .leading) {
                     ForEach(links, id: \.title) { link in
@@ -133,14 +133,14 @@ struct showEvents: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
                 }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
             if !collapsed {
                 VStack {
                     ForEach(eventIds, id: \.self) { eventId in
                         NavigationLink(destination: EventDetailView(eventId: eventId)) {
                             if let ev = viewModel.events.first(where: { $0.id == eventId }) {
                                 SpeakerEventView(event: ev, bookmarks: bookmarks.map { $0.id })
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primary)
                             }
                         }
                     }

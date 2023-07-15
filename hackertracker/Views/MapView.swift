@@ -12,6 +12,7 @@ struct MapView: View {
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var viewModel: InfoViewModel
+    @State var loading: Bool = false
 
     let screenSize = UIScreen.main.bounds.size
 
@@ -24,7 +25,7 @@ struct MapView: View {
                             if let file = map.file {
                                 let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
                                 let mLocal = docDir.appendingPathComponent("\(con.code)/\(file)")
-
+                                
                                 PDFView(url: mLocal)
                                     .onAppear {
                                         print("MapView: Loading \(mLocal)")

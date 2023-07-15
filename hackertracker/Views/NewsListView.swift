@@ -46,7 +46,7 @@ struct articleRow: View {
                     Spacer()
                     showText ? Image(systemName: "chevron.down") : Image(systemName: "chevron.right")
                 }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.white)
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
 
             if showText {
                 Markdown(article.text).padding(.vertical)
