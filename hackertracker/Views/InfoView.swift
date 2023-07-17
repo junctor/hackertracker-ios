@@ -55,7 +55,7 @@ struct InfoView: View {
                                 CountdownView(start: con.startTimestamp)
                             }
                         } else {
-                            _04View(message: "Loading", show404: false).preferredColorScheme(.dark)
+                            _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
                                 .onAppear {
                                     print("InfoView: Need to fetch data for \(selected.code)")
                                     viewModel.fetchData(code: selected.code)

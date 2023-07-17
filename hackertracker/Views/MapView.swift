@@ -12,6 +12,7 @@ struct MapView: View {
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var viewModel: InfoViewModel
+    @EnvironmentObject var theme: Theme
     @State var loading: Bool = false
 
     let screenSize = UIScreen.main.bounds.size
@@ -40,7 +41,7 @@ struct MapView: View {
                     _04View(message: "No Maps Found")
                 }
             } else {
-                _04View(message: "Loading", show404: false).preferredColorScheme(.dark)
+                _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
             }
         }
 

@@ -8,10 +8,20 @@
 import SwiftUI
 
 class Theme: ObservableObject {
+    @AppStorage("lightMode") var lightMode: Bool = false
     @Published var colorScheme: ColorScheme = .dark
+
     let colors = ["#326295", "#71cc98", "#c16784", "#4b9560", "#c04c36"]
     let font = ThemeFont()
     var index = 0
+    
+    init() {
+        if lightMode {
+            self.colorScheme = .light
+        } else {
+            self.colorScheme = .dark
+        }
+    }
 
     func carousel() -> Color {
         if index >= colors.count {

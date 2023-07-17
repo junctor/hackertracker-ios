@@ -158,11 +158,34 @@ struct ShowPastEventsSettingsView: View {
     }
 }
 
+struct LightModeSettingsView: View {
+    @EnvironmentObject var viewModel: InfoViewModel
+    @AppStorage("lightMode") var lightMode: Bool = false
+    @EnvironmentObject var theme: Theme
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Toggle("Enable Light Mode", isOn: $lightMode)
+                .onChange(of: lightMode) { value in
+                    print("SettingsView: Changing to lightMode = \(value)")
+                    if value {
+                        theme.colorScheme = .light
+                    } else {
+                        theme.colorScheme = .dark
+                    }
+                }
+        }
+        .padding(5)
+        Divider()
+    }
+}
+
 struct StartScreenSettingsView: View {
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     let startScreens = ["Main", "Schedule", "Maps"]
 
     var body: some View {
+        LightModeSettingsView()
         VStack(alignment: .leading) {
             Text("Start Screen")
             Picker("Start Screen", selection: $launchScreen) {

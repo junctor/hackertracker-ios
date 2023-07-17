@@ -19,6 +19,7 @@ struct ContentView: View {
     @AppStorage("showHidden") var showHidden: Bool = false
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("showNews") var showNews: Bool = true
+    @AppStorage("lightMode") var lightMode: Bool = false
 
     @StateObject var selected = SelectedConference()
     @StateObject var viewModel = InfoViewModel()

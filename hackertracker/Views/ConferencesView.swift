@@ -13,6 +13,7 @@ struct ConferencesView: View {
     // var conferences: [Conference]
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var viewModel: InfoViewModel
+    @EnvironmentObject var theme: Theme
     @Environment(\.presentationMode) var presentationMode
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
     @AppStorage("showHidden") var showHidden: Bool = false
@@ -66,7 +67,7 @@ struct ConferencesView: View {
             }
             .listStyle(.plain)
         } else {
-            _04View(message: "Loading", show404: false).preferredColorScheme(.dark)
+            _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
                 .onAppear {
                     viewModel.fetchConferences(hidden: showHidden)
                 }
