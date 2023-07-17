@@ -16,7 +16,8 @@ struct ConferencesView: View {
     @Environment(\.presentationMode) var presentationMode
     @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
     @AppStorage("showHidden") var showHidden: Bool = false
-
+    @AppStorage("showLocaltime") var showLocaltime: Bool = false
+    
     var body: some View {
         if viewModel.conferences.count > 0 {
             Text("Select Conference")
@@ -32,6 +33,7 @@ struct ConferencesView: View {
                             selected.code = conference.code
                             conferenceCode = conference.code
                             viewModel.fetchData(code: conference.code)
+                            showLocaltime ? DateFormatterUtility.shared.update(tz: TimeZone.current) : DateFormatterUtility.shared.update(tz: TimeZone(identifier: conference.timezone ?? "America/Los_Angeles"))
                         }
 
                         let fileManager = FileManager.default

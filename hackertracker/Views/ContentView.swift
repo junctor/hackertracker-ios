@@ -77,6 +77,9 @@ struct ContentView: View {
                     self.tabSelection = 1
                 }
                 viewModel.showNews = showNews
+                if let con = viewModel.conference {
+                    showLocaltime ? DateFormatterUtility.shared.update(tz: TimeZone.current) : DateFormatterUtility.shared.update(tz: TimeZone(identifier: con.timezone ?? "America/Los_Angeles"))
+                }
 
                 // viewModel.fetchData(code: selected.code)
             }
