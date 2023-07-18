@@ -270,7 +270,7 @@ class InfoViewModel: ObservableObject {
                 // NSLog("InfoViewModel: Documents: \(self.documents.count)")
             }
         db.collection("conferences/\(code)/articles")
-            .order(by: "updated_at", descending: true).addSnapshotListener { querySnapshot, error in
+            .order(by: "updated_at", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
                     print("No Documents")
                     return

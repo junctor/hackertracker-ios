@@ -28,27 +28,31 @@ struct EventCell: View {
             HStack(alignment: .center) {
                 Rectangle().fill(getEventTagColorBackground())
                     .frame(width: 6)
-                VStack {
-                    Text(dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp))
-                        .font(.subheadline)
-                }
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(event.title).font(.headline)
-                    if !event.speakers.isEmpty {
-                        Text(event.speakers.map { $0.name }.joined(separator: ", ")).font(.subheadline)
+                HStack(alignment: .top) {
+                    HStack(alignment: .center) {
+                        VStack {
+                            Text(dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp))
+                                .font(.subheadline)
+                        }
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(event.title).font(.headline)
+                            if !event.speakers.isEmpty {
+                                Text(event.speakers.map { $0.name }.joined(separator: ", ")).font(.subheadline)
+                            }
+                            Text(event.location.name).font(.caption2)
+                            ShowEventCellTags(tagIds: event.tagIds)
+                        }
                     }
-                    Text(event.location.name).font(.caption2)
-                    ShowEventCellTags(tagIds: event.tagIds)
-                }
-
-                HStack(alignment: .center) {
-                    Button {
-                        bookmarkAction()
-                    } label: {
-                        Image(systemName: bookmarks.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                    
+                    HStack(alignment: .center) {
+                        Button {
+                            bookmarkAction()
+                        } label: {
+                            Image(systemName: bookmarks.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                        }
                     }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .buttonStyle(PlainButtonStyle())
             }
 
         }.swipeActions {
@@ -73,7 +77,7 @@ struct EventCell: View {
 struct ShowEventCellTags: View {
     var tagIds: [Int]
     @EnvironmentObject var viewModel: InfoViewModel
-    let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
+    let gridItemLayout = [GridItem(.adaptive(minimum: 80))]
 
     var body: some View {
         LazyVGrid(columns: gridItemLayout, alignment: .leading, spacing: 2) {

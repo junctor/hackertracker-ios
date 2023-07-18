@@ -90,7 +90,7 @@ struct InfoView: View {
                         LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                             ForEach(self.viewModel.documents, id: \.id) { doc in
                                 NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
-                                    CardView(systemImage: "doc", text: doc.title, color: ThemeColors.blue)
+                                    CardView(systemImage: "doc", text: doc.title, color: Color(.systemGray6))
                                 }
                             }
                         }
@@ -100,24 +100,24 @@ struct InfoView: View {
                         .font(.subheadline)
                     LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                         NavigationLink(destination: GlobalSearchView(viewModel: viewModel)) {
-                            CardView(systemImage: "magnifyingglass", text: "Search", color: ThemeColors.drkGreen)
+                            CardView(systemImage: "magnifyingglass", text: "Search", color: Color(.systemGray6))
                         }
                         NavigationLink(destination: SpeakersView(speakers: viewModel.speakers)) {
-                            CardView(systemImage: "person.crop.rectangle", text: "Speakers", color: ThemeColors.pink)
+                            CardView(systemImage: "person.crop.rectangle", text: "Speakers", color: Color(.systemGray6))
                         }
                         if self.viewModel.locations.count > 0 {
                             NavigationLink(destination: LocationView(locations: self.viewModel.locations)) {
-                                CardView(systemImage: "mappin.and.ellipse", text: "Locations", color: ThemeColors.blue)
+                                CardView(systemImage: "mappin.and.ellipse", text: "Locations", color: Color(.systemGray6))
                             }
                         }
                         if viewModel.faqs.count > 0 {
                             NavigationLink(destination: FAQListView()) {
-                                CardView(systemImage: "questionmark.app", text: "FAQ", color: ThemeColors.red)
+                                CardView(systemImage: "questionmark.app", text: "FAQ", color: Color(.systemGray6))
                             }
                         }
                         if viewModel.news.count > 0 {
                             NavigationLink(destination: NewsListView()) {
-                                CardView(systemImage: "newspaper", text: "News", color: ThemeColors.pink)
+                                CardView(systemImage: "newspaper", text: "News", color: Color(.systemGray6))
                             }
                         }
                         if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga" }) {
@@ -125,7 +125,7 @@ struct InfoView: View {
                             ForEach(sortedTags, id: \.id) { tag in
                                 if let _ = viewModel.orgs.first(where: {$0.tag_ids.contains(tag.id)}) {
                                     NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id)) {
-                                        CardView(systemImage: "bag", text: tag.label, color: theme.carousel())
+                                        CardView(systemImage: "bag", text: tag.label, color: Color(.systemGray6))
                                     }
                                 }
                             }
@@ -133,7 +133,7 @@ struct InfoView: View {
                         let kidsTags = getKidsTags()
                         if kidsTags.count > 0 {
                             NavigationLink(destination: ScheduleView(tagIds: kidsTags, includeNav: false, navTitle: "Kids Content")) {
-                                CardView(systemImage: "figure.and.child.holdinghands", text: "Kids Content", color: theme.carousel())
+                                CardView(systemImage: "figure.and.child.holdinghands", text: "Kids Content", color: Color(.systemGray6))
                             }
                         }
                     }
@@ -224,10 +224,10 @@ struct CardView: View {
             Image(systemName: systemImage)
             Text(text)
         }
-        .foregroundColor(.white)
+        .foregroundColor(.primary)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(15)
-        .background(color.gradient)
+        .background(color)
         .cornerRadius(15)
     }
 }

@@ -206,7 +206,7 @@ struct ShowLocaltimeSettingsView: View {
     let dfu = DateFormatterUtility.shared
 
     var body: some View {
-        VStack {
+        VStack(alignment: .leading) {
             Toggle("Show Local Timezone", isOn: $showLocaltime)
                 .onChange(of: showLocaltime) { value in
                     print("SettingsView: Changing to showLocaltime = \(value)")

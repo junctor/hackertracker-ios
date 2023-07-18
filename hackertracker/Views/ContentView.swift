@@ -23,11 +23,11 @@ struct ContentView: View {
 
     @StateObject var selected = SelectedConference()
     @StateObject var viewModel = InfoViewModel()
+    @StateObject var theme = Theme()
 
     @State private var tabSelection = 1
     @State private var isInit: Bool = false
 
-    private var theme = Theme()
 
     var body: some View {
         if viewModel.conference != nil {
@@ -93,8 +93,9 @@ struct ContentView: View {
                     .preferredColorScheme(theme.colorScheme)
                     .environmentObject(selected)
                     .environmentObject(viewModel)
+                    .environmentObject(theme)
             } else {
-                _04View(message: "Loading", show404: false).preferredColorScheme(.dark)
+                _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
                     .onAppear {
                         print("ContentView: Selected Conference \(selected.code), Conference Code: \(conferenceCode)")
                         if selected.code != conferenceCode {
