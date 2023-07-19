@@ -12,10 +12,19 @@ struct SpeakerRow: View {
     var themeColor: Color
     var body: some View {
         HStack {
-            Rectangle().fill(themeColor).frame(width: 10, height: .infinity)
+            Rectangle().fill(themeColor)
+                .frame(width: 6)
+                .frame(maxHeight: .infinity)
             VStack(alignment: .leading) {
-                Text(speaker.name).fontWeight(.bold)
-                Text(speaker.title ?? "Hacker")
+                Text(speaker.name)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                if let title = speaker.title {
+                    Text(title)
+                        .font(.subheadline)
+                        .multilineTextAlignment(.leading)
+                        .foregroundColor(.gray)
+                }
             }
         }
     }
@@ -27,9 +36,12 @@ struct SpeakerRow_Previews: PreviewProvider {
                                       conferenceName: "DEF CON 30",
                                       description: "Description",
                                       link: "https://twitter.com/defcon",
+                                      links: [],
+                                      media: [],
                                       name: "Speaker Name",
+                                      pronouns: "they/them",
                                       twitter: "defcon",
-                                      events: [])
+                                      eventIds: [99, 23])
         SpeakerRow(speaker: preview_speaker, themeColor: .purple)
     }
 }

@@ -7,15 +7,32 @@
 
 import CoreData
 import FirebaseCore
+import FirebaseMessaging
 import SwiftUI
+import UserNotifications
 
 class AppDelegate: NSObject, UIApplicationDelegate {
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [
-                        UIApplication.LaunchOptionsKey: Any
-                     ]? = nil) -> Bool {
-                         FirebaseApp.configure()
-                         return true
+    let gcmMessageIDKey = "gcm.message_id"
+
+    func application(
+        _: UIApplication,
+        didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        FirebaseApp.configure()
+        FirebaseConfiguration.shared.setLoggerLevel(.min)
+
+        // 1
+        UNUserNotificationCenter.current().delegate = self
+        // 2
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(
+            options: authOptions) { _, _ in }
+        // 3
+        UIApplication.shared.registerForRemoteNotifications()
+
+        Messaging.messaging().delegate = self
+
+        return true
     }
 }
 
@@ -23,15 +40,51 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct hackertrackerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     let persistenceController = PersistenceController.shared
-    
-    // Setup for bookmarks object that will be passed around.
-    @StateObject var bookmarks: oBookmarks = oBookmarks()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
-                .environmentObject(bookmarks)
         }
+    }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(
+        _: UNUserNotificationCenter,
+        willPresent _: UNNotification,
+        withCompletionHandler completionHandler:
+        @escaping (UNNotificationPresentationOptions) -> Void
+    ) {
+        completionHandler([[.list, .banner, .sound]])
+    }
+
+    func userNotificationCenter(
+        _: UNUserNotificationCenter,
+        didReceive _: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        completionHandler()
+    }
+
+    func application(
+        _: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
+        Messaging.messaging().apnsToken = deviceToken
+    }
+}
+
+extension AppDelegate: MessagingDelegate {
+    func messaging(
+        _: Messaging,
+        didReceiveRegistrationToken fcmToken: String?
+    ) {
+        let tokenDict = ["token": fcmToken ?? ""]
+        NotificationCenter.default.post(
+            name: Notification.Name("FCMToken"),
+            object: nil,
+            userInfo: tokenDict
+        )
     }
 }

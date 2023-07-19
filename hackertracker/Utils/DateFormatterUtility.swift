@@ -10,30 +10,30 @@ import Foundation
 class DateFormatterUtility {
     var timeZone = TimeZone(identifier: "America/Los_Angeles")
 
-    /* static let shared : [String:DateFormatterUtility] =
-     ["America/Los_Angeles": DateFormatterUtility(identifier: "America/Los_Angeles"),
-     "America/Chicago": DateFormatterUtility(identifier: "America/Chicago"),
-     "America/Denver": DateFormatterUtility(identifier: "America/Denver"),
-     "America/New_York": DateFormatterUtility(identifier: "America/New_York")
-     ] */
+    static let shared = DateFormatterUtility(tz: TimeZone(identifier: "America/Los_Angeles"))
 
-    static let shared = DateFormatterUtility(identifier: "America/Los_Angeles")
-
-    init(identifier: String) {
-        update(identifier: identifier)
+    init(tz: TimeZone?) {
+        if let zone = tz {
+            update(tz: zone)
+        } else {
+            if let zone = timeZone {
+                update(tz: zone)
+            } else {
+                print("DateFormatterUtility: Set timezone failed.")
+            }
+        }
     }
 
-    func update(identifier: String) {
-        if preferLocalTime() {
-            timeZone = .current
-        } else {
-            timeZone = TimeZone(identifier: identifier)
-        }
+    func update(tz: TimeZone?) {
+        print("DateFormatterUtility: Updating timezone to \(tz?.identifier ?? "error")")
+        timeZone = tz
 
         yearMonthDayTimeFormatter.timeZone = timeZone
         timezoneFormatter.timeZone = timeZone
         yearMonthDayFormatter.timeZone = timeZone
         monthDayTimeFormatter.timeZone = timeZone
+        monthDayFormatter.timeZone = timeZone
+        iso8601Formatter.timeZone = timeZone
         yearMonthDayNoTimeZoneTimeFormatter.timeZone = timeZone
         dayOfWeekFormatter.timeZone = timeZone
         shortDayOfMonthFormatter.timeZone = timeZone
@@ -42,10 +42,11 @@ class DateFormatterUtility {
         dayOfWeekTimeFormatter.timeZone = timeZone
         hourMinuteTimeFormatter.timeZone = timeZone
         monthDayYearFormatter.timeZone = timeZone
+        locationTimeFormatter.timeZone = timeZone
     }
 
     func preferLocalTime() -> Bool {
-        UserDefaults.standard.bool(forKey: "PreferLocalTime")
+        UserDefaults.standard.bool(forKey: "showLocaltime")
     }
 
     // time format
@@ -81,6 +82,22 @@ class DateFormatterUtility {
         return formatter
     }()
 
+    // Aug 11
+    let monthDayFormatter = { () -> DateFormatter in
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter
+    }()
+    
+    // August 11
+    let longMonthDayFormatter = { () -> DateFormatter in
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter
+    }()
+
     // UTC time format
     let monthDayTimeFormatter = { () -> DateFormatter in
         let formatter = DateFormatter()
@@ -92,7 +109,7 @@ class DateFormatterUtility {
     // UTC iso8601 time format
     let iso8601Formatter = { () -> DateFormatter in
         let formatter = DateFormatter()
-        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        formatter.timeZone = TimeZone(abbreviation: "PDT")
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.sZ"
         formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
@@ -126,7 +143,7 @@ class DateFormatterUtility {
     let dayMonthDayOfWeekFormatter = { () -> DateFormatter in
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "EEEE, MMM d"
+        formatter.dateFormat = "EE, MMM d"
         return formatter
     }()
 
@@ -151,6 +168,15 @@ class DateFormatterUtility {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+
+    // UTC location time format
+    let locationTimeFormatter = { () -> DateFormatter in
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(abbreviation: "UTC")
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
     }()
 

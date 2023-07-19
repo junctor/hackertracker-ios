@@ -6,78 +6,106 @@
 //
 
 import CoreData
-import SwiftUI
 import FirebaseFirestoreSwift
+import SwiftUI
+
+class SelectedConference: ObservableObject {
+    @Published var code = "INIT"
+}
 
 struct ContentView: View {
-    @AppStorage("conferenceName") var conferenceName: String = "DEF CON 30"
-    @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
-    
-    @FirestoreQuery(collectionPath: "conferences") var conferences: [Conference]
+    @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
+    @AppStorage("launchScreen") var launchScreen: String = "Main"
+    @AppStorage("showHidden") var showHidden: Bool = false
+    @AppStorage("showLocaltime") var showLocaltime: Bool = false
+    @AppStorage("showNews") var showNews: Bool = true
+    @AppStorage("lightMode") var lightMode: Bool = false
+    @AppStorage("colorMode") var colorMode: Bool = false
 
-    // @State var conference: Conference?
-    // @State private var viewModel = ConferencesViewModel()
-    
-    private var colorScheme: ColorScheme = .dark
+    @StateObject var selected = SelectedConference()
+    @StateObject var viewModel = InfoViewModel()
+    @StateObject var theme = Theme()
+
+    @State private var tabSelection = 1
+    @State private var isInit: Bool = false
 
     var body: some View {
-        NavigationView {
-            TabView {
-                if let con = conferences.first {
-                    InfoView(conference: con)
-                        .tabItem {
-                            Image(systemName: "house")
-                            // Text("Info")
-                        }
-                        .tag(3)
-                        .preferredColorScheme(colorScheme)
-                    
-                    ScheduleView(code: con.code)
-                        .tabItem {
-                            Image(systemName: "calendar")
-                            // Text("Main")
-                        }
-                        .tag(1)
-                        .preferredColorScheme(colorScheme)
-                    MapView()
-                        .tabItem {
-                            Image(systemName: "map")
-                            // Text("Maps")
-                        }
-                        .tag(2)
-                        .preferredColorScheme(colorScheme)
-                    
-                    SettingsView()
-                        .tabItem {
-                            Image(systemName: "gearshape")
-                            // Text("Settings")
-                        }
-                        .tag(4)
-                        .preferredColorScheme(colorScheme)
+        if viewModel.conference != nil {
+            TabView(selection: $tabSelection) {
+                InfoView(tabSelection: $tabSelection)
+                    .tabItem {
+                        Image(systemName: "house")
+                        // Text("Info")
+                    }
+                    .tag(1)
+                    .preferredColorScheme(theme.colorScheme)
+                ScheduleView(tagIds: [])
+                    .tabItem {
+                        Image(systemName: "calendar")
+                        // Text("Main")
+                    }
+                    .tag(2)
+                    .preferredColorScheme(theme.colorScheme)
+                MapView()
+                    .tabItem {
+                        Image(systemName: "map")
+                        // Text("Maps")
+                    }
+                    .tag(3)
+                    .preferredColorScheme(theme.colorScheme)
+                SettingsView()
+                    .tabItem {
+                        Image(systemName: "gearshape")
+                        // Text("Settings")
+                    }
+                    .tag(4)
+                    .preferredColorScheme(theme.colorScheme)
+            }
+            .onAppear {
+                if #available(iOS 15.0, *) {
+                    let tabBarAppearance: UITabBarAppearance = .init()
+                    tabBarAppearance.configureWithDefaultBackground()
+                    UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
                 }
-            }
-            // .navigationBarTitle(conferenceName, displayMode: .inline)
-/*            .navigationBarItems(leading: HStack {
-                                    Button(action: {
-                                        print("I'm feeling lucky ;)")
-                                    }) {
-                                        Text(conferenceName)
-                                    }
-                                }
-            ) */
-        }
-        .onAppear {
-            if #available(iOS 15.0, *) {
-                let tabBarAppearance: UITabBarAppearance = .init()
-                tabBarAppearance.configureWithDefaultBackground()
-                UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
-            }
+                print("ContentView: selectedCode: \(selected.code)")
+                print("ContentView: launchScreen: \(launchScreen)")
+                switch launchScreen {
+                case "Maps":
+                    self.tabSelection = 3
+                case "Schedule":
+                    self.tabSelection = 2
+                default:
+                    self.tabSelection = 1
+                }
+                viewModel.showNews = showNews
+                viewModel.colorMode = colorMode
+                if let con = viewModel.conference {
+                    showLocaltime ? DateFormatterUtility.shared.update(tz: TimeZone.current) : DateFormatterUtility.shared.update(tz: TimeZone(identifier: con.timezone ?? "America/Los_Angeles"))
+                }
 
-            $conferences.predicates = [.where("code", isEqualTo: conferenceCode)]
-            // NSLog("ContentView: Conference - \(conferences.first?.name ?? "None found")")
-
-            // self.viewModel.fetchData()
-            // self.conference = self.viewModel.getConference(code: conferenceCode)
+                // viewModel.fetchData(code: selected.code)
+            }
+            .environmentObject(selected)
+            .environmentObject(viewModel)
+            .environmentObject(theme)
+        } else {
+            if conferenceCode == "INIT" {
+                ConferencesView()
+                    .preferredColorScheme(theme.colorScheme)
+                    .environmentObject(selected)
+                    .environmentObject(viewModel)
+                    .environmentObject(theme)
+            } else {
+                _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
+                    .onAppear {
+                        print("ContentView: Selected Conference \(selected.code), Conference Code: \(conferenceCode)")
+                        if selected.code != conferenceCode {
+                            print("ContentView: Switching to conference from AppStorage - \(conferenceCode)")
+                            selected.code = conferenceCode
+                        }
+                        self.viewModel.fetchData(code: conferenceCode)
+                    }
+            }
         }
     }
 }

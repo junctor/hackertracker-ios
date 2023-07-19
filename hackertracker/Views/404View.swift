@@ -9,15 +9,20 @@ import SwiftUI
 
 struct _04View: View {
     var message: String
+    var show404: Bool = true
 
     var body: some View {
         VStack {
-            Image("404")
-                .frame(width: 512)
+            if show404 {
+                Image("404")
+                    .frame(width: 512)
+            }
             Text(message)
                 .font(.title)
-            Image("skull")
-                .frame(width: 50)
+            Image("beezle")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 100)
         }
     }
 }

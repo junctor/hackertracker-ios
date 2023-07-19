@@ -8,7 +8,6 @@
 import XCTest
 
 class hackertrackerUITestsLaunchTests: XCTestCase {
-
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
     }

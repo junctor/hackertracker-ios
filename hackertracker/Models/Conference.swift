@@ -9,29 +9,43 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 import Foundation
 
-struct Conference: Codable, Identifiable {
+struct Conference: Codable, Identifiable, Equatable {
+    static func == (lhs: Conference, rhs: Conference) -> Bool {
+        lhs.code == rhs.code
+    }
+    
     @DocumentID var id: String?
     var name: String
+    var description: String
     var code: String
     var endDate: String
     var startDate: String
-    var timeZone: String?
+    var timezone: String?
     var coc: String?
+    var kickoffTimestamp: Date
     var startTimestamp: Date
     var endTimestamp: Date
     var maps: [Map]?
+    var documents: [Document]?
     var hidden: Bool
+    var enableMerch: Bool
+    var tagline: String?
 
     private enum CodingKeys: String, CodingKey {
         case name
+        case description
         case code
         case endDate = "end_date"
         case startDate = "start_date"
-        case timeZone = "tz"
+        case timezone
         case coc = "codeofconduct"
+        case kickoffTimestamp = "kickoff_timestamp"
         case startTimestamp = "start_timestamp"
         case endTimestamp = "end_timestamp"
         case maps
+        case documents
         case hidden
+        case enableMerch = "enable_merch"
+        case tagline = "tagline_text"
     }
 }
