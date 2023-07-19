@@ -10,6 +10,7 @@ import SwiftUI
 import WebKit
 
 struct InfoView: View {
+    @Binding var tabSelection: Int
     @EnvironmentObject var viewModel: InfoViewModel
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
@@ -101,6 +102,16 @@ struct InfoView: View {
                     LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                         NavigationLink(destination: GlobalSearchView(viewModel: viewModel)) {
                             CardView(systemImage: "magnifyingglass", text: "Search", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
+                        }
+                        Button {
+                            tabSelection = 2
+                        } label: {
+                            CardView(systemImage: "calendar", text: "Schedule", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
+                        }
+                        Button {
+                            tabSelection = 3
+                        } label: {
+                            CardView(systemImage: "map", text: "Maps", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                         }
                         NavigationLink(destination: SpeakersView(speakers: viewModel.speakers)) {
                             CardView(systemImage: "person.crop.rectangle", text: "Speakers", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))

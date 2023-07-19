@@ -157,7 +157,7 @@ struct CartRow: View {
                 HStack {
                     Text("\(count)")
                         .bold()
-                    Stepper("", value: $count)
+                    Stepper("", value: $count, in: 1...100)
                         .fixedSize()
                     VStack {
                         Text("$\((variant.price*Int(item.count))/100) USD")

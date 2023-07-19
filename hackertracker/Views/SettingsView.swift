@@ -62,7 +62,7 @@ struct NotificationSettingsView: View {
         Text("Notifications")
             .font(.headline)
         VStack(alignment: .leading) {
-                Stepper("Before Event: \(notifyAt)", value: $notifyAt)
+            Stepper("Before Event: \(notifyAt)", value: $notifyAt, in: 0...60)
                 Text("Notification time in minutes")
                     .font(.caption)
         }

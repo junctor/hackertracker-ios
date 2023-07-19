@@ -29,11 +29,10 @@ struct ContentView: View {
     @State private var tabSelection = 1
     @State private var isInit: Bool = false
 
-
     var body: some View {
         if viewModel.conference != nil {
             TabView(selection: $tabSelection) {
-                InfoView()
+                InfoView(tabSelection: $tabSelection)
                     .tabItem {
                         Image(systemName: "house")
                         // Text("Info")

@@ -16,8 +16,13 @@ struct ConferenceRow: View {
             VStack(alignment: .leading, spacing: 5, content: {
                 Text(conference.name)
                     .font(.title3)
-                Text("\(conference.startDate) - \(conference.endDate)")
-                    .font(.body)
+                if conference.startDate == conference.endDate {
+                    Text(conference.endDate)
+                        .font(.body)
+                } else {
+                    Text("\(conference.startDate) - \(conference.endDate)")
+                        .font(.body)
+                }
             })
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(0)
