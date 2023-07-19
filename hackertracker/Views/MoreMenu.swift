@@ -5,10 +5,8 @@
 //
 
 import SwiftUI
-#if canImport(EventKit)
 import EventKit
 import EventKitUI
-#endif
 
 struct MoreMenu: View {
     let event: Event

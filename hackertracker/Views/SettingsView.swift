@@ -161,6 +161,7 @@ struct ShowPastEventsSettingsView: View {
 struct LightModeSettingsView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @AppStorage("lightMode") var lightMode: Bool = false
+    @AppStorage("colorMode") var colorMode: Bool = false
     @EnvironmentObject var theme: Theme
 
     var body: some View {
@@ -173,6 +174,15 @@ struct LightModeSettingsView: View {
                     } else {
                         theme.colorScheme = .dark
                     }
+                }
+        }
+        .padding(5)
+        Divider()
+        VStack(alignment: .leading) {
+            Toggle("Enable Colorful Mode", isOn: $colorMode)
+                .onChange(of: colorMode) { value in
+                    print("SettingsView: Changing to lightMode = \(value)")
+                    viewModel.colorMode = value
                 }
         }
         .padding(5)

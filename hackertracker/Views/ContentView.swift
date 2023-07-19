@@ -20,6 +20,7 @@ struct ContentView: View {
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("showNews") var showNews: Bool = true
     @AppStorage("lightMode") var lightMode: Bool = false
+    @AppStorage("colorMode") var colorMode: Bool = false
 
     @StateObject var selected = SelectedConference()
     @StateObject var viewModel = InfoViewModel()
@@ -78,6 +79,7 @@ struct ContentView: View {
                     self.tabSelection = 1
                 }
                 viewModel.showNews = showNews
+                viewModel.colorMode = colorMode
                 if let con = viewModel.conference {
                     showLocaltime ? DateFormatterUtility.shared.update(tz: TimeZone.current) : DateFormatterUtility.shared.update(tz: TimeZone(identifier: con.timezone ?? "America/Los_Angeles"))
                 }
