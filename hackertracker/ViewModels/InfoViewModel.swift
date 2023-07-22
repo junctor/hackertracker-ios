@@ -151,6 +151,7 @@ class InfoViewModel: ObservableObject {
 
     func fetchLocations(code: String) {
         db.collection("conferences/\(code)/locations")
+            .order(by: "peer_sort_order", descending: false)
             .addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
                     print("No Locations")
