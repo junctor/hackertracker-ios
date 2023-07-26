@@ -49,7 +49,7 @@ struct ContentView: View {
                         info = UUID()
                         self.tappedMainTwice = false
                     })
-                ScheduleView(tagIds: [], tappedScheduleTwice: $tappedScheduleTwice)
+                ScheduleView(tagIds: [], tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule)
                     .tabItem {
                         Image(systemName: "calendar")
                         // Text("Main")

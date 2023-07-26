@@ -14,6 +14,7 @@ struct OrgView: View {
     @Binding var tappedScheduleTwice: Bool
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
+    @State var schedule = UUID()
 
     var body: some View {
         ScrollView {
@@ -45,7 +46,7 @@ struct OrgView: View {
                 }
                 Markdown(org.description)
                 if let org_tag_id = org.tag_id_as_organizer, viewModel.events.first(where: { $0.tagIds.contains(org_tag_id)}) != nil {
-                    NavigationLink(destination: ScheduleView(tagId: org_tag_id, includeNav: false, navTitle: org.name, tappedScheduleTwice: $tappedScheduleTwice)) {
+                    NavigationLink(destination: ScheduleView(tagId: org_tag_id, includeNav: false, navTitle: org.name, tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule)) {
                         Label("Events", systemImage: "calendar")
                         
                     }.buttonStyle(.plain)

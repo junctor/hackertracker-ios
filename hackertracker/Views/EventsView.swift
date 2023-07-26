@@ -17,6 +17,7 @@ struct EventsView: View {
     var includeNav: Bool = true
     var navTitle: String = ""
     @Binding var tappedScheduleTwice: Bool
+    @Binding var schedule: UUID
 
     @State private var eventDay = ""
     @State private var searchText = ""
@@ -29,7 +30,7 @@ struct EventsView: View {
                 EventScrollView(events: events
                     .filters(typeIds: filters, bookmarks: bookmarks)
                     .search(text: searchText)
-                    .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents, tappedScheduleTwice: $tappedScheduleTwice)
+                    .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents, includeNav: includeNav, tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule)
                 .navigationTitle(viewModel.conference?.name ?? "Schedule")
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarLeading) {
@@ -104,7 +105,7 @@ struct EventsView: View {
                 EventScrollView(events: events
                     .filters(typeIds: filters, bookmarks: bookmarks)
                     .search(text: searchText)
-                    .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents, tappedScheduleTwice: $tappedScheduleTwice)
+                    .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents, includeNav: includeNav, tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule)
                 .navigationTitle(navTitle)
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
@@ -136,9 +137,12 @@ struct EventScrollView: View {
     let bookmarks: [Int32]
     let dayTag: String
     let showPastEvents: Bool
+    let includeNav: Bool
     let dfu = DateFormatterUtility.shared
     @Binding var tappedScheduleTwice: Bool
     @EnvironmentObject var viewModel: InfoViewModel
+    @State var viewShowing = false
+    @Binding var schedule: UUID
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -158,16 +162,27 @@ struct EventScrollView: View {
             }
             .onChange(of: tappedScheduleTwice, perform: { tappedTwice in
                 guard tappedTwice else { return }
-                var es = events.sorted(by: {$0.key < $1.key})
-                if let f = es.first, let e = f.value.first {
-                    let id: String = dfu.dayOfWeekFormatter.string(from: e.beginTimestamp)
-                    withAnimation {
-                        proxy.scrollTo(id, anchor: .top)
+                let es = events.sorted(by: {$0.key < $1.key})
+                if viewShowing && includeNav {
+                    if let f = es.first, let e = f.value.first {
+                        let id: String = dfu.dayOfWeekFormatter.string(from: e.beginTimestamp)
+                        withAnimation {
+                            proxy.scrollTo(id, anchor: .top)
+                        }
+                        // schedule = UUID()
                     }
-                    // schedule = UUID()
-                    self.tappedScheduleTwice = false
+                } else {
+                    print("EventScrollView: reset UUID here!")
+                    schedule = UUID()
                 }
+                self.tappedScheduleTwice = false
             })
+            .onAppear {
+                viewShowing = true
+            }
+            .onDisappear {
+                viewShowing = false
+            }
         }
     }
 }

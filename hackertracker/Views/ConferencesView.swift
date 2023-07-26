@@ -15,7 +15,7 @@ struct ConferencesView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
     @Environment(\.presentationMode) var presentationMode
-    @AppStorage("conferenceCode") var conferenceCode: String = "DEFCON30"
+    @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
     @AppStorage("showHidden") var showHidden: Bool = false
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     

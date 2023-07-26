@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ScheduleView: View {
     @Binding var tappedScheduleTwice: Bool
+    @Binding var schedule: UUID
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var viewModel: InfoViewModel
     @AppStorage("launchScreen") var launchScreen: String = "Schedule"
@@ -20,7 +21,7 @@ struct ScheduleView: View {
 
     @StateObject var filters: Filters
 
-    init(tagId: Int? = nil, includeNav: Bool? = true, navTitle: String = "", tappedScheduleTwice: Binding<Bool>) {
+    init(tagId: Int? = nil, includeNav: Bool? = true, navTitle: String = "", tappedScheduleTwice: Binding<Bool>, schedule: Binding<UUID>) {
         if let tagId = tagId {
             _filters = StateObject(wrappedValue: Filters(filters: Set([tagId])))
         } else {
@@ -32,9 +33,10 @@ struct ScheduleView: View {
         }
         self.navTitle = navTitle
         self._tappedScheduleTwice = tappedScheduleTwice
+        self._schedule = schedule
     }
     
-    init(tagIds: [Int] = [], includeNav: Bool? = true, navTitle: String = "", tappedScheduleTwice: Binding<Bool>) {
+    init(tagIds: [Int] = [], includeNav: Bool? = true, navTitle: String = "", tappedScheduleTwice: Binding<Bool>, schedule: Binding<UUID>) {
         if tagIds.count > 0 {
             _filters = StateObject(wrappedValue: Filters(filters: Set(tagIds)))
         } else {
@@ -45,10 +47,11 @@ struct ScheduleView: View {
         }
         self.navTitle = navTitle
         self._tappedScheduleTwice = tappedScheduleTwice
+        self._schedule = schedule
     }
 
     var body: some View {
-        EventsView(events: viewModel.events, conference: viewModel.conference, bookmarks: bookmarks.map { $0.id }, includeNav: includeNav, navTitle: navTitle, tappedScheduleTwice: $tappedScheduleTwice, filters: $filters.filters)
+        EventsView(events: viewModel.events, conference: viewModel.conference, bookmarks: bookmarks.map { $0.id }, includeNav: includeNav, navTitle: navTitle, tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule, filters: $filters.filters)
             .onAppear {
                 print("ScheduleView: Current launchscreen is: \(launchScreen)")
             }

@@ -22,6 +22,7 @@ struct InfoView: View {
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
     @State var rick: Int = 0
+    @State var schedule = UUID()
 
     var body: some View {
         NavigationView {
@@ -144,7 +145,7 @@ struct InfoView: View {
                         }
                         let kidsTags = getKidsTags()
                         if kidsTags.count > 0 {
-                            NavigationLink(destination: ScheduleView(tagIds: kidsTags, includeNav: false, navTitle: "Kids Content", tappedScheduleTwice: $tappedMainTwice)) {
+                            NavigationLink(destination: ScheduleView(tagIds: kidsTags, includeNav: false, navTitle: "Kids Content", tappedScheduleTwice: $tappedMainTwice, schedule: $schedule)) {
                                 CardView(systemImage: "figure.and.child.holdinghands", text: "Kids Content", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                             }
                         }
