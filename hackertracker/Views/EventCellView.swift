@@ -64,7 +64,6 @@ struct EventCell: View {
     }
     
     func getEventTagColorBackground() -> Color {
-        var colorHex = "#2c8f07"
         if let tagtype = viewModel.tagtypes.first(where: {$0.tags.contains(where: {$0.id == event.tagIds[0]})}),
            let tag = tagtype.tags.first(where: { $0.id == event.tagIds[0]}),
            let colorHex = tag.colorBackground, let uicolor = UIColor(hex: colorHex) {

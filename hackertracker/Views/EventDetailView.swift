@@ -115,7 +115,6 @@ struct EventDetailView: View {
                 }
             }
             .navigationBarTitle(Text(""), displayMode: .inline)
-            //.toolbar(.hidden, for: .tabBar)
         } else {
             _04View(message: "Event \(eventId) found")
         }

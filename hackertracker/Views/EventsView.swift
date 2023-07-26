@@ -16,6 +16,7 @@ struct EventsView: View {
     let dfu = DateFormatterUtility.shared
     var includeNav: Bool = true
     var navTitle: String = ""
+    @Binding var tappedScheduleTwice: Bool
 
     @State private var eventDay = ""
     @State private var searchText = ""
@@ -28,7 +29,7 @@ struct EventsView: View {
                 EventScrollView(events: events
                     .filters(typeIds: filters, bookmarks: bookmarks)
                     .search(text: searchText)
-                    .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents)
+                    .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents, tappedScheduleTwice: $tappedScheduleTwice)
                 .navigationTitle(viewModel.conference?.name ?? "Schedule")
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarLeading) {
@@ -59,6 +60,14 @@ struct EventsView: View {
                     }
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         Menu {
+                            Button {
+                                self.tappedScheduleTwice = true
+                            } label: {
+                                HStack {
+                                    Text("Top")
+                                    Image(systemName: "chevron.up")
+                                }
+                            }
                             ForEach(events.filters(typeIds: filters, bookmarks: bookmarks).eventDayGroup().sorted {
                                 $0.key < $1.key
                             }, id: \.key) { day, _ in
@@ -95,7 +104,7 @@ struct EventsView: View {
                 EventScrollView(events: events
                     .filters(typeIds: filters, bookmarks: bookmarks)
                     .search(text: searchText)
-                    .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents)
+                    .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents, tappedScheduleTwice: $tappedScheduleTwice)
                 .navigationTitle(navTitle)
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
@@ -128,6 +137,8 @@ struct EventScrollView: View {
     let dayTag: String
     let showPastEvents: Bool
     let dfu = DateFormatterUtility.shared
+    @Binding var tappedScheduleTwice: Bool
+    @EnvironmentObject var viewModel: InfoViewModel
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -141,8 +152,22 @@ struct EventScrollView: View {
             }
             .listStyle(.plain)
             .onChange(of: dayTag) { changedValue in
-                proxy.scrollTo(changedValue, anchor: .top)
+                withAnimation {
+                    proxy.scrollTo(changedValue, anchor: .top)
+                }
             }
+            .onChange(of: tappedScheduleTwice, perform: { tappedTwice in
+                guard tappedTwice else { return }
+                var es = events.sorted(by: {$0.key < $1.key})
+                if let f = es.first, let e = f.value.first {
+                    let id: String = dfu.dayOfWeekFormatter.string(from: e.beginTimestamp)
+                    withAnimation {
+                        proxy.scrollTo(id, anchor: .top)
+                    }
+                    // schedule = UUID()
+                    self.tappedScheduleTwice = false
+                }
+            })
         }
     }
 }

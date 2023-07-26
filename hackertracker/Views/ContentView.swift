@@ -27,24 +27,35 @@ struct ContentView: View {
     @StateObject var theme = Theme()
 
     @State private var tabSelection = 1
+    @State private var tappedMainTwice = false
+    @State private var tappedScheduleTwice = false
+    @State private var info = UUID()
+    @State private var schedule = UUID()
     @State private var isInit: Bool = false
 
     var body: some View {
         if viewModel.conference != nil {
             TabView(selection: $tabSelection) {
-                InfoView(tabSelection: $tabSelection)
+                InfoView(tabSelection: $tabSelection, tappedMainTwice: $tappedScheduleTwice)
                     .tabItem {
                         Image(systemName: "house")
                         // Text("Info")
                     }
                     .tag(1)
+                    .id(info)
                     .preferredColorScheme(theme.colorScheme)
-                ScheduleView(tagIds: [])
+                    .onChange(of: tappedMainTwice, perform: { tappedTwice in
+                        guard tappedTwice else { return }
+                        info = UUID()
+                        self.tappedMainTwice = false
+                    })
+                ScheduleView(tagIds: [], tappedScheduleTwice: $tappedScheduleTwice)
                     .tabItem {
                         Image(systemName: "calendar")
                         // Text("Main")
                     }
                     .tag(2)
+                    .id(schedule)
                     .preferredColorScheme(theme.colorScheme)
                 MapView()
                     .tabItem {
@@ -60,6 +71,18 @@ struct ContentView: View {
                     }
                     .tag(4)
                     .preferredColorScheme(theme.colorScheme)
+            }
+            .onTapGesture(count: 2) {
+                switch tabSelection {
+                case 1:
+                    print("tapped mainview twice")
+                    tappedMainTwice = true
+                case 2:
+                    print("tapped scheduleview twice")
+                    tappedScheduleTwice = true
+                default:
+                    print("tapped twice")
+                }
             }
             .onAppear {
                 if #available(iOS 15.0, *) {

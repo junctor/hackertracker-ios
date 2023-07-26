@@ -11,6 +11,7 @@ import SwiftUI
 
 struct OrgView: View {
     var org: Organization
+    @Binding var tappedScheduleTwice: Bool
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
 
@@ -44,7 +45,7 @@ struct OrgView: View {
                 }
                 Markdown(org.description)
                 if let org_tag_id = org.tag_id_as_organizer, viewModel.events.first(where: { $0.tagIds.contains(org_tag_id)}) != nil {
-                    NavigationLink(destination: ScheduleView(tagId: org_tag_id, includeNav: false, navTitle: org.name)) {
+                    NavigationLink(destination: ScheduleView(tagId: org_tag_id, includeNav: false, navTitle: org.name, tappedScheduleTwice: $tappedScheduleTwice)) {
                         Label("Events", systemImage: "calendar")
                         
                     }.buttonStyle(.plain)

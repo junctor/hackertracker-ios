@@ -11,6 +11,7 @@ import WebKit
 
 struct InfoView: View {
     @Binding var tabSelection: Int
+    @Binding var tappedMainTwice: Bool
     @EnvironmentObject var viewModel: InfoViewModel
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
@@ -134,8 +135,8 @@ struct InfoView: View {
                         if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga" }) {
                             let sortedTags = ott.tags.sorted { $0.sortOrder < $1.sortOrder }
                             ForEach(sortedTags, id: \.id) { tag in
-                                if let _ = viewModel.orgs.first(where: {$0.tag_ids.contains(tag.id)}) {
-                                    NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id)) {
+                                if viewModel.orgs.first(where: {$0.tag_ids.contains(tag.id)}) != nil {
+                                    NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id, tappedTwice: $tappedMainTwice)) {
                                         CardView(systemImage: "bag", text: tag.label, color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                                     }
                                 }
@@ -143,7 +144,7 @@ struct InfoView: View {
                         }
                         let kidsTags = getKidsTags()
                         if kidsTags.count > 0 {
-                            NavigationLink(destination: ScheduleView(tagIds: kidsTags, includeNav: false, navTitle: "Kids Content")) {
+                            NavigationLink(destination: ScheduleView(tagIds: kidsTags, includeNav: false, navTitle: "Kids Content", tappedScheduleTwice: $tappedMainTwice)) {
                                 CardView(systemImage: "figure.and.child.holdinghands", text: "Kids Content", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                             }
                         }
