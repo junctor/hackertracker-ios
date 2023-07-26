@@ -9,6 +9,7 @@ import SwiftUI
 struct EventCell: View {
     let event: Event
     let bookmarks: [Int32]
+    let showDay: Bool
     @Environment(\.managedObjectContext) private var viewContext
     @EnvironmentObject var viewModel: InfoViewModel
     let dfu = DateFormatterUtility.shared
@@ -31,6 +32,10 @@ struct EventCell: View {
                 HStack(alignment: .top) {
                     HStack(alignment: .center) {
                         VStack {
+                            if showDay {
+                                Text(dfu.monthDayFormatter.string(from: event.beginTimestamp))
+                                    .font(.subheadline)
+                            }
                             Text(dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp))
                                 .font(.subheadline)
                         }

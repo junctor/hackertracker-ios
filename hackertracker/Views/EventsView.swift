@@ -206,7 +206,7 @@ struct EventData: View {
                         }, id: \.id) { event in
                             if showPastEvents || event.beginTimestamp >= Date() {
                                 NavigationLink(destination: EventDetailView(eventId: event.id)) {
-                                    EventCell(event: event, bookmarks: bookmarks)
+                                    EventCell(event: event, bookmarks: bookmarks, showDay: false)
                                 }
                             }
                         }

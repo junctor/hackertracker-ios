@@ -17,9 +17,9 @@ struct GlobalSearchView: View {
             List {
                 if !searchText.isEmpty {
                     Section(header: Text("Events")) {
-                        ForEach(viewModel.events.search(text: searchText), id: \.id) { event in
+                        ForEach(viewModel.events.search(text: searchText).sorted {$0.beginTimestamp < $1.beginTimestamp}, id: \.id) { event in
                             NavigationLink(destination: EventDetailView(eventId: event.id)) {
-                                EventCell(event: event, bookmarks: bookmarks.map { $0.id })
+                                EventCell(event: event, bookmarks: bookmarks.map { $0.id }, showDay: true)
                             }
                         }
                     }
