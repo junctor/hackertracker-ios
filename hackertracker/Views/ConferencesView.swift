@@ -19,12 +19,14 @@ struct ConferencesView: View {
     @AppStorage("showHidden") var showHidden: Bool = false
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     
+    @StateObject var cViewModel = ConferencesViewModel()
+    
     var body: some View {
-        if viewModel.conferences.count > 0 {
+        if cViewModel.conferences.count > 0 {
             Text("Select Conference")
                 .font(.headline)
             Divider()
-            List(viewModel.conferences, id: \.code) { conference in
+            List(cViewModel.conferences, id: \.code) { conference in
                 ConferenceRow(conference: conference, code: selected.code)
                     .onTapGesture {
                         if conference.code == selected.code {
@@ -69,7 +71,7 @@ struct ConferencesView: View {
         } else {
             _04View(message: "Loading", show404: false).preferredColorScheme(.dark)
                 .onAppear {
-                    viewModel.fetchConferences(hidden: showHidden)
+                    cViewModel.fetchConferences(hidden: showHidden)
                 }
         }
     }
@@ -77,6 +79,7 @@ struct ConferencesView: View {
 
 struct ConferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        ConferencesView()
+        Text("ConferencesView")
+        // ConferencesView()
     }
 }
