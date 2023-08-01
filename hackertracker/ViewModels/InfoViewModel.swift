@@ -21,10 +21,12 @@ class InfoViewModel: ObservableObject {
     @Published var orgs = [Organization]()
     @Published var faqs = [FAQ]()
     @Published var news = [Article]()
+    @Published var menus = [InfoMenu]()
     @Published var showLocaltime = false
     @Published var showPastEvents = true
     @Published var showNews = true
     @Published var colorMode = false
+    @Published var outOfStock = false
 
     private var db = Firestore.firestore()
 
@@ -38,6 +40,7 @@ class InfoViewModel: ObservableObject {
         fetchSpeakers(code: code)
         fetchOrgs(code: code)
         fetchLists(code: code)
+        fetchMenus(code: code)
     }
 
     func fetchConference(code: String) {
@@ -281,6 +284,28 @@ class InfoViewModel: ObservableObject {
                     }
                 }
                 // NSLog("InfoViewModel: Documents: \(self.documents.count)")
+            }
+    }
+    
+    func fetchMenus(code: String) {
+        db.collection("conferences")
+            .document(code)
+            .collection("menus")
+            .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
+                guard let docs = querySnapshot?.documents else {
+                    print("No Menu Items")
+                    return
+                }
+
+                self.menus = docs.compactMap { queryDocumentSnapshot -> InfoMenu? in
+                    do {
+                        return try queryDocumentSnapshot.data(as: InfoMenu.self)
+                    } catch {
+                        print("Error \(error)")
+                        return nil
+                    }
+                }
+                print("InfoViewModel: \(self.menus.count) menus")
             }
     }
 }

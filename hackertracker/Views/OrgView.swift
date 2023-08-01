@@ -64,6 +64,7 @@ struct OrgView: View {
             }
         }
         .padding(5)
+        .analyticsScreen(name: "OrgView")
     }
 }
 

@@ -37,6 +37,7 @@ struct MapView: View {
                     }
                     .tabViewStyle(.page)
                     .scaledToFill()
+                    .analyticsScreen(name: "MapView")
                 } else {
                     _04View(message: "No Maps Found")
                 }

@@ -30,6 +30,7 @@ struct SpeakersView: View {
             }
             .searchable(text: $searchText)
         }
+        .analyticsScreen(name: "SpeakersView")
     }
 }
 

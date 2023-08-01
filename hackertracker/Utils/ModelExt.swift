@@ -9,16 +9,11 @@ import Foundation
 
 extension Date {
     func dayOfDate() -> Date? {
-        let calendar = Calendar.current
-
-        var components = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: self)
-
-        components.hour = 0
-        components.minute = 0
-        components.second = 0
-        components.timeZone = DateFormatterUtility.shared.timeZone
-
-        return calendar.date(from: components)
+        var calendar = Calendar.current
+        if let tz = DateFormatterUtility.shared.timeZone {
+            calendar.timeZone = tz
+        }
+        return calendar.startOfDay(for: self)
     }
 }
 

@@ -23,6 +23,7 @@ struct NewsListView: View {
         }
         .searchable(text: $searchText)
         .navigationTitle("News")
+        .analyticsScreen(name: "NewsListView")
     }
 }
 

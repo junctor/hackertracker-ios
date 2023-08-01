@@ -32,6 +32,7 @@ struct OrgsView: View {
         }
         .navigationTitle(title)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+        .analyticsScreen(name: "OrgsView")
     }
 }
 

@@ -21,6 +21,7 @@ struct FAQListView: View {
         }
         .searchable(text: $searchText)
         .navigationTitle("FAQs")
+        .analyticsScreen(name: "FAQListView")
     }
 }
 

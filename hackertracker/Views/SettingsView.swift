@@ -49,6 +49,7 @@ struct SettingsView: View {
                 NotificationSettingsView()
             }
             .padding(10)
+            .analyticsScreen(name: "SettingsView")
         }
     }
 }

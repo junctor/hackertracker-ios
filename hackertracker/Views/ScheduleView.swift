@@ -55,5 +55,6 @@ struct ScheduleView: View {
             .onAppear {
                 print("ScheduleView: Current launchscreen is: \(launchScreen)")
             }
+            .analyticsScreen(name: "ScheduleView")
     }
 }

@@ -114,6 +114,7 @@ struct ProductView: View {
                     .font(.caption)
             }
         }
+        .padding(15)
         .onAppear {
             self.selectedVariant = self.product.variants[0].variantId
         }
@@ -124,6 +125,7 @@ struct ProductView: View {
                 }
             }
         }
+        .analyticsScreen(name: "ProductView")
     }
     
     func addToCart(variant: Variant) {

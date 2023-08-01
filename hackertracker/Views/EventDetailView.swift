@@ -114,6 +114,7 @@ struct EventDetailView: View {
                     }
                 }
             }
+            .analyticsScreen(name: "EventDetailView")
             .navigationBarTitle(Text(""), displayMode: .inline)
         } else {
             _04View(message: "Event \(eventId) found")

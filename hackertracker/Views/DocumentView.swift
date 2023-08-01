@@ -30,7 +30,8 @@ struct DocumentView: View {
                 Divider()
             }
         }
-        .padding(5)
+        .analyticsScreen(name: "DocumentView")
+        .padding(15)
     }
 }
 

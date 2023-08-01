@@ -67,6 +67,7 @@ struct ConferencesView: View {
                         self.presentationMode.wrappedValue.dismiss()
                     }
             }
+            .analyticsScreen(name: "ConferencesView")
             .listStyle(.plain)
         } else {
             _04View(message: "Loading", show404: false).preferredColorScheme(.dark)

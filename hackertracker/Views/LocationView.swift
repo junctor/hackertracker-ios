@@ -22,6 +22,7 @@ struct LocationView: View {
         }.frame(maxWidth: .infinity, maxHeight: .infinity)
             .accentColor(.primary)
             .navigationTitle("Locations")
+            .analyticsScreen(name: "LocationView")
     }
 
     init(locations: [Location]) {

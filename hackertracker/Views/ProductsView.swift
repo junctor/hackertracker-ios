@@ -12,27 +12,30 @@ struct ProductsView: View {
     @EnvironmentObject var viewModel: InfoViewModel
 
     @State private var searchText = ""
+    @State private var filters: [String] = []
 
     var body: some View {
         List {
             ForEach(self.viewModel.products.search(text: searchText).sorted {
                 $0.sortOrder < $1.sortOrder
             }) { product in
-                NavigationLink(destination: ProductView(product: product)) {
-                    HStack {
-                        if product.media.count > 0, let media_url = URL(string: product.media[0].url) {
-                            KFImage(media_url)
-                                .resizable()
-                                .scaledToFit()
-                                .cornerRadius(5)
+                if filters.count == 0 || product.variants.filter({ filters.contains($0.code) }).count > 0 {
+                    NavigationLink(destination: ProductView(product: product)) {
+                        HStack {
+                            if product.media.count > 0, let media_url = URL(string: product.media[0].url) {
+                                KFImage(media_url)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .cornerRadius(5)
+                            }
+                            VStack(alignment: .leading) {
+                                Text(product.title).font(.subheadline).fontWeight(.bold).multilineTextAlignment(.leading)
+                                Text(product.priceMin < product.priceMax ? "$\(product.priceMin / 100) - $\(product.priceMax / 100)" : "$\(product.priceMin/100)")
+                                    .font(.subheadline)
+                            }
                         }
-                        VStack(alignment: .leading) {
-                            Text(product.title).font(.subheadline).fontWeight(.bold).multilineTextAlignment(.leading)
-                            Text(product.priceMin < product.priceMax ? "$\(product.priceMin / 100) - $\(product.priceMax / 100)" : "$\(product.priceMin/100)")
-                                .font(.subheadline)
-                        }
+                        .frame(idealHeight: 50)
                     }
-                    .frame(idealHeight: 50)
                 }
             }
         }
@@ -43,6 +46,7 @@ struct ProductsView: View {
                 Image(systemName: "qrcode")
             }
         }
+        .analyticsScreen(name: "ProductsView")
     }
 }
 

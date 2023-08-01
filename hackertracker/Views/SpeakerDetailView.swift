@@ -65,6 +65,7 @@ struct SpeakerDetailView: View {
                 .padding(15)
             }
             .navigationBarTitle(Text(""), displayMode: .inline)
+            .analyticsScreen(name: "SpeakerDetailView")
         } else {
             _04View(message: "Speaker \(id) not found")
         }

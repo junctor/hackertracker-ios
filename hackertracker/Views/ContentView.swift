@@ -7,6 +7,7 @@
 
 import CoreData
 import FirebaseFirestoreSwift
+import FirebaseAnalyticsSwift
 import SwiftUI
 
 class SelectedConference: ObservableObject {
@@ -111,6 +112,7 @@ struct ContentView: View {
             .environmentObject(selected)
             .environmentObject(viewModel)
             .environmentObject(theme)
+            .analyticsScreen(name: "ContentView")
         } else {
             if conferenceCode == "INIT" {
                 ConferencesView()

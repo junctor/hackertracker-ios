@@ -24,6 +24,7 @@ struct _04View: View {
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 100)
         }
+        .analyticsScreen(name: "404View")
     }
 }
 

@@ -11,18 +11,16 @@ struct CartView: View {
     @FetchRequest(sortDescriptors: []) var cart: FetchedResults<Cart>
     @EnvironmentObject var viewModel: InfoViewModel
     @Environment(\.managedObjectContext) private var viewContext
-    // @EnvironmentObject var theme: Theme
     @State private var total = 0
     @State private var totalItems = 0
-    @State private var outOfStock = false
     @State private var showingAlert = false
 
     var body: some View {
         ScrollView {
-            if !outOfStock && cart.count > 0 {
+            if !viewModel.outOfStock && cart.count > 0 {
                 QRCodeView(qrString: generateQRValue())
             } else {
-                if outOfStock {
+                if viewModel.outOfStock {
                     Text("Out Of Stock Items Selected")
                         .font(.headline)
                     Text("Remove out of stock items from list")
@@ -41,7 +39,6 @@ struct CartView: View {
                 let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) })[0]
                 let variant = product.variants.filter({$0.variantId == item.variantId})[0]
                 CartRow(product: product, item: item, variant: variant, total: $total, totalItems: $totalItems)
-                
             }
             HStack {
                 Text("Subtotal (\(totalItems) items)")
@@ -63,14 +60,14 @@ struct CartView: View {
                 }
         }
         .onAppear {
-            outOfStock = false
+            viewModel.outOfStock = false
             var mytotal = 0
             var mytotalItems = 0
             for item in cart {
                 let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) })[0]
                 let variant = product.variants.filter({$0.variantId == item.variantId})[0]
                 if variant.stockStatus == "OUT" {
-                    outOfStock = true
+                    viewModel.outOfStock = true
                 }
                 mytotal += (variant.price*Int(item.count))
                 mytotalItems += Int(item.count)
@@ -81,17 +78,18 @@ struct CartView: View {
         .onChange(of: totalItems) { _ in
             checkOutOfStock()
         }
+        .analyticsScreen(name: "CartView")
         .navigationTitle("Merch")
         .padding(15)
     }
     
     func checkOutOfStock() {
-        outOfStock = false
+        viewModel.outOfStock = false
         for item in cart {
             let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) })[0]
             let variant = product.variants.filter({$0.variantId == item.variantId})[0]
             if variant.stockStatus == "OUT" {
-                outOfStock = true
+                viewModel.outOfStock = true
             }
         }
     }
@@ -137,6 +135,7 @@ struct CartRow: View {
     @Binding var total: Int
     @Binding var totalItems: Int
     @Environment(\.managedObjectContext) private var viewContext
+    @EnvironmentObject private var viewModel: InfoViewModel
     @State private var count: Int = 0
     
     init(product: Product, item: Cart, variant: Variant, total: Binding<Int>, totalItems: Binding<Int>) {
@@ -181,6 +180,9 @@ struct CartRow: View {
                     .background(Color(.systemGray6))
                     .cornerRadius(15)
                     .frame(alignment: .center)
+                    .onAppear {
+                        viewModel.outOfStock = true
+                    }
                 }
             }
             .frame(maxWidth: .infinity)
