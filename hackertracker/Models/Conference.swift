@@ -32,6 +32,7 @@ struct Conference: Codable, Identifiable, Equatable {
     var enableMerchCart: Bool
     var homeMenuId: Int
     var tagline: String?
+    var merchHelpDocId: Int?
 
     private enum CodingKeys: String, CodingKey {
         case name
@@ -51,5 +52,6 @@ struct Conference: Codable, Identifiable, Equatable {
         case enableMerchCart = "enable_merch_cart"
         case homeMenuId = "home_menu_id"
         case tagline = "tagline_text"
+        case merchHelpDocId = "merch_help_doc_id"
     }
 }
