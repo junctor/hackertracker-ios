@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct ShareView: View {
+    @EnvironmentObject var viewModel: InfoViewModel
     let event: Event
     let title: Bool
 
@@ -17,7 +18,7 @@ struct ShareView: View {
 
     func shareText() -> String {
         return """
-        DEF CON 30: Attending \(event.title) on \(event.beginTimestamp.formatted(date: .abbreviated, time: .shortened)) in \(event.location.name)
+        \(viewModel.conference?.name ?? "HT"): Attending \(event.title) on \(event.beginTimestamp.formatted(date: .abbreviated, time: .shortened)) in \(event.location.name)
         #hackertracker
         """
     }

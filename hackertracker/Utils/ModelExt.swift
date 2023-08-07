@@ -34,11 +34,28 @@ extension [Event] {
         }
     }
 
-    func filters(typeIds: Set<Int>, bookmarks: [Int32]) -> Self {
+    func filters(typeIds: Set<Int>, bookmarks: [Int32], tagTypes: [TagType]) -> Self {
         if typeIds.isEmpty {
             return self
         } else {
-            return self.filter { $0.tagIds.filter({ typeIds.contains($0) }).count > 0 || (typeIds.contains(1337) && bookmarks.contains(Int32($0.id))) }
+            var filterTypes: [Int: [Int]] = [:]
+            for typeId in typeIds {
+                if let tagType = tagTypes.first(where: { $0.tags.contains(where: { $0.id == typeId }) }) {
+                    if filterTypes.keys.contains(tagType.id) {
+                        filterTypes[tagType.id]?.append(typeId)
+                    } else {
+                        filterTypes[tagType.id] = [typeId]
+                    }
+                }
+            }
+            
+            if typeIds.contains(1337) {
+                return self.filter { isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes) &&
+                                     bookmarks.contains(Int32($0.id))
+                }
+            } else {
+                return self.filter { isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes) }
+            }
         }
     }
 
@@ -54,5 +71,21 @@ extension [Event] {
             $0.beginTimestamp.dayOfDate() ?? Date()
         })
         return eventDict
+    }
+}
+
+func isFiltered(tagIds: [Int], filterTypes: [Int: [Int]]) -> Bool {
+    var results: [Bool] = []
+    for ft in filterTypes {
+        var my_r = false
+        if ft.value.contains(where: {tagIds.contains($0)}) {
+            my_r = true
+        }
+        results.append(my_r)
+    }
+    if results.contains(false) {
+        return false
+    } else {
+        return true
     }
 }

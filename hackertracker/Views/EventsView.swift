@@ -28,7 +28,7 @@ struct EventsView: View {
         if includeNav {
             NavigationView {
                 EventScrollView(events: events
-                    .filters(typeIds: filters, bookmarks: bookmarks)
+                    .filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
                     .search(text: searchText)
                     .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents, includeNav: includeNav, tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule)
                 .navigationTitle(viewModel.conference?.name ?? "Schedule")
@@ -69,7 +69,7 @@ struct EventsView: View {
                                     Image(systemName: "chevron.up")
                                 }
                             }
-                            ForEach(events.filters(typeIds: filters, bookmarks: bookmarks).eventDayGroup().sorted {
+                            ForEach(events.filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes).eventDayGroup().sorted {
                                 $0.key < $1.key
                             }, id: \.key) { day, _ in
                                 Button(dfu.dayMonthDayOfWeekFormatter.string(from: day)) {
@@ -103,14 +103,14 @@ struct EventsView: View {
         } else {
             VStack {
                 EventScrollView(events: events
-                    .filters(typeIds: filters, bookmarks: bookmarks)
+                    .filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
                     .search(text: searchText)
                     .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay, showPastEvents: showPastEvents, includeNav: includeNav, tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule)
                 .navigationTitle(navTitle)
                 .toolbar {
                     ToolbarItemGroup(placement: .navigationBarTrailing) {
                         Menu {
-                            ForEach(events.filters(typeIds: filters, bookmarks: bookmarks).eventDayGroup().sorted {
+                            ForEach(events.filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes).eventDayGroup().sorted {
                                 $0.key < $1.key
                             }, id: \.key) { day, _ in
                                 Button(dfu.dayMonthDayOfWeekFormatter.string(from: day)) {
