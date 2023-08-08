@@ -149,10 +149,10 @@ struct EventScrollView: View {
             List(events.sorted {
                 $0.key < $1.key
             }, id: \.key) { weekday, events in
-                if showPastEvents || weekday >= Date() {
+                // if showPastEvents || weekday >= Date() {
                     EventData(weekday: weekday, events: events, bookmarks: bookmarks, showPastEvents: showPastEvents)
                         .id(dfu.dayOfWeekFormatter.string(from: weekday))
-                }
+                // }
             }
             .listStyle(.plain)
             .onChange(of: dayTag) { changedValue in
@@ -199,7 +199,7 @@ struct EventData: View {
             ForEach(events.eventDateTimeGroup().sorted {
                 $0.key < $1.key
             }, id: \.key) { time, timeEvents in
-                if showPastEvents || time >= Date() {
+                // if showPastEvents || time >= Date() {
                     Section {
                         ForEach(timeEvents.sorted {
                             $0.beginTimestamp < $1.beginTimestamp
@@ -212,7 +212,7 @@ struct EventData: View {
                         }
                     }
                     .listStyle(.plain)
-                }
+                // }
             }
         }
         .headerProminence(.increased)

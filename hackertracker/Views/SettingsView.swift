@@ -88,6 +88,8 @@ struct NotificationSettingsView: View {
         .background(ThemeColors.red)
         .cornerRadius(5)
         Divider()
+        ShowMerchInfoSettingsView()
+        Divider()
     }
 }
 
@@ -133,6 +135,23 @@ struct ShowNewsSettingsView: View {
                         viewModel.showNews = value
                     }
                 Text("Show the most recent news article on the home screen")
+                    .font(.caption)
+        }
+        .padding(5)
+        Divider()
+    }
+}
+
+struct ShowMerchInfoSettingsView: View {
+    @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+                Toggle("Merch Info on Merchandise Screen", isOn: $showMerchInfo)
+                    .onChange(of: showMerchInfo) { value in
+                        print("SettingsView: Changing to showMerchInfo = \(value)")
+                    }
+                Text("Show the merchandise information link on the merch list")
                     .font(.caption)
         }
         .padding(5)

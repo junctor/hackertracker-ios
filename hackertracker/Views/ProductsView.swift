@@ -10,24 +10,34 @@ import Kingfisher
 
 struct ProductsView: View {
     @EnvironmentObject var viewModel: InfoViewModel
+    @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
 
     @State private var searchText = ""
     @State private var filters: [String] = []
 
     var body: some View {
         ScrollView {
-            if let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {
+            if showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {
                 NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
                     HStack {
-                        Image(systemName: "questionmark.circle")
-                        Text(doc.title)
+                        Button {
+                            showMerchInfo = false
+                        } label: {
+                            Image(systemName: "x.circle")
+                        }
+                        VStack(alignment: .leading) {
+                            Text(doc.title).font(.subheadline).fontWeight(.bold)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
                     }
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity)
-                    .padding(15)
-                    .background(viewModel.colorMode ? ThemeColors.blue : Color(.systemGray6))
+                    .padding(10)
+                    .background(ThemeColors.red)
                     .cornerRadius(15)
                 }
+                Divider()
             }
                 ForEach(self.viewModel.products.search(text: searchText).sorted {
                     $0.sortOrder < $1.sortOrder
@@ -54,11 +64,8 @@ struct ProductsView: View {
                                             .font(.subheadline)
                                     }
                                     .foregroundColor(.primary)
-                                    .frame(maxWidth: .infinity)
-                                    VStack(alignment: .trailing) {
-                                        Image(systemName: "chevron.right")
-                                    }
-                                    .frame(alignment: .trailing)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
                                 }
                                 .frame(idealHeight: 50)
                             }
@@ -69,6 +76,11 @@ struct ProductsView: View {
         .searchable(text: $searchText)
         .navigationTitle("Merch")
         .toolbar {
+            if !showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {
+                NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
+                    Image(systemName: "info.circle")
+                }
+            }
             NavigationLink(destination: CartView()) {
                 Image(systemName: "qrcode")
             }
