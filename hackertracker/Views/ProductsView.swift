@@ -81,8 +81,10 @@ struct ProductsView: View {
                     Image(systemName: "info.circle")
                 }
             }
-            NavigationLink(destination: CartView()) {
-                Image(systemName: "qrcode")
+            if let c = viewModel.conference, c.enableMerchCart {
+                NavigationLink(destination: CartView()) {
+                    Image(systemName: "qrcode")
+                }
             }
         }
         .padding(15)

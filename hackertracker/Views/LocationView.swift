@@ -74,13 +74,14 @@ func childrenLocations(locations: [Location]) -> [Int: [Location]] {
 
 func circleStatus(location: Location) -> Color {
     let curDate = Date()
+    let dfu = DateFormatterUtility.shared
 
-    if let schedule = location.schedule, !schedule.isEmpty {
-        if schedule.contains(where: { $0.status == "open" && curDate >= $0.begin! && curDate <= $0.end! }) {
+    if !location.schedule.isEmpty {
+        if location.schedule.contains(where: { $0.status == "open" && curDate >= dfu.iso8601Formatter.date(from: $0.begin) ?? Date() && curDate <= dfu.iso8601Formatter.date(from: $0.end) ?? Date() }) {
             return .green
-        } else if schedule.contains(where: { $0.status == "closed" && curDate >= $0.begin! && curDate <= $0.end! }) {
+        } else if location.schedule.contains(where: { $0.status == "closed" && curDate >= dfu.iso8601Formatter.date(from: $0.begin) ?? Date() && curDate <= dfu.iso8601Formatter.date(from: $0.end) ?? Date() }) {
             return .red
-        } else if schedule.allSatisfy({ $0.status == "closed" }) {
+        } else if location.schedule.allSatisfy({ $0.status == "closed" }) {
             return .red
         }
     }

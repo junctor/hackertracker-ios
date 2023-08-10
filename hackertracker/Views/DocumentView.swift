@@ -35,6 +35,20 @@ struct DocumentView: View {
     }
 }
 
+struct docSearchRow: View {
+    let title_text: String
+    let themeColor: Color
+    
+    var body: some View {
+        HStack {
+            Rectangle().fill(themeColor)
+                .frame(width: 6)
+                .frame(maxHeight: .infinity)
+            Text(title_text)
+        }
+    }
+}
+
 struct DocumentView_Previews: PreviewProvider {
     static var previews: some View {
         DocumentView(title_text: "Title of Document", body_text: "Go ahead and add *markdown* to make things interesting if you want")

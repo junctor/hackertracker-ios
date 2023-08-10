@@ -29,7 +29,7 @@ struct CartView: View {
                     Text("No Items Selected")
                         .font(.headline)
                     NavigationLink(destination: ProductsView()) {
-                        Text("Select some Merch to see a QR Code")
+                        Text("Select items to view QR Code")
                             .font(.subheadline)
                     }
                 }
@@ -156,7 +156,7 @@ struct CartRow: View {
                 HStack {
                     Text("\(count)")
                         .bold()
-                    Stepper("", value: $count, in: 1...100)
+                    Stepper("", value: $count, in: 0...100)
                         .fixedSize()
                     VStack {
                         Text("$\((variant.price*Int(item.count))/100) USD")
@@ -170,7 +170,7 @@ struct CartRow: View {
                         Button {
                             count = 0
                         } label: {
-                            Label("Out of stock, remove from cart", systemImage: "trash")
+                            Label("Out of stock, remove from list", systemImage: "trash")
                                 .font(.callout)
                         }
                     }

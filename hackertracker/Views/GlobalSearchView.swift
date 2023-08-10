@@ -33,6 +33,16 @@ struct GlobalSearchView: View {
                             }
                         }
                     }
+                    
+                    Section(header: Text("Documents")) {
+                        ForEach(viewModel.documents.search(text: searchText).sorted {
+                            $0.title < $1.title
+                        }, id: \.id) { document in
+                            NavigationLink(destination: DocumentView(title_text: document.title, body_text: document.body)) {
+                                docSearchRow(title_text: document.title, themeColor: viewModel.colorMode ? theme.carousel() : Color(.systemGray2))
+                            }
+                        }
+                    }
 
                     if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga" }) {
                         ForEach(ott.tags, id: \.id) { tag in
