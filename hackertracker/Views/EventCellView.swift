@@ -40,12 +40,8 @@ struct EventCell: View {
                             Text(dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp))
                                 .font(.subheadline)
                             if event.beginTimestamp != event.endTimestamp {
-                                Rectangle()
-                                    .fill(.tertiary)
-                                    .frame(width: 6, height: 1)
-                                    .padding(.vertical, 3)
                                 Text(dfu.hourMinuteTimeFormatter.string(from: event.endTimestamp))
-                                    .font(.subheadline)
+                                    .font(.caption2)
                             }
                         }
                         VStack(alignment: .leading, spacing: 3) {
