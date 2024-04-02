@@ -1,5 +1,5 @@
 //
-//  ModelUtils.swift
+//  ModelExt.swift
 //  hackertracker
 //
 //  Created by Caleb Kinney on 6/2/23.
@@ -20,7 +20,7 @@ extension Date {
 extension [TagType] {
     func tags(category: String) -> [Tag] {
         var retArray: [Tag] = []
-        for tagtype in self.filter({$0.category == category}) {
+        for tagtype in filter({ $0.category == category }) {
             retArray.append(contentsOf: tagtype.tags)
         }
         return retArray
@@ -29,7 +29,7 @@ extension [TagType] {
 
 extension [Event] {
     func types() -> [Int: EventType] {
-        return self.reduce(into: [:]) { tags, event in
+        return reduce(into: [:]) { tags, event in
             tags[event.type.id] = event.type
         }
     }
@@ -48,29 +48,25 @@ extension [Event] {
                     }
                 }
             }
-            
+
             if typeIds.contains(1337) {
-                return self.filter { isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes) &&
-                                     bookmarks.contains(Int32($0.id))
+                return filter { isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes) &&
+                    bookmarks.contains(Int32($0.id))
                 }
             } else {
-                return self.filter { isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes) }
+                return filter { isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes) }
             }
         }
     }
 
-    func eventDayGroup() -> [Date: [Event]] {
+    func eventDayGroup() -> [(key: String, value: [Event])] {
+        let dfu = DateFormatterUtility.shared
         let eventDict = Dictionary(grouping: self, by: {
-            $0.beginTimestamp.dayOfDate() ?? Date()
+            dfu.longMonthDayFormatter.string(from: $0.beginTimestamp)
         })
-        return eventDict
-    }
-
-    func eventDateTimeGroup() -> [Date: [Event]] {
-        let eventDict = Dictionary(grouping: self, by: {
-            $0.beginTimestamp.dayOfDate() ?? Date()
-        })
-        return eventDict
+        return eventDict.sorted {
+            ($0.value.first?.beginTimestamp ?? Date()) < ($1.value.first?.beginTimestamp ?? Date())
+        }
     }
 }
 
@@ -78,7 +74,7 @@ func isFiltered(tagIds: [Int], filterTypes: [Int: [Int]]) -> Bool {
     var results: [Bool] = []
     for ft in filterTypes {
         var my_r = false
-        if ft.value.contains(where: {tagIds.contains($0)}) {
+        if ft.value.contains(where: { tagIds.contains($0) }) {
             my_r = true
         }
         results.append(my_r)
