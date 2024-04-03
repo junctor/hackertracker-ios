@@ -31,10 +31,11 @@ struct EventsView: View {
           events:
             events
             .filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
-            .search(text: searchText)
-            .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay,
+            .search(text: searchText), conference: conference, bookmarks: bookmarks,
+          dayTag: eventDay,
           showPastEvents: showPastEvents, includeNav: includeNav,
-          tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule
+          tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
+          showLocaltime: $showLocaltime
         )
         .navigationTitle(viewModel.conference?.name ?? "Schedule")
         .toolbar {
@@ -105,7 +106,8 @@ struct EventsView: View {
         EventFilters(
           tagtypes: viewModel.tagtypes.filter {
             $0.category == "content" && $0.isBrowsable == true
-          }, showFilters: $showFilters, filters: $filters)
+          }, showFilters: $showFilters, filters: $filters
+        )
       }
       .onChange(of: viewModel.conference) { con in
         print("EventsView.onChange(of: conference) == \(con?.name ?? "not found")")
@@ -117,10 +119,11 @@ struct EventsView: View {
           events:
             events
             .filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
-            .search(text: searchText)
-            .eventDayGroup(), bookmarks: bookmarks, dayTag: eventDay,
+            .search(text: searchText), conference: conference, bookmarks: bookmarks,
+          dayTag: eventDay,
           showPastEvents: showPastEvents, includeNav: includeNav,
-          tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule
+          tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
+          showLocaltime: $showLocaltime
         )
         .navigationTitle(navTitle)
         .toolbar {
@@ -150,7 +153,8 @@ struct EventsView: View {
 }
 
 struct EventScrollView: View {
-  let events: [(key: String, value: [Event])]
+  let events: [Event]
+  let conference: Conference?
   let bookmarks: [Int32]
   let dayTag: String
   let showPastEvents: Bool
@@ -160,13 +164,15 @@ struct EventScrollView: View {
   @EnvironmentObject var viewModel: InfoViewModel
   @State var viewShowing = false
   @Binding var schedule: UUID
+  @Binding var showLocaltime: Bool
+  @State var eventDayGroup: [(key: String, value: [Event])] = []
 
   var body: some View {
     ScrollViewReader { proxy in
-      List(events, id: \.key) { weekday, events in
+      List(eventDayGroup, id: \.key) { weekday, dayEvents in
         // if showPastEvents || weekday >= Date() {
         EventData(
-          weekday: weekday, events: events, bookmarks: bookmarks, showPastEvents: showPastEvents
+          weekday: weekday, events: dayEvents, bookmarks: bookmarks, showPastEvents: showPastEvents
         )
         .id(weekday)
         // }
@@ -181,7 +187,7 @@ struct EventScrollView: View {
         of: tappedScheduleTwice,
         perform: { tappedTwice in
           guard tappedTwice else { return }
-          let es = events
+          let es = eventDayGroup
           if viewShowing, includeNav {
             if let f = es.first, let e = f.value.first {
               let id: String = dfu.dayOfWeekFormatter.string(from: e.beginTimestamp)
@@ -197,12 +203,35 @@ struct EventScrollView: View {
           self.tappedScheduleTwice = false
         }
       )
+      .onChange(of: showLocaltime) { _ in
+        eventDayGroup = calculateEventDayGroup()
+      }
       .onAppear {
+        eventDayGroup = calculateEventDayGroup()
         viewShowing = true
       }
       .onDisappear {
         viewShowing = false
       }
+    }
+  }
+
+  func calculateEventDayGroup() -> [(key: String, value: [Event])] {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "MMMM d"
+    formatter.timeZone =
+      showLocaltime
+      ? TimeZone.current : TimeZone(identifier: conference?.timezone ?? "America/Los_Angeles")
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+
+    let eventDict = Dictionary(
+      grouping: events,
+      by: {
+        formatter.string(from: $0.beginTimestamp)
+      }
+    )
+    return eventDict.sorted {
+      ($0.value.first?.beginTimestamp ?? Date()) < ($1.value.first?.beginTimestamp ?? Date())
     }
   }
 }
@@ -212,29 +241,23 @@ struct EventData: View {
   let events: [Event]
   let bookmarks: [Int32]
   let showPastEvents: Bool
-  let dfu = DateFormatterUtility.shared
 
   var body: some View {
     Section(header: Text(weekday)) {
-      ForEach(events.eventDayGroup(), id: \.key) { _, timeEvents in
-        // if showPastEvents || time >= Date() {
-        Section {
-          ForEach(
-            timeEvents.sorted {
-              $0.beginTimestamp < $1.beginTimestamp
-            }, id: \.id
-          ) { event in
-            if showPastEvents || event.beginTimestamp >= Date() {
-              NavigationLink(destination: EventDetailView(eventId: event.id)) {
-                EventCell(event: event, bookmarks: bookmarks, showDay: false)
-              }
+      Section {
+        ForEach(
+          events.sorted {
+            $0.beginTimestamp < $1.beginTimestamp
+          }, id: \.id
+        ) { event in
+          if showPastEvents || event.beginTimestamp >= Date() {
+            NavigationLink(destination: EventDetailView(eventId: event.id)) {
+              EventCell(event: event, bookmarks: bookmarks, showDay: false)
             }
           }
         }
-        .listStyle(.plain)
-        // }
       }
-    }
-    .headerProminence(.increased)
+      .listStyle(.plain)
+    }.headerProminence(.increased)
   }
 }
