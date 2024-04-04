@@ -60,18 +60,25 @@ extension [Event] {
     }
   }
 
-  func eventDayGroup() -> [(key: String, value: [Event])] {
-    let dfu = DateFormatterUtility.shared
-    let eventDict = Dictionary(
-      grouping: self,
-      by: {
-        dfu.longMonthDayFormatter.string(from: $0.beginTimestamp)
-      })
-    return eventDict.sorted {
-      ($0.value.first?.beginTimestamp ?? Date()) < ($1.value.first?.beginTimestamp ?? Date())
+    
+    func eventDayGroup(showLocaltime: Bool, conference: Conference?) -> [(key: String, value: [Event])] {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d"
+        formatter.timeZone =
+        showLocaltime
+        ? TimeZone.current : TimeZone(identifier: conference?.timezone ?? "America/Los_Angeles")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        let eventDict = Dictionary(
+            grouping: self,
+            by: {
+                formatter.string(from: $0.beginTimestamp)
+            }
+        )
+        return eventDict.sorted {
+            ($0.value.first?.beginTimestamp ?? Date()) < ($1.value.first?.beginTimestamp ?? Date())
+        }
     }
-  }
-}
 
 func isFiltered(tagIds: [Int], filterTypes: [Int: [Int]]) -> Bool {
   var results: [Bool] = []
