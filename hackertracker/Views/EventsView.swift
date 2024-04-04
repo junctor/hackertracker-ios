@@ -31,7 +31,10 @@ struct EventsView: View {
           events:
             events
             .filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
-            .search(text: searchText).eventDayGroup(showLocaltime: showLocaltime, conference: conference), conference: conference, bookmarks: bookmarks,
+            .search(text: searchText).eventDayGroup(
+              showLocaltime: showLocaltime, conference: conference
+            ), conference: conference,
+          bookmarks: bookmarks,
           dayTag: eventDay,
           showPastEvents: showPastEvents, includeNav: includeNav,
           tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
@@ -77,8 +80,8 @@ struct EventsView: View {
                 }
               }
               ForEach(
-                events.filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes).eventDayGroup(showLocaltime: showLocaltime, conference: conference)
-, id: \.key
+                events.filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
+                  .eventDayGroup(showLocaltime: showLocaltime, conference: conference), id: \.key
               ) { day, _ in
                 Button(day) {
                   eventDay = day
@@ -119,7 +122,10 @@ struct EventsView: View {
           events:
             events
             .filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
-            .search(text: searchText).eventDayGroup(showLocaltime: showLocaltime, conference: conference), conference: conference, bookmarks: bookmarks,
+            .search(text: searchText).eventDayGroup(
+              showLocaltime: showLocaltime, conference: conference
+            ), conference: conference,
+          bookmarks: bookmarks,
           dayTag: eventDay,
           showPastEvents: showPastEvents, includeNav: includeNav,
           tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
@@ -131,7 +137,7 @@ struct EventsView: View {
             Menu {
               ForEach(
                 events.filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
-                    .eventDayGroup(showLocaltime: showLocaltime, conference: conference), id: \.key
+                  .eventDayGroup(showLocaltime: showLocaltime, conference: conference), id: \.key
               ) { day, _ in
                 Button(day) {
                   eventDay = day
