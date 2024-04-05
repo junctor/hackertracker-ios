@@ -1,5 +1,5 @@
 //
-//  ModelUtils.swift
+//  ModelExt.swift
 //  hackertracker
 //
 //  Created by Caleb Kinney on 6/2/23.
@@ -20,7 +20,7 @@ extension Date {
 extension [TagType] {
     func tags(category: String) -> [Tag] {
         var retArray: [Tag] = []
-        for tagtype in self.filter({$0.category == category}) {
+        for tagtype in filter({ $0.category == category }) {
             retArray.append(contentsOf: tagtype.tags)
         }
         return retArray
@@ -29,11 +29,11 @@ extension [TagType] {
 
 extension [Event] {
     func types() -> [Int: EventType] {
-        return self.reduce(into: [:]) { tags, event in
+        return reduce(into: [:]) { tags, event in
             tags[event.type.id] = event.type
         }
     }
-
+    
     func filters(typeIds: Set<Int>, bookmarks: [Int32], tagTypes: [TagType]) -> Self {
         if typeIds.isEmpty {
             return self
@@ -50,42 +50,48 @@ extension [Event] {
             }
             
             if typeIds.contains(1337) {
-                return self.filter { isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes) &&
-                                     bookmarks.contains(Int32($0.id))
+                return filter {
+                    isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes)
+                    && bookmarks.contains(Int32($0.id))
                 }
             } else {
-                return self.filter { isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes) }
+                return filter { isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes) }
             }
         }
     }
-
-    func eventDayGroup() -> [Date: [Event]] {
-        let eventDict = Dictionary(grouping: self, by: {
-            $0.beginTimestamp.dayOfDate() ?? Date()
-        })
-        return eventDict
-    }
-
-    func eventDateTimeGroup() -> [Date: [Event]] {
-        let eventDict = Dictionary(grouping: self, by: {
-            $0.beginTimestamp.dayOfDate() ?? Date()
-        })
-        return eventDict
-    }
-}
-
-func isFiltered(tagIds: [Int], filterTypes: [Int: [Int]]) -> Bool {
-    var results: [Bool] = []
-    for ft in filterTypes {
-        var my_r = false
-        if ft.value.contains(where: {tagIds.contains($0)}) {
-            my_r = true
+    
+    func eventDayGroup(showLocaltime: Bool, conference: Conference?) -> [(key: String, value: [Event])] {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMMM d"
+        formatter.timeZone =
+        showLocaltime
+        ? TimeZone.current : TimeZone(identifier: conference?.timezone ?? "America/Los_Angeles")
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        
+        let eventDict = Dictionary(
+            grouping: self,
+            by: {
+                formatter.string(from: $0.beginTimestamp)
+            }
+        )
+        return eventDict.sorted {
+            ($0.value.first?.beginTimestamp ?? Date()) < ($1.value.first?.beginTimestamp ?? Date())
         }
-        results.append(my_r)
     }
-    if results.contains(false) {
-        return false
-    } else {
-        return true
+    
+    func isFiltered(tagIds: [Int], filterTypes: [Int: [Int]]) -> Bool {
+        var results: [Bool] = []
+        for ft in filterTypes {
+            var myR = false
+            if ft.value.contains(where: { tagIds.contains($0) }) {
+                myR = true
+            }
+            results.append(myR)
+        }
+        if results.contains(false) {
+            return false
+        } else {
+            return true
+        }
     }
 }
