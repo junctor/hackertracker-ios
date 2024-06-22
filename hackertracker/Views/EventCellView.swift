@@ -31,13 +31,18 @@ struct EventCell: View {
                     .frame(width: 6)
                 HStack(alignment: .top) {
                     HStack(alignment: .center) {
-                        VStack {
+                        VStack(spacing: 0) {
                             if showDay {
                                 Text(dfu.monthDayFormatter.string(from: event.beginTimestamp))
                                     .font(.subheadline)
+                                    .padding(.bottom, 3)
                             }
                             Text(dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp))
                                 .font(.subheadline)
+                            if event.beginTimestamp != event.endTimestamp {
+                                Text(dfu.hourMinuteTimeFormatter.string(from: event.endTimestamp))
+                                    .font(.caption2)
+                            }
                         }
                         VStack(alignment: .leading, spacing: 3) {
                             Text(event.title).font(.headline)
