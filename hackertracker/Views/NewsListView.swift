@@ -7,6 +7,8 @@
 
 import MarkdownUI
 import SwiftUI
+import FirebaseAnalytics
+import FirebaseAnalyticsSwift
 
 struct NewsListView: View {
     @EnvironmentObject var viewModel: InfoViewModel

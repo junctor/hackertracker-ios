@@ -49,7 +49,7 @@ struct Event: Codable, Identifiable {
 struct Person: Codable, Identifiable {
     var id: Int
     var sortOrder: Int
-    var tagId: Int
+    var tagId: Int?
     
     private enum CodingKeys: String, CodingKey {
         case id = "person_id"

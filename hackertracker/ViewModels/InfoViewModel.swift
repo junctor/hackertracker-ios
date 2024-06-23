@@ -16,6 +16,7 @@ class InfoViewModel: ObservableObject {
     @Published var tagtypes = [TagType]()
     @Published var locations = [Location]()
     @Published var products = [Product]()
+    @Published var content = [Content]()
     @Published var events = [Event]()
     @Published var speakers = [Speaker]()
     @Published var orgs = [Organization]()
@@ -37,6 +38,7 @@ class InfoViewModel: ObservableObject {
         fetchLocations(code: code)
         fetchProducts(code: code)
         fetchEvents(code: code)
+        fetchContent(code: code)
         fetchSpeakers(code: code)
         fetchOrgs(code: code)
         fetchLists(code: code)
@@ -198,6 +200,28 @@ class InfoViewModel: ObservableObject {
                     }
                 }
                 print("InfoViewModel: \(self.events.count) events")
+            }
+    }
+    
+    func fetchContent(code: String) {
+        db.collection("conferences")
+            .document(code)
+            .collection("content")
+            .order(by: "title", descending: false).addSnapshotListener { querySnapshot, error in
+                guard let docs = querySnapshot?.documents else {
+                    print("No Content")
+                    return
+                }
+
+                self.content = docs.compactMap { queryDocumentSnapshot -> Content? in
+                    do {
+                        return try queryDocumentSnapshot.data(as: Content.self)
+                    } catch {
+                        print("Error \(error)")
+                        return nil
+                    }
+                }
+                print("InfoViewModel: \(self.content.count) content")
             }
     }
 
