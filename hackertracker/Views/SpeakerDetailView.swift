@@ -141,10 +141,10 @@ struct showEvents: View {
             if !collapsed {
                 VStack {
                     ForEach(eventIds, id: \.self) { eventId in
-                        NavigationLink(destination: EventDetailView(eventId: eventId)) {
-                            if let ev = viewModel.events.first(where: { $0.id == eventId }) {
-                                SpeakerEventView(event: ev, bookmarks: bookmarks.map { $0.id })
-                                    .foregroundColor(.primary)
+                        if let ev = viewModel.events.first(where: {$0.id == eventId}) {
+                            NavigationLink(destination: ContentDetailView(contentId: ev.contentId)) {
+                                    SpeakerEventView(event: ev, bookmarks: bookmarks.map { $0.id })
+                                        .foregroundColor(.primary)
                             }
                         }
                     }
@@ -178,10 +178,11 @@ struct SpeakerEventView: View {
     var bookmarks: [Int32]
     let dfu = DateFormatterUtility.shared
     @Environment(\.managedObjectContext) private var viewContext
+    @EnvironmentObject var viewModel: InfoViewModel
 
     var body: some View {
         HStack {
-            Rectangle().fill(event.type.swiftuiColor)
+            Rectangle().fill(getEventTagColorBackground(id: event.tagIds[0]))
                 .frame(width: 6)
             VStack(alignment: .leading, spacing: 3) {
                 Text(event.title)
@@ -189,16 +190,21 @@ struct SpeakerEventView: View {
                     .multilineTextAlignment(.leading)
                 Text(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.beginTimestamp))
                     .font(.subheadline)
-                Text(event.location.name).font(.caption2)
-                VStack {
-                    HStack {
-                        Circle().foregroundColor(event.type.swiftuiColor)
-                            .frame(width: 8, height: 8, alignment: .center)
-                        Text(event.type.name).font(.caption)
-                        Spacer()
-                    }
+                if let l = viewModel.locations.first(where: {$0.id == event.locationId}) {
+                    Text(l.name).font(.caption2)
                 }
-                .frame(minWidth: 0, maxWidth: .infinity)
+                if let tag = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == event.tagIds[0]})}) {
+                    VStack {
+                        HStack {
+                            Circle().foregroundColor(getEventTagColorBackground(id: event.tagIds[0]))
+                                .frame(width: 8, height: 8, alignment: .center)
+                            
+                            Text(tag.label).font(.caption)
+                            Spacer()
+                        }
+                    }
+                    .frame(minWidth: 0, maxWidth: .infinity)
+                }
             }
             .frame(alignment: .leading)
 
@@ -221,6 +227,15 @@ struct SpeakerEventView: View {
             print("SpeakerDetailView: Adding Bookmark \(event.id)")
             BookmarkUtility.addBookmark(context: viewContext, id: event.id)
         }
+    }
+    
+    func getEventTagColorBackground(id: Int) -> Color {
+        if let tagtype = viewModel.tagtypes.first(where: {$0.tags.contains(where: {$0.id == id})}),
+           let tag = tagtype.tags.first(where: { $0.id == id}),
+           let colorHex = tag.colorBackground, let uicolor = UIColor(hex: colorHex) {
+            return Color(uiColor: uicolor)
+        }
+        return .purple
     }
 }
 

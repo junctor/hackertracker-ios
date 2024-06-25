@@ -5,39 +5,17 @@
 //  Created by Seth Law on 6/23/24.
 //
 
-import SwiftUI
-
 import MarkdownUI
 import SwiftUI
 
 struct ContentDetailView: View {
     let contentId: Int
-    let sessionId: Int = 0
-    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @EnvironmentObject var viewModel: InfoViewModel
-    @EnvironmentObject var theme: Theme
-    let dfu = DateFormatterUtility.shared
-    @State var showingAlert = false
-    @State var showAddContentModal = false
-    @State var nExists = false
-
-    @Environment(\.managedObjectContext) private var viewContext
-    @AppStorage("notifyAt") var notifyAt: Int = 20
 
     let columns = [
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
-    
-    func bookmarkAction(id: Int) {
-        if bookmarks.map({$0.id}).contains(Int32(id)) {
-            print("ContentDetailView: Removing Bookmark \(id)")
-            BookmarkUtility.deleteBookmark(context: viewContext, id: id)
-        } else {
-            print("ContentDetailView: Adding Bookmark \(id)")
-            BookmarkUtility.addBookmark(context: viewContext, id: id)
-        }
-    }
 
     var body: some View {
         if let item = viewModel.content.first(where: { $0.id == contentId }) {
@@ -46,55 +24,7 @@ struct ContentDetailView: View {
                     VStack(alignment: .center) {
                         Text(item.title).font(.largeTitle).bold()
                         if !item.sessions.isEmpty {
-                            VStack(alignment: .leading) {
-                                ForEach(item.sessions) { s in
-                                    if sessionId == 0 || sessionId == s.id {
-                                        HStack {
-                                            VStack(alignment: .leading) {
-                                                HStack {
-                                                    Button {
-                                                        showAddContentModal.toggle()
-                                                    } label: {
-                                                        Image(systemName: "clock")
-                                                    }
-                                                    Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinuteTimeFormatter.string(from: s.endTimestamp))")
-                                                        .font(.subheadline)
-                                                }
-                                                .sheet(isPresented: $showAddContentModal) {
-                                                    AddContent(content: item, session: s)
-                                                }
-                                                HStack {
-                                                    Image(systemName: "map")
-                                                    Text(viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unkown").font(.caption)
-                                                }
-                                            }
-                                            .padding(.leading, 5)
-                                            .padding(.trailing, 5)
-                                            .padding(.vertical, 5)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
-                                            VStack(alignment: .trailing) {
-                                                HStack(alignment: .center) {
-                                                    Button {
-                                                        bookmarkAction(id: s.id)
-                                                    } label: {
-                                                        Image(systemName: bookmarks.map{$0.id}.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
-                                                    }
-                                                    MoreContentMenu(content: item, session: s)
-                                                }
-                                                
-                                                // .buttonStyle(PlainButtonStyle())
-                                            }
-                                        }
-                                        .padding(.leading, 5)
-                                        .padding(.trailing, 5)
-                                        .padding(.vertical, 5)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .background(.background)
-                                        .cornerRadius(10)
-                                        .padding(.bottom, 5)
-                                    }
-                                }
-                            }
+                            showSessions(item: item)
                         }
                         
                         if !item.tagIds.isEmpty {
@@ -125,6 +55,88 @@ struct ContentDetailView: View {
             _04View(message: "Content \(contentId) not found")
         }
 
+    }
+}
+
+struct showSessions: View {
+    var item: Content
+    @State var showAddContentModal = false
+    @State private var collapsed = false
+    let dfu = DateFormatterUtility.shared
+    @EnvironmentObject var viewModel: InfoViewModel
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    @Environment(\.managedObjectContext) private var viewContext
+    
+    func bookmarkAction(id: Int) {
+        if bookmarks.map({$0.id}).contains(Int32(id)) {
+            print("ContentDetailView: Removing Bookmark \(id)")
+            BookmarkUtility.deleteBookmark(context: viewContext, id: id)
+        } else {
+            print("ContentDetailView: Adding Bookmark \(id)")
+            BookmarkUtility.addBookmark(context: viewContext, id: id)
+        }
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                collapsed.toggle()
+            }, label: {
+                HStack {
+                    Text("Sessions")
+                        .font(.headline).padding(.top)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                }
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
+            if !collapsed {
+                ForEach(item.sessions) { s in
+                    HStack {
+                        VStack(alignment: .leading) {
+                            HStack {
+                                Button {
+                                    showAddContentModal.toggle()
+                                } label: {
+                                    Image(systemName: "clock")
+                                }
+                                Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinuteTimeFormatter.string(from: s.endTimestamp))")
+                                    .font(.subheadline)
+                            }
+                            .sheet(isPresented: $showAddContentModal) {
+                                AddContent(content: item, session: s)
+                            }
+                            HStack {
+                                Image(systemName: "map")
+                                Text(viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unkown").font(.caption)
+                            }
+                        }
+                        .padding(.leading, 5)
+                        .padding(.trailing, 5)
+                        .padding(.vertical, 5)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        VStack(alignment: .trailing) {
+                            HStack(alignment: .center) {
+                                Button {
+                                    bookmarkAction(id: s.id)
+                                } label: {
+                                    Image(systemName: bookmarks.map{$0.id}.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
+                                }
+                                MoreContentMenu(content: item, session: s)
+                            }
+                            
+                            // .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding(.leading, 5)
+                    .padding(.trailing, 5)
+                    .padding(.vertical, 5)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.background)
+                    .cornerRadius(10)
+                    .padding(.bottom, 5)
+                }
+            }
+        }
     }
 }
 

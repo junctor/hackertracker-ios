@@ -37,7 +37,7 @@ class InfoViewModel: ObservableObject {
         fetchTagTypes(code: code)
         fetchLocations(code: code)
         fetchProducts(code: code)
-        fetchEvents(code: code)
+        // fetchEvents(code: code)
         fetchContent(code: code)
         fetchSpeakers(code: code)
         fetchOrgs(code: code)
@@ -181,7 +181,7 @@ class InfoViewModel: ObservableObject {
             }
     }
 
-    func fetchEvents(code: String) {
+    /* func fetchEvents(code: String) {
         db.collection("conferences")
             .document(code)
             .collection("events")
@@ -201,7 +201,7 @@ class InfoViewModel: ObservableObject {
                 }
                 print("InfoViewModel: \(self.events.count) events")
             }
-    }
+    } */
     
     func fetchContent(code: String) {
         db.collection("conferences")
@@ -221,6 +221,15 @@ class InfoViewModel: ObservableObject {
                         return nil
                     }
                 }
+                for c in self.content {
+                    if !c.sessions.isEmpty {
+                        for s in c.sessions {
+                            var e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds)
+                            self.events.append(e)
+                        }
+                    }
+                }
+
                 print("InfoViewModel: \(self.content.count) content")
             }
     }

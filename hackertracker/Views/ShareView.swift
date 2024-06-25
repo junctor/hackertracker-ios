@@ -6,7 +6,7 @@
 
 import SwiftUI
 
-struct ShareView: View {
+/* struct ShareView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     let event: Event
     let title: Bool
@@ -28,7 +28,7 @@ struct ShareView: View {
             ShareLink(title ? "Share" : "", item: shareText())
         }
     }
-}
+} */
 
 struct ShareContentView: View {
     @EnvironmentObject var viewModel: InfoViewModel

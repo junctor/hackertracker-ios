@@ -72,11 +72,11 @@ extension [Content] {
 }
 
 extension [Event] {
-    func types() -> [Int: EventType] {
+    /* func types() -> [Int: EventType] {
         return reduce(into: [:]) { tags, event in
             tags[event.type.id] = event.type
         }
-    }
+    } */
     
     func filters(typeIds: Set<Int>, bookmarks: [Int32], tagTypes: [TagType]) -> Self {
         if typeIds.isEmpty {

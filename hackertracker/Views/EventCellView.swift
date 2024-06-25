@@ -46,10 +46,12 @@ struct EventCell: View {
                         }
                         VStack(alignment: .leading, spacing: 3) {
                             Text(event.title).font(.headline)
-                            if !event.speakers.isEmpty {
-                                Text(event.speakers.map { $0.name }.joined(separator: ", ")).font(.subheadline)
+                            if !event.people.isEmpty {
+                                Text(event.people.map { p in viewModel.speakers.first(where: { $0.id == p.id })?.name ?? "" }.joined(separator: ", ")).font(.subheadline)
                             }
-                            Text(event.location.name).font(.caption2)
+                            if let l = viewModel.locations.first(where: {$0.id == event.locationId}) {
+                                Text(l.name).font(.caption2)
+                            }
                             ShowEventCellTags(tagIds: event.tagIds)
                         }
                     }

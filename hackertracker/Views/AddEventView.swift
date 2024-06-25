@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AddEvent: UIViewControllerRepresentable {
+/* struct AddEvent: UIViewControllerRepresentable {
     var event: Event
     
     func makeUIViewController(context: Context) -> AddEventController {
@@ -20,7 +20,7 @@ struct AddEvent: UIViewControllerRepresentable {
         // We need this to follow the protocol, but don't have to implement it
         // Edit here to update the state of the view controller with information from SwiftUI
     }
-}
+} */
 
 struct AddContent: UIViewControllerRepresentable {
     var content: Content

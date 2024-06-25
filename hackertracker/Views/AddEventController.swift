@@ -9,7 +9,7 @@ import EventKit
 import EventKitUI
 import UIKit
 
-class AddEventController: UIViewController, EKEventEditViewDelegate {
+/* class AddEventController: UIViewController, EKEventEditViewDelegate {
   let eventStore = EKEventStore()
   var event: Event?
 
@@ -85,6 +85,7 @@ class AddEventController: UIViewController, EKEventEditViewDelegate {
     }
   }
 }
+ */
 
 class AddContentController: UIViewController, EKEventEditViewDelegate {
   let eventStore = EKEventStore()

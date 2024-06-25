@@ -8,7 +8,7 @@ import SwiftUI
 import EventKit
 import EventKitUI
 
-struct MoreMenu: View {
+/* struct MoreMenu: View {
     let event: Event
     let dfu = DateFormatterUtility.shared
     @State var showAddEventModal = false
@@ -37,7 +37,7 @@ struct MoreMenu: View {
         }
     }
     
-}
+} */
 
 struct MoreContentMenu: View {
     let content: Content

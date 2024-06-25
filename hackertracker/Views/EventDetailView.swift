@@ -7,6 +7,7 @@
 import MarkdownUI
 import SwiftUI
 
+/*
 struct EventDetailView: View {
     let eventId: Int
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
@@ -72,7 +73,7 @@ struct EventDetailView: View {
                 }
                 if event.links.count > 0 {
                     Divider()
-                    showLinks(links: event.links)
+                        .(links: event.links)
                         .padding(15)
                 }
             }
@@ -199,6 +200,7 @@ struct showSpeakers: View {
     }
 
 }
+*/
 
 struct showTags: View {
     var tagIds: [Int]
@@ -244,7 +246,7 @@ struct showTags: View {
     }
 }
 
-struct EventDetailView_Previews: PreviewProvider {
+/* struct EventDetailView_Previews: PreviewProvider {
     struct EventDetailPreview: View {
         // let event = InfoViewModel().events[202]
 
@@ -256,4 +258,4 @@ struct EventDetailView_Previews: PreviewProvider {
     static var previews: some View {
         EventDetailPreview()
     }
-}
+} */
