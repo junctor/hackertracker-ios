@@ -85,3 +85,88 @@ class AddEventController: UIViewController, EKEventEditViewDelegate {
     }
   }
 }
+
+class AddContentController: UIViewController, EKEventEditViewDelegate {
+  let eventStore = EKEventStore()
+  var content: Content?
+  var session: Session?
+  var location: Location?
+
+  func eventEditViewController(
+    _ controller: EKEventEditViewController, didCompleteWith _: EKEventEditViewAction
+  ) {
+    controller.dismiss(animated: true, completion: nil)
+    parent?.dismiss(animated: true, completion: nil)
+  }
+
+  func setContent(newEvent: Content, newSession: Session, newLocation: Location?) {
+    content = newEvent
+    session = newSession
+    location = newLocation
+  }
+
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+
+    if let e = content, let s = session {
+      if #available(iOS 17.0, *) {
+        eventStore.requestWriteOnlyAccessToEvents { granted, error in
+          DispatchQueue.main.async {
+            if granted && (error == nil) {
+              let ek = EKEvent(eventStore: self.eventStore)
+              ek.title = e.title
+              ek.startDate = s.beginTimestamp
+              ek.endDate = s.endTimestamp
+              ek.timeZone = DateFormatterUtility.shared.timeZone
+                if let l = self.location {
+                    ek.location = l.name
+                }
+              ek.notes = e.description
+
+              let eventController = EKEventEditViewController()
+
+              eventController.eventStore = self.eventStore
+              eventController.event = ek
+              eventController.editViewDelegate = self
+              eventController.modalPresentationStyle = .overCurrentContext
+              eventController.modalTransitionStyle = .crossDissolve
+
+              self.present(eventController, animated: true, completion: nil)
+            }
+          }
+        }
+      } else {
+        eventStore.requestAccess(
+          to: EKEntityType.event,
+          completion: { granted, error in
+            DispatchQueue.main.async {
+              if granted, error == nil {
+                let ek = EKEvent(eventStore: self.eventStore)
+                ek.title = e.title
+                ek.startDate = s.beginTimestamp
+                ek.endDate = s.endTimestamp
+                ek.timeZone = DateFormatterUtility.shared.timeZone
+                  if let l = self.location {
+                      ek.location = l.name
+                  }
+                ek.notes = e.description
+
+                let eventController = EKEventEditViewController()
+
+                eventController.eventStore = self.eventStore
+                eventController.event = ek
+                eventController.editViewDelegate = self
+                eventController.modalPresentationStyle = .overCurrentContext
+                eventController.modalTransitionStyle = .crossDissolve
+
+                self.present(eventController, animated: true, completion: nil)
+              }
+            }
+          })
+      }
+
+    } else {
+      print("AddEventController: event is nil")
+    }
+  }
+}

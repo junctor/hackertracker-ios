@@ -18,6 +18,7 @@ struct ContentDetailView: View {
     @EnvironmentObject var theme: Theme
     let dfu = DateFormatterUtility.shared
     @State var showingAlert = false
+    @State var showAddContentModal = false
     @State var nExists = false
 
     @Environment(\.managedObjectContext) private var viewContext
@@ -51,16 +52,23 @@ struct ContentDetailView: View {
                                         HStack {
                                             VStack(alignment: .leading) {
                                                 HStack {
-                                                    Image(systemName: "clock")
-                                                    Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp)) - \(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.endTimestamp))")
+                                                    Button {
+                                                        showAddContentModal.toggle()
+                                                    } label: {
+                                                        Image(systemName: "clock")
+                                                    }
+                                                    Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinuteTimeFormatter.string(from: s.endTimestamp))")
                                                         .font(.subheadline)
+                                                }
+                                                .sheet(isPresented: $showAddContentModal) {
+                                                    AddContent(content: item, session: s)
                                                 }
                                                 HStack {
                                                     Image(systemName: "map")
                                                     Text(viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unkown").font(.caption)
                                                 }
                                             }
-                                            .padding(.leading, 10)
+                                            .padding(.leading, 5)
                                             .padding(.trailing, 5)
                                             .padding(.vertical, 5)
                                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -71,11 +79,13 @@ struct ContentDetailView: View {
                                                     } label: {
                                                         Image(systemName: bookmarks.map{$0.id}.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
                                                     }
+                                                    MoreContentMenu(content: item, session: s)
                                                 }
+                                                
                                                 // .buttonStyle(PlainButtonStyle())
                                             }
                                         }
-                                        .padding(.leading, 10)
+                                        .padding(.leading, 5)
                                         .padding(.trailing, 5)
                                         .padding(.vertical, 5)
                                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -101,7 +111,7 @@ struct ContentDetailView: View {
                     Markdown(item.description).padding()
                 }
                 if !item.people.isEmpty {
-                    // showSpeakers(event: item)
+                    showPeople(content: item)
                 }
                 if !item.links.isEmpty {
                     Divider()
@@ -116,16 +126,76 @@ struct ContentDetailView: View {
         }
 
     }
-    
-    /* func notificationExists() {
-        print("Checking for existence of notification for \(eventId)")
-        UNUserNotificationCenter.current().getPendingNotificationRequests(completionHandler: { notificationRequests in
-            for nr in notificationRequests where nr.identifier == "hackertracker-\(self.eventId)" {
-                self.nExists = true
-            }
-        })
-    } */
 }
+
+struct showPeople: View {
+    var content: Content
+    @EnvironmentObject var viewModel: InfoViewModel
+    @EnvironmentObject var theme: Theme
+    @State private var collapsed = false
+    let columns = [GridItem(.flexible()), GridItem(.flexible())]
+
+    var body: some View {
+        Divider()
+        VStack(alignment: .leading) {
+            Button(action: {
+                collapsed.toggle()
+            }, label: {
+                HStack {
+                    Text("People")
+                        .font(.headline).padding(.top)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                }
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
+            if !collapsed {
+                let people = content.people.sorted { $0.sortOrder < $1.sortOrder }
+                if people.count > 1 {
+                    LazyVGrid(columns: columns, spacing: 20) {
+                        ForEach(people, id: \.id) { person in
+                            if let speaker = viewModel.speakers.first(where: {$0.id == person.id}) {
+                                HStack {
+                                    NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
+                                        VStack {
+                                            Text(speaker.name)
+                                            if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == person.tagId}) {
+                                                Text(tag.label).font(.caption)
+                                            }
+                                        }
+                                    }
+                                }
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .padding(15)
+                                .background(theme.carousel().gradient)
+                                .cornerRadius(15)
+                            }
+                        }
+                    }
+                } else if let speaker = viewModel.speakers.first(where: {$0.id == content.people[0].id}) {
+                    HStack {
+                        NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
+                            VStack {
+                                Text(speaker.name)
+                                if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == content.people[0].tagId}) {
+                                    Text(tag.label).font(.caption)
+                                }
+                            }
+                        }
+                    }
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(15)
+                    .background(theme.carousel().gradient)
+                    .cornerRadius(15)
+                }
+            }
+        }
+        .padding(15)
+    }
+
+}
+
 
 
 struct ContentDetailPreviews: PreviewProvider {
