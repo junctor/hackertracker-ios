@@ -210,17 +210,19 @@ struct showTags: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Button(action: {
-                collapsed.toggle()
-            }, label: {
-                HStack {
-                    Text("Tags")
-                        .font(.headline).padding(.top)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
-                }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
-            if !collapsed {
+            if tagIds.count > 2 {
+                Button(action: {
+                    collapsed.toggle()
+                }, label: {
+                    HStack {
+                        Text("Tags")
+                            .font(.subheadline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                    }
+                }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
+            }
+            if !collapsed || tagIds.count <= 2 {
                 VStack(alignment: .leading) {
                     LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
                         ForEach(tagIds, id: \.self) { tagId in
@@ -241,6 +243,11 @@ struct showTags: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .onAppear {
+            if tagIds.count > 2 {
+                collapsed = true
             }
         }
     }

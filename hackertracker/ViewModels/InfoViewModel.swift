@@ -224,7 +224,7 @@ class InfoViewModel: ObservableObject {
                 for c in self.content {
                     if !c.sessions.isEmpty {
                         for s in c.sessions {
-                            var e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds)
+                            let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds)
                             self.events.append(e)
                         }
                     }

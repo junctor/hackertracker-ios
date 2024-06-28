@@ -81,7 +81,7 @@ struct showLinks: View {
             }, label: {
                 HStack {
                     Text("Links")
-                        .font(.headline).padding(.top)
+                        .font(.subheadline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
                 }

@@ -5,6 +5,7 @@
 //  Created by Seth Law on 6/23/24.
 //
 
+import Kingfisher
 import MarkdownUI
 import SwiftUI
 
@@ -40,6 +41,10 @@ struct ContentDetailView: View {
                 VStack(alignment: .leading) {
                     Markdown(item.description).padding()
                 }
+                if item.media.count > 0 {
+                    showMedia(media: item.media)
+                        .padding(15)
+                }
                 if !item.people.isEmpty {
                     showPeople(content: item)
                 }
@@ -56,6 +61,43 @@ struct ContentDetailView: View {
         }
 
     }
+}
+
+struct showMedia: View {
+    var media: [Media]
+    // @State private var collapsed = false
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            /* Button(action: {
+                collapsed.toggle()
+            }, label: {
+                HStack {
+                    Text("")
+                        .font(.headline).padding(.top)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                }
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary) */
+            //if !collapsed {
+                HStack {
+                    ForEach(media, id: \.assetId) { m in
+                        if let url = URL(string: m.url) {
+                            KFImage(url)
+                                .resizable()
+                                .scaledToFit()
+                                .aspectRatio(contentMode: .fit)
+                                .cornerRadius(15)
+                                .padding(.leading, 10)
+                                .padding(.trailing, 10)
+                        }
+                    }
+                }
+            //}
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+    
 }
 
 struct showSessions: View {
@@ -79,18 +121,20 @@ struct showSessions: View {
     
     var body: some View {
         VStack(alignment: .leading) {
-            Button(action: {
-                collapsed.toggle()
-            }, label: {
-                HStack {
-                    Text("Sessions")
-                        .font(.headline).padding(.top)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
-                }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
-            if !collapsed {
-                ForEach(item.sessions) { s in
+            if item.sessions.count > 1 {
+                Button(action: {
+                    collapsed.toggle()
+                }, label: {
+                    HStack {
+                        Text("Sessions")
+                            .font(.subheadline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                    }
+                }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
+            }
+            if !collapsed || item.sessions.count == 1 {
+                ForEach(item.sessions.sorted { $0.beginTimestamp < $1.beginTimestamp }) { s in
                     HStack {
                         VStack(alignment: .leading) {
                             HStack {
@@ -155,7 +199,7 @@ struct showPeople: View {
             }, label: {
                 HStack {
                     Text("People")
-                        .font(.headline).padding(.top)
+                        .font(.subheadline)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
                 }
