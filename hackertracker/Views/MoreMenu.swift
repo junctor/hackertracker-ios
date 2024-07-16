@@ -8,37 +8,6 @@ import SwiftUI
 import EventKit
 import EventKitUI
 
-/* struct MoreMenu: View {
-    let event: Event
-    let dfu = DateFormatterUtility.shared
-    @State var showAddEventModal = false
-    @Binding var showingAlert: Bool
-    @Binding var notExists: Bool
-
-    var body: some View {
-        Menu {
-            ShareView(event: event, title: true)
-            Button {
-                showAddEventModal.toggle()
-            } label: {
-                Label("Save to Calendar", systemImage: "calendar")
-            }
-            Button {
-                showingAlert = true
-            } label: {
-                Label(notExists ? "Remove Alert" : "Add Alert", systemImage: notExists ? "bell.fill" : "bell")
-            }
-            
-        } label: {
-            Image(systemName: "ellipsis")
-        }
-        .sheet(isPresented: $showAddEventModal) {
-            AddEvent(event: event)
-        }
-    }
-    
-} */
-
 struct MoreContentMenu: View {
     let content: Content
     let session: Session
@@ -90,13 +59,9 @@ struct MoreContentMenu: View {
                 secondaryButton: .cancel(Text("No"))
             )
         }
-        /* .sheet(isPresented: $showAddContentModal) {
-            AddContent(content: content, session: session)
-        } */
     }
     
     func notificationExists(id: Int) -> Bool {
-        print("Checking for existence of notification for \(id)")
         var ret : Bool = false
         UNUserNotificationCenter.current().getPendingNotificationRequests(completionHandler: { notificationRequests in
             for nr in notificationRequests where nr.identifier == "hackertracker-\(id)" {

@@ -54,6 +54,7 @@
 		5D9E5759285A4710001374D4 /* SpeakerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E5758285A4710001374D4 /* SpeakerDetailView.swift */; };
 		5D9E575F285CFDF0001374D4 /* EventViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E575E285CFDF0001374D4 /* EventViewModel.swift */; };
 		5DA0F6962A741EA400A093B5 /* ConferencesViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DA0F6952A741EA400A093B5 /* ConferencesViewModel.swift */; };
+		5DA754CD2C46DB7600FB7776 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5DA754CC2C46DB7600FB7776 /* GoogleService-Info.plist */; };
 		5DAE04B42820948B00930A2D /* hackertrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04B32820948B00930A2D /* hackertrackerApp.swift */; };
 		5DAE04B62820948B00930A2D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DAE04B52820948B00930A2D /* ContentView.swift */; };
 		5DAE04B82820948E00930A2D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5DAE04B72820948E00930A2D /* Assets.xcassets */; };
@@ -77,7 +78,6 @@
 		5DB4E0BC284EA0AE0012F6F4 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */; };
 		5DB4E0C3284FFEF00012F6F4 /* GoogleService-Info-OLD.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info-OLD.plist */; };
 		5DB4E0C8285001820012F6F4 /* events.json in Resources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C7285001820012F6F4 /* events.json */; };
-		5DDF03582C2740880087BA59 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5DDF03572C2740880087BA59 /* GoogleService-Info.plist */; };
 		5DDF035A2C2751670087BA59 /* ContentListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF03592C2751670087BA59 /* ContentListView.swift */; };
 		5DDF035C2C2767750087BA59 /* ContentCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF035B2C2767750087BA59 /* ContentCellView.swift */; };
 		5DDF035E2C28B4F10087BA59 /* ContentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */; };
@@ -157,6 +157,7 @@
 		5D9E5758285A4710001374D4 /* SpeakerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerDetailView.swift; sourceTree = "<group>"; };
 		5D9E575E285CFDF0001374D4 /* EventViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventViewModel.swift; sourceTree = "<group>"; };
 		5DA0F6952A741EA400A093B5 /* ConferencesViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesViewModel.swift; sourceTree = "<group>"; };
+		5DA754CC2C46DB7600FB7776 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		5DAE04B02820948B00930A2D /* hackertracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = hackertracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DAE04B32820948B00930A2D /* hackertrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = hackertrackerApp.swift; sourceTree = "<group>"; };
 		5DAE04B52820948B00930A2D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -179,7 +180,6 @@
 		5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info-OLD.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-OLD.plist"; sourceTree = "<group>"; };
 		5DB4E0C7285001820012F6F4 /* events.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = events.json; sourceTree = "<group>"; };
-		5DDF03572C2740880087BA59 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		5DDF03592C2751670087BA59 /* ContentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentListView.swift; sourceTree = "<group>"; };
 		5DDF035B2C2767750087BA59 /* ContentCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentCellView.swift; sourceTree = "<group>"; };
 		5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailView.swift; sourceTree = "<group>"; };
@@ -269,7 +269,7 @@
 				5DF51AD928516869007BCB83 /* ViewModels */,
 				5DB4E0BF284EDA670012F6F4 /* Utils */,
 				5DAE04B32820948B00930A2D /* hackertrackerApp.swift */,
-				5DDF03572C2740880087BA59 /* GoogleService-Info.plist */,
+				5DA754CC2C46DB7600FB7776 /* GoogleService-Info.plist */,
 				5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info-OLD.plist */,
 				5DAE04B72820948E00930A2D /* Assets.xcassets */,
 				5DAE04BC2820948E00930A2D /* Persistence.swift */,
@@ -520,7 +520,7 @@
 			files = (
 				5DB4E0C8285001820012F6F4 /* events.json in Resources */,
 				5DAE04BB2820948E00930A2D /* Preview Assets.xcassets in Resources */,
-				5DDF03582C2740880087BA59 /* GoogleService-Info.plist in Resources */,
+				5DA754CD2C46DB7600FB7776 /* GoogleService-Info.plist in Resources */,
 				5DAE04B82820948E00930A2D /* Assets.xcassets in Resources */,
 				5DB4E0C3284FFEF00012F6F4 /* GoogleService-Info-OLD.plist in Resources */,
 			);
@@ -780,7 +780,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24062803;
+				CURRENT_PROJECT_VERSION = 24070902;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
@@ -797,7 +797,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.0.12;
+				MARKETING_VERSION = 5.1;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -816,7 +817,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24062803;
+				CURRENT_PROJECT_VERSION = 24070902;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
@@ -833,7 +834,8 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.0.12;
+				MARKETING_VERSION = 5.1;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

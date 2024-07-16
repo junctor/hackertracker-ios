@@ -37,6 +37,7 @@ class InfoViewModel: ObservableObject {
         fetchTagTypes(code: code)
         fetchLocations(code: code)
         fetchProducts(code: code)
+        self.events = []
         // fetchEvents(code: code)
         fetchContent(code: code)
         fetchSpeakers(code: code)
@@ -215,6 +216,7 @@ class InfoViewModel: ObservableObject {
 
                 self.content = docs.compactMap { queryDocumentSnapshot -> Content? in
                     do {
+                        self.events = []
                         return try queryDocumentSnapshot.data(as: Content.self)
                     } catch {
                         print("Error \(error)")
@@ -224,8 +226,12 @@ class InfoViewModel: ObservableObject {
                 for c in self.content {
                     if !c.sessions.isEmpty {
                         for s in c.sessions {
-                            let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds)
-                            self.events.append(e)
+                            if let _ = self.events.first(where: {$0.id == s.id}) {
+                                // Don't do anything
+                            } else {
+                                let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds)
+                                self.events.append(e)
+                            }
                         }
                     }
                 }

@@ -36,9 +36,9 @@ struct CartView: View {
             }
             Divider()
             ForEach(cart, id: \.self) { (item: Cart) in
-                let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) })[0]
-                let variant = product.variants.filter({$0.variantId == item.variantId})[0]
-                CartRow(product: product, item: item, variant: variant, total: $total, totalItems: $totalItems)
+                if let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) }).first, let variant = product.variants.filter({$0.variantId == item.variantId}).first {
+                    CartRow(product: product, item: item, variant: variant, total: $total, totalItems: $totalItems)
+                }
             }
             HStack {
                 Text("Subtotal (\(totalItems) items)")
@@ -64,13 +64,13 @@ struct CartView: View {
             var mytotal = 0
             var mytotalItems = 0
             for item in cart {
-                let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) })[0]
-                let variant = product.variants.filter({$0.variantId == item.variantId})[0]
-                if variant.stockStatus == "OUT" {
-                    viewModel.outOfStock = true
+                if let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) }).first, let variant = product.variants.filter({$0.variantId == item.variantId}).first {
+                    if variant.stockStatus == "OUT" {
+                        viewModel.outOfStock = true
+                    }
+                    mytotal += (variant.price*Int(item.count))
+                    mytotalItems += Int(item.count)
                 }
-                mytotal += (variant.price*Int(item.count))
-                mytotalItems += Int(item.count)
             }
             total = mytotal
             totalItems = mytotalItems
@@ -86,10 +86,10 @@ struct CartView: View {
     func checkOutOfStock() {
         viewModel.outOfStock = false
         for item in cart {
-            let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) })[0]
-            let variant = product.variants.filter({$0.variantId == item.variantId})[0]
-            if variant.stockStatus == "OUT" {
-                viewModel.outOfStock = true
+            if let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) }).first, let variant = product.variants.filter({$0.variantId == item.variantId}).first {
+                if variant.stockStatus == "OUT" {
+                    viewModel.outOfStock = true
+                }
             }
         }
     }
