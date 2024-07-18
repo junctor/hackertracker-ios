@@ -12,13 +12,16 @@ struct EventFilters: View {
     // let types: [Int: EventType]
     @Binding var showFilters: Bool
     @Binding var filters: Set<Int>
+    var showBookmarks: Bool = true
     
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                FilterRow(id: 1337, name: "Bookmarks", color: ThemeColors.blue, filters: $filters)
+                if showBookmarks {
+                    FilterRow(id: 1337, name: "Bookmarks", color: ThemeColors.blue, filters: $filters)
+                }
 
                 ForEach(tagtypes.sorted { $0.sortOrder < $1.sortOrder }) { tagtype in
                     Section(header: Text(tagtype.label)) {

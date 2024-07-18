@@ -76,7 +76,6 @@
 		5DB4E0B8284E9FEF0012F6F4 /* Conference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0B7284E9FEF0012F6F4 /* Conference.swift */; };
 		5DB4E0BA284EA02C0012F6F4 /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0B9284EA02C0012F6F4 /* Map.swift */; };
 		5DB4E0BC284EA0AE0012F6F4 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */; };
-		5DB4E0C3284FFEF00012F6F4 /* GoogleService-Info-OLD.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info-OLD.plist */; };
 		5DB4E0C8285001820012F6F4 /* events.json in Resources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C7285001820012F6F4 /* events.json */; };
 		5DDF035A2C2751670087BA59 /* ContentListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF03592C2751670087BA59 /* ContentListView.swift */; };
 		5DDF035C2C2767750087BA59 /* ContentCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF035B2C2767750087BA59 /* ContentCellView.swift */; };
@@ -178,7 +177,6 @@
 		5DB4E0B7284E9FEF0012F6F4 /* Conference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Conference.swift; sourceTree = "<group>"; };
 		5DB4E0B9284EA02C0012F6F4 /* Map.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
 		5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
-		5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info-OLD.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info-OLD.plist"; sourceTree = "<group>"; };
 		5DB4E0C7285001820012F6F4 /* events.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = events.json; sourceTree = "<group>"; };
 		5DDF03592C2751670087BA59 /* ContentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentListView.swift; sourceTree = "<group>"; };
 		5DDF035B2C2767750087BA59 /* ContentCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentCellView.swift; sourceTree = "<group>"; };
@@ -270,7 +268,6 @@
 				5DB4E0BF284EDA670012F6F4 /* Utils */,
 				5DAE04B32820948B00930A2D /* hackertrackerApp.swift */,
 				5DA754CC2C46DB7600FB7776 /* GoogleService-Info.plist */,
-				5DB4E0C2284FFEF00012F6F4 /* GoogleService-Info-OLD.plist */,
 				5DAE04B72820948E00930A2D /* Assets.xcassets */,
 				5DAE04BC2820948E00930A2D /* Persistence.swift */,
 				5DAE04BE2820948E00930A2D /* hackertracker.xcdatamodeld */,
@@ -522,7 +519,6 @@
 				5DAE04BB2820948E00930A2D /* Preview Assets.xcassets in Resources */,
 				5DA754CD2C46DB7600FB7776 /* GoogleService-Info.plist in Resources */,
 				5DAE04B82820948E00930A2D /* Assets.xcassets in Resources */,
-				5DB4E0C3284FFEF00012F6F4 /* GoogleService-Info-OLD.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -780,7 +776,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24070902;
+				CURRENT_PROJECT_VERSION = 24071701;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
@@ -817,7 +813,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24070902;
+				CURRENT_PROJECT_VERSION = 24071701;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;

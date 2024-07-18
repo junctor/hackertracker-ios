@@ -21,7 +21,7 @@ struct Product: Codable, Identifiable {
     var priceMin: Int
     var productId: Int
     var sortOrder: Int
-    var tags: [Int]
+    var tagIds: [Int]
     var title: String
     var variants: [Variant]
 
@@ -36,7 +36,7 @@ struct Product: Codable, Identifiable {
         case priceMin = "price_min"
         case productId = "product_id"
         case sortOrder = "sort_order"
-        case tags
+        case tagIds = "tag_ids"
         case title
         case variants
     }
@@ -66,7 +66,7 @@ struct Variant: Codable, Identifiable, Hashable {
     var price: Int
     var sortOrder: Int
     var stockStatus: String
-    var tags: [Int]
+    var tagIds: [Int]
     var title: String
     var variantId: Int
 
@@ -75,7 +75,7 @@ struct Variant: Codable, Identifiable, Hashable {
         case price
         case sortOrder = "sort_order"
         case stockStatus = "stock_status"
-        case tags
+        case tagIds = "tag_ids"
         case title
         case variantId = "variant_id"
     }
