@@ -25,6 +25,12 @@ extension [Speaker] {
     }
 }
 
+extension [Content] {
+    func search(text: String) -> Self {
+        text.isEmpty ? self : self.filter { $0.title.lowercased().contains(text.lowercased()) || $0.description.lowercased().contains(text.lowercased()) }
+    }
+}
+
 extension [Organization] {
     func search(text: String) -> Self {
         text.isEmpty ? self : self.filter { $0.name.lowercased().contains(text.lowercased()) }

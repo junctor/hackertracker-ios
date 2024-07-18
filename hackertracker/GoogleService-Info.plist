@@ -2,37 +2,29 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CLIENT_ID</key>
-	<string>611899979455-f02njg17o5vg4f4g90kcfk18mb05kq4g.apps.googleusercontent.com</string>
-	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.611899979455-f02njg17o5vg4f4g90kcfk18mb05kq4g</string>
-	<key>ANDROID_CLIENT_ID</key>
-	<string>611899979455-4js09fs2qfs9fdo9kob110b6a3bg84m3.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
-	<string>AIzaSyADDkL9ZqSrdA9rjUBMzg17CrF15WO3w3Y</string>
+	<string>AIzaSyBwPi4g5VQAaK6NG1wzsv5JjsKET_zs9vc</string>
 	<key>GCM_SENDER_ID</key>
-	<string>611899979455</string>
+	<string>552364409858</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>org.beezle.hackertracker</string>
 	<key>PROJECT_ID</key>
-	<string>hackertest-5a202</string>
+	<string>junctor-hackertracker</string>
 	<key>STORAGE_BUCKET</key>
-	<string>hackertest-5a202.appspot.com</string>
+	<string>junctor-hackertracker.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
-	<false/>
+	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
-	<true/>
+	<false></false>
 	<key>IS_APPINVITE_ENABLED</key>
-	<true/>
+	<true></true>
 	<key>IS_GCM_ENABLED</key>
-	<true/>
+	<true></true>
 	<key>IS_SIGNIN_ENABLED</key>
-	<true/>
+	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:611899979455:ios:53360723cf108bcc</string>
-	<key>DATABASE_URL</key>
-	<string>https://hackertest-5a202.firebaseio.com</string>
+	<string>1:552364409858:ios:f9a5d6de4e80e76a0d131b</string>
 </dict>
 </plist>

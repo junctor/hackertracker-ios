@@ -7,6 +7,8 @@
 
 import FirebaseFirestoreSwift
 import SwiftUI
+import FirebaseAnalytics
+import FirebaseAnalyticsSwift
 
 struct MapView: View {
     @AppStorage("launchScreen") var launchScreen: String = "Main"

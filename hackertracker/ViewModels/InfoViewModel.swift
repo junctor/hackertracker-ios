@@ -16,6 +16,7 @@ class InfoViewModel: ObservableObject {
     @Published var tagtypes = [TagType]()
     @Published var locations = [Location]()
     @Published var products = [Product]()
+    @Published var content = [Content]()
     @Published var events = [Event]()
     @Published var speakers = [Speaker]()
     @Published var orgs = [Organization]()
@@ -36,7 +37,9 @@ class InfoViewModel: ObservableObject {
         fetchTagTypes(code: code)
         fetchLocations(code: code)
         fetchProducts(code: code)
-        fetchEvents(code: code)
+        self.events = []
+        // fetchEvents(code: code)
+        fetchContent(code: code)
         fetchSpeakers(code: code)
         fetchOrgs(code: code)
         fetchLists(code: code)
@@ -179,7 +182,7 @@ class InfoViewModel: ObservableObject {
             }
     }
 
-    func fetchEvents(code: String) {
+    /* func fetchEvents(code: String) {
         db.collection("conferences")
             .document(code)
             .collection("events")
@@ -198,6 +201,42 @@ class InfoViewModel: ObservableObject {
                     }
                 }
                 print("InfoViewModel: \(self.events.count) events")
+            }
+    } */
+    
+    func fetchContent(code: String) {
+        db.collection("conferences")
+            .document(code)
+            .collection("content")
+            .order(by: "title", descending: false).addSnapshotListener { querySnapshot, error in
+                guard let docs = querySnapshot?.documents else {
+                    print("No Content")
+                    return
+                }
+
+                self.content = docs.compactMap { queryDocumentSnapshot -> Content? in
+                    do {
+                        self.events = []
+                        return try queryDocumentSnapshot.data(as: Content.self)
+                    } catch {
+                        print("Error \(error)")
+                        return nil
+                    }
+                }
+                for c in self.content {
+                    if !c.sessions.isEmpty {
+                        for s in c.sessions {
+                            if let _ = self.events.first(where: {$0.id == s.id}) {
+                                // Don't do anything
+                            } else {
+                                let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds)
+                                self.events.append(e)
+                            }
+                        }
+                    }
+                }
+
+                print("InfoViewModel: \(self.content.count) content")
             }
     }
 

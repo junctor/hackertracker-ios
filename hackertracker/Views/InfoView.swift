@@ -281,6 +281,10 @@ struct MenuView: View {
                     NavigationLink(destination: NewsListView()) {
                         CardView(systemImage: item.symbol ?? "newspaper", text: "News", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                     }
+                case "content":
+                    NavigationLink(destination: ContentListView(content: viewModel.content)) {
+                        CardView(systemImage: item.symbol ?? "list.dash", text: item.title, color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
+                    }
                 case "organizations":
                     if viewModel.orgs.first(where: {$0.tag_ids.contains(item.appliedTagIds[0])}) != nil {
                         NavigationLink(destination: OrgsView(title: item.title, tagId: item.appliedTagIds[0], tappedTwice: $tappedMainTwice)) {

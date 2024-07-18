@@ -7,6 +7,7 @@
 import MarkdownUI
 import SwiftUI
 
+/*
 struct EventDetailView: View {
     let eventId: Int
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
@@ -72,7 +73,7 @@ struct EventDetailView: View {
                 }
                 if event.links.count > 0 {
                     Divider()
-                    showLinks(links: event.links)
+                        .(links: event.links)
                         .padding(15)
                 }
             }
@@ -199,6 +200,7 @@ struct showSpeakers: View {
     }
 
 }
+*/
 
 struct showTags: View {
     var tagIds: [Int]
@@ -208,17 +210,19 @@ struct showTags: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Button(action: {
-                collapsed.toggle()
-            }, label: {
-                HStack {
-                    Text("Tags")
-                        .font(.headline).padding(.top)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
-                }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
-            if !collapsed {
+            if tagIds.count > 2 {
+                Button(action: {
+                    collapsed.toggle()
+                }, label: {
+                    HStack {
+                        Text("Tags")
+                            .font(.subheadline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                    }
+                }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
+            }
+            if !collapsed || tagIds.count <= 2 {
                 VStack(alignment: .leading) {
                     LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
                         ForEach(tagIds, id: \.self) { tagId in
@@ -241,10 +245,15 @@ struct showTags: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
+        .onAppear {
+            if tagIds.count > 2 {
+                collapsed = true
+            }
+        }
     }
 }
 
-struct EventDetailView_Previews: PreviewProvider {
+/* struct EventDetailView_Previews: PreviewProvider {
     struct EventDetailPreview: View {
         // let event = InfoViewModel().events[202]
 
@@ -256,4 +265,4 @@ struct EventDetailView_Previews: PreviewProvider {
     static var previews: some View {
         EventDetailPreview()
     }
-}
+} */

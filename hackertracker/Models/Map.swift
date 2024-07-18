@@ -19,7 +19,7 @@ struct Map: Codable, Identifiable {
     private enum CodingKeys: String, CodingKey {
         case id
         case url
-        case description
-        case file
+        case description = "name_text"
+        case file = "filename"
     }
 }

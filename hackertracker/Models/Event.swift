@@ -10,38 +10,25 @@ import FirebaseFirestoreSwift
 import Foundation
 
 struct Event: Codable, Identifiable {
-    @DocumentID var docID: String?
     var id: Int
-    var conferenceName: String?
+    var contentId: Int
     var description: String
-    var begin: String
     var beginTimestamp: Date
     var endTimestamp: Date
-    var end: String
-    var includes: String
-    var links: [Link]
     var title: String
-    var location: EventLocation
-    var speakers: [EventSpeaker]
+    var locationId: Int
     var people: [Person]
-    var type: EventType
     var tagIds: [Int]
 
     private enum CodingKeys: String, CodingKey {
         case id
-        case conferenceName
+        case contentId
         case description
-        case begin
         case beginTimestamp = "begin_timestamp"
         case endTimestamp = "end_timestamp"
-        case end
-        case includes
-        case links
         case title
-        case location
-        case speakers
+        case locationId
         case people
-        case type
         case tagIds = "tag_ids"
     }
 }
@@ -49,7 +36,7 @@ struct Event: Codable, Identifiable {
 struct Person: Codable, Identifiable {
     var id: Int
     var sortOrder: Int
-    var tagId: Int
+    var tagId: Int?
     
     private enum CodingKeys: String, CodingKey {
         case id = "person_id"

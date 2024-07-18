@@ -64,7 +64,7 @@ enum NotificationUtility {
         }
     }
     
-    static func scheduleNotification(date: Date, event: Event) {
+    /* static func scheduleNotification(date: Date, event: Event) {
         let calendar = Calendar(identifier: .gregorian)
         let components = calendar.dateComponents(in: .current, from: date)
         let newComponents = DateComponents(calendar: calendar, timeZone: .current, month: components.month, day: components.day, hour: components.hour, minute: components.minute)
@@ -79,16 +79,37 @@ enum NotificationUtility {
         let request = UNNotificationRequest(identifier: "hackertracker-\(event.id)", content: content, trigger: trigger)
 
         NotificationUtility.addNotification(request: request)
+    } */
+    
+    static func scheduleNotification(date: Date, id: Int, title: String, location: String) {
+        let calendar = Calendar(identifier: .gregorian)
+        let components = calendar.dateComponents(in: .current, from: date)
+        let newComponents = DateComponents(calendar: calendar, timeZone: .current, month: components.month, day: components.day, hour: components.hour, minute: components.minute)
+
+        let trigger = UNCalendarNotificationTrigger(dateMatching: newComponents, repeats: false)
+
+        let content = UNMutableNotificationContent()
+        content.title = "Upcoming Event"
+        content.body = "\(title) in \(location)"
+        content.sound = UNNotificationSound.default
+
+        let request = UNNotificationRequest(identifier: "hackertracker-\(id)", content: content, trigger: trigger)
+
+        NotificationUtility.addNotification(request: request)
     }
 
     static func removeNotification(event: Event) {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["hackertracker-\(event.id)"])
     }
     
-    static func updateNotificationForEvent(date: Date, event: Event) {
+    static func removeNotification(id: Int) {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["hackertracker-\(id)"])
+    }
+    
+    /* static func updateNotificationForEvent(date: Date, event: Event) {
         self.removeNotification(event: event)
         self.scheduleNotification(date: date, event: event)
-    }
+    } */
     
     static func removeAllNotifications() {
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()

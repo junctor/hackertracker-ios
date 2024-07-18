@@ -13,7 +13,8 @@ struct ProductsView: View {
     @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
 
     @State private var searchText = ""
-    @State private var filters: [String] = []
+    @State private var showFilters = false
+    @State var filters: Set<Int> = []
 
     var body: some View {
         ScrollView {
@@ -42,7 +43,9 @@ struct ProductsView: View {
                 ForEach(self.viewModel.products.search(text: searchText).sorted {
                     $0.sortOrder < $1.sortOrder
                 }) { product in
-                    if filters.count == 0 || product.variants.filter({ filters.contains($0.code) }).count > 0 {
+                    if filters.count == 0 ||
+                        product.tagIds.filter({ filters.contains($0) }).count > 0 ||
+                        product.variants.filter({ $0.tagIds.intersects(with: filters) && $0.stockStatus == "IN" }).count > 0 {
                         HStack {
                             NavigationLink(destination: ProductView(product: product)) {
                                 HStack {
@@ -81,11 +84,27 @@ struct ProductsView: View {
                     Image(systemName: "info.circle")
                 }
             }
+            Button {
+              showFilters.toggle()
+            } label: {
+              Image(
+                systemName: filters
+                  .isEmpty
+                  ? "line.3.horizontal.decrease.circle"
+                  : "line.3.horizontal.decrease.circle.fill")
+            }
             if let c = viewModel.conference, c.enableMerchCart {
                 NavigationLink(destination: CartView()) {
                     Image(systemName: "qrcode")
                 }
             }
+        }
+        .sheet(isPresented: $showFilters) {
+          EventFilters(
+            tagtypes: viewModel.tagtypes.filter {
+                ($0.category == "merch-product" || $0.category == "merch-variant") && $0.isBrowsable == true
+            }, showFilters: $showFilters, filters: $filters, showBookmarks: false
+          )
         }
         .padding(15)
         .analyticsScreen(name: "ProductsView")

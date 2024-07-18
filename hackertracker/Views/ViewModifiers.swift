@@ -5,9 +5,11 @@
 //  Created by caleb on 6/16/22.
 //
 
-import SwiftUI
+/* import SwiftUI
 
 struct RectangleBackground: ViewModifier {
+    typealias Body = <#type#>
+    
     @Environment(\.colorScheme) var colorScheme
 
     func body(content: Content) -> some View {
@@ -21,4 +23,4 @@ extension View {
     func rectangleBackground() -> some View {
         modifier(RectangleBackground())
     }
-}
+} */
