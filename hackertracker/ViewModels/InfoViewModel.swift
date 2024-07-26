@@ -23,6 +23,7 @@ class InfoViewModel: ObservableObject {
     @Published var faqs = [FAQ]()
     @Published var news = [Article]()
     @Published var menus = [InfoMenu]()
+    @Published var feedbackForms = [FeedbackForm]()
     @Published var showLocaltime = false
     @Published var showPastEvents = true
     @Published var showNews = true
@@ -56,6 +57,7 @@ class InfoViewModel: ObservableObject {
         fetchOrgs(code: code)
         fetchLists(code: code)
         fetchMenus(code: code)
+        fetchFeedbackForms(code: code)
     }
     
     func removeListeners() {
@@ -391,6 +393,28 @@ class InfoViewModel: ObservableObject {
                     }
                 }
                 print("InfoViewModel: \(self.menus.count) menus")
+            }
+    }
+    
+    func fetchFeedbackForms(code: String) {
+        productListener = db.collection("conferences")
+            .document(code)
+            .collection("feedbackforms")
+            .addSnapshotListener { querySnapshot, error in
+                guard let docs = querySnapshot?.documents else {
+                    print("No Products")
+                    return
+                }
+
+                self.feedbackForms = docs.compactMap { queryDocumentSnapshot -> FeedbackForm? in
+                    do {
+                        return try queryDocumentSnapshot.data(as: FeedbackForm.self)
+                    } catch {
+                        print("Error \(error)")
+                        return nil
+                    }
+                }
+                print("InfoViewModel: \(self.feedbackForms.count) feedback forms")
             }
     }
 }

@@ -11,7 +11,10 @@ import SwiftUI
 
 struct ContentDetailView: View {
     let contentId: Int
+    @State private var showFeedback = false
     @EnvironmentObject var viewModel: InfoViewModel
+    let dfu = DateFormatterUtility.shared
+    let currentTime = Date()
 
     let columns = [
         GridItem(.flexible()),
@@ -53,13 +56,42 @@ struct ContentDetailView: View {
                     showLinks(links: item.links)
                         .padding(15)
                 }
+                if let fe = item.feedbackEnableTimestamp, let fd = item.feedbackDisableTimestamp, currentTime > fe, currentTime < fd {
+                    showFeedbackButton(showFeedback: $showFeedback)
+                        .padding(15)
+                }
+                
             }
             .analyticsScreen(name: "ContentDetailView")
             .navigationBarTitle(Text(""), displayMode: .inline)
+            .sheet(isPresented: $showFeedback) {
+                FeedbackFormView(showFeedback: $showFeedback, item: item)
+            }
         } else {
             _04View(message: "Content \(contentId) not found")
         }
 
+    }
+}
+
+struct showFeedbackButton: View {
+    @Binding var showFeedback: Bool
+    @EnvironmentObject var viewModel: InfoViewModel
+    @EnvironmentObject var theme: Theme
+
+    var body: some View {
+        VStack {
+            Button {
+                showFeedback = true
+            } label: {
+                Label("Submit Feedback", systemImage: "square.and.pencil")
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(15)
+            .background(viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
+            .cornerRadius(15)
+        }
     }
 }
 

@@ -21,6 +21,9 @@ struct Content: Codable, Identifiable {
     var sessions: [Session]
     var tagIds: [Int]
     var title: String
+    var feedbackDisableTimestamp: Date?
+    var feedbackEnableTimestamp: Date?
+    var feedbackFormId: Int?
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -33,6 +36,9 @@ struct Content: Codable, Identifiable {
         case sessions
         case tagIds = "tag_ids"
         case title
+        case feedbackDisableTimestamp = "feedback_disable_timestamp"
+        case feedbackEnableTimestamp = "feedback_enable_timestamp"
+        case feedbackFormId = "feedback_form_id"
     }
 }
 
