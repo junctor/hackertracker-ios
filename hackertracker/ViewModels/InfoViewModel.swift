@@ -28,10 +28,22 @@ class InfoViewModel: ObservableObject {
     @Published var showNews = true
     @Published var colorMode = false
     @Published var outOfStock = false
+    var conferenceListener: ListenerRegistration?
+    var documentListener: ListenerRegistration?
+    var tagListener: ListenerRegistration?
+    var locationListener: ListenerRegistration?
+    var productListener: ListenerRegistration?
+    var contentListener: ListenerRegistration?
+    var speakerListener: ListenerRegistration?
+    var orgListener: ListenerRegistration?
+    var listListener: ListenerRegistration?
+    var articleListener: ListenerRegistration?
+    var menuListener: ListenerRegistration?
 
     private var db = Firestore.firestore()
 
     func fetchData(code: String, hidden: Bool = false) {
+        self.removeListeners()
         fetchConference(code: code)
         fetchDocuments(code: code)
         fetchTagTypes(code: code)
@@ -45,9 +57,43 @@ class InfoViewModel: ObservableObject {
         fetchLists(code: code)
         fetchMenus(code: code)
     }
+    
+    func removeListeners() {
+        print("Removing listeners")
+        if let cl = conferenceListener {
+            cl.remove()
+        }
+        if let dl = documentListener {
+            dl.remove()
+        }
+        if let tl = tagListener {
+            tl.remove()
+        }
+        if let ll = locationListener {
+            ll.remove()
+        }
+        if let pl = productListener {
+            pl.remove()
+        }
+        if let cl = contentListener {
+            cl.remove()
+        }
+        if let sl = speakerListener {
+            sl.remove()
+        }
+        if let ll = listListener {
+            ll.remove()
+        }
+        if let al = articleListener {
+            al.remove()
+        }
+        if let ml = menuListener {
+            ml.remove()
+        }
+    }
 
     func fetchConference(code: String) {
-        db.collection("conferences")
+        conferenceListener = db.collection("conferences")
             .document(code)
             .addSnapshotListener { documentSnapshot, error in
                 guard let doc = documentSnapshot else {
@@ -92,7 +138,7 @@ class InfoViewModel: ObservableObject {
     }
 
     func fetchDocuments(code: String) {
-        db.collection("conferences")
+        documentListener = db.collection("conferences")
             .document(code)
             .collection("documents")
             .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
@@ -114,7 +160,7 @@ class InfoViewModel: ObservableObject {
     }
 
     func fetchTagTypes(code: String) {
-        db.collection("conferences")
+        tagListener = db.collection("conferences")
             .document(code)
             .collection("tagtypes")
             .order(by: "sort_order", descending: false).addSnapshotListener { querySnapshot, error in
@@ -136,7 +182,7 @@ class InfoViewModel: ObservableObject {
     }
 
     func fetchLocations(code: String) {
-        db.collection("conferences")
+        locationListener = db.collection("conferences")
             .document(code)
             .collection("locations")
             .order(by: "peer_sort_order", descending: false)
@@ -161,7 +207,7 @@ class InfoViewModel: ObservableObject {
     }
 
     func fetchProducts(code: String) {
-        db.collection("conferences")
+        productListener = db.collection("conferences")
             .document(code)
             .collection("products")
             .order(by: "sort_order", descending: false).addSnapshotListener { querySnapshot, error in
@@ -205,7 +251,7 @@ class InfoViewModel: ObservableObject {
     } */
     
     func fetchContent(code: String) {
-        db.collection("conferences")
+        contentListener = db.collection("conferences")
             .document(code)
             .collection("content")
             .order(by: "title", descending: false).addSnapshotListener { querySnapshot, error in
@@ -241,7 +287,7 @@ class InfoViewModel: ObservableObject {
     }
 
     func fetchSpeakers(code: String) {
-        db.collection("conferences")
+        speakerListener = db.collection("conferences")
             .document(code)
             .collection("speakers")
             .order(by: "name", descending: false).addSnapshotListener { querySnapshot, error in
@@ -263,7 +309,7 @@ class InfoViewModel: ObservableObject {
     }
 
     func fetchOrgs(code: String) {
-        db.collection("conferences")
+        orgListener = db.collection("conferences")
             .document(code)
             .collection("organizations")
             .order(by: "name", descending: false).addSnapshotListener { querySnapshot, error in
@@ -286,7 +332,7 @@ class InfoViewModel: ObservableObject {
     }
 
     func fetchLists(code: String) {
-        db.collection("conferences")
+        listListener = db.collection("conferences")
             .document(code)
             .collection("faqs")
             .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
@@ -305,7 +351,7 @@ class InfoViewModel: ObservableObject {
                 }
                 // NSLog("InfoViewModel: Documents: \(self.documents.count)")
             }
-        db.collection("conferences")
+        articleListener = db.collection("conferences")
             .document(code)
             .collection("articles")
             .order(by: "updated_at", descending: true).addSnapshotListener { querySnapshot, error in
@@ -327,7 +373,7 @@ class InfoViewModel: ObservableObject {
     }
     
     func fetchMenus(code: String) {
-        db.collection("conferences")
+        menuListener = db.collection("conferences")
             .document(code)
             .collection("menus")
             .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
