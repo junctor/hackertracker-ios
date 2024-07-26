@@ -73,7 +73,11 @@ struct ProductView: View {
                     Stepper("Quantity: \(count)", value: $count, in: 1...100)
                         .fixedSize()
                 }
-                
+                Divider()
+                Text(viewModel.conference?.merchTaxStatement ?? "Tax Included")
+                    .font(.subheadline)
+                    .multilineTextAlignment(.center)
+                Divider()
                 HStack {
                     if let v = product.variants.first(where: { $0.variantId == selectedVariant }) {
                         if v.stockStatus == "OUT" {

@@ -48,6 +48,11 @@ struct CartView: View {
                     .font(.headline)
                     .frame(alignment: .trailing)
             }
+            Divider()
+            Text(viewModel.conference?.merchTaxStatement ?? "Tax Included")
+                .font(.subheadline)
+                .multilineTextAlignment(.center)
+            Divider()
             
             DeleteAllView(showingAlert: $showingAlert)
                 .alert("Are you sure", isPresented: $showingAlert) {

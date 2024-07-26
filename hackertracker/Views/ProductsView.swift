@@ -40,7 +40,13 @@ struct ProductsView: View {
                 }
                 Divider()
             }
-                ForEach(self.viewModel.products.search(text: searchText).sorted {
+            Text(viewModel.conference?.merchMandatoryAck ?? "Tax Included. All Sales Final")
+                .font(.subheadline)
+                .fontWeight(.bold)
+                .multilineTextAlignment(.center)
+            Divider()
+            
+            ForEach(self.viewModel.products.search(text: searchText).sorted {
                     $0.sortOrder < $1.sortOrder
                 }) { product in
                     if filters.count == 0 ||
@@ -63,8 +69,13 @@ struct ProductsView: View {
                                     .frame(width: 75)
                                     VStack(alignment: .leading) {
                                         Text(product.title).font(.subheadline).fontWeight(.bold).multilineTextAlignment(.leading)
-                                        Text(product.priceMin < product.priceMax ? "$\(product.priceMin / 100) - $\(product.priceMax / 100)" : "$\(product.priceMin/100)")
-                                            .font(.subheadline)
+                                        if product.variants.filter({$0.stockStatus == "IN"}).count > 0 {
+                                            Text(product.priceMin < product.priceMax ? "$\(product.priceMin / 100) - $\(product.priceMax / 100)" : "$\(product.priceMin/100)")
+                                                .font(.subheadline)
+                                        } else {
+                                            Text("Out of Stock")
+                                                .font(.subheadline)
+                                        }
                                     }
                                     .foregroundColor(.primary)
                                     Spacer()
