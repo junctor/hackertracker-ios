@@ -65,7 +65,9 @@ struct ContentDetailView: View {
             .analyticsScreen(name: "ContentDetailView")
             .navigationBarTitle(Text(""), displayMode: .inline)
             .sheet(isPresented: $showFeedback) {
-                FeedbackFormView(showFeedback: $showFeedback, item: item)
+                if let form = viewModel.feedbackForms.first(where: {$0.id == item.feedbackFormId}) {
+                    FeedbackFormView(showFeedback: $showFeedback, item: item, form: form)
+                }
             }
         } else {
             _04View(message: "Content \(contentId) not found")
