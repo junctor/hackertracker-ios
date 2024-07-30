@@ -14,7 +14,8 @@ struct Conference: Codable, Identifiable, Equatable {
         lhs.code == rhs.code
     }
     
-    @DocumentID var id: String?
+    @DocumentID var docId: String?
+    var id: Int
     var name: String
     var description: String
     var code: String
@@ -37,6 +38,7 @@ struct Conference: Codable, Identifiable, Equatable {
     var merchTaxStatement: String?
 
     private enum CodingKeys: String, CodingKey {
+        case id
         case name
         case description
         case code

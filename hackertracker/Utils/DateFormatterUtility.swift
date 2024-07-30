@@ -34,6 +34,7 @@ class DateFormatterUtility {
         monthDayTimeFormatter.timeZone = timeZone
         monthDayFormatter.timeZone = timeZone
         iso8601Formatter.timeZone = timeZone
+        iso8601ColonFormatter.timeZone = timeZone
         yearMonthDayNoTimeZoneTimeFormatter.timeZone = timeZone
         dayOfWeekFormatter.timeZone = timeZone
         shortDayOfMonthFormatter.timeZone = timeZone
@@ -111,6 +112,15 @@ class DateFormatterUtility {
         let formatter = DateFormatter()
         formatter.timeZone = TimeZone(abbreviation: "PDT")
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.sZ"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter
+    }()
+    
+    // UTC iso8601 time format with colon
+    let iso8601ColonFormatter = { () -> DateFormatter in
+        let formatter = DateFormatter()
+        formatter.timeZone = TimeZone(abbreviation: "PDT")
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssxxx"
         formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
     }()

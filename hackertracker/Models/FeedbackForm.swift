@@ -58,3 +58,23 @@ struct FeedbackOption: Codable, Identifiable {
         case sortOrder = "sort_order"
     }
 }
+
+struct FeedbackOptionSelectOne {
+    var item_id: Int
+    var options: [Int]
+}
+
+struct FeedbackOptionText {
+    var item_id: Int
+    var options: String
+}
+
+struct FeedbackAnswers {
+    var client: String
+    var conference_id: Int
+    var content_id: Int
+    var device_id: String
+    var feedback_form_id: Int
+    var items: [AnyObject]
+    var timestamp: String
+}
