@@ -11,8 +11,8 @@ import Foundation
 
 struct Map: Codable, Identifiable {
     @DocumentID var docID: String?
-    var id: Int?
-    var url: String?
+    var id: Int
+    var url: String
     var description: String?
     var file: String?
 

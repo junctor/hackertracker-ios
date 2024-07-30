@@ -19,6 +19,8 @@ struct _04View: View {
             }
             Text(message)
                 .font(.title)
+                .multilineTextAlignment(.center)
+            
             Image("beezle")
                 .resizable()
                 .aspectRatio(contentMode: .fit)

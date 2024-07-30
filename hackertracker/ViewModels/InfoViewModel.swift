@@ -114,22 +114,32 @@ class InfoViewModel: ObservableObject {
                 if let conference = self.conference, let maps = conference.maps, maps.count > 0 {
                     let fileManager = FileManager.default
                     let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                    let storageRef = Storage.storage().reference()
                     
                     for map in maps {
-                        if let file = map.file {
-                            let path = "\(conference.code)/\(file)"
-                            let mRef = storageRef.child(path)
+                        if let url = URL(string: map.url) {
+                            let path = "\(conference.code)/\(url.lastPathComponent)"
+                            let mLocalDir = docDir.appendingPathComponent(conference.code)
+                            if !FileManager.default.fileExists(atPath: mLocalDir.path) {
+                                try! FileManager.default.createDirectory(at: mLocalDir, withIntermediateDirectories: true)
+                            }
+                            // let mRef = storageRef.child(conference.code)
                             let mLocal = docDir.appendingPathComponent(path)
                             if fileManager.fileExists(atPath: mLocal.path) {
                                 // Add logic to check md5 hash and re-update if it has changed
                                 print("InfoViewModel: (\(conference.code): Map file (\(path)) already exists")
                             } else {
-                                _ = mRef.write(toFile: mLocal) { _, error in
+                                /* _ = mRef.write(toFile: mLocal) { _, error in
                                     if let error = error {
                                         print("InfoViewModel: (\(conference.code)): Error \(error) retrieving \(path)")
                                     } else {
                                         print("InfoViewModel: (\(conference.code)): Got map \(path)")
+                                    }
+                                } */
+                                self.downloadFileCompletionHandler(url: url, destinationUrl: mLocal) { (destinationUrl, error) in
+                                    if let durl = destinationUrl {
+                                        NSLog("Finished downloading: \(durl)")
+                                    } else {
+                                        print(error!)
                                     }
                                 }
                             }
@@ -138,6 +148,51 @@ class InfoViewModel: ObservableObject {
                 }
             }
     }
+    
+    private func downloadFileCompletionHandler(url: URL, destinationUrl: URL, completion: @escaping (URL?, Error?) -> Void) {
+
+            /* let url = URL(string: urlstring)!
+            let documentsUrl =  try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            let destinationUrl = documentsUrl.appendingPathComponent(url.lastPathComponent)
+             */
+            print(destinationUrl)
+
+            if FileManager().fileExists(atPath: destinationUrl.path) {
+                print("File already exists [\(destinationUrl.path)]")
+    //            try! FileManager().removeItem(at: destinationUrl)
+                completion(destinationUrl, nil)
+                return
+            }
+
+            let request = URLRequest(url: url)
+
+
+            let task = URLSession.shared.downloadTask(with: request) { tempFileUrl, response, error in
+    //            print(tempFileUrl, response, error)
+                if error != nil {
+                    completion(nil, error)
+                    return
+                }
+
+                if let response = response as? HTTPURLResponse {
+                    if response.statusCode == 200 {
+                        if let tempFileUrl = tempFileUrl {
+                            print("download finished")
+                            if FileManager().fileExists(atPath: destinationUrl.path) {
+                                try! FileManager.default.removeItem(at: destinationUrl)
+                            }
+                                try! FileManager.default.moveItem(at: tempFileUrl, to: destinationUrl)
+                            completion(destinationUrl, error)
+                        } else {
+                            completion(nil, error)
+                        }
+
+                    }
+                }
+
+            }
+            task.resume()
+        }
 
     func fetchDocuments(code: String) {
         documentListener = db.collection("conferences")
@@ -229,28 +284,6 @@ class InfoViewModel: ObservableObject {
                 print("InfoViewModel: \(self.products.count) products")
             }
     }
-
-    /* func fetchEvents(code: String) {
-        db.collection("conferences")
-            .document(code)
-            .collection("events")
-            .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
-                guard let docs = querySnapshot?.documents else {
-                    print("No Events")
-                    return
-                }
-
-                self.events = docs.compactMap { queryDocumentSnapshot -> Event? in
-                    do {
-                        return try queryDocumentSnapshot.data(as: Event.self)
-                    } catch {
-                        print("Error \(error)")
-                        return nil
-                    }
-                }
-                print("InfoViewModel: \(self.events.count) events")
-            }
-    } */
     
     func fetchContent(code: String) {
         contentListener = db.collection("conferences")

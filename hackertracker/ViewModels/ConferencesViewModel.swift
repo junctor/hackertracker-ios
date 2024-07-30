@@ -10,28 +10,33 @@ import FirebaseFirestore
 
 class ConferencesViewModel: ObservableObject {
     @Published var conferences = [Conference]()
+    var conferenceListener: ListenerRegistration?
     
     private var db = Firestore.firestore()
     
     func fetchConferences(hidden: Bool) {
-        db.collection("conferences")
-            .whereField("hidden", isEqualTo: hidden)
-            .order(by: "start_date", descending: true).addSnapshotListener { querySnapshot, error in
-                guard let documents = querySnapshot?.documents else {
-                    print("No Conferences")
-                    return
-                }
-
-                self.conferences = documents.compactMap { queryDocumentSnapshot -> Conference? in
-                    do {
-                        return try queryDocumentSnapshot.data(as: Conference.self)
-                    } catch {
-                        print("Error \(error)")
-                        return nil
+        if let _ = conferenceListener {
+            //NSLog("Conference Listener already exists")
+        } else {
+            conferenceListener = db.collection("conferences")
+                .whereField("hidden", isEqualTo: hidden)
+                .order(by: "start_date", descending: true).addSnapshotListener { querySnapshot, error in
+                    guard let documents = querySnapshot?.documents else {
+                        print("No Conferences")
+                        return
                     }
+                    
+                    self.conferences = documents.compactMap { queryDocumentSnapshot -> Conference? in
+                        do {
+                            return try queryDocumentSnapshot.data(as: Conference.self)
+                        } catch {
+                            print("Error \(error)")
+                            return nil
+                        }
+                    }
+                    print("ConferencesViewModel: \(self.conferences.count) conferences")
                 }
-                print("ConferencesViewModel: \(self.conferences.count) conferences")
-            }
+        }
     }
 
 }

@@ -47,6 +47,7 @@
 		5D642D482A5CB3110064492D /* OrgView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D472A5CB3110064492D /* OrgView.swift */; };
 		5D642D4F2A5DDB8D0064492D /* AddEventController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D4E2A5DDB8D0064492D /* AddEventController.swift */; };
 		5D642D512A5DDBD20064492D /* AddEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D502A5DDBD20064492D /* AddEventView.swift */; };
+		5D9681162C5946E000D246B0 /* FeedbackUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9681152C5946E000D246B0 /* FeedbackUtility.swift */; };
 		5D9B8EC92C534207009AAA61 /* FeedbackForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9B8EC82C534207009AAA61 /* FeedbackForm.swift */; };
 		5D9B8ECB2C5345E9009AAA61 /* FeedbackFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9B8ECA2C5345E9009AAA61 /* FeedbackFormView.swift */; };
 		5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57442857B398001374D4 /* ConferencesView.swift */; };
@@ -151,6 +152,7 @@
 		5D642D4D2A5DD1BC0064492D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		5D642D4E2A5DDB8D0064492D /* AddEventController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventController.swift; sourceTree = "<group>"; };
 		5D642D502A5DDBD20064492D /* AddEventView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEventView.swift; sourceTree = "<group>"; };
+		5D9681152C5946E000D246B0 /* FeedbackUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackUtility.swift; sourceTree = "<group>"; };
 		5D9B8EC82C534207009AAA61 /* FeedbackForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackForm.swift; sourceTree = "<group>"; };
 		5D9B8ECA2C5345E9009AAA61 /* FeedbackFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedbackFormView.swift; sourceTree = "<group>"; };
 		5D9E57442857B398001374D4 /* ConferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConferencesView.swift; sourceTree = "<group>"; };
@@ -387,6 +389,7 @@
 				5D642D412A59C1710064492D /* CartUtility.swift */,
 				5DF82B252A5F3B29001395C7 /* NotificationUtility.swift */,
 				3C04BD9D2A5FDFD900D01402 /* Filters.swift */,
+				5D9681152C5946E000D246B0 /* FeedbackUtility.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -619,6 +622,7 @@
 				5D642D232A4388D50064492D /* PDFView.swift in Sources */,
 				5DF51ABC2851203F007BCB83 /* Document.swift in Sources */,
 				5DDF035E2C28B4F10087BA59 /* ContentDetailView.swift in Sources */,
+				5D9681162C5946E000D246B0 /* FeedbackUtility.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -784,7 +788,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24072901;
+				CURRENT_PROJECT_VERSION = 24073004;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
@@ -821,7 +825,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24072901;
+				CURRENT_PROJECT_VERSION = 24073004;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;

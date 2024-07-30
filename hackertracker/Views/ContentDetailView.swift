@@ -11,9 +11,13 @@ import SwiftUI
 
 struct ContentDetailView: View {
     let contentId: Int
-    @State private var showFeedback = false
+    @State private var showFeedback: Bool = false
     // @State private var showFeedbackButton = true
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
     @EnvironmentObject var viewModel: InfoViewModel
+    @FetchRequest(sortDescriptors: []) var feedbacks: FetchedResults<Feedbacks>
+    @Environment(\.managedObjectContext) private var viewContext
     let dfu = DateFormatterUtility.shared
     let currentTime = Date()
 
@@ -57,7 +61,7 @@ struct ContentDetailView: View {
                     showLinks(links: item.links)
                         .padding(15)
                 }
-                if let fe = item.feedbackEnableTimestamp, let fd = item.feedbackDisableTimestamp, currentTime > fe, currentTime < fd {
+                if let fe = item.feedbackEnableTimestamp, let fd = item.feedbackDisableTimestamp, currentTime > fe, currentTime < fd, !feedbacks.map({$0.id}).contains(Int32(item.id)) {
                     showFeedbackButton(showFeedback: $showFeedback)
                         .padding(15)
                 }
@@ -67,8 +71,13 @@ struct ContentDetailView: View {
             .navigationBarTitle(Text(""), displayMode: .inline)
             .sheet(isPresented: $showFeedback) {
                 if let form = viewModel.feedbackForms.first(where: {$0.id == item.feedbackFormId}) {
-                    FeedbackFormView(showFeedback: $showFeedback, item: item, form: form)
+                    FeedbackFormView(showFeedback: $showFeedback, item: item, form: form, showAlert: $showAlert, alertMessage: $alertMessage)
                 }
+            }
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text("Submit Feedback"), message: Text(alertMessage), dismissButton: .default(Text("OK")) {
+                    FeedbackUtility.addFeedback(context: viewContext, id: item.id)
+                })
             }
         } else {
             _04View(message: "Content \(contentId) not found")

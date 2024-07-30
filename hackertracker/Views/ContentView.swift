@@ -25,6 +25,7 @@ struct ContentView: View {
 
     @StateObject var selected = SelectedConference()
     @StateObject var viewModel = InfoViewModel()
+    @StateObject var consViewModel = ConferencesViewModel()
     @StateObject var theme = Theme()
 
     @State private var tabSelection = 1
@@ -112,6 +113,7 @@ struct ContentView: View {
             .environmentObject(selected)
             .environmentObject(viewModel)
             .environmentObject(theme)
+            .environmentObject(consViewModel)
             .analyticsScreen(name: "ContentView")
         } else {
             if conferenceCode == "INIT" {
@@ -129,6 +131,7 @@ struct ContentView: View {
                             selected.code = conferenceCode
                         }
                         self.viewModel.fetchData(code: conferenceCode)
+                        self.consViewModel.fetchConferences(hidden: showHidden)
                     }
             }
         }

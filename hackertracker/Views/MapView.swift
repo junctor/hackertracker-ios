@@ -25,9 +25,10 @@ struct MapView: View {
                 if let maps = con.maps, maps.count > 0 {
                     TabView {
                         ForEach(maps, id: \.id) { map in
-                            if let file = map.file {
+                            if let url = URL(string: map.url) {
+                                let path = "\(selected.code)/\(url.lastPathComponent)"
                                 let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                                let mLocal = docDir.appendingPathComponent("\(con.code)/\(file)")
+                                let mLocal = docDir.appendingPathComponent(path)
                                 
                                 PDFView(url: mLocal)
                                     .onAppear {
@@ -41,7 +42,7 @@ struct MapView: View {
                     .scaledToFill()
                     .analyticsScreen(name: "MapView")
                 } else {
-                    _04View(message: "No Maps Found")
+                    _04View(message: "No Maps Provided For \(con.name)",show404: false)
                 }
             } else {
                 _04View(message: "Loading...", show404: false).preferredColorScheme(theme.colorScheme)

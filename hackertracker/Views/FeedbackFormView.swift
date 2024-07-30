@@ -15,8 +15,8 @@ struct FeedbackFormView: View {
     @State var test: String = ""
     @State var answers: [Int: AnyObject] = [:]
     let dfu = DateFormatterUtility.shared
-    @State private var showAlert = false
-    @State private var alertMessage = ""
+    @Binding var showAlert: Bool
+    @Binding var alertMessage: String
     
     var body: some View {
         VStack {
@@ -27,41 +27,38 @@ struct FeedbackFormView: View {
                 .font(.title3)
         }
         .padding(15)
-        HStack {
-            Divider()
-            Form {
-                ForEach(form.items.sorted(by: {$0.sortOrder < $1.sortOrder})) { i in
-                    FeedbackRow(item: i,answers: $answers)
-                }
+        Divider()
+        Form {
+            ForEach(form.items.sorted(by: {$0.sortOrder < $1.sortOrder})) { i in
+                FeedbackRow(item: i,answers: $answers)
             }
-            .alert(isPresented: $showAlert) {
-                Alert(title: Text("Submit Feedback"), message: Text(alertMessage), dismissButton: .default(Text("OK")) {
-                    showFeedback.toggle()
-                })
-            }
-            Divider()
         }
-        HStack {
-            Button(action: {
-                showFeedback.toggle()
-            }, label: {
-                Text("Close")
-            })
-            .foregroundColor(.red)
-            .frame(maxWidth: .infinity)
-            .padding(15)
-            .background(Color(.systemGray5))
-            .cornerRadius(15)
+        Divider()
+        VStack {
+            
+            HStack {
+                Button(action: {
+                    showFeedback.toggle()
+                }, label: {
+                    Text("Close")
+                })
+                .foregroundColor(.red)
+                .frame(maxWidth: .infinity)
+                .padding(15)
+                .background(Color(.systemGray5))
+                .cornerRadius(15)
                 
-            Button(action: {
-                uploadFeedback(item: item, form: form, answers: answers, viewModel: viewModel, dfu: dfu)
-            }, label: {
-                Text("Submit")
-            })
-            .frame(maxWidth: .infinity)
-            .padding(15)
-            .background(Color(.systemGray5))
-            .cornerRadius(15)
+                Button(action: {
+                    uploadFeedback(item: item, form: form, answers: answers, viewModel: viewModel, dfu: dfu)
+                    showFeedback.toggle()
+                }, label: {
+                    Text("Submit")
+                })
+                .frame(maxWidth: .infinity)
+                .padding(15)
+                .background(Color(.systemGray5))
+                .cornerRadius(15)
+            }
         }
         .padding(15)
     }
@@ -155,7 +152,7 @@ struct FeedbackRow: View {
         } else if item.type == "text" {
             Text(item.captionText).textCase(.uppercase).font(.subheadline).bold()
             TextField("Optional", text: $answer, axis: .vertical)
-                .lineLimit(4...6)
+                .lineLimit(5...5)
                 .onReceive(answer.publisher.collect()) {
                     answer = String($0.prefix(item.textMaxLength ?? 1024))
                     answers[item.id] = answer as AnyObject
