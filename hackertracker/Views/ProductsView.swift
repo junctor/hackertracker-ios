@@ -15,6 +15,8 @@ struct ProductsView: View {
     @State private var searchText = ""
     @State private var showFilters = false
     @State var filters: Set<Int> = []
+    
+    let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
         ScrollView {
@@ -45,8 +47,54 @@ struct ProductsView: View {
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
             Divider()
+            LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
+                ForEach(self.viewModel.products.search(text: searchText).sorted {
+                        $0.sortOrder < $1.sortOrder
+                }) { product in
+                    if filters.count == 0 ||
+                        product.tagIds.filter({ filters.contains($0) }).count > 0 ||
+                        product.variants.filter({ $0.tagIds.intersects(with: filters) && $0.stockStatus == "IN" }).count > 0 {
+                        HStack {
+                            NavigationLink(destination: ProductView(product: product)) {
+                                ZStack(alignment: .bottomTrailing) {
+                                    if product.media.count > 0, let media_url = URL(string: product.media[0].url) {
+                                        KFImage(media_url)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .cornerRadius(5)
+                                    } else {
+                                        Image(systemName: "tshirt")
+                                            .foregroundColor(.primary)
+                                    }
+                                    if product.variants.filter({$0.stockStatus == "IN"}).count > 0 {
+                                        HStack {
+                                            Text(product.priceMin < product.priceMax ? "$\(product.priceMin / 100)+" : "$\(product.priceMin/100)")
+                                                .font(.subheadline)
+                                                .foregroundColor(.white)
+                                        }
+                                        .padding(5)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(5)
+                                        .frame(alignment: .center)
+                                    } else {
+                                        HStack {
+                                            Text("Out of Stock")
+                                                .font(.subheadline)
+                                                .foregroundColor(.red)
+                                        }
+                                        .padding(5)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(5)
+                                        .frame(alignment: .center)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             
-            ForEach(self.viewModel.products.search(text: searchText).sorted {
+            /* ForEach(self.viewModel.products.search(text: searchText).sorted {
                     $0.sortOrder < $1.sortOrder
                 }) { product in
                     if filters.count == 0 ||
@@ -85,7 +133,7 @@ struct ProductsView: View {
                             }
                         }
                     }
-                }
+                } */
         }
         .searchable(text: $searchText)
         .navigationTitle("Merch")

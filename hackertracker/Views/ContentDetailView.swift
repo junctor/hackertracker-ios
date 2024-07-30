@@ -12,6 +12,7 @@ import SwiftUI
 struct ContentDetailView: View {
     let contentId: Int
     @State private var showFeedback = false
+    // @State private var showFeedbackButton = true
     @EnvironmentObject var viewModel: InfoViewModel
     let dfu = DateFormatterUtility.shared
     let currentTime = Date()

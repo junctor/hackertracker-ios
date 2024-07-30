@@ -31,7 +31,7 @@ struct FeedbackItem: Codable, Identifiable {
     var selectMax: Int
     var selectOrientation: String
     var sortOrder: Int
-    var textMaxLength: String?
+    var textMaxLength: Int?
     var type: String
     
     private enum CodingKeys: String, CodingKey {

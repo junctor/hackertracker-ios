@@ -19,18 +19,19 @@ struct FeedbackFormView: View {
     @State private var alertMessage = ""
     
     var body: some View {
-        HStack {
+        VStack {
             Text(form.name)
                 .font(.title)
-        }
-        .padding(15)
             Divider()
             Text(item.title)
                 .font(.title3)
+        }
+        .padding(15)
+        HStack {
             Divider()
             Form {
-                ForEach(form.items) { i in
-                     FeedbackRow(item: i,answers: $answers)
+                ForEach(form.items.sorted(by: {$0.sortOrder < $1.sortOrder})) { i in
+                    FeedbackRow(item: i,answers: $answers)
                 }
             }
             .alert(isPresented: $showAlert) {
@@ -39,33 +40,30 @@ struct FeedbackFormView: View {
                 })
             }
             Divider()
-            HStack {
-                Button(action: {
-                    showFeedback.toggle()
-                }, label: {
-                    Text("Close")
-                })
-                .foregroundColor(.red)
-                .frame(maxWidth: .infinity)
-                .padding(15)
-                .background(Color(.systemGray5))
-                .cornerRadius(15)
-                
-                Button(action: {
-                    /* Format for Upload:
-                    */
-                    // NSLog("Full value of answers for Content \(item.title): \(answers)")
-                    uploadFeedback(item: item, form: form, answers: answers, viewModel: viewModel, dfu: dfu)
-                    // showFeedback.toggle()
-                }, label: {
-                    Text("Submit")
-                })
-                .frame(maxWidth: .infinity)
-                .padding(15)
-                .background(Color(.systemGray5))
-                .cornerRadius(15)
-            }
+        }
+        HStack {
+            Button(action: {
+                showFeedback.toggle()
+            }, label: {
+                Text("Close")
+            })
+            .foregroundColor(.red)
+            .frame(maxWidth: .infinity)
             .padding(15)
+            .background(Color(.systemGray5))
+            .cornerRadius(15)
+                
+            Button(action: {
+                uploadFeedback(item: item, form: form, answers: answers, viewModel: viewModel, dfu: dfu)
+            }, label: {
+                Text("Submit")
+            })
+            .frame(maxWidth: .infinity)
+            .padding(15)
+            .background(Color(.systemGray5))
+            .cornerRadius(15)
+        }
+        .padding(15)
     }
 }
 
@@ -156,10 +154,12 @@ struct FeedbackRow: View {
             })
         } else if item.type == "text" {
             Text(item.captionText).textCase(.uppercase).font(.subheadline).bold()
-            TextField("Optional", text: $answer)
-                .onChange(of: answer, perform: {val in
-                    answers[item.id] = val as AnyObject
-                })
+            TextField("Optional", text: $answer, axis: .vertical)
+                .lineLimit(4...6)
+                .onReceive(answer.publisher.collect()) {
+                    answer = String($0.prefix(item.textMaxLength ?? 1024))
+                    answers[item.id] = answer as AnyObject
+                }
         } else {
             Text("Currently Unavailable")
         }
