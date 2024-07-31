@@ -25,16 +25,22 @@ class ConferencesViewModel: ObservableObject {
                         print("No Conferences")
                         return
                     }
-                    
+                    var cache = 0
+                    var firestore = 0
                     self.conferences = documents.compactMap { queryDocumentSnapshot -> Conference? in
                         do {
+                            if queryDocumentSnapshot.metadata.isFromCache {
+                                cache = cache + 1
+                            } else {
+                                firestore = firestore + 1
+                            }
                             return try queryDocumentSnapshot.data(as: Conference.self)
                         } catch {
                             print("Error \(error)")
                             return nil
                         }
                     }
-                    print("ConferencesViewModel: \(self.conferences.count) conferences")
+                    print("ConferencesViewModel: \(self.conferences.count) conferences (cache hits \(cache), firestore hits \(firestore))")
                 }
         }
     }

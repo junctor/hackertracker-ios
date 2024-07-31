@@ -61,7 +61,8 @@ class InfoViewModel: ObservableObject {
     }
     
     func removeListeners() {
-        print("Removing listeners")
+        // print("Removing listeners")
+        // print("DB Cache Settings: \(db.settings.isPersistenceEnabled)")
         if let cl = conferenceListener {
             cl.remove()
         }
@@ -105,6 +106,11 @@ class InfoViewModel: ObservableObject {
                 
                 do {
                     self.conference = try doc.data(as: Conference.self)
+                    if doc.metadata.isFromCache {
+                        NSLog("Pulling conference \(self.conference?.code ?? "none") data from cache")
+                    } else {
+                        NSLog("Pulling conference \(self.conference?.code ?? "none") data from firestore")
+                    }
                 } catch {
                     print("Error \(error)")
                     return
@@ -126,7 +132,7 @@ class InfoViewModel: ObservableObject {
                             let mLocal = docDir.appendingPathComponent(path)
                             if fileManager.fileExists(atPath: mLocal.path) {
                                 // Add logic to check md5 hash and re-update if it has changed
-                                print("InfoViewModel: (\(conference.code): Map file (\(path)) already exists")
+                                NSLog("InfoViewModel: (\(conference.code): Map file (\(path)) already exists")
                             } else {
                                 /* _ = mRef.write(toFile: mLocal) { _, error in
                                     if let error = error {
@@ -203,16 +209,22 @@ class InfoViewModel: ObservableObject {
                     print("No Documents")
                     return
                 }
-
+                var cache = 0
+                var firestore = 0
                 self.documents = docs.compactMap { queryDocumentSnapshot -> Document? in
                     do {
+                        if queryDocumentSnapshot.metadata.isFromCache {
+                            cache = cache + 1
+                        } else {
+                            firestore = firestore + 1
+                        }
                         return try queryDocumentSnapshot.data(as: Document.self)
                     } catch {
                         print("Error \(error)")
                         return nil
                     }
                 }
-                print("InfoViewModel: \(self.documents.count) documents")
+                NSLog("InfoViewModel: \(self.documents.count) documents (cache hits \(cache), firestore hits \(firestore))")
             }
     }
 
@@ -225,16 +237,22 @@ class InfoViewModel: ObservableObject {
                     print("No Tags")
                     return
                 }
-
+                var cache = 0
+                var firestore = 0
                 self.tagtypes = docs.compactMap { queryDocumentSnapshot -> TagType? in
                     do {
+                        if queryDocumentSnapshot.metadata.isFromCache {
+                            cache = cache + 1
+                        } else {
+                            firestore = firestore + 1
+                        }
                         return try queryDocumentSnapshot.data(as: TagType.self)
                     } catch {
                         print("Error \(error)")
                         return nil
                     }
                 }
-                print("InfoViewModel: \(self.tagtypes.count) tags")
+                NSLog("InfoViewModel: \(self.tagtypes.count) tags (cache hits \(cache), firestore hits \(firestore))")
             }
     }
 
@@ -248,9 +266,15 @@ class InfoViewModel: ObservableObject {
                     print("No Locations")
                     return
                 }
-
+                var cache = 0
+                var firestore = 0
                 self.locations = docs.compactMap { queryDocumentSnapshot -> Location? in
                     do {
+                        if queryDocumentSnapshot.metadata.isFromCache {
+                            cache = cache + 1
+                        } else {
+                            firestore = firestore + 1
+                        }
                         return try queryDocumentSnapshot.data(as: Location.self)
                     } catch {
                         print("fetchLocations: Location Parsing Error: \(error)")
@@ -259,7 +283,7 @@ class InfoViewModel: ObservableObject {
                         return nil
                     }
                 }
-                print("InfoViewModel: \(self.locations.count) locations")
+                NSLog("InfoViewModel: \(self.locations.count) locations (cache hits \(cache), firestore hits \(firestore))")
             }
     }
 
@@ -272,16 +296,22 @@ class InfoViewModel: ObservableObject {
                     print("No Products")
                     return
                 }
-
+                var cache = 0
+                var firestore = 0
                 self.products = docs.compactMap { queryDocumentSnapshot -> Product? in
                     do {
+                        if queryDocumentSnapshot.metadata.isFromCache {
+                            cache = cache + 1
+                        } else {
+                            firestore = firestore + 1
+                        }
                         return try queryDocumentSnapshot.data(as: Product.self)
                     } catch {
                         print("Error \(error)")
                         return nil
                     }
                 }
-                print("InfoViewModel: \(self.products.count) products")
+                NSLog("InfoViewModel: \(self.products.count) products (cache hits \(cache), firestore hits \(firestore))")
             }
     }
     
@@ -295,9 +325,16 @@ class InfoViewModel: ObservableObject {
                     return
                 }
 
+                var cache = 0
+                var firestore = 0
                 self.content = docs.compactMap { queryDocumentSnapshot -> Content? in
                     do {
                         self.events = []
+                        if queryDocumentSnapshot.metadata.isFromCache {
+                            cache = cache + 1
+                        } else {
+                            firestore = firestore + 1
+                        }
                         return try queryDocumentSnapshot.data(as: Content.self)
                     } catch {
                         print("Error \(error)")
@@ -317,7 +354,7 @@ class InfoViewModel: ObservableObject {
                     }
                 }
 
-                print("InfoViewModel: \(self.content.count) content")
+                NSLog("InfoViewModel: \(self.content.count) content (cache hits \(cache), firestore hits \(firestore))")
             }
     }
 
@@ -331,8 +368,15 @@ class InfoViewModel: ObservableObject {
                     return
                 }
 
+                var cache = 0
+                var firestore = 0
                 self.speakers = docs.compactMap { queryDocumentSnapshot -> Speaker? in
                     do {
+                        if queryDocumentSnapshot.metadata.isFromCache {
+                            cache = cache + 1
+                        } else {
+                            firestore = firestore + 1
+                        }
                         return try queryDocumentSnapshot.data(as: Speaker.self)
                     } catch {
                         print("Error \(error)")
@@ -340,6 +384,7 @@ class InfoViewModel: ObservableObject {
                     }
                 }
                 self.speakers.sort(using: KeyPathComparator(\.self.name, comparator: .localizedStandard))
+                NSLog("InfoViewModel: \(self.speakers.count) speakers (cache hits \(cache), firestore hits \(firestore))")
             }
     }
 
@@ -353,8 +398,15 @@ class InfoViewModel: ObservableObject {
                     return
                 }
 
+                var cache = 0
+                var firestore = 0
                 self.orgs = docs.compactMap { queryDocumentSnapshot -> Organization? in
                     do {
+                        if queryDocumentSnapshot.metadata.isFromCache {
+                            cache = cache + 1
+                        } else {
+                            firestore = firestore + 1
+                        }
                         return try queryDocumentSnapshot.data(as: Organization.self)
                     } catch {
                         print("Error \(error)")
@@ -362,7 +414,7 @@ class InfoViewModel: ObservableObject {
                     }
                 }
                 self.orgs.sort(using: KeyPathComparator(\.self.name, comparator: .localizedStandard))
-                print("InfoViewModel: \(self.orgs.count) organizations")
+                NSLog("InfoViewModel: \(self.orgs.count) organizations (cache hits \(cache), firestore hits \(firestore))")
             }
     }
 
@@ -376,15 +428,22 @@ class InfoViewModel: ObservableObject {
                     return
                 }
 
+                var cache = 0
+                var firestore = 0
                 self.faqs = docs.compactMap { queryDocumentSnapshot -> FAQ? in
                     do {
+                        if queryDocumentSnapshot.metadata.isFromCache {
+                            cache = cache + 1
+                        } else {
+                            firestore = firestore + 1
+                        }
                         return try queryDocumentSnapshot.data(as: FAQ.self)
                     } catch {
                         print("Error \(error)")
                         return nil
                     }
                 }
-                // NSLog("InfoViewModel: Documents: \(self.documents.count)")
+                NSLog("InfoViewModel: FAQs: \(self.faqs.count) (cache hits \(cache), firestore hits \(firestore))")
             }
         articleListener = db.collection("conferences")
             .document(code)
@@ -395,15 +454,22 @@ class InfoViewModel: ObservableObject {
                     return
                 }
 
+                var cache = 0
+                var firestore = 0
                 self.news = docs.compactMap { queryDocumentSnapshot -> Article? in
                     do {
+                        if queryDocumentSnapshot.metadata.isFromCache {
+                            cache = cache + 1
+                        } else {
+                            firestore = firestore + 1
+                        }
                         return try queryDocumentSnapshot.data(as: Article.self)
                     } catch {
                         print("Error \(error)")
                         return nil
                     }
                 }
-                // NSLog("InfoViewModel: Documents: \(self.documents.count)")
+                NSLog("InfoViewModel: News Articles: \(self.news.count) (cache hits \(cache), firestore hits \(firestore))")
             }
     }
     
@@ -417,15 +483,22 @@ class InfoViewModel: ObservableObject {
                     return
                 }
 
+                var cache = 0
+                var firestore = 0
                 self.menus = docs.compactMap { queryDocumentSnapshot -> InfoMenu? in
                     do {
+                        if queryDocumentSnapshot.metadata.isFromCache {
+                            cache = cache + 1
+                        } else {
+                            firestore = firestore + 1
+                        }
                         return try queryDocumentSnapshot.data(as: InfoMenu.self)
                     } catch {
                         print("Error \(error)")
                         return nil
                     }
                 }
-                print("InfoViewModel: \(self.menus.count) menus")
+                print("InfoViewModel: \(self.menus.count) menus (cache hits \(cache), firestore hits \(firestore))")
             }
     }
     
@@ -439,15 +512,22 @@ class InfoViewModel: ObservableObject {
                     return
                 }
 
+                var cache = 0
+                var firestore = 0
                 self.feedbackForms = docs.compactMap { queryDocumentSnapshot -> FeedbackForm? in
                     do {
+                        if queryDocumentSnapshot.metadata.isFromCache {
+                            cache = cache + 1
+                        } else {
+                            firestore = firestore + 1
+                        }
                         return try queryDocumentSnapshot.data(as: FeedbackForm.self)
                     } catch {
                         print("Error \(error)")
                         return nil
                     }
                 }
-                print("InfoViewModel: \(self.feedbackForms.count) feedback forms")
+                print("InfoViewModel: \(self.feedbackForms.count) feedback forms (cache hits \(cache), firestore hits \(firestore))")
             }
     }
 }
