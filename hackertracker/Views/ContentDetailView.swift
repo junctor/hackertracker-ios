@@ -109,21 +109,9 @@ struct showFeedbackButton: View {
 
 struct showMedia: View {
     var media: [Media]
-    // @State private var collapsed = false
     
     var body: some View {
         VStack(alignment: .leading) {
-            /* Button(action: {
-                collapsed.toggle()
-            }, label: {
-                HStack {
-                    Text("")
-                        .font(.headline).padding(.top)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
-                }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary) */
-            //if !collapsed {
                 HStack {
                     ForEach(media, id: \.assetId) { m in
                         if let url = URL(string: m.url) {
@@ -148,6 +136,9 @@ struct showSessions: View {
     var item: Content
     @State var showAddContentModal = false
     @State private var collapsed = false
+    // @State var showingAlert: Bool = false
+    // @State var notExists: Bool = false
+    @AppStorage("notifyAt") var notifyAt: Int = 20
     let dfu = DateFormatterUtility.shared
     @EnvironmentObject var viewModel: InfoViewModel
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
@@ -157,9 +148,18 @@ struct showSessions: View {
         if bookmarks.map({$0.id}).contains(Int32(id)) {
             print("ContentDetailView: Removing Bookmark \(id)")
             BookmarkUtility.deleteBookmark(context: viewContext, id: id)
+            if NotificationUtility.notificationExists(id: id) {
+                NSLog("Removing alert for \(item.title) - \(id)")
+                NotificationUtility.removeNotification(id: id)
+            }
         } else {
             print("ContentDetailView: Adding Bookmark \(id)")
             BookmarkUtility.addBookmark(context: viewContext, id: id)
+            if !NotificationUtility.notificationExists(id: id), let session = item.sessions.first(where: {$0.id == id}) {
+                NSLog("Adding alert for \(item.title) - \(id)")
+                let notDate = session.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
+                NotificationUtility.scheduleNotification(date: notDate, id: session.id, title: item.title, location: viewModel.locations.first(where: {$0.id == session.locationId})?.name ?? "unknown")
+            }
         }
     }
     
@@ -211,8 +211,6 @@ struct showSessions: View {
                                 }
                                 MoreContentMenu(content: item, session: s)
                             }
-                            
-                            // .buttonStyle(PlainButtonStyle())
                         }
                     }
                     .padding(.leading, 5)

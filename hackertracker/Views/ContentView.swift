@@ -121,6 +121,7 @@ struct ContentView: View {
                     .preferredColorScheme(theme.colorScheme)
                     .environmentObject(selected)
                     .environmentObject(viewModel)
+                    .environmentObject(consViewModel)
                     .environmentObject(theme)
             } else {
                 _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
