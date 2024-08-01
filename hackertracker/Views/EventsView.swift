@@ -7,17 +7,21 @@
 import SwiftUI
 
 struct EventsView: View {
-  let events: [Event]
-  let conference: Conference?
-  let bookmarks: [Int32]
-  @AppStorage("showLocaltime") var showLocaltime: Bool = false
-  @AppStorage("showPastEvents") var showPastEvents: Bool = true
-  @EnvironmentObject var viewModel: InfoViewModel
-  let dfu = DateFormatterUtility.shared
-  var includeNav: Bool = true
-  var navTitle: String = ""
-  @Binding var tappedScheduleTwice: Bool
-  @Binding var schedule: UUID
+    let events: [Event]
+    let conference: Conference?
+    let bookmarks: [Int32]
+    @AppStorage("showLocaltime") var showLocaltime: Bool = false
+    @AppStorage("showPastEvents") var showPastEvents: Bool = true
+    @EnvironmentObject var viewModel: InfoViewModel
+    @EnvironmentObject var toTop: ToTop
+    @EnvironmentObject var toBottom: ToBottom
+    @EnvironmentObject var toCurrent: ToCurrent
+    @EnvironmentObject var toNext: ToNext
+    let dfu = DateFormatterUtility.shared
+    var includeNav: Bool = true
+    var navTitle: String = ""
+    @Binding var tappedScheduleTwice: Bool
+    @Binding var schedule: UUID
 
   @State private var eventDay = ""
   @State private var searchText = ""
@@ -63,6 +67,7 @@ struct EventsView: View {
               .onChange(of: showPastEvents) { value in
                 print("EventsView: Changing to showPastEvents = \(value)")
                 viewModel.showPastEvents = value
+                  toTop.val = true
               }
               .toggleStyle(.automatic)
             } label: {
@@ -72,13 +77,38 @@ struct EventsView: View {
           ToolbarItemGroup(placement: .navigationBarTrailing) {
             Menu {
               Button {
-                self.tappedScheduleTwice = true
+                  toTop.val = true
               } label: {
                 HStack {
                   Text("Top")
-                  Image(systemName: "chevron.up")
+                  Image(systemName: "arrow.up")
                 }
               }
+                Button {
+                    toCurrent.val = true
+                } label: {
+                  HStack {
+                    Text("Now")
+                    Image(systemName: "clock")
+                  }
+                }
+                Button {
+                    toNext.val = true
+                } label: {
+                  HStack {
+                    Text("Next")
+                    Image(systemName: "arrow.turn.right.down")
+                  }
+                }
+                Button {
+                    toBottom.val = true
+                } label: {
+                  HStack {
+                    Text("Bottom")
+                    Image(systemName: "arrow.down")
+                  }
+                }
+                Divider()
               ForEach(
                 events.filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
                   .eventDayGroup(showLocaltime: showLocaltime, conference: conference), id: \.key
@@ -89,7 +119,7 @@ struct EventsView: View {
               }
 
             } label: {
-              Image(systemName: "chevron.up.chevron.down")
+              Image(systemName: "arrow.up.arrow.down")
             }
 
             Button {
@@ -133,8 +163,42 @@ struct EventsView: View {
         )
         .navigationTitle(navTitle)
         .toolbar {
+            
           ToolbarItemGroup(placement: .navigationBarTrailing) {
             Menu {
+                Button {
+                    toTop.val = true
+                } label: {
+                  HStack {
+                    Text("Top")
+                    Image(systemName: "arrow.up")
+                  }
+                }
+                  Button {
+                      toCurrent.val = true
+                  } label: {
+                    HStack {
+                      Text("Now")
+                      Image(systemName: "clock")
+                    }
+                  }
+                  Button {
+                      toNext.val = true
+                  } label: {
+                    HStack {
+                      Text("Next")
+                      Image(systemName: "arrow.turn.right.down")
+                    }
+                  }
+                  Button {
+                      toBottom.val = true
+                  } label: {
+                    HStack {
+                      Text("Bottom")
+                      Image(systemName: "arrow.down")
+                    }
+                  }
+                  Divider()
               ForEach(
                 events.filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
                   .eventDayGroup(showLocaltime: showLocaltime, conference: conference), id: \.key
@@ -145,7 +209,7 @@ struct EventsView: View {
               }
 
             } label: {
-              Image(systemName: "chevron.up.chevron.down")
+              Image(systemName: "arrow.up.arrow.down")
             }
           }
         }
@@ -159,29 +223,34 @@ struct EventsView: View {
 }
 
 struct EventScrollView: View {
-  let events: [(key: String, value: [Event])]
-  let conference: Conference?
-  let bookmarks: [Int32]
-  let dayTag: String
-  let showPastEvents: Bool
-  let includeNav: Bool
-  let dfu = DateFormatterUtility.shared
-  @Binding var tappedScheduleTwice: Bool
-  @EnvironmentObject var viewModel: InfoViewModel
-  @State var viewShowing = false
-  @Binding var schedule: UUID
-  @Binding var showLocaltime: Bool
-  @State var eventDayGroup: [(key: String, value: [Event])] = []
+
+    let events: [(key: String, value: [Event])]
+    let conference: Conference?
+    let bookmarks: [Int32]
+    let dayTag: String
+    let showPastEvents: Bool
+    let includeNav: Bool
+    let dfu = DateFormatterUtility.shared
+    @Binding var tappedScheduleTwice: Bool
+    @EnvironmentObject var toTop: ToTop
+    @EnvironmentObject var toCurrent: ToCurrent
+    @EnvironmentObject var toBottom: ToBottom
+    @EnvironmentObject var toNext: ToNext
+    @EnvironmentObject var viewModel: InfoViewModel
+    @State var viewShowing = false
+    @Binding var schedule: UUID
+    @Binding var showLocaltime: Bool
+    @State var eventDayGroup: [(key: String, value: [Event])] = []
 
   var body: some View {
     ScrollViewReader { proxy in
       List(events, id: \.key) { weekday, dayEvents in
-        // if showPastEvents || weekday >= Date() {
-        EventData(
-          weekday: weekday, events: dayEvents, bookmarks: bookmarks, showPastEvents: showPastEvents
-        )
-        .id(weekday)
-        // }
+          if showPastEvents || dayEvents.contains(where: {Date() < $0.endTimestamp}) {
+            EventData(
+              weekday: weekday, events: dayEvents, bookmarks: bookmarks, showPastEvents: showPastEvents
+            )
+            .id(weekday)
+        }
       }
       .listStyle(.plain)
       .onChange(of: dayTag) { changedValue in
@@ -189,26 +258,53 @@ struct EventScrollView: View {
           proxy.scrollTo(changedValue, anchor: .top)
         }
       }
-      .onChange(
-        of: tappedScheduleTwice,
-        perform: { tappedTwice in
-          guard tappedTwice else { return }
-          let es = eventDayGroup
-          if viewShowing, includeNav {
-            if let f = es.first, let e = f.value.first {
-              let id: String = dfu.dayOfWeekFormatter.string(from: e.beginTimestamp)
-              withAnimation {
-                proxy.scrollTo(id, anchor: .top)
-              }
-              // schedule = UUID()
+      .onChange(of: toTop.val, perform: { tapTop in
+          guard tapTop else { return }
+            if tapTop, showPastEvents {
+                if let e = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first {
+                    withAnimation {
+                        proxy.scrollTo(e.id, anchor: .top)
+                    }
+                }
+                toTop.val = false
+            } else {
+                toTop.val = false
+                toCurrent.val = true
             }
-          } else {
-            print("EventScrollView: reset UUID here!")
-            schedule = UUID()
-          }
-          self.tappedScheduleTwice = false
+          
         }
       )
+      .onChange(of: toBottom.val, perform: { tapBottom in
+          guard tapBottom else { return }
+          if tapBottom, let es = events.map({$0.value.sorted{$0.beginTimestamp < $1.beginTimestamp}}).last, let e = es.last {
+              withAnimation {
+                  proxy.scrollTo(e.id)
+              }
+              toBottom.val = false
+          }
+      })
+      .onChange(of: toCurrent.val, perform: { tapCurrent in
+          guard tapCurrent else { return }
+          let curDate = Date()
+          // print("events: \(events.key)")
+          if tapCurrent, let es = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first(where: {curDate < $0.endTimestamp}) {
+                  withAnimation {
+                      proxy.scrollTo(es.id, anchor: .top)
+                  }
+              toCurrent.val = false
+          }
+      })
+      .onChange(of: toNext.val, perform: { tapNext in
+          guard tapNext else { return }
+          let curDate = Date()
+          // print("events: \(events.key)")
+          if tapNext, let es = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first(where: {curDate < $0.beginTimestamp}) {
+                  withAnimation {
+                      proxy.scrollTo(es.id, anchor: .top)
+                  }
+              toNext.val = false
+          }
+      })
       .onAppear {
         viewShowing = true
       }
@@ -233,9 +329,10 @@ struct EventData: View {
             $0.beginTimestamp < $1.beginTimestamp
           }, id: \.id
         ) { event in
-          if showPastEvents || event.beginTimestamp >= Date() {
+          if showPastEvents || event.endTimestamp >= Date() {
               NavigationLink(destination: ContentDetailView(contentId:event.contentId)) {
               EventCell(event: event, bookmarks: bookmarks, showDay: false)
+                      .id(event.id)
             }
           }
         }

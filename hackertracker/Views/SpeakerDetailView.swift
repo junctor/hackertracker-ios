@@ -132,7 +132,7 @@ struct showEvents: View {
                 collapsed.toggle()
             }, label: {
                 HStack {
-                    Text("Events")
+                    Text("Schedule")
                         .font(.headline).padding(.top)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
@@ -179,6 +179,7 @@ struct SpeakerEventView: View {
     let dfu = DateFormatterUtility.shared
     @Environment(\.managedObjectContext) private var viewContext
     @EnvironmentObject var viewModel: InfoViewModel
+    @AppStorage("notifyAt") var notifyAt: Int = 20
 
     var body: some View {
         HStack {
@@ -221,11 +222,12 @@ struct SpeakerEventView: View {
     
     func bookmarkAction() {
         if bookmarks.contains(Int32(event.id)) {
-            print("SpeakerDetailView: Removing Bookmark \(event.id)")
             BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
+            NotificationUtility.removeNotification(id: event.id)
         } else {
-            print("SpeakerDetailView: Adding Bookmark \(event.id)")
             BookmarkUtility.addBookmark(context: viewContext, id: event.id)
+            let notDate = event.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
+            NotificationUtility.scheduleNotification(date: notDate, id: event.id, title: event.title, location: viewModel.locations.first(where: {$0.id == event.locationId})?.name ?? "unknown")
         }
     }
     

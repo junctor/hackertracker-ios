@@ -106,14 +106,10 @@ enum NotificationUtility {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["hackertracker-\(id)"])
     }
     
-    static func notificationExists(id: Int) -> Bool {
+    static func notificationExists(id: Int) async -> Bool {
         var ret : Bool = false
-        UNUserNotificationCenter.current().getPendingNotificationRequests(completionHandler: { notificationRequests in
-            for nr in notificationRequests where nr.identifier == "hackertracker-\(id)" {
-                ret = true
-                break
-            }
-        })
+        let notificationRequests = await UNUserNotificationCenter.current().pendingNotificationRequests()
+        ret = notificationRequests.map({"hackertracker-\($0.identifier)"}).count > 0
         return ret
     }
     

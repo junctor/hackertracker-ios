@@ -14,6 +14,18 @@ class SelectedConference: ObservableObject {
     @Published var code = "INIT"
 }
 
+class GoToButton: ObservableObject, Equatable {
+    static func == (lhs: GoToButton, rhs: GoToButton) -> Bool {
+        lhs.val == rhs.val
+    }
+    @Published var val: Bool = false
+}
+
+class ToTop: GoToButton {}
+class ToBottom: GoToButton {}
+class ToCurrent: GoToButton {}
+class ToNext: GoToButton {}
+
 struct ContentView: View {
     @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
     @AppStorage("launchScreen") var launchScreen: String = "Main"
@@ -27,6 +39,10 @@ struct ContentView: View {
     @StateObject var viewModel = InfoViewModel()
     @StateObject var consViewModel = ConferencesViewModel()
     @StateObject var theme = Theme()
+    @StateObject private var toTop = ToTop()
+    @StateObject private var toBottom = ToBottom()
+    @StateObject private var toCurrent = ToCurrent()
+    @StateObject private var toNext = ToNext()
 
     @State private var tabSelection = 1
     @State private var tappedMainTwice = false
@@ -114,6 +130,10 @@ struct ContentView: View {
             .environmentObject(viewModel)
             .environmentObject(theme)
             .environmentObject(consViewModel)
+            .environmentObject(toTop)
+            .environmentObject(toBottom)
+            .environmentObject(toCurrent)
+            .environmentObject(toNext)
             .analyticsScreen(name: "ContentView")
         } else {
             if conferenceCode == "INIT" {

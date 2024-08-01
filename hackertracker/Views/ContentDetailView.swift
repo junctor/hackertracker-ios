@@ -138,30 +138,7 @@ struct showSessions: View {
     @State private var collapsed = false
     // @State var showingAlert: Bool = false
     // @State var notExists: Bool = false
-    @AppStorage("notifyAt") var notifyAt: Int = 20
-    let dfu = DateFormatterUtility.shared
-    @EnvironmentObject var viewModel: InfoViewModel
-    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
-    @Environment(\.managedObjectContext) private var viewContext
-    
-    func bookmarkAction(id: Int) {
-        if bookmarks.map({$0.id}).contains(Int32(id)) {
-            print("ContentDetailView: Removing Bookmark \(id)")
-            BookmarkUtility.deleteBookmark(context: viewContext, id: id)
-            if NotificationUtility.notificationExists(id: id) {
-                NSLog("Removing alert for \(item.title) - \(id)")
-                NotificationUtility.removeNotification(id: id)
-            }
-        } else {
-            print("ContentDetailView: Adding Bookmark \(id)")
-            BookmarkUtility.addBookmark(context: viewContext, id: id)
-            if !NotificationUtility.notificationExists(id: id), let session = item.sessions.first(where: {$0.id == id}) {
-                NSLog("Adding alert for \(item.title) - \(id)")
-                let notDate = session.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
-                NotificationUtility.scheduleNotification(date: notDate, id: session.id, title: item.title, location: viewModel.locations.first(where: {$0.id == session.locationId})?.name ?? "unknown")
-            }
-        }
-    }
+
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -179,50 +156,91 @@ struct showSessions: View {
             }
             if !collapsed || item.sessions.count == 1 {
                 ForEach(item.sessions.sorted { $0.beginTimestamp < $1.beginTimestamp }) { s in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            HStack {
-                                Button {
-                                    showAddContentModal.toggle()
-                                } label: {
-                                    Image(systemName: "clock")
-                                }
-                                Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinuteTimeFormatter.string(from: s.endTimestamp))")
-                                    .font(.subheadline)
-                            }
-                            .sheet(isPresented: $showAddContentModal) {
-                                AddContent(content: item, session: s)
-                            }
-                            HStack {
-                                Image(systemName: "map")
-                                Text(viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unkown").font(.caption)
-                            }
-                        }
-                        .padding(.leading, 5)
-                        .padding(.trailing, 5)
-                        .padding(.vertical, 5)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        VStack(alignment: .trailing) {
-                            HStack(alignment: .center) {
-                                Button {
-                                    bookmarkAction(id: s.id)
-                                } label: {
-                                    Image(systemName: bookmarks.map{$0.id}.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
-                                }
-                                MoreContentMenu(content: item, session: s)
-                            }
-                        }
-                    }
-                    .padding(.leading, 5)
-                    .padding(.trailing, 5)
-                    .padding(.vertical, 5)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.background)
-                    .cornerRadius(10)
-                    .padding(.bottom, 5)
+                    showSessionRow(item: item, s: s, showAddContentModal: $showAddContentModal)
                 }
             }
         }
+    }
+}
+
+struct showSessionRow: View {
+    var item: Content
+    var s: Session
+    @Binding var showAddContentModal: Bool
+    let dfu = DateFormatterUtility.shared
+    
+    @State var notExists: Bool = false
+    @AppStorage("notifyAt") var notifyAt: Int = 20
+    @EnvironmentObject var viewModel: InfoViewModel
+    
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    @Environment(\.managedObjectContext) private var viewContext
+    
+    func bookmarkAction(id: Int) {
+        if bookmarks.map({$0.id}).contains(Int32(id)) {
+            BookmarkUtility.deleteBookmark(context: viewContext, id: id)
+            if notExists {
+                NotificationUtility.removeNotification(id: id)
+                notExists.toggle()
+            }
+        } else {
+            BookmarkUtility.addBookmark(context: viewContext, id: id)
+            if !notExists {
+                let notDate = s.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
+                NotificationUtility.scheduleNotification(date: notDate, id: s.id, title: item.title, location: viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unknown")
+                notExists.toggle()
+            } else {
+            }
+        }
+    }
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading) {
+                HStack {
+                    Button {
+                        showAddContentModal.toggle()
+                    } label: {
+                        Image(systemName: "clock")
+                    }
+                    Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinuteTimeFormatter.string(from: s.endTimestamp))")
+                        .font(.subheadline)
+                }
+                .sheet(isPresented: $showAddContentModal) {
+                    AddContent(content: item, session: s)
+                }
+                HStack {
+                    Image(systemName: "map")
+                    Text(viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unkown").font(.caption)
+                }
+            }
+            .padding(.leading, 5)
+            .padding(.trailing, 5)
+            .padding(.vertical, 5)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .trailing) {
+                HStack(alignment: .center) {
+                    Button {
+                        bookmarkAction(id: s.id)
+                    } label: {
+                        Image(systemName: bookmarks.map{$0.id}.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
+                    }
+                    MoreContentMenu(content: item, session: s, notExists: $notExists)
+                }
+            }
+        }
+        .onAppear {
+            Task {
+                notExists = await NotificationUtility.notificationExists(id: s.id)
+            }
+        }
+        .padding(.leading, 5)
+        .padding(.trailing, 5)
+        .padding(.vertical, 5)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.background)
+        .cornerRadius(10)
+        .padding(.bottom, 5)
     }
 }
 

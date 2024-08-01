@@ -40,6 +40,7 @@ class InfoViewModel: ObservableObject {
     var listListener: ListenerRegistration?
     var articleListener: ListenerRegistration?
     var menuListener: ListenerRegistration?
+    @AppStorage("notifyAt") var notifyAt: Int = 20
 
     private var db = Firestore.firestore()
 
@@ -349,6 +350,13 @@ class InfoViewModel: ObservableObject {
                             } else {
                                 let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds)
                                 self.events.append(e)
+                                /* Task {
+                                    if await NotificationUtility.notificationExists(id: e.id) {
+                                        NotificationUtility.removeNotification(id: e.id)
+                                        let notDate = e.beginTimestamp.addingTimeInterval(Double((-self.notifyAt)) * 60)
+                                        NotificationUtility.scheduleNotification(date: notDate, id: e.id, title: e.title, location: self.locations.first(where: {$0.id == e.locationId})?.name ?? "unknown")
+                                    }
+                                } */
                             }
                         }
                     }
