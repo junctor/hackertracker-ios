@@ -171,6 +171,7 @@ struct showSessionRow: View {
     
     @State var notExists: Bool = false
     @AppStorage("notifyAt") var notifyAt: Int = 20
+    @AppStorage("show24hourtime") var show24hourtime: Bool = true
     @EnvironmentObject var viewModel: InfoViewModel
     
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
@@ -203,8 +204,23 @@ struct showSessionRow: View {
                     } label: {
                         Image(systemName: "clock")
                     }
-                    Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinuteTimeFormatter.string(from: s.endTimestamp))")
-                        .font(.subheadline)
+                    if show24hourtime {
+                        if s.beginTimestamp != s.endTimestamp {
+                            Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinuteTimeFormatter.string(from: s.endTimestamp))")
+                                .font(.subheadline)
+                        } else {
+                            Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))")
+                                .font(.subheadline)
+                        }
+                    } else {
+                        if s.beginTimestamp != s.endTimestamp {
+                            Text("\(dfu.shortDayMonthDay12HourOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinute12TimeFormatter.string(from: s.endTimestamp))")
+                                .font(.subheadline)
+                        } else {
+                            Text("\(dfu.shortDayMonthDay12HourOfWeekFormatter.string(from: s.beginTimestamp))")
+                                .font(.subheadline)
+                        }
+                    }
                 }
                 .sheet(isPresented: $showAddContentModal) {
                     AddContent(content: item, session: s)

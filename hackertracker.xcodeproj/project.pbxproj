@@ -48,6 +48,7 @@
 		5D642D4F2A5DDB8D0064492D /* AddEventController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D4E2A5DDB8D0064492D /* AddEventController.swift */; };
 		5D642D512A5DDBD20064492D /* AddEventView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D502A5DDBD20064492D /* AddEventView.swift */; };
 		5D9681162C5946E000D246B0 /* FeedbackUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9681152C5946E000D246B0 /* FeedbackUtility.swift */; };
+		5D9681182C5C380000D246B0 /* FirebaseInAppMessagingSwift-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = 5D9681172C5C380000D246B0 /* FirebaseInAppMessagingSwift-Beta */; };
 		5D9B8EC92C534207009AAA61 /* FeedbackForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9B8EC82C534207009AAA61 /* FeedbackForm.swift */; };
 		5D9B8ECB2C5345E9009AAA61 /* FeedbackFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9B8ECA2C5345E9009AAA61 /* FeedbackFormView.swift */; };
 		5D9E57452857B398001374D4 /* ConferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D9E57442857B398001374D4 /* ConferencesView.swift */; };
@@ -207,6 +208,7 @@
 			files = (
 				5D642D312A4F9F0E0064492D /* FirebaseMessaging in Frameworks */,
 				5DAE3E9C2836A76000F9F845 /* FirebaseDatabaseSwift in Frameworks */,
+				5D9681182C5C380000D246B0 /* FirebaseInAppMessagingSwift-Beta in Frameworks */,
 				5D0A5A662A35293000BD5ECE /* MarkdownUI in Frameworks */,
 				5D642D3E2A5725D80064492D /* Kingfisher in Frameworks */,
 				5DAE3E982836A76000F9F845 /* FirebaseAnalyticsSwift in Frameworks */,
@@ -430,6 +432,7 @@
 				5D642D3D2A5725D80064492D /* Kingfisher */,
 				5D2FAD982BC095C90043A84C /* FirebaseStorage */,
 				5D2FAD9A2BC096150043A84C /* FirebaseAnalytics */,
+				5D9681172C5C380000D246B0 /* FirebaseInAppMessagingSwift-Beta */,
 			);
 			productName = hackertracker;
 			productReference = 5DAE04B02820948B00930A2D /* hackertracker.app */;
@@ -788,7 +791,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24080103;
+				CURRENT_PROJECT_VERSION = 24080106;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
@@ -805,7 +808,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.3;
+				MARKETING_VERSION = 5.4;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -825,7 +828,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 24080103;
+				CURRENT_PROJECT_VERSION = 24080106;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
@@ -842,7 +845,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.3;
+				MARKETING_VERSION = 5.4;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1022,6 +1025,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5D642D3C2A5725D80064492D /* XCRemoteSwiftPackageReference "Kingfisher" */;
 			productName = Kingfisher;
+		};
+		5D9681172C5C380000D246B0 /* FirebaseInAppMessagingSwift-Beta */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5DAE3E962836A76000F9F845 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseInAppMessagingSwift-Beta";
 		};
 		5DAE3E972836A76000F9F845 /* FirebaseAnalyticsSwift */ = {
 			isa = XCSwiftPackageProductDependency;

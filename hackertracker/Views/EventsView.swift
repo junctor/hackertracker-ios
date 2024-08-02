@@ -11,6 +11,7 @@ struct EventsView: View {
     let conference: Conference?
     let bookmarks: [Int32]
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
+    @AppStorage("show24hourtime") var show24hourtime: Bool = true
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var toTop: ToTop
@@ -61,6 +62,12 @@ struct EventsView: View {
                     tz: TimeZone(identifier: conference?.timezone ?? "America/Los_Angeles"))
                 }
               }
+                Toggle(isOn: $show24hourtime) {
+                  Label("Display 24 Hour Time", systemImage: "calendar.badge.clock")
+                }
+                .onChange(of: show24hourtime) { value in
+                  print("EventsView: Changing to show24hourtime = \(value)")
+                }
               Toggle(isOn: $showPastEvents) {
                 Label("Show Past Events", systemImage: "calendar")
               }

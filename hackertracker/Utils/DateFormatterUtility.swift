@@ -40,8 +40,10 @@ class DateFormatterUtility {
         shortDayOfMonthFormatter.timeZone = timeZone
         dayMonthDayOfWeekFormatter.timeZone = timeZone
         shortDayMonthDayTimeOfWeekFormatter.timeZone = timeZone
+        shortDayMonthDay12HourOfWeekFormatter.timeZone = timeZone
         dayOfWeekTimeFormatter.timeZone = timeZone
         hourMinuteTimeFormatter.timeZone = timeZone
+        hourMinute12TimeFormatter.timeZone = timeZone
         monthDayYearFormatter.timeZone = timeZone
         locationTimeFormatter.timeZone = timeZone
     }
@@ -164,6 +166,14 @@ class DateFormatterUtility {
         formatter.dateFormat = "EE, MMM d HH:mm"
         return formatter
     }()
+    
+    // DOW format
+    let shortDayMonthDay12HourOfWeekFormatter = { () -> DateFormatter in
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "EE, MMM d h:mm a"
+        return formatter
+    }()
 
     // DOW Hour:Minute time format
     let dayOfWeekTimeFormatter = { () -> DateFormatter in
@@ -178,6 +188,14 @@ class DateFormatterUtility {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "HH:mm"
+        return formatter
+    }()
+    
+    // Hour:Minute AM/PM time format
+    let hourMinute12TimeFormatter = { () -> DateFormatter in
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "h:mm a"
         return formatter
     }()
 

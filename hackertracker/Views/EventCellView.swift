@@ -14,6 +14,8 @@ struct EventCell: View {
     @EnvironmentObject var viewModel: InfoViewModel
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
+    @AppStorage("show24hourtime") var show24hourtime: Bool = true
+    
 
     /*
      func bookmarkAction(id: Int) {
@@ -66,10 +68,10 @@ struct EventCell: View {
                                     .font(.subheadline)
                                     .padding(.bottom, 3)
                             }
-                            Text(dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp))
+                            Text(show24hourtime ? dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp) : dfu.hourMinute12TimeFormatter.string(from: event.beginTimestamp))
                                 .font(.subheadline)
                             if event.beginTimestamp != event.endTimestamp {
-                                Text(dfu.hourMinuteTimeFormatter.string(from: event.endTimestamp))
+                                Text(show24hourtime ? dfu.hourMinuteTimeFormatter.string(from: event.endTimestamp) : dfu.hourMinute12TimeFormatter.string(from: event.endTimestamp))
                                     .font(.caption2)
                             }
                         }

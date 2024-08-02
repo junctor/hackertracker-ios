@@ -233,6 +233,7 @@ struct StartScreenSettingsView: View {
 struct ShowLocaltimeSettingsView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
+    @AppStorage("show24hourtime") var show24hourtime: Bool = true
     let dfu = DateFormatterUtility.shared
 
     var body: some View {
@@ -248,6 +249,16 @@ struct ShowLocaltimeSettingsView: View {
                     }
                 }
             Text("Show event times in current localtime instead of conference time")
+                .font(.caption)
+        }
+        .padding(5)
+        Divider()
+        VStack(alignment: .leading) {
+            Toggle("Show 24 Hour Time", isOn: $show24hourtime)
+                .onChange(of: show24hourtime) { value in
+                    print("SettingsView: Changing to show24hourtime = \(value)")
+                }
+            Text("Show event times in 24 hour time (13:00) instead of 12 hour time (1:00 PM)")
                 .font(.caption)
         }
         .padding(5)
