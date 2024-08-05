@@ -39,7 +39,10 @@ struct articleRow: View {
             Button(action: {
                 showText.toggle()
             }, label: {
-                HStack {
+                HStack (alignment: .top) {
+                    Circle().fill(readnews.map({$0.id}).contains(Int32(article.id)) ? Color(.clear) : .blue )
+                        .frame(width: 6)
+                        .padding(.top, 5)
                     VStack(alignment: .leading) {
                         Text(article.name).font(.subheadline).fontWeight(.bold).multilineTextAlignment(.leading)
 
@@ -53,7 +56,7 @@ struct articleRow: View {
                 }
             })
             .buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
-            .overlay(NotificationDot(showDot: !readnews.map({$0.id}).contains(Int32(article.id))))
+            // .overlay(NotificationDot(showDot: !readnews.map({$0.id}).contains(Int32(article.id))))
 
             if showText {
                 Markdown(article.text).padding(.vertical)

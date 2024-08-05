@@ -29,11 +29,24 @@ struct MapView: View {
                                 let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
                                 let mLocal = docDir.appendingPathComponent(path)
                                 
-                                PDFView(url: mLocal)
-                                    .onAppear {
-                                        print("MapView: Loading \(mLocal)")
+                                ZStack(alignment: .bottomTrailing) {
+                                    PDFView(url: mLocal)
+                                        .onAppear {
+                                            print("MapView: Loading \(mLocal)")
+                                        }
+                                        .frame(width: screenSize.width)
+                                    if let desc = map.description {
+                                        HStack {
+                                            Text(desc)
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
+                                        .padding(5)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(5)
+                                        .frame(alignment: .center)
                                     }
-                                    .frame(width: screenSize.width)
+                                }
                             }
                         }
                     }
