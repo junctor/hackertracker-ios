@@ -8,7 +8,6 @@
 import MarkdownUI
 import SwiftUI
 import FirebaseAnalytics
-import FirebaseAnalyticsSwift
 
 struct NewsListView: View {
     @EnvironmentObject var viewModel: InfoViewModel
@@ -18,7 +17,7 @@ struct NewsListView: View {
     var body: some View {
         List {
             ForEach(self.viewModel.news.search(text: searchText).sorted {
-                $0.updatedAt < $1.updatedAt
+                $0.updatedAt > $1.updatedAt
             }) { article in
                 articleRow(article: article)
             }
@@ -32,6 +31,8 @@ struct NewsListView: View {
 struct articleRow: View {
     let article: Article
     @State private var showText = false
+    @FetchRequest(sortDescriptors: []) var readnews: FetchedResults<News>
+    @Environment(\.managedObjectContext) private var viewContext
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -45,14 +46,22 @@ struct articleRow: View {
                         Text(DateFormatterUtility.shared.monthDayTimeFormatter.string(from: article.updatedAt))
                             .font(.caption2)
                     }
+                    
 
                     Spacer()
                     showText ? Image(systemName: "chevron.down") : Image(systemName: "chevron.right")
                 }
-            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
+            })
+            .buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
+            .overlay(NotificationDot(showDot: !readnews.map({$0.id}).contains(Int32(article.id))))
 
             if showText {
                 Markdown(article.text).padding(.vertical)
+            }
+        }
+        .onChange(of: showText) { value in
+            if value && !readnews.map({$0.id}).contains(Int32(article.id)) {
+                NewsUtility.addReadNews(context: viewContext, id: article.id)
             }
         }
     }

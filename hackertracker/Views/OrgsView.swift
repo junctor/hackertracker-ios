@@ -5,7 +5,7 @@
 //  Created by Seth W Law on 6/9/23.
 //
 
-import FirebaseFirestoreSwift
+import FirebaseFirestore
 import SwiftUI
 import Kingfisher
 

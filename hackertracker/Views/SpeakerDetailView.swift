@@ -9,7 +9,6 @@ import SwiftUI
 import MarkdownUI
 import Kingfisher
 import FirebaseAnalytics
-import FirebaseAnalyticsSwift
 
 struct SpeakerDetailView: View {
     @EnvironmentObject var viewModel: InfoViewModel

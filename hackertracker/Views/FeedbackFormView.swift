@@ -17,6 +17,8 @@ struct FeedbackFormView: View {
     let dfu = DateFormatterUtility.shared
     @Binding var showAlert: Bool
     @Binding var alertMessage: String
+    @FetchRequest(sortDescriptors: []) var feedbacks: FetchedResults<Feedbacks>
+    @Environment(\.managedObjectContext) private var viewContext
     
     var body: some View {
         VStack {
@@ -34,11 +36,13 @@ struct FeedbackFormView: View {
             }
         }
         Divider()
-        VStack {
-            
+        VStack(alignment: .center) {
+            Text("A minimum of one answer is required for submission.")
+                .font(.caption)
             HStack {
                 Button(action: {
-                    showFeedback.toggle()
+                    showFeedback = false
+                    // showFeedback.toggle()
                 }, label: {
                     Text("Close")
                 })
@@ -49,8 +53,11 @@ struct FeedbackFormView: View {
                 .cornerRadius(15)
                 
                 Button(action: {
-                    uploadFeedback(item: item, form: form, answers: answers, viewModel: viewModel, dfu: dfu)
-                    showFeedback.toggle()
+                    // print("Answers: \(answers.values.count)")
+                    if answers.values.count > 1 {
+                        uploadFeedback(item: item, form: form, answers: answers, viewModel: viewModel, dfu: dfu)
+                        showFeedback = false
+                    }
                 }, label: {
                     Text("Submit")
                 })
@@ -122,6 +129,7 @@ extension FeedbackFormView {
                     }
                     DispatchQueue.main.async {
                         self.alertMessage = "Feedback Sent"
+                        FeedbackUtility.addFeedback(context: viewContext, id: item.id)
                         self.showAlert.toggle()
                     }
                     NSLog("Feedback sent successfully")

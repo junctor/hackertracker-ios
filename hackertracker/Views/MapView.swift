@@ -5,10 +5,9 @@
 //  Created by Seth W Law on 6/6/22.
 //
 
-import FirebaseFirestoreSwift
+import FirebaseFirestore
 import SwiftUI
 import FirebaseAnalytics
-import FirebaseAnalyticsSwift
 
 struct MapView: View {
     @AppStorage("launchScreen") var launchScreen: String = "Main"

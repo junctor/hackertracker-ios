@@ -12,6 +12,7 @@ struct EventFilters: View {
     // let types: [Int: EventType]
     @Binding var showFilters: Bool
     @Binding var filters: Set<Int>
+    @EnvironmentObject var toTop: ToTop
     var showBookmarks: Bool = true
     
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
@@ -42,6 +43,7 @@ struct EventFilters: View {
                     }
                     Button("Close") {
                         showFilters = false
+                        toTop.val = true
                     }
                 }
             }

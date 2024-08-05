@@ -24,9 +24,9 @@ class FeedbackUtility {
     }
 
     static func getFeedbacks(context: NSManagedObjectContext) -> [Int] {
-        let fr = NSFetchRequest<NSFetchRequestResult>(entityName: "Bookmarks")
+        let fr = NSFetchRequest<NSFetchRequestResult>(entityName: "Feedbacks")
         do {
-            if let res = try context.fetch(fr) as? [Bookmark] {
+            if let res = try context.fetch(fr) as? [Feedback] {
                 print("FeedbackUtility.getFeedbacks: \(res.count) feedback returned")
                 return res.map { $0.id }
             } else {

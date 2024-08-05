@@ -6,8 +6,8 @@
 //
 
 import CoreData
-import FirebaseFirestoreSwift
-import FirebaseAnalyticsSwift
+import FirebaseFirestore
+import FirebaseAnalytics
 import SwiftUI
 
 class SelectedConference: ObservableObject {

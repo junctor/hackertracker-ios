@@ -11,6 +11,9 @@
     <entity name="Feedbacks" representedClassName="Feedbacks" syncable="YES" codeGenerationType="class">
         <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
     </entity>
+    <entity name="News" representedClassName="News" syncable="YES" codeGenerationType="class">
+        <attribute name="id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+    </entity>
     <entity name="Settings" representedClassName="Settings" syncable="YES" codeGenerationType="class">
         <attribute name="conference" optional="YES" attributeType="String"/>
         <attribute name="dark" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>

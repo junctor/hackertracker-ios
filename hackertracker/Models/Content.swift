@@ -6,7 +6,6 @@
 //
 
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 import Foundation
 
 struct Content: Codable, Identifiable {

@@ -80,7 +80,7 @@ extension AppDelegate: MessagingDelegate {
         _: Messaging,
         didReceiveRegistrationToken fcmToken: String?
     ) {
-        print("Firebase registration token: \(String(describing: fcmToken))")
+        print("Firebase registration token: \(fcmToken ?? "not found")")
         let tokenDict = ["token": fcmToken ?? ""]
         NotificationCenter.default.post(
             name: Notification.Name("FCMToken"),

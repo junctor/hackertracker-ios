@@ -6,11 +6,11 @@
 //
 
 import FirebaseFirestore
-import FirebaseFirestoreSwift
 import Foundation
 
 struct Article: Codable, Identifiable {
-    @DocumentID var id: String?
+    @DocumentID var docId: String?
+    var id: Int
     var name: String
     var text: String
     var updatedAt: Date
@@ -21,4 +21,8 @@ struct Article: Codable, Identifiable {
         case text
         case updatedAt = "updated_at"
     }
+}
+
+struct NewsItem: Codable {
+    var id: Int
 }

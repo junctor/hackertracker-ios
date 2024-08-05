@@ -5,7 +5,7 @@
 //  Created by Seth W Law on 6/6/22.
 //
 
-import FirebaseFirestoreSwift
+import FirebaseFirestore
 import SwiftUI
 import WebKit
 
@@ -217,7 +217,7 @@ struct InfoView: View {
                 print("Regex failed")
             }
         }
-        print("KidsTags: \(kidsTags)")
+        // print("KidsTags: \(kidsTags)")
         return kidsTags
     }
 
@@ -242,6 +242,7 @@ struct MenuView: View {
     @EnvironmentObject var theme: Theme
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
     @State var schedule = UUID()
+    @FetchRequest(sortDescriptors: []) var readnews: FetchedResults<News>
     
     var body: some View {
         Text(menu.title)
@@ -316,6 +317,10 @@ struct MenuView: View {
                         } label: {
                             CardView(systemImage: item.symbol ?? "calendar", text: "Schedule", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                         }
+                    }
+                case "schedule_bookmark":
+                    NavigationLink(destination: ScheduleView(tagIds: [1337], includeNav: false, navTitle: item.title, tappedScheduleTwice: $tappedMainTwice, schedule: $schedule)) {
+                        CardView(systemImage: item.symbol ?? "calendar", text: item.title, color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                     }
                 case "search":
                      NavigationLink(destination: GlobalSearchView(viewModel: viewModel)) {

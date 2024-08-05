@@ -61,6 +61,13 @@ struct ContentDetailView: View {
                     showLinks(links: item.links)
                         .padding(15)
                 }
+                if alertMessage != "" {
+                    VStack(alignment: .center) {
+                        Text(alertMessage)
+                    }
+                    .padding(15)
+                    Divider()
+                }
                 if let fe = item.feedbackEnableTimestamp, let fd = item.feedbackDisableTimestamp, currentTime > fe, currentTime < fd, !feedbacks.map({$0.id}).contains(Int32(item.id)) {
                     showFeedbackButton(showFeedback: $showFeedback)
                         .padding(15)
@@ -69,16 +76,16 @@ struct ContentDetailView: View {
             }
             .analyticsScreen(name: "ContentDetailView")
             .navigationBarTitle(Text(""), displayMode: .inline)
-            .sheet(isPresented: $showFeedback) {
+            .fullScreenCover(isPresented: $showFeedback) {
                 if let form = viewModel.feedbackForms.first(where: {$0.id == item.feedbackFormId}) {
                     FeedbackFormView(showFeedback: $showFeedback, item: item, form: form, showAlert: $showAlert, alertMessage: $alertMessage)
                 }
             }
-            .alert(isPresented: $showAlert) {
+            /* .alert(isPresented: $showAlert) {
                 Alert(title: Text("Submit Feedback"), message: Text(alertMessage), dismissButton: .default(Text("OK")) {
                     FeedbackUtility.addFeedback(context: viewContext, id: item.id)
                 })
-            }
+            } */
         } else {
             _04View(message: "Content \(contentId) not found")
         }
