@@ -12,7 +12,7 @@ import Kingfisher
 struct OrgsView: View {
     var title: String
     var tagId: Int
-    @Binding var tappedTwice: Bool
+    @Binding var tabSelection: Int
     @EnvironmentObject var theme: Theme
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var selected: SelectedConference
@@ -24,7 +24,7 @@ struct OrgsView: View {
         ScrollView {
             LazyVGrid(columns: gridItemLayout, spacing: 20) {
                 ForEach(self.viewModel.orgs.filter { $0.tag_ids.contains(tagId) }.search(text: searchText), id: \.id) { org in
-                    NavigationLink(destination: OrgView(org: org, tappedScheduleTwice: $tappedTwice)) {
+                    NavigationLink(destination: OrgView(org: org, tabSelection: $tabSelection)) {
                         orgRow(org: org, theme: theme)
                     }
                 }

@@ -18,7 +18,26 @@ struct EventFilters: View {
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
-        NavigationStack {
+        HStack(alignment: .center) {
+            Button {
+                filters.removeAll()
+            } label: {
+                Image(systemName: "x.circle")
+                Text("Clear")
+            }
+            Spacer()
+            Text("Filters")
+            Spacer()
+            Button {
+                showFilters = false
+                toTop.val = true
+            } label: {
+                Text("Close")
+                Image(systemName: "checkmark.circle")
+            }
+        }
+        .padding(10)
+            Divider()
             ScrollView {
                 if showBookmarks {
                     FilterRow(id: 1337, name: "Bookmarks", color: ThemeColors.blue, filters: $filters)
@@ -38,18 +57,11 @@ struct EventFilters: View {
             .navigationTitle("Filters")
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button("Clear") {
-                        filters.removeAll()
-                    }
-                    Button("Close") {
-                        showFilters = false
-                        toTop.val = true
-                    }
                 }
             }
             .padding(5)
         }
-    }
+    //}
 }
 
 struct FilterRow: View {
@@ -72,12 +84,12 @@ struct FilterRow: View {
             .padding(5)
             .overlay(RoundedRectangle(cornerRadius: 10).stroke(color, lineWidth: 2))
             .onTapGesture {
-                print("Filters (tap): \(filters)")
                 if filters.contains(id) {
                     filters.remove(id)
                 } else {
                     filters.insert(id)
                 }
+                print("FiltersView: Current filters = \(filters)")
             }
         } else {
             VStack(alignment: .leading) {

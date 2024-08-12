@@ -14,7 +14,7 @@ struct SettingsView: View {
     @AppStorage("showNews") var showNews: Bool = true
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 Text("Settings")
                     .font(.title)
@@ -47,10 +47,28 @@ struct SettingsView: View {
                 ShowPastEventsSettingsView()
                 ShowNewsSettingsView()
                 NotificationSettingsView()
+                EasterEggSettingsView()
             }
             .padding(10)
             .analyticsScreen(name: "SettingsView")
         }
+    }
+}
+
+struct EasterEggSettingsView: View {
+    @EnvironmentObject var viewModel: InfoViewModel
+    @AppStorage("easterEgg") var easterEgg: Bool = false
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+                Toggle("Easter Eggs", isOn: $easterEgg)
+                    .onChange(of: easterEgg) { value in
+                        print("SettingsView: Changing to easterEgg = \(value)")
+                        viewModel.easterEgg = value
+                    }
+        }
+        .padding(5)
+        Divider()
     }
 }
 

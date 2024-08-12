@@ -21,8 +21,8 @@ struct EventsView: View {
     let dfu = DateFormatterUtility.shared
     var includeNav: Bool = true
     var navTitle: String = ""
-    @Binding var tappedScheduleTwice: Bool
-    @Binding var schedule: UUID
+    // @Binding var tappedScheduleTwice: Bool
+    // @Binding var schedule: UUID
 
   @State private var eventDay = ""
   @State private var searchText = ""
@@ -31,7 +31,7 @@ struct EventsView: View {
 
   var body: some View {
     if includeNav {
-      NavigationView {
+      NavigationStack {
         EventScrollView(
           events:
             events
@@ -42,7 +42,7 @@ struct EventsView: View {
           bookmarks: bookmarks,
           dayTag: eventDay,
           showPastEvents: showPastEvents, includeNav: includeNav,
-          tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
+          // tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
           showLocaltime: $showLocaltime
         )
         .navigationTitle(viewModel.conference?.name ?? "Schedule")
@@ -165,7 +165,7 @@ struct EventsView: View {
           bookmarks: bookmarks,
           dayTag: eventDay,
           showPastEvents: showPastEvents, includeNav: includeNav,
-          tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
+          // tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
           showLocaltime: $showLocaltime
         )
         .navigationTitle(navTitle)
@@ -238,14 +238,14 @@ struct EventScrollView: View {
     let showPastEvents: Bool
     let includeNav: Bool
     let dfu = DateFormatterUtility.shared
-    @Binding var tappedScheduleTwice: Bool
+    // @Binding var tappedScheduleTwice: Bool
     @EnvironmentObject var toTop: ToTop
     @EnvironmentObject var toCurrent: ToCurrent
     @EnvironmentObject var toBottom: ToBottom
     @EnvironmentObject var toNext: ToNext
     @EnvironmentObject var viewModel: InfoViewModel
     @State var viewShowing = false
-    @Binding var schedule: UUID
+    // @Binding var schedule: UUID
     @Binding var showLocaltime: Bool
     @State var eventDayGroup: [(key: String, value: [Event])] = []
 

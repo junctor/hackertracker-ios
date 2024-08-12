@@ -34,6 +34,7 @@ struct ContentView: View {
     @AppStorage("showNews") var showNews: Bool = true
     @AppStorage("lightMode") var lightMode: Bool = false
     @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage("easterEgg") var easterEgg: Bool = false
 
     @StateObject var selected = SelectedConference()
     @StateObject var viewModel = InfoViewModel()
@@ -43,18 +44,19 @@ struct ContentView: View {
     @StateObject private var toBottom = ToBottom()
     @StateObject private var toCurrent = ToCurrent()
     @StateObject private var toNext = ToNext()
-
+    @StateObject var filters = Filters(filters:[])
     @State private var tabSelection = 1
-    @State private var tappedMainTwice = false
-    @State private var tappedScheduleTwice = false
+    // @State private var tappedMainTwice = false
+    // @State private var tappedScheduleTwice = false
     @State private var info = UUID()
     @State private var schedule = UUID()
     @State private var isInit: Bool = false
+    @State private var scheduleView = ScheduleView(tagIds: [])
 
     var body: some View {
         if viewModel.conference != nil {
             TabView(selection: $tabSelection) {
-                InfoView(tabSelection: $tabSelection, tappedMainTwice: $tappedScheduleTwice)
+                InfoView(tabSelection: $tabSelection)
                     .tabItem {
                         Image(systemName: "house")
                         // Text("Info")
@@ -62,12 +64,19 @@ struct ContentView: View {
                     .tag(1)
                     .id(info)
                     .preferredColorScheme(theme.colorScheme)
-                    .onChange(of: tappedMainTwice, perform: { tappedTwice in
+                    /* .onChange(of: tappedMainTwice, perform: { tappedTwice in
                         guard tappedTwice else { return }
-                        info = UUID()
+                        
                         self.tappedMainTwice = false
-                    })
-                ScheduleView(tagIds: [], tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule)
+                        print("tappedMainTwice: \(tappedMainTwice)")
+                    }) */
+                    /*.onTapGesture(count: 2) {
+                        // switch tabSelection {
+                        // case 1:
+                            print("tapped infoview twice")
+                            //tappedMainTwice = true
+                        } */
+                scheduleView
                     .tabItem {
                         Image(systemName: "calendar")
                         // Text("Main")
@@ -90,7 +99,7 @@ struct ContentView: View {
                     .tag(4)
                     .preferredColorScheme(theme.colorScheme)
             }
-            .onTapGesture(count: 2) {
+            /* .onTapGesture(count: 2) {
                 switch tabSelection {
                 case 1:
                     print("tapped mainview twice")
@@ -101,7 +110,7 @@ struct ContentView: View {
                 default:
                     print("tapped twice")
                 }
-            }
+            } */
             .onAppear {
                 if #available(iOS 15.0, *) {
                     let tabBarAppearance: UITabBarAppearance = .init()
@@ -120,6 +129,7 @@ struct ContentView: View {
                 }
                 viewModel.showNews = showNews
                 viewModel.colorMode = colorMode
+                viewModel.easterEgg = easterEgg
                 if let con = viewModel.conference {
                     showLocaltime ? DateFormatterUtility.shared.update(tz: TimeZone.current) : DateFormatterUtility.shared.update(tz: TimeZone(identifier: con.timezone ?? "America/Los_Angeles"))
                 }
@@ -134,6 +144,7 @@ struct ContentView: View {
             .environmentObject(toBottom)
             .environmentObject(toCurrent)
             .environmentObject(toNext)
+            .environmentObject(filters)
             .analyticsScreen(name: "ContentView")
         } else {
             if conferenceCode == "INIT" {

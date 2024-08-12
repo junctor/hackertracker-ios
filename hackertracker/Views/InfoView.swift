@@ -11,12 +11,13 @@ import WebKit
 
 struct InfoView: View {
     @Binding var tabSelection: Int
-    @Binding var tappedMainTwice: Bool
+    //@Binding var tappedMainTwice: Bool
     @EnvironmentObject var viewModel: InfoViewModel
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var theme: Theme
+    @EnvironmentObject var filters: Filters
     @Environment(\.openURL) private var openURL
 
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
@@ -87,7 +88,7 @@ struct InfoView: View {
                         .cornerRadius(15)
                     }
                     if let con = self.viewModel.conference, let menu = self.viewModel.menus.first(where: { $0.id == con.homeMenuId}) {
-                        MenuView(menu: menu, tabSelection: $tabSelection, tappedMainTwice: $tappedMainTwice)
+                        MenuView(menu: menu, tabSelection: $tabSelection)
                         
                     } else {
                         
@@ -141,7 +142,7 @@ struct InfoView: View {
                                 let sortedTags = ott.tags.sorted { $0.sortOrder < $1.sortOrder }
                                 ForEach(sortedTags, id: \.id) { tag in
                                     if viewModel.orgs.first(where: {$0.tag_ids.contains(tag.id)}) != nil {
-                                        NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id, tappedTwice: $tappedMainTwice)) {
+                                        NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id, tabSelection: $tabSelection)) {
                                             CardView(systemImage: "bag", text: tag.label, color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                                         }
                                     }
@@ -149,9 +150,20 @@ struct InfoView: View {
                             }
                             let kidsTags = getKidsTags()
                             if kidsTags.count > 0 {
-                                NavigationLink(destination: ScheduleView(tagIds: kidsTags, includeNav: false, navTitle: "Kids Content", tappedScheduleTwice: $tappedMainTwice, schedule: $schedule)) {
+                                Button {
+                                    filters.filters.removeAll()
+                                    for id in kidsTags {
+                                        filters.filters.insert(id)
+                                    }
+                                    tabSelection = 2
+                                } label: {
+                                    // NavigationLink(destination: ScheduleView(tagIds: [1337], includeNav: false, navTitle: item.title)) {
                                     CardView(systemImage: "figure.and.child.holdinghands", text: "Kids Content", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
+                                    // }
                                 }
+                                /* NavigationLink(destination: ScheduleView(tagIds: kidsTags, includeNav: false, navTitle: "Kids Content")) {
+                                    CardView(systemImage: "figure.and.child.holdinghands", text: "Kids Content", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
+                                } */
                             }
                         }
                         Divider()
@@ -178,30 +190,54 @@ struct InfoView: View {
                         .background(Color(.systemGray6))
                         .cornerRadius(15)
                     }
-                    if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
-                        Text("#hackertracker iOS v\(v)")
-                            .font(.caption2)
-                            .onTapGesture {
-                                tapped()
+                    HStack {
+                        if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                            Text("#hackertracker iOS v\(v)")
+                                .font(.caption2)
+                                .onTapGesture {
+                                    tapped()
+                                }
+                                .frame(maxWidth: .infinity)
+                        } else {
+                            Text("#hackertracker iOS")
+                                .font(.caption2)
+                                .onTapGesture {
+                                    tapped()
+                                }
+                                .frame(maxWidth: .infinity)
+                        }
+                        if viewModel.easterEgg {
+                            ZStack(alignment: .bottomTrailing){
+                                Button {
+                                    playChik()
+                                    print("chikin")
+                                } label: {
+                                    Label("", systemImage: "bird.circle")
+                                }
                             }
-                    } else {
-                        Text("#hackertracker iOS")
-                            .font(.caption2)
-                            .onTapGesture {
-                                tapped()
-                            }
+                        }
                     }
+                    
+                    .padding(5)
+
                 }
                 .padding(5)
                 .onAppear {
                     print("InfoView: selectedCode: \(selected.code)")
-                    print("ScheduleView: Current launchscreen is: \(launchScreen)")
+                    // print("ScheduleView: Current launchscreen is: \(launchScreen)")
                     launchScreen = "Main"
                     viewModel.showLocaltime = showLocaltime
                 }
                 .analyticsScreen(name: "InfoView")
             }
         }
+        /* .onTapGesture(count: 2) {
+            // switch tabSelection {
+            // case 1:
+                print("tapped infoview twice")
+            //path = NavigationPath()
+                //tappedMainTwice = true
+            } */
         .navigationViewStyle(.stack)
     }
     
@@ -237,9 +273,10 @@ struct MenuView: View {
     var menu: InfoMenu
     var useGrid: Bool = true
     @Binding var tabSelection: Int
-    @Binding var tappedMainTwice: Bool
+    // @Binding var tappedMainTwice: Bool
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
+    @EnvironmentObject var filters: Filters
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
     @State var schedule = UUID()
     @FetchRequest(sortDescriptors: []) var readnews: FetchedResults<News>
@@ -270,7 +307,7 @@ struct MenuView: View {
                 case "menu":
                     if let menuId = item.menuId, let m = viewModel.menus.first(where: {$0.id == menuId}) {
                         NavigationLink(destination: ScrollView {
-                            MenuView(menu: m, useGrid: false, tabSelection: $tabSelection, tappedMainTwice: $tappedMainTwice)
+                            MenuView(menu: m, useGrid: false, tabSelection: $tabSelection)
                             
                         }
                             .padding(15)
@@ -288,7 +325,7 @@ struct MenuView: View {
                     }
                 case "organizations":
                     if viewModel.orgs.first(where: {$0.tag_ids.contains(item.appliedTagIds[0])}) != nil {
-                        NavigationLink(destination: OrgsView(title: item.title, tagId: item.appliedTagIds[0], tappedTwice: $tappedMainTwice)) {
+                        NavigationLink(destination: OrgsView(title: item.title, tagId: item.appliedTagIds[0], tabSelection: $tabSelection)) {
                             CardView(systemImage: item.symbol ?? "figure.walk", text: item.title, color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                         }
                     }
@@ -307,19 +344,38 @@ struct MenuView: View {
                         CardView(systemImage: item.symbol ?? "questionmark.app", text: "FAQ", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                     }
                 case "schedule":
-                    if item.appliedTagIds.count > 0 {
-                        NavigationLink(destination: ScheduleView(tagIds: item.appliedTagIds, includeNav: false, navTitle: item.title, tappedScheduleTwice: $tappedMainTwice, schedule: $schedule)) {
+                    // if item.appliedTagIds.count > 0 {
+                        /* Button {
+                            filters.filters.removeAll()
+                            for id in item.appliedTagIds {
+                                filters.filters.append(id)
+                            }
+                            tabSelection = 2
+                        } label: {
                             CardView(systemImage: item.symbol ?? "calendar", text: item.title, color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
-                        }
-                    } else {
+                        } */
+                        /* NavigationLink(destination: ScheduleView(tagIds: item.appliedTagIds, includeNav: false, navTitle: item.title)) {
+                            CardView(systemImage: item.symbol ?? "calendar", text: item.title, color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
+                        } */
+                    // } else {
                         Button {
+                            /* if item.appliedTagIds.count > 0 {
+                                // filters.filters.removeAll()
+                                for id in item.appliedTagIds {
+                                    filters.filters.append(id)
+                                }
+                            } */
+                            // item.appliedTagIds.count > 0 ? {filters.filters.removeAll(); filters.filters.description.append(item.appliedTagIds)} : print("no tag ids")
                             tabSelection = 2
                         } label: {
                             CardView(systemImage: item.symbol ?? "calendar", text: "Schedule", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                         }
-                    }
+                    // }
                 case "schedule_bookmark":
-                    NavigationLink(destination: ScheduleView(tagIds: [1337], includeNav: false, navTitle: item.title, tappedScheduleTwice: $tappedMainTwice, schedule: $schedule)) {
+                    Button {
+                        filters.filters = [1337]
+                        tabSelection = 2
+                    } label: {
                         CardView(systemImage: item.symbol ?? "calendar", text: item.title, color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                     }
                 case "search":

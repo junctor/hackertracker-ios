@@ -67,6 +67,9 @@ struct articleRow: View {
                 NewsUtility.addReadNews(context: viewContext, id: article.id)
             }
         }
+        .onDisappear {
+            self.showText = false
+        }
     }
 }
 

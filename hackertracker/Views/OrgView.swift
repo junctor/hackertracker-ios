@@ -11,10 +11,11 @@ import SwiftUI
 
 struct OrgView: View {
     var org: Organization
-    @Binding var tappedScheduleTwice: Bool
+    // @Binding var tappedScheduleTwice: Bool
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
-    @State var schedule = UUID()
+    @EnvironmentObject var filters: Filters
+    @Binding var tabSelection: Int
 
     var body: some View {
         ScrollView {
@@ -46,8 +47,20 @@ struct OrgView: View {
                 }
                 Markdown(org.description)
                 if let org_tag_id = org.tag_id_as_organizer, viewModel.events.first(where: { $0.tagIds.contains(org_tag_id)}) != nil {
-                    NavigationLink(destination: ScheduleView(tagId: org_tag_id, includeNav: false, navTitle: org.name, tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule)) {
+                    Button {
+                        filters.filters = [org_tag_id]
+                        tabSelection = 2
+                    } label: {
                         Label("Schedule", systemImage: "calendar")
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding(15)
+                            .background(theme.carousel())
+                            .cornerRadius(15)
+                        // CardView(systemImage: "calendar", text: "Schedule", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
+                    }
+                    /* NavigationLink(destination: ScheduleView(tagId: org_tag_id, includeNav: false, navTitle: org.name)) {
+                        
                         
                     }.buttonStyle(.plain)
                         .foregroundColor(.white)
@@ -55,6 +68,7 @@ struct OrgView: View {
                         .padding(15)
                         .background(theme.carousel())
                         .cornerRadius(15)
+                     */
                 }
 
                 Divider()

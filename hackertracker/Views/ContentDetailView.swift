@@ -81,6 +81,9 @@ struct ContentDetailView: View {
                     FeedbackFormView(showFeedback: $showFeedback, item: item, form: form, showAlert: $showAlert, alertMessage: $alertMessage)
                 }
             }
+            .onAppear {
+                print("ContentDetailView Loading \(item.id) - \(item.title)")
+            }
             /* .alert(isPresented: $showAlert) {
                 Alert(title: Text("Submit Feedback"), message: Text(alertMessage), dismissButton: .default(Text("OK")) {
                     FeedbackUtility.addFeedback(context: viewContext, id: item.id)
@@ -229,7 +232,7 @@ struct showSessionRow: View {
                         }
                     }
                 }
-                .sheet(isPresented: $showAddContentModal) {
+                .fullScreenCover(isPresented: $showAddContentModal) {
                     AddContent(content: item, session: s)
                 }
                 HStack {

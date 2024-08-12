@@ -49,3 +49,20 @@ enum ThemeColors {
     static let red = hexSwiftUIColor(hex: "#c04c36")
     static let gray = hexSwiftUIColor(hex: "#2D2D2D")
 }
+
+import AVFoundation
+var player: AVAudioPlayer?
+
+func playChik() {
+    guard let path = Bundle.main.path(forResource: "rubber_\(Int.random(in: 1...5))", ofType:"mp3") else {
+        return }
+    let url = URL(fileURLWithPath: path)
+
+    do {
+        player = try AVAudioPlayer(contentsOf: url)
+        player?.play()
+        
+    } catch let error {
+        print(error.localizedDescription)
+    }
+}

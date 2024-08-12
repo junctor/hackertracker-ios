@@ -13,7 +13,7 @@ struct CartView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @State private var total = 0
     @State private var totalItems = 0
-    @State private var showingAlert = false
+    @State private var showDeleteAlert = false
 
     var body: some View {
         ScrollView {
@@ -54,8 +54,8 @@ struct CartView: View {
                 .multilineTextAlignment(.center)
             Divider()
             
-            DeleteAllView(showingAlert: $showingAlert)
-                .alert("Are you sure", isPresented: $showingAlert) {
+            DeleteAllView(showDeleteAlert: $showDeleteAlert)
+                .alert("Are you sure", isPresented: $showDeleteAlert) {
                     Button("Yes") {
                         total = 0
                         totalItems = 0
@@ -79,9 +79,14 @@ struct CartView: View {
             }
             total = mytotal
             totalItems = mytotalItems
+            print("CartView: made it here \(total) - \(totalItems)")
         }
         .onChange(of: totalItems) { _ in
             checkOutOfStock()
+            print("CartView: Detected change in totalItems")
+        }
+        .onDisappear {
+            print("CartView: closing")
         }
         .analyticsScreen(name: "CartView")
         .navigationTitle("Merch")
@@ -116,11 +121,11 @@ struct CartView: View {
 }
 
 struct DeleteAllView: View {
-    @Binding var showingAlert: Bool
+    @Binding var showDeleteAlert: Bool
     var body: some View {
         HStack {
             Button {
-                showingAlert = true
+                showDeleteAlert = true
             } label: {
                 Label("Delete All", systemImage: "trash")
             }

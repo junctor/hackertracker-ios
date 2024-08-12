@@ -29,6 +29,7 @@ class InfoViewModel: ObservableObject {
     @Published var showNews = true
     @Published var colorMode = false
     @Published var outOfStock = false
+    @Published var easterEgg = false
     var conferenceListener: ListenerRegistration?
     var documentListener: ListenerRegistration?
     var tagListener: ListenerRegistration?

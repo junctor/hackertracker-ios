@@ -29,7 +29,7 @@ struct MoreContentMenu: View {
         } label: {
             Image(systemName: "chevron.down.square")
         }
-        .sheet(isPresented: $showAddContentModal) {
+        .fullScreenCover(isPresented: $showAddContentModal) {
             AddContent(content: content, session: session)
         }
     }
