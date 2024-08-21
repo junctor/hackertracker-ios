@@ -366,6 +366,7 @@ struct MenuView: View {
                                 }
                             } */
                             // item.appliedTagIds.count > 0 ? {filters.filters.removeAll(); filters.filters.description.append(item.appliedTagIds)} : print("no tag ids")
+                            filters.filters = []
                             tabSelection = 2
                         } label: {
                             CardView(systemImage: item.symbol ?? "calendar", text: "Schedule", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
