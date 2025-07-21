@@ -15,6 +15,7 @@ struct ConferencesView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
     @EnvironmentObject var consViewModel: ConferencesViewModel
+    @EnvironmentObject var filters: Filters
     @Environment(\.presentationMode) var presentationMode
     @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
     @AppStorage("showHidden") var showHidden: Bool = false
@@ -28,26 +29,29 @@ struct ConferencesView: View {
                 .font(.headline)
             Divider()
             List(consViewModel.conferences, id: \.code) { conference in
-                ConferenceRow(conference: conference, code: selected.code)
-                    .onTapGesture {
-                        if conference.code == selected.code {
-                            print("Already selected \(conference.name)")
-                        } else {
-                            print("Selected \(conference.name)")
-                            selected.code = conference.code
-                            conferenceCode = conference.code
-                            viewModel.fetchData(code: conference.code)
-                            showLocaltime ? DateFormatterUtility.shared.update(tz: TimeZone.current) : DateFormatterUtility.shared.update(tz: TimeZone(identifier: conference.timezone ?? "America/Los_Angeles"))
-                        }
-
-                        self.presentationMode.wrappedValue.dismiss()
+                Button(action: {
+                    self.presentationMode.wrappedValue.dismiss()
+                    if conference.code == selected.code {
+                        print("Already selected \(conference.name)")
+                    } else {
+                        print("Selected \(conference.name)")
+                        selected.code = conference.code
+                        conferenceCode = conference.code
+                        filters.filters.removeAll()
+                        viewModel.fetchData(code: conference.code)
+                        showLocaltime ? DateFormatterUtility.shared.update(tz: TimeZone.current) : DateFormatterUtility.shared.update(tz: TimeZone(identifier: conference.timezone ?? "America/Los_Angeles"))
                     }
+                    
+                }) {
+                    ConferenceRow(conference: conference, code: selected.code)
+                }
+                    
             }
             .analyticsScreen(name: "ConferencesView")
             .listStyle(.plain)
         } else {
             _04View(message: "Loading", show404: false).preferredColorScheme(.dark)
-                .onAppear {
+                .task {
                     consViewModel.fetchConferences(hidden: showHidden)
                 }
         }

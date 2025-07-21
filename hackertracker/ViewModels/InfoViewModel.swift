@@ -24,10 +24,10 @@ class InfoViewModel: ObservableObject {
     @Published var news = [Article]()
     @Published var menus = [InfoMenu]()
     @Published var feedbackForms = [FeedbackForm]()
-    @Published var showLocaltime = false
+    // @Published var showLocaltime = false
     @Published var showPastEvents = true
     @Published var showNews = true
-    @Published var colorMode = false
+    // @Published var colorMode = false
     @Published var outOfStock = false
     @Published var easterEgg = false
     var conferenceListener: ListenerRegistration?
@@ -349,7 +349,7 @@ class InfoViewModel: ObservableObject {
                             if let _ = self.events.first(where: {$0.id == s.id}) {
                                 // Don't do anything
                             } else {
-                                let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds)
+                                let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds, relatedIds: c.relatedIds)
                                 self.events.append(e)
                                 /* Task {
                                     if await NotificationUtility.notificationExists(id: e.id) {

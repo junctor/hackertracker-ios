@@ -7,9 +7,7 @@
 import SwiftUI
 
 struct EventsView: View {
-    let events: [Event]
-    let conference: Conference?
-    let bookmarks: [Int32]
+    @EnvironmentObject var selected: SelectedConference
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
@@ -18,15 +16,17 @@ struct EventsView: View {
     @EnvironmentObject var toBottom: ToBottom
     @EnvironmentObject var toCurrent: ToCurrent
     @EnvironmentObject var toNext: ToNext
+    @EnvironmentObject var filters: Filters
     let dfu = DateFormatterUtility.shared
     var includeNav: Bool = true
     var navTitle: String = ""
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     // @Binding var tappedScheduleTwice: Bool
     // @Binding var schedule: UUID
 
   @State private var eventDay = ""
   @State private var searchText = ""
-  @Binding var filters: Set<Int>
+  //@Binding var filters: Set<Int>
   @State private var showFilters = false
 
   var body: some View {
@@ -34,15 +34,14 @@ struct EventsView: View {
       NavigationStack {
         EventScrollView(
           events:
-            events
-            .filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
-            .search(text: searchText).eventDayGroup(
-              showLocaltime: showLocaltime, conference: conference
-            ), conference: conference,
-          bookmarks: bookmarks,
+            viewModel.events
+            .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
+            .search(text: searchText)
+            .eventDayGroup(
+                showLocaltime: showLocaltime, conference: viewModel.conference
+            ),
           dayTag: eventDay,
           showPastEvents: showPastEvents, includeNav: includeNav,
-          // tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
           showLocaltime: $showLocaltime
         )
         .navigationTitle(viewModel.conference?.name ?? "Schedule")
@@ -54,12 +53,12 @@ struct EventsView: View {
               }
               .onChange(of: showLocaltime) { value in
                 print("EventsView: Changing to showLocaltime = \(value)")
-                viewModel.showLocaltime = value
+                // viewModel.showLocaltime = value
                 if showLocaltime {
                   dfu.update(tz: TimeZone.current)
                 } else {
                   dfu.update(
-                    tz: TimeZone(identifier: conference?.timezone ?? "America/Los_Angeles"))
+                    tz: TimeZone(identifier: viewModel.conference?.timezone ?? "America/Los_Angeles"))
                 }
               }
                 Toggle(isOn: $show24hourtime) {
@@ -117,8 +116,8 @@ struct EventsView: View {
                 }
                 Divider()
               ForEach(
-                events.filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
-                  .eventDayGroup(showLocaltime: showLocaltime, conference: conference), id: \.key
+                viewModel.events.filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
+                    .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
               ) { day, _ in
                 Button(day) {
                   eventDay = day
@@ -133,7 +132,7 @@ struct EventsView: View {
               showFilters.toggle()
             } label: {
               Image(
-                systemName: filters
+                systemName: filters.filters
                   .isEmpty
                   ? "line.3.horizontal.decrease.circle"
                   : "line.3.horizontal.decrease.circle.fill")
@@ -146,23 +145,22 @@ struct EventsView: View {
         EventFilters(
           tagtypes: viewModel.tagtypes.filter {
             $0.category == "content" && $0.isBrowsable == true
-          }, showFilters: $showFilters, filters: $filters
+          }, showFilters: $showFilters
         )
       }
-      .onChange(of: viewModel.conference) { con in
+      /*.onChange(of: viewModel.conference) { con in
         print("EventsView.onChange(of: conference) == \(con?.name ?? "not found")")
-        self.filters = []
-      }
+          filters.filters = []
+      } */
     } else {
       VStack {
         EventScrollView(
           events:
-            events
-            .filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
+            viewModel.events
+            .filters(typeIds: filters.filters, bookmarks: bookmarks.map({$0.id}), tagTypes: viewModel.tagtypes)
             .search(text: searchText).eventDayGroup(
-              showLocaltime: showLocaltime, conference: conference
-            ), conference: conference,
-          bookmarks: bookmarks,
+                showLocaltime: showLocaltime, conference: viewModel.conference
+            ),
           dayTag: eventDay,
           showPastEvents: showPastEvents, includeNav: includeNav,
           // tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
@@ -207,8 +205,8 @@ struct EventsView: View {
                   }
                   Divider()
               ForEach(
-                events.filters(typeIds: filters, bookmarks: bookmarks, tagTypes: viewModel.tagtypes)
-                  .eventDayGroup(showLocaltime: showLocaltime, conference: conference), id: \.key
+                viewModel.events.filters(typeIds: filters.filters, bookmarks: bookmarks.map({$0.id}), tagTypes: viewModel.tagtypes)
+                    .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
               ) { day, _ in
                 Button(day) {
                   eventDay = day
@@ -232,8 +230,7 @@ struct EventsView: View {
 struct EventScrollView: View {
 
     let events: [(key: String, value: [Event])]
-    let conference: Conference?
-    let bookmarks: [Int32]
+    // let bookmarks: [Int32]
     let dayTag: String
     let showPastEvents: Bool
     let includeNav: Bool
@@ -243,9 +240,7 @@ struct EventScrollView: View {
     @EnvironmentObject var toCurrent: ToCurrent
     @EnvironmentObject var toBottom: ToBottom
     @EnvironmentObject var toNext: ToNext
-    @EnvironmentObject var viewModel: InfoViewModel
     @State var viewShowing = false
-    // @Binding var schedule: UUID
     @Binding var showLocaltime: Bool
     @State var eventDayGroup: [(key: String, value: [Event])] = []
 
@@ -254,7 +249,7 @@ struct EventScrollView: View {
       List(events, id: \.key) { weekday, dayEvents in
           if showPastEvents || dayEvents.contains(where: {Date() < $0.endTimestamp}) {
             EventData(
-              weekday: weekday, events: dayEvents, bookmarks: bookmarks, showPastEvents: showPastEvents
+              weekday: weekday, events: dayEvents, showPastEvents: showPastEvents
             )
             .id(weekday)
         }
@@ -325,7 +320,7 @@ struct EventScrollView: View {
 struct EventData: View {
   let weekday: String
   let events: [Event]
-  let bookmarks: [Int32]
+  // let bookmarks: [Int32]
   let showPastEvents: Bool
 
   var body: some View {
@@ -338,7 +333,7 @@ struct EventData: View {
         ) { event in
           if showPastEvents || event.endTimestamp >= Date() {
               NavigationLink(destination: ContentDetailView(contentId:event.contentId)) {
-              EventCell(event: event, bookmarks: bookmarks, showDay: false)
+              EventCell(event: event, showDay: false)
                       .id(event.id)
             }
           }

@@ -8,42 +8,18 @@ import SwiftUI
 
 struct EventCell: View {
     let event: Event
-    let bookmarks: [Int32]
+    // let bookmarks: [Int32]
     let showDay: Bool
     @Environment(\.managedObjectContext) private var viewContext
     @EnvironmentObject var viewModel: InfoViewModel
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     
 
-    /*
-     func bookmarkAction(id: Int) {
-         if bookmarks.map({$0.id}).contains(Int32(id)) {
-             print("ContentDetailView: Removing Bookmark \(id)")
-             BookmarkUtility.deleteBookmark(context: viewContext, id: id)
-             if notExists {
-                 NSLog("ContentDetailView: Removing alert for \(item.title) - \(id)")
-                 NotificationUtility.removeNotification(id: id)
-                 notExists.toggle()
-             } else {
-                 NSLog("ContentDetailView: No alert exists for \(item.title) - \(id)")
-             }
-         } else {
-             print("ContentDetailView: Adding Bookmark \(id)")
-             BookmarkUtility.addBookmark(context: viewContext, id: id)
-             if !notExists {
-                 NSLog("ContentDetailView: Adding alert for \(item.title) - \(id)")
-                 let notDate = s.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
-                 NotificationUtility.scheduleNotification(date: notDate, id: s.id, title: item.title, location: viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unknown")
-                 notExists.toggle()
-             } else {
-                 NSLog("ContentDetailView: Alert already exists for \(item.title) - \(id)")
-             }
-         }
-     }*/
     func bookmarkAction() {
-        if bookmarks.contains(Int32(event.id)) {
+        if bookmarks.map({$0.id}).contains(Int32(event.id)) {
             print("EventCellView: Removing Bookmark \(event.id)")
             BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
             NotificationUtility.removeNotification(id: event.id)
@@ -91,7 +67,7 @@ struct EventCell: View {
                         Button {
                             bookmarkAction()
                         } label: {
-                            Image(systemName: bookmarks.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                            Image(systemName: bookmarks.map({$0.id}).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
                         }
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -99,10 +75,10 @@ struct EventCell: View {
             }
 
         }.swipeActions {
-            Button(bookmarks.contains(Int32(event.id)) ? "Remove Bookmark" : "Bookmark") {
+            Button(bookmarks.map({$0.id}).contains(Int32(event.id)) ? "Remove Bookmark" : "Bookmark") {
                 bookmarkAction()
             }.buttonStyle(DefaultButtonStyle())
-                .tint(bookmarks.contains(Int32(event.id)) ? .red : .yellow)
+                .tint(bookmarks.map({$0.id}).contains(Int32(event.id)) ? .red : .yellow)
         }
     }
     

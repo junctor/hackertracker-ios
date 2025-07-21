@@ -61,6 +61,11 @@ struct ContentDetailView: View {
                     showLinks(links: item.links)
                         .padding(15)
                 }
+                if let relatedIds = item.relatedIds, !relatedIds.isEmpty, relatedIds.count > 0 {
+                    Divider()
+                    showRelated(eventIds: relatedIds)
+                        .padding(15)
+                }
                 if alertMessage != "" {
                     VStack(alignment: .center) {
                         Text(alertMessage)
@@ -81,7 +86,7 @@ struct ContentDetailView: View {
                     FeedbackFormView(showFeedback: $showFeedback, item: item, form: form, showAlert: $showAlert, alertMessage: $alertMessage)
                 }
             }
-            .onAppear {
+            .onAppear() {
                 print("ContentDetailView Loading \(item.id) - \(item.title)")
             }
             /* .alert(isPresented: $showAlert) {
@@ -100,6 +105,7 @@ struct showFeedbackButton: View {
     @Binding var showFeedback: Bool
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
+    @AppStorage("colorMode") var colorMode: Bool = false
 
     var body: some View {
         VStack {
@@ -111,7 +117,7 @@ struct showFeedbackButton: View {
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .padding(15)
-            .background(viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
+            .background(colorMode ? theme.carousel() : Color(.systemGray6))
             .cornerRadius(15)
         }
     }
@@ -255,7 +261,7 @@ struct showSessionRow: View {
                 }
             }
         }
-        .onAppear {
+        .task {
             Task {
                 notExists = await NotificationUtility.notificationExists(id: s.id)
             }
@@ -267,6 +273,40 @@ struct showSessionRow: View {
         .background(.background)
         .cornerRadius(10)
         .padding(.bottom, 5)
+    }
+}
+
+struct showRelated: View {
+    var eventIds: [Int]
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    @EnvironmentObject var viewModel: InfoViewModel
+    @State private var collapsed = false
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                collapsed.toggle()
+            }, label: {
+                HStack {
+                    Text("Related Content")
+                        .font(.headline).padding(.top)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                }
+            }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
+            if !collapsed {
+                VStack {
+                    ForEach(eventIds, id: \.self) { eventId in
+                        if let c = viewModel.content.first(where: {$0.id == eventId}) {
+                            NavigationLink(destination: ContentDetailView(contentId: c.id)) {
+                                ContentCell(content: c, bookmarks: bookmarks.map { $0.id }, showDay: true)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

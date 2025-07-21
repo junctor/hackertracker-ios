@@ -8,18 +8,18 @@
 import SwiftUI
 
 struct GlobalSearchView: View {
-    let viewModel: InfoViewModel
     @State private var searchText = ""
     @EnvironmentObject var theme: Theme
-    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
-
+    @EnvironmentObject var viewModel: InfoViewModel
+    @AppStorage("colorMode") var colorMode: Bool = false
+    
     var body: some View {
             List {
                 if !searchText.isEmpty {
                     Section(header: Text("Schedule")) {
                         ForEach(viewModel.events.search(text: searchText).sorted {$0.beginTimestamp < $1.beginTimestamp}, id: \.id) { event in
                             NavigationLink(destination: ContentDetailView(contentId: event.contentId)) {
-                                EventCell(event: event, bookmarks: bookmarks.map { $0.id }, showDay: true)
+                                EventCell(event: event, showDay: true)
                             }
                         }
                     }
@@ -39,7 +39,7 @@ struct GlobalSearchView: View {
                             $0.title < $1.title
                         }, id: \.id) { document in
                             NavigationLink(destination: DocumentView(title_text: document.title, body_text: document.body)) {
-                                docSearchRow(title_text: document.title, themeColor: viewModel.colorMode ? theme.carousel() : Color(.systemGray2))
+                                docSearchRow(title_text: document.title, themeColor: colorMode ? theme.carousel() : Color(.systemGray2))
                             }
                         }
                     }

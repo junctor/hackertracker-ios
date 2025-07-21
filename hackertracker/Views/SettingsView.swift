@@ -220,7 +220,7 @@ struct LightModeSettingsView: View {
             Toggle("Enable Colorful Mode", isOn: $colorMode)
                 .onChange(of: colorMode) { value in
                     print("SettingsView: Changing to lightMode = \(value)")
-                    viewModel.colorMode = value
+                    //colorMode = value
                 }
         }
         .padding(5)
@@ -259,7 +259,7 @@ struct ShowLocaltimeSettingsView: View {
             Toggle("Show Local Timezone", isOn: $showLocaltime)
                 .onChange(of: showLocaltime) { value in
                     print("SettingsView: Changing to showLocaltime = \(value)")
-                    viewModel.showLocaltime = value
+                    // viewModel.showLocaltime = value
                     if value {
                         dfu.update(tz: TimeZone.current)
                     } else {

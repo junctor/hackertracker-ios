@@ -18,6 +18,7 @@ struct Event: Codable, Identifiable {
     var locationId: Int
     var people: [Person]
     var tagIds: [Int]
+    var relatedIds: [Int]?
 
     private enum CodingKeys: String, CodingKey {
         case id

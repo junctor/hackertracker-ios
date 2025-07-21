@@ -9,9 +9,8 @@ import SwiftUI
 
 struct EventFilters: View {
     let tagtypes: [TagType]
-    // let types: [Int: EventType]
     @Binding var showFilters: Bool
-    @Binding var filters: Set<Int>
+    @EnvironmentObject var filters: Filters
     @EnvironmentObject var toTop: ToTop
     var showBookmarks: Bool = true
     
@@ -20,7 +19,7 @@ struct EventFilters: View {
     var body: some View {
         HStack(alignment: .center) {
             Button {
-                filters.removeAll()
+                filters.filters.removeAll()
             } label: {
                 Image(systemName: "x.circle")
                 Text("Clear")
@@ -40,14 +39,14 @@ struct EventFilters: View {
             Divider()
             ScrollView {
                 if showBookmarks {
-                    FilterRow(id: 1337, name: "Bookmarks", color: ThemeColors.blue, filters: $filters)
+                    FilterRow(id: 1337, name: "Bookmarks", color: ThemeColors.blue)
                 }
 
                 ForEach(tagtypes.sorted { $0.sortOrder < $1.sortOrder }) { tagtype in
                     Section(header: Text(tagtype.label)) {
                         LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
                             ForEach(tagtype.tags.sorted { $0.sortOrder < $1.sortOrder }) { tag in
-                                FilterRow(id: tag.id, name: tag.label, color: Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple), filters: $filters)
+                                FilterRow(id: tag.id, name: tag.label, color: Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
                             }
                         }
                     }
@@ -68,10 +67,18 @@ struct FilterRow: View {
     let id: Int
     let name: String
     let color: Color
-    @Binding var filters: Set<Int>
+    @EnvironmentObject var filters: Filters
 
     var body: some View {
-        if !filters.contains(id) {
+        
+        Button(action: {
+            if filters.filters.contains(id) {
+                filters.filters.remove(id)
+            } else {
+                filters.filters.insert(id)
+            }
+            print("FiltersView: Current filters = \(filters.filters)")
+        }) {
             VStack(alignment: .leading) {
                 HStack {
                     Text(name)
@@ -79,38 +86,13 @@ struct FilterRow: View {
                         .padding(5)
                 }
             }
-            .foregroundColor(.primary)
+            .foregroundColor(filters.filters.contains(id) ? .white : .primary)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
             .padding(5)
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(color, lineWidth: 2))
-            .onTapGesture {
-                if filters.contains(id) {
-                    filters.remove(id)
-                } else {
-                    filters.insert(id)
-                }
-                print("FiltersView: Current filters = \(filters)")
-            }
-        } else {
-            VStack(alignment: .leading) {
-                HStack {
-                    Text(name)
-                        .font(.subheadline)
-                        .padding(5)
-                }
-            }
-            .foregroundColor(.white)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .padding(5)
-            .background(color)
+            .background(filters.filters.contains(id) ? color : Color.clear)
             .cornerRadius(10)
-            .onTapGesture {
-                if filters.contains(id) {
-                    filters.remove(id)
-                } else {
-                    filters.insert(id)
-                }
-            }
+            .overlay(RoundedRectangle(cornerRadius: 10).stroke(filters.filters.contains(id) ? Color.clear : color, lineWidth: 2))
         }
+
     }
 }

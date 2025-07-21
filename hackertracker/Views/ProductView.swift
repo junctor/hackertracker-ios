@@ -119,7 +119,7 @@ struct ProductView: View {
             }
         }
         .padding(15)
-        .onAppear {
+        .task {
             self.selectedVariant = self.product.variants[0].variantId
         }
         .toolbar {

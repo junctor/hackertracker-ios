@@ -15,6 +15,7 @@ struct OrgView: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
     @EnvironmentObject var filters: Filters
+    @AppStorage("colorMode") var colorMode: Bool = false
     @Binding var tabSelection: Int
 
     var body: some View {
@@ -48,27 +49,18 @@ struct OrgView: View {
                 Markdown(org.description)
                 if let org_tag_id = org.tag_id_as_organizer, viewModel.events.first(where: { $0.tagIds.contains(org_tag_id)}) != nil {
                     Button {
-                        filters.filters = [org_tag_id]
+                        if filters.filters != [org_tag_id] {
+                            filters.filters = [org_tag_id]
+                        }
                         tabSelection = 2
                     } label: {
                         Label("Schedule", systemImage: "calendar")
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(theme.carousel())
+                            .background(colorMode ? theme.carousel() : Color(.systemGray6))
                             .cornerRadius(15)
-                        // CardView(systemImage: "calendar", text: "Schedule", color: viewModel.colorMode ? theme.carousel() : Color(.systemGray6))
                     }
-                    /* NavigationLink(destination: ScheduleView(tagId: org_tag_id, includeNav: false, navTitle: org.name)) {
-                        
-                        
-                    }.buttonStyle(.plain)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(15)
-                        .background(theme.carousel())
-                        .cornerRadius(15)
-                     */
                 }
 
                 Divider()
@@ -87,6 +79,7 @@ struct showLinks: View {
     @Environment(\.openURL) private var openURL
     @State private var collapsed = false
     @EnvironmentObject var theme: Theme
+    @AppStorage("colorMode") var colorMode: Bool = false
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -116,7 +109,7 @@ struct showLinks: View {
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(theme.carousel())
+                            .background(colorMode ? theme.carousel() : Color(.systemGray6))
                             .cornerRadius(15)
                         }
                     }

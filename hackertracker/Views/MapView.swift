@@ -10,7 +10,6 @@ import SwiftUI
 import FirebaseAnalytics
 
 struct MapView: View {
-    @AppStorage("launchScreen") var launchScreen: String = "Main"
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
@@ -31,7 +30,7 @@ struct MapView: View {
                                 
                                 ZStack(alignment: .bottomTrailing) {
                                     PDFView(url: mLocal)
-                                        .onAppear {
+                                        .onAppear() {
                                             print("MapView: Loading \(mLocal)")
                                         }
                                         .frame(width: screenSize.width)
@@ -59,11 +58,6 @@ struct MapView: View {
             } else {
                 _04View(message: "Loading...", show404: false).preferredColorScheme(theme.colorScheme)
             }
-        }
-
-        .onAppear {
-            print("MapView: Current launchscreen is: \(launchScreen)")
-            // viewModel.fetchData(code: selected.code)
         }
     }
 }

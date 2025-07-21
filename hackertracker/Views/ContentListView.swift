@@ -10,13 +10,13 @@ import SwiftUI
 struct ContentListView: View {
     var content: [Content]
     @State private var searchText = ""
-    @State var filters: Set<Int> = []
     @State private var showFilters = false
     @EnvironmentObject var viewModel: InfoViewModel
+    @EnvironmentObject var filters: Filters
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     
     func contentGroup() -> [String.Element: [Content]] {
-        return Dictionary(grouping: content.search(text: searchText).filter { $0.tagIds.intersects(with: filters) || filters.isEmpty || (filters.contains(1337) && $0.sessions.map {Int32($0.id)}.intersects(with: bookmarks.map{$0.id}))}, by: { $0.title.lowercased().first ?? "-" })
+        return Dictionary(grouping: content.search(text: searchText).filter { $0.tagIds.intersects(with: filters.filters) || filters.filters.isEmpty || (filters.filters.contains(1337) && $0.sessions.map {Int32($0.id)}.intersects(with: bookmarks.map{$0.id}))}, by: { $0.title.lowercased().first ?? "-" })
     }
 
     var body: some View {
@@ -27,7 +27,7 @@ struct ContentListView: View {
                         ForEach(self.contentGroup().sorted {
                             $0.key < $1.key
                         }, id: \.key) { char, content in
-                            ContentData(char: char, content: content, filters: filters)
+                            ContentData(char: char, content: content)
                         }
                     }
                 }
@@ -38,7 +38,7 @@ struct ContentListView: View {
               EventFilters(
                 tagtypes: viewModel.tagtypes.filter {
                   $0.category == "content" && $0.isBrowsable == true
-                }, showFilters: $showFilters, filters: $filters
+                }, showFilters: $showFilters
               )
             }
         }
@@ -49,7 +49,7 @@ struct ContentListView: View {
                   showFilters.toggle()
                 } label: {
                   Image(
-                    systemName: filters
+                    systemName: filters.filters
                       .isEmpty
                       ? "line.3.horizontal.decrease.circle"
                       : "line.3.horizontal.decrease.circle.fill")
@@ -76,7 +76,6 @@ struct ContentListView: View {
 struct ContentData: View {
     let char: String.Element
     let content: [Content]
-    var filters: Set<Int>
     @EnvironmentObject var theme: Theme
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
 

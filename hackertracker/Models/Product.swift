@@ -44,7 +44,7 @@ struct Product: Codable, Identifiable {
 struct Media: Codable {
     var assetId: Int
     var filetype: String
-    var md5: String
+    var md5: String?
     var name: String
     var sortOrder: Int
     var url: String

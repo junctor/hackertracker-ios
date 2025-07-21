@@ -64,18 +64,6 @@ struct ContentView: View {
                     .tag(1)
                     .id(info)
                     .preferredColorScheme(theme.colorScheme)
-                    /* .onChange(of: tappedMainTwice, perform: { tappedTwice in
-                        guard tappedTwice else { return }
-                        
-                        self.tappedMainTwice = false
-                        print("tappedMainTwice: \(tappedMainTwice)")
-                    }) */
-                    /*.onTapGesture(count: 2) {
-                        // switch tabSelection {
-                        // case 1:
-                            print("tapped infoview twice")
-                            //tappedMainTwice = true
-                        } */
                 scheduleView
                     .tabItem {
                         Image(systemName: "calendar")
@@ -99,19 +87,7 @@ struct ContentView: View {
                     .tag(4)
                     .preferredColorScheme(theme.colorScheme)
             }
-            /* .onTapGesture(count: 2) {
-                switch tabSelection {
-                case 1:
-                    print("tapped mainview twice")
-                    tappedMainTwice = true
-                case 2:
-                    print("tapped scheduleview twice")
-                    tappedScheduleTwice = true
-                default:
-                    print("tapped twice")
-                }
-            } */
-            .onAppear {
+            .task {
                 if #available(iOS 15.0, *) {
                     let tabBarAppearance: UITabBarAppearance = .init()
                     tabBarAppearance.configureWithDefaultBackground()
@@ -128,7 +104,6 @@ struct ContentView: View {
                     self.tabSelection = 1
                 }
                 viewModel.showNews = showNews
-                viewModel.colorMode = colorMode
                 viewModel.easterEgg = easterEgg
                 if let con = viewModel.conference {
                     showLocaltime ? DateFormatterUtility.shared.update(tz: TimeZone.current) : DateFormatterUtility.shared.update(tz: TimeZone(identifier: con.timezone ?? "America/Los_Angeles"))
@@ -154,9 +129,10 @@ struct ContentView: View {
                     .environmentObject(viewModel)
                     .environmentObject(consViewModel)
                     .environmentObject(theme)
+                    .environmentObject(filters)
             } else {
                 _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
-                    .onAppear {
+                    .task {
                         print("ContentView: Selected Conference \(selected.code), Conference Code: \(conferenceCode)")
                         if selected.code != conferenceCode {
                             print("ContentView: Switching to conference from AppStorage - \(conferenceCode)")

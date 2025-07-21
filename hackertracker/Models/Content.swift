@@ -19,6 +19,7 @@ struct Content: Codable, Identifiable {
     var people: [Person]
     var sessions: [Session]
     var tagIds: [Int]
+    var relatedIds: [Int]?
     var title: String
     var feedbackDisableTimestamp: Date?
     var feedbackEnableTimestamp: Date?
@@ -34,6 +35,7 @@ struct Content: Codable, Identifiable {
         case people
         case sessions
         case tagIds = "tag_ids"
+        case relatedIds = "related_content_ids"
         case title
         case feedbackDisableTimestamp = "feedback_disable_timestamp"
         case feedbackEnableTimestamp = "feedback_enable_timestamp"
