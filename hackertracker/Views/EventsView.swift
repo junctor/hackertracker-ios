@@ -11,6 +11,7 @@ struct EventsView: View {
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
+    @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var toTop: ToTop
     @EnvironmentObject var toBottom: ToBottom
@@ -28,10 +29,21 @@ struct EventsView: View {
   @State private var searchText = ""
   //@Binding var filters: Set<Int>
   @State private var showFilters = false
+  @State private var showEmergency = false
+  @State private var showShareBookmarks = false
+  @State private var showConflictAlertPopup = false
 
   var body: some View {
     if includeNav {
       NavigationStack {
+        if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
+              NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
+                  CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details")
+                      .frame(height: 40)
+                      .cornerRadius(0)
+              }
+        }
+          
         EventScrollView(
           events:
             viewModel.events
@@ -48,6 +60,9 @@ struct EventsView: View {
         .toolbar {
           ToolbarItemGroup(placement: .navigationBarLeading) {
             Menu {
+                NavigationLink(destination: ShareBookmarksView()) {
+                    Label("Share Schedule", systemImage: "qrcode")
+                }
               Toggle(isOn: $showLocaltime) {
                 Label("Display Localtime", systemImage: "clock")
               }
@@ -79,65 +94,73 @@ struct EventsView: View {
             } label: {
               Image(systemName: "ellipsis")
             }
-          }
-          ToolbarItemGroup(placement: .navigationBarTrailing) {
-            Menu {
-              Button {
-                  toTop.val = true
-              } label: {
-                HStack {
-                  Text("Top")
-                  Image(systemName: "arrow.up")
-                }
+              if showConflictAlert, viewModel.bookmarkConflicts(bookmarks: bookmarks.map({Int($0.id)})) {
+                  Button {
+                      showConflictAlertPopup = true
+                  } label: {
+                      Image(systemName: "exclamationmark.triangle")
+                          .foregroundColor(ThemeColors.red)
+                  }
               }
-                Button {
-                    toCurrent.val = true
-                } label: {
-                  HStack {
-                    Text("Now")
-                    Image(systemName: "clock")
-                  }
-                }
-                Button {
-                    toNext.val = true
-                } label: {
-                  HStack {
-                    Text("Next")
-                    Image(systemName: "arrow.turn.right.down")
-                  }
-                }
-                Button {
-                    toBottom.val = true
-                } label: {
-                  HStack {
-                    Text("Bottom")
-                    Image(systemName: "arrow.down")
-                  }
-                }
-                Divider()
-              ForEach(
-                viewModel.events.filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
-                    .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
-              ) { day, _ in
-                Button(day) {
-                  eventDay = day
-                }
-              }
-
-            } label: {
-              Image(systemName: "arrow.up.arrow.down")
-            }
-
-            Button {
-              showFilters.toggle()
-            } label: {
-              Image(
-                systemName: filters.filters
-                  .isEmpty
-                  ? "line.3.horizontal.decrease.circle"
-                  : "line.3.horizontal.decrease.circle.fill")
-            }
           }
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                Menu {
+                    Button {
+                        toTop.val = true
+                    } label: {
+                        HStack {
+                            Text("Top")
+                            Image(systemName: "arrow.up")
+                        }
+                    }
+                    Button {
+                        toCurrent.val = true
+                    } label: {
+                        HStack {
+                            Text("Now")
+                            Image(systemName: "clock")
+                        }
+                    }
+                    Button {
+                        toNext.val = true
+                    } label: {
+                        HStack {
+                            Text("Next")
+                            Image(systemName: "arrow.turn.right.down")
+                        }
+                    }
+                    Button {
+                        toBottom.val = true
+                    } label: {
+                        HStack {
+                            Text("Bottom")
+                            Image(systemName: "arrow.down")
+                        }
+                    }
+                    Divider()
+                    ForEach(
+                        viewModel.events.filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
+                            .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
+                    ) { day, _ in
+                        Button(day) {
+                            eventDay = day
+                        }
+                    }
+                    
+                } label: {
+                    Image(systemName: "arrow.up.arrow.down")
+                }
+                
+                Button {
+                    showFilters.toggle()
+                } label: {
+                    Image(
+                        systemName: filters.filters
+                            .isEmpty
+                        ? "line.3.horizontal.decrease.circle"
+                        : "line.3.horizontal.decrease.circle.fill")
+                }
+            }
         }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
       }
@@ -148,9 +171,20 @@ struct EventsView: View {
           }, showFilters: $showFilters
         )
       }
-      /*.onChange(of: viewModel.conference) { con in
-        print("EventsView.onChange(of: conference) == \(con?.name ?? "not found")")
-          filters.filters = []
+      .alert("Schedule Conflicts", isPresented: $showConflictAlertPopup) {
+          Button("OK", role: .cancel) {
+          }
+          Button("Hide") {
+              showConflictAlert = false
+          }
+      } message: {
+          Text("Bookmarked events have conflicting times")
+      }
+      /*.sheet(isPresented: $showShareBookmarks) {
+          QRCodeView(qrString: "hackertracker://\(viewModel.conference.code)/s?ids=\(bookmarks.map(\.id).joined(separator: ","))")
+          Button("Dismiss") {
+              showShareBookmarks.toggle()
+          }
       } */
     } else {
       VStack {
@@ -245,75 +279,107 @@ struct EventScrollView: View {
     @State var eventDayGroup: [(key: String, value: [Event])] = []
 
   var body: some View {
-    ScrollViewReader { proxy in
-      List(events, id: \.key) { weekday, dayEvents in
-          if showPastEvents || dayEvents.contains(where: {Date() < $0.endTimestamp}) {
-            EventData(
-              weekday: weekday, events: dayEvents, showPastEvents: showPastEvents
-            )
-            .id(weekday)
-        }
-      }
-      .listStyle(.plain)
-      .onChange(of: dayTag) { changedValue in
-        withAnimation {
-          proxy.scrollTo(changedValue, anchor: .top)
-        }
-      }
-      .onChange(of: toTop.val, perform: { tapTop in
-          guard tapTop else { return }
-            if tapTop, showPastEvents {
-                if let e = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first {
-                    withAnimation {
-                        proxy.scrollTo(e.id, anchor: .top)
-                    }
-                }
-                toTop.val = false
-            } else {
-                toTop.val = false
-                toCurrent.val = true
-            }
-          
-        }
-      )
-      .onChange(of: toBottom.val, perform: { tapBottom in
-          guard tapBottom else { return }
-          if tapBottom, let es = events.map({$0.value.sorted{$0.beginTimestamp < $1.beginTimestamp}}).last, let e = es.last {
-              withAnimation {
-                  proxy.scrollTo(e.id)
+      /*
+       VStack {
+           ScrollView {
+               ScrollViewReader { _ in
+                   LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
+                       ForEach(self.contentGroup().sorted {
+                           $0.key < $1.key
+                       }, id: \.key) { char, content in
+                           ContentData(char: char, content: content)
+                       }
+                   }
+               }
+               .listStyle(.plain)
+           }
+           .searchable(text: $searchText)
+           .sheet(isPresented: $showFilters) {
+             EventFilters(
+               tagtypes: viewModel.tagtypes.filter {
+                 $0.category == "content" && $0.isBrowsable == true
+               }, showFilters: $showFilters
+             )
+           }
+       }
+       */
+      VStack {
+          ScrollView {
+              ScrollViewReader { proxy in
+                  LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
+                      ForEach(events, id: \.key) { weekday, dayEvents in
+                          if showPastEvents || dayEvents.contains(where: {Date() < $0.endTimestamp}) {
+                              EventData(
+                                weekday: weekday, events: dayEvents, showPastEvents: showPastEvents
+                              )
+                              .id(weekday)
+                          }
+                      }
+                  }
+                  .listStyle(.plain)
+                  .onChange(of: dayTag) { changedValue in
+                      withAnimation {
+                          proxy.scrollTo(changedValue, anchor: .top)
+                      }
+                  }
+                  .onChange(of: toTop.val, perform: { tapTop in
+                      guard tapTop else { return }
+                      if tapTop, showPastEvents {
+                          if let e = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first {
+                              withAnimation {
+                                  proxy.scrollTo(e.id, anchor: .top)
+                              }
+                          }
+                          toTop.val = false
+                      } else {
+                          toTop.val = false
+                          toCurrent.val = true
+                      }
+                      
+                  }
+                  )
+                  .onChange(of: toBottom.val, perform: { tapBottom in
+                      guard tapBottom else { return }
+                      if tapBottom, let es = events.map({$0.value.sorted{$0.beginTimestamp < $1.beginTimestamp}}).last, let e = es.last {
+                          withAnimation {
+                              proxy.scrollTo(e.id)
+                          }
+                          toBottom.val = false
+                      }
+                  })
+                  .onChange(of: toCurrent.val, perform: { tapCurrent in
+                      guard tapCurrent else { return }
+                      let curDate = Date()
+                      // print("events: \(events.key)")
+                      if tapCurrent, let es = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first(where: {curDate < $0.endTimestamp}) {
+                          withAnimation {
+                              proxy.scrollTo(es.id, anchor: .top)
+                          }
+                          toCurrent.val = false
+                      }
+                  })
+                  .onChange(of: toNext.val, perform: { tapNext in
+                      guard tapNext else { return }
+                      let curDate = Date()
+                      // print("events: \(events.key)")
+                      if tapNext, let es = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first(where: {curDate < $0.beginTimestamp}) {
+                          withAnimation {
+                              proxy.scrollTo(es.id, anchor: .top)
+                          }
+                          toNext.val = false
+                      }
+                  })
+                  .onAppear {
+                      viewShowing = true
+                  }
+                  .onDisappear {
+                      viewShowing = false
+                  }
+
               }
-              toBottom.val = false
+              
           }
-      })
-      .onChange(of: toCurrent.val, perform: { tapCurrent in
-          guard tapCurrent else { return }
-          let curDate = Date()
-          // print("events: \(events.key)")
-          if tapCurrent, let es = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first(where: {curDate < $0.endTimestamp}) {
-                  withAnimation {
-                      proxy.scrollTo(es.id, anchor: .top)
-                  }
-              toCurrent.val = false
-          }
-      })
-      .onChange(of: toNext.val, perform: { tapNext in
-          guard tapNext else { return }
-          let curDate = Date()
-          // print("events: \(events.key)")
-          if tapNext, let es = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first(where: {curDate < $0.beginTimestamp}) {
-                  withAnimation {
-                      proxy.scrollTo(es.id, anchor: .top)
-                  }
-              toNext.val = false
-          }
-      })
-      .onAppear {
-        viewShowing = true
       }
-      .onDisappear {
-        viewShowing = false
-      }
-    }
   }
 }
 
@@ -324,7 +390,12 @@ struct EventData: View {
   let showPastEvents: Bool
 
   var body: some View {
-    Section(header: Text(weekday)) {
+      Section(header: Text(weekday.uppercased())
+        .font(.subheadline)
+        .padding(3)
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemGray6))
+    ) {
       Section {
         ForEach(
           events.sorted {
@@ -335,6 +406,8 @@ struct EventData: View {
               NavigationLink(destination: ContentDetailView(contentId:event.contentId)) {
               EventCell(event: event, showDay: false)
                       .id(event.id)
+                      .foregroundColor(.primary)
+                      .padding(1)
             }
           }
         }

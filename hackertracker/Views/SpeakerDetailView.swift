@@ -29,7 +29,7 @@ struct SpeakerDetailView: View {
                                 .font(.caption)
                                 .foregroundColor(.gray)
                         }
-                        if let affiliations = speaker.affiliations {
+                        if let affiliations = speaker.affiliations, affiliations.count > 0 {
                             showAffiliations(affiliations: affiliations)
                         }
                     }
@@ -78,6 +78,7 @@ struct showSpeakerLinks: View {
     @Environment(\.openURL) private var openURL
     @State private var collapsed = false
     @EnvironmentObject var theme: Theme
+    @AppStorage("colorMode") var colorMode: Bool = false
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -86,10 +87,21 @@ struct showSpeakerLinks: View {
             }, label: {
                 HStack {
                     Text("Links")
-                        .font(.headline).padding(.top)
+                        .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
-                }
+                    if collapsed {
+                        Text("Show")
+                            .foregroundColor(.secondary)
+                            .font(.subheadline)
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Hide")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                        Image(systemName: "chevron.down")
+                            .foregroundColor(.secondary)
+                    }                }
             }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
             if !collapsed {
                 VStack(alignment: .leading) {
@@ -104,10 +116,10 @@ struct showSpeakerLinks: View {
                                     Label(link.url, systemImage: "link")
                                 }
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(theme.carousel())
+                            .background(colorMode ? theme.carousel(): Color(.systemGray6))
                             .cornerRadius(15)
                             
                         }
@@ -121,9 +133,11 @@ struct showSpeakerLinks: View {
 
 struct showEvents: View {
     var eventIds: [Int]
+    var title: String?
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @EnvironmentObject var viewModel: InfoViewModel
     @State private var collapsed = false
+    @State private var myEvents: [Event] = []
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -131,25 +145,49 @@ struct showEvents: View {
                 collapsed.toggle()
             }, label: {
                 HStack {
-                    Text("Schedule")
-                        .font(.headline).padding(.top)
+                    Text(title ?? "Schedule")
+                        .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
-                }
+                    if collapsed {
+                        Text("Show")
+                            .foregroundColor(.secondary)
+                            .font(.subheadline)
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Hide")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                        Image(systemName: "chevron.down")
+                            .foregroundColor(.secondary)
+                    }                }
             }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
             if !collapsed {
                 VStack {
-                    ForEach(eventIds, id: \.self) { eventId in
-                        if let ev = viewModel.events.first(where: {$0.id == eventId}) {
-                            NavigationLink(destination: ContentDetailView(contentId: ev.contentId)) {
-                                    SpeakerEventView(event: ev, bookmarks: bookmarks.map { $0.id })
+                    ForEach(myEvents) { event in
+                        //if let ev = viewModel.events.first(where: {$0.id == eventId}) {
+                            NavigationLink(destination: ContentDetailView(contentId: event.contentId)) {
+                                    SpeakerEventView(event: event)
                                         .foregroundColor(.primary)
                             }
-                        }
+                        //}
                     }
                 }
             }
         }
+        .task {
+            sortEvents()
+        }
+    }
+    
+    func sortEvents() {
+        var unsortedEvents: [Event] = []
+        for e in eventIds {
+            if let events = viewModel.events.first(where: {$0.id == e}) {
+                unsortedEvents.append(events)
+            }
+        }
+        myEvents = unsortedEvents.sorted(by:{ $0.beginTimestamp < $1.endTimestamp })
     }
 }
 
@@ -174,7 +212,7 @@ struct showAffiliations: View {
 
 struct SpeakerEventView: View {
     var event: Event
-    var bookmarks: [Int32]
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     let dfu = DateFormatterUtility.shared
     @Environment(\.managedObjectContext) private var viewContext
     @EnvironmentObject var viewModel: InfoViewModel
@@ -193,10 +231,11 @@ struct SpeakerEventView: View {
                 if let l = viewModel.locations.first(where: {$0.id == event.locationId}) {
                     Text(l.name).font(.caption2)
                 }
-                if let tag = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == event.tagIds[0]})}) {
+                // if let tagtype = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == tagId})}), let tag = tagtype.tags.first(where: {$0.id == tagId})
+                if let tagType = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == event.tagIds[0]})}), let tag = tagType.tags.first(where: {$0.id == event.tagIds[0]}) {
                     VStack {
                         HStack {
-                            Circle().foregroundColor(getEventTagColorBackground(id: event.tagIds[0]))
+                            Circle().foregroundColor(Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
                                 .frame(width: 8, height: 8, alignment: .center)
                             
                             Text(tag.label).font(.caption)
@@ -212,7 +251,8 @@ struct SpeakerEventView: View {
                 Button {
                     bookmarkAction()
                 } label: {
-                    Image(systemName: bookmarks.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                    Image(systemName: bookmarks.map({$0.id}).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                        .foregroundColor((bookmarks.map({$0.id}).contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
                 }
             }
             .buttonStyle(PlainButtonStyle())
@@ -220,7 +260,7 @@ struct SpeakerEventView: View {
     }
     
     func bookmarkAction() {
-        if bookmarks.contains(Int32(event.id)) {
+        if bookmarks.map({$0.id}).contains(Int32(event.id)) {
             BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
             NotificationUtility.removeNotification(id: event.id)
         } else {

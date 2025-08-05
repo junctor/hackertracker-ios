@@ -47,7 +47,9 @@ struct ContentDetailView: View {
                     .cornerRadius(15)
                 }
                 VStack(alignment: .leading) {
-                    Markdown(item.description).padding()
+                    Markdown(item.description)
+                        .textSelection(.enabled)
+                        .padding()
                 }
                 if item.media.count > 0 {
                     showMedia(media: item.media)
@@ -114,7 +116,7 @@ struct showFeedbackButton: View {
             } label: {
                 Label("Submit Feedback", systemImage: "square.and.pencil")
             }
-            .foregroundColor(.white)
+            .foregroundColor(colorMode ? .white : .primary)
             .frame(maxWidth: .infinity)
             .padding(15)
             .background(colorMode ? theme.carousel() : Color(.systemGray6))
@@ -166,7 +168,19 @@ struct showSessions: View {
                         Text("Sessions")
                             .font(.subheadline)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                        collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                        if collapsed {
+                            Text("Show")
+                                .foregroundColor(.secondary)
+                                .font(.subheadline)
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("Hide")
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                            Image(systemName: "chevron.down")
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
             }
@@ -256,6 +270,7 @@ struct showSessionRow: View {
                         bookmarkAction(id: s.id)
                     } label: {
                         Image(systemName: bookmarks.map{$0.id}.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
+                            .foregroundColor((bookmarks.map({$0.id}).contains(Int32(s.id)) && viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
                     }
                     MoreContentMenu(content: item, session: s, notExists: $notExists)
                 }
@@ -276,11 +291,20 @@ struct showSessionRow: View {
     }
 }
 
+struct MoreView: View {
+    var body: some View {
+        HStack {
+            Text("More")
+            Image(systemName: "chevron.right")
+        }
+    }
+}
+
 struct showRelated: View {
     var eventIds: [Int]
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @EnvironmentObject var viewModel: InfoViewModel
-    @State private var collapsed = false
+    @State private var collapsed = true
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -289,9 +313,21 @@ struct showRelated: View {
             }, label: {
                 HStack {
                     Text("Related Content")
-                        .font(.headline).padding(.top)
+                        .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                    if collapsed {
+                        Text("More")
+                            .foregroundColor(.secondary)
+                            .font(.subheadline)
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Less")
+                            .foregroundColor(.secondary)
+                            .font(.subheadline)
+                        Image(systemName: "chevron.down")
+                            .foregroundColor(.secondary)
+                    }
                 }
             }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
             if !collapsed {
@@ -305,6 +341,16 @@ struct showRelated: View {
                         }
                     }
                 }
+            } else {
+                VStack {
+                        let eventId = eventIds[0]
+                        if let c = viewModel.content.first(where: {$0.id == eventId}) {
+                            NavigationLink(destination: ContentDetailView(contentId: c.id)) {
+                                ContentCell(content: c, bookmarks: bookmarks.map { $0.id }, showDay: true)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                }
             }
         }
     }
@@ -315,6 +361,7 @@ struct showPeople: View {
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
     @State private var collapsed = false
+    @AppStorage("colorMode") var colorMode: Bool = false
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
@@ -325,9 +372,22 @@ struct showPeople: View {
             }, label: {
                 HStack {
                     Text("People")
-                        .font(.subheadline)
+                        .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
+                    if collapsed {
+                        Text("Show")
+                            .foregroundColor(.secondary)
+                            .font(.subheadline)
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Hide")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                        Image(systemName: "chevron.down")
+                            .foregroundColor(.secondary)
+                    }
+                    //collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
                 }
             }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
             if !collapsed {
@@ -346,10 +406,10 @@ struct showPeople: View {
                                         }
                                     }
                                 }
-                                .foregroundColor(.white)
+                                .foregroundColor(.primary)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding(15)
-                                .background(theme.carousel().gradient)
+                                .background(colorMode ? theme.carousel(): Color(.systemGray6))
                                 .cornerRadius(15)
                             }
                         }
@@ -365,10 +425,10 @@ struct showPeople: View {
                             }
                         }
                     }
-                    .foregroundColor(.white)
+                    .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(theme.carousel().gradient)
+                    .background(colorMode ? theme.carousel(): Color(.systemGray6))
                     .cornerRadius(15)
                 }
             }

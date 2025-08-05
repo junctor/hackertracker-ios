@@ -13,12 +13,22 @@ struct InfoView: View {
     @Binding var tabSelection: Int
     //@Binding var tappedMainTwice: Bool
     @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("colorMode") var colorMode: Bool = false
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var theme: Theme
     @EnvironmentObject var filters: Filters
+    @EnvironmentObject var consViewModel: ConferencesViewModel
     @Environment(\.openURL) private var openURL
+    @State private var showUpdateButton = false
+    @State private var appStoreVersion: String?
+    @State private var showOpenUrl = false
+    @State private var path = NavigationPath()
+    @State private var sharedEvents:[Event] = []
+    @State private var eventDay = ""
+    @State private var searchText = ""
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
 
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
@@ -26,7 +36,14 @@ struct InfoView: View {
     @State var schedule = UUID()
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $path) {
+            if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
+                NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
+                    CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details" )
+                        .frame(height: 40)
+                        .cornerRadius(0)
+                }
+            }
             ScrollView {
                 VStack(alignment: .center) {
                     VStack(alignment: .center) {
@@ -71,7 +88,22 @@ struct InfoView: View {
                     .padding(15)
                     .background(Color(.systemGray6))
                     .cornerRadius(15)
-                    
+                    if showUpdateButton {
+                        if let url = URL(string: "itms-apps://itunes.apple.com/app/id1021141595") {
+                            Divider()
+                            Button {
+                                openURL(url)
+                            } label: {
+                                Label("HackerTracker Update (v\(appStoreVersion ?? "n/a")) Available", systemImage: "arrow.triangle.2.circlepath.circle")
+                            }
+                            .foregroundColor(colorMode ? .white : .primary)
+                            .frame(maxWidth: .infinity)
+                            .padding(15)
+                            .background(colorMode ? theme.carousel() : Color(.systemGray6))
+                            .cornerRadius(15)
+                            Divider()
+                        }
+                    }
                     if viewModel.showNews, let article = viewModel.news.first {
                         VStack {
                             Text("Latest News")
@@ -107,6 +139,13 @@ struct InfoView: View {
                         Text("Searchable")
                             .font(.subheadline)
                         LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
+                            if let emergId = viewModel.conference?.emergencyDocId, emergId > 0 {
+                                if let doc = viewModel.documents.first(where: {$0.id == emergId}) {
+                                    NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
+                                        CardView(systemImage: "doc", text: doc.title, color: ThemeColors.red)
+                                    }
+                                }
+                            }
                             NavigationLink(destination: GlobalSearchView()) {
                                 CardView(systemImage: "magnifyingglass", text: "Search", color: colorMode ? theme.carousel() : Color(.systemGray6))
                             }
@@ -172,7 +211,7 @@ struct InfoView: View {
                             }
                         }
                     }
-                    if let url = URL(string: "mailto:hackertracker@defcon.org") {
+                    if let url = URL(string: "mailto:hackertracker@defcon.org?subject=HackerTracker&body=\r\n-----------------------\r\nVersion: \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "Unknown")  (\(Bundle.main.infoDictionary?["CFBundleVersion"] ?? "Unknown"))\r\niOS: \(ProcessInfo.processInfo.operatingSystemVersionString)\r\nApp: \(Bundle.main.bundleIdentifier ?? "Unknown")\r\n-----------------------\r\n".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!) {
                         Divider()
                         HStack {
                             Button {
@@ -241,15 +280,116 @@ struct InfoView: View {
                 .onAppear {
                     print("InfoView: selectedCode: \(selected.code)")
                     if colorMode { theme.index = 0 }
+                    checkAppUpdate()
                 }
                 .analyticsScreen(name: "InfoView")
                 .onOpenURL(perform: { url in
+                    if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false) {
+                        let queryItems = urlComponents.queryItems
+                        //let path = urlComponents.path
+                        //let host = urlComponents.host ?? ""
                         print("opened with url \(url)")
+                        if let urlConference = url.host {
+                            if urlConference == viewModel.conference?.code {
+                                print("Conference is \(urlConference), checking path to \(url.path)")
+                                filters.filters.removeAll()
+                            } else {
+                                print("Need to switch conference to \(urlConference)")
+                                if let conf = consViewModel.conferences.first(where: {$0.code == urlConference}) {
+                                    print("Changing to \(conf.name)")
+                                    selected.code = conf.code
+                                    filters.filters.removeAll()
+                                    viewModel.fetchData(code: conf.code)
+                                }
+                            }
+                            switch url.path {
+                            case "/c", "/content":
+                                print("Open Content ID")
+                                
+                            case "/s", "/share":
+                                print("Share Content")
+                                if let sharedIds = queryItems?.first(where: { $0.name == "ids" })?.value {
+                                    print("Share IDs: \(sharedIds)")
+                                    
+                                    for id in sharedIds.split(separator: ",") {
+                                        if let e = viewModel.events.first(where: { $0.id == Int(id) }) {
+                                            sharedEvents.append(e)
+                                        } else {
+                                            print("Invalid ID: \(id) for conference \(urlConference)")
+                                        }
+                                    }
+                                    // Change Tab To Main Screen
+                                    if tabSelection != 1 {
+                                        tabSelection = 1
+                                    }
+                                    //print("Valid Ids: \(ids)")
+                                    // NavigationLink("Go to Content List View", destination: ContentListView(content: sharedContent, title: "Shared Content"))
+                                    if sharedEvents.count > 0 {
+                                        path.append("SharedEvents")
+                                    }
+                                }
+                            default:
+                                print("No corresponding URL")
+                            }
+                            
+                        }
+                    }
+                       
                 })
+            }
+            .navigationDestination(for: String.self) { value in
+                switch value {
+                case "SharedEvents":
+                    EventScrollView(events:
+                        sharedEvents
+                            .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
+                            .search(text: searchText)
+                            .eventDayGroup(
+                                showLocaltime: showLocaltime, conference: viewModel.conference
+                            ),
+                      dayTag: eventDay,
+                      showPastEvents: true, includeNav: true,
+                      showLocaltime: $showLocaltime)
+                    //EventsView(sharedEvents: sharedEvents)
+                    .onAppear {
+                        print("Navigating to \(value)")
+                    }
+                default:
+                    _04View(message: "Unknown destination: \(value)")
+                }
             }
         }
     }
     
+    func checkAppUpdate() {
+        guard let currentVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
+            return
+        }
+
+        guard let url = URL(string: "https://itunes.apple.com/lookup?bundleId=org.beezle.hackertracker") else {
+            return
+        }
+
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            guard let data = data, error == nil else {
+                return
+            }
+
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                    let results = json["results"] as? [[String: Any]],
+                    let latestAppStoreVersion = results.first?["version"] as? String {
+                        if latestAppStoreVersion.compare(currentVersion, options: .numeric) == .orderedDescending {
+                            self.appStoreVersion = latestAppStoreVersion
+                            self.showUpdateButton = true
+                        }
+                    }
+            } catch {
+                print("Error parsing JSON: \(error.localizedDescription)")
+            }
+        }.resume()
+    }
+
     func getKidsTags() -> [Int] {
         var kidsTags: [Int] = []
         for kidstype in viewModel.tagtypes.filter({$0.category == "content" && $0.isBrowsable == true}) {
@@ -318,7 +458,6 @@ struct MenuView: View {
                     if let menuId = item.menuId, let m = viewModel.menus.first(where: {$0.id == menuId}) {
                         NavigationLink(destination: ScrollView {
                             MenuView(menu: m, useGrid: false, tabSelection: $tabSelection)
-                            
                         }
                             .padding(15)
                         ) {
@@ -383,6 +522,8 @@ struct CardView: View {
     var systemImage: String
     var text: String
     var color: Color
+    var subtitle: String?
+    var foregroundColor: Color?
     @EnvironmentObject var viewModel: InfoViewModel
     @AppStorage("colorMode") var colorMode: Bool = false
 
@@ -390,19 +531,37 @@ struct CardView: View {
         if colorMode {
             HStack {
                 Image(systemName: systemImage)
-                Text(text)
+                if let sub = subtitle {
+                    VStack {
+                        Text(text)
+                        Text(sub)
+                            .font(.caption)
+                    }
+                    .frame(maxWidth: .infinity)
+                } else {
+                    Text(text)
+                }
             }
             .foregroundColor(.white)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(15)
-            .background(color.gradient)
+            .background(color)
             .cornerRadius(15)
         } else {
             HStack {
                 Image(systemName: systemImage)
-                Text(text)
+                if let sub = subtitle {
+                    VStack {
+                        Text(text)
+                        Text(sub)
+                            .font(.caption)
+                    }
+                    .frame(maxWidth: .infinity)
+                } else {
+                    Text(text)
+                }
             }
-            .foregroundColor(.primary)
+            .foregroundColor(foregroundColor ?? .primary)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(15)
             .background(color)

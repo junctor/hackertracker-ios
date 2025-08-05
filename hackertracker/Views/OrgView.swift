@@ -55,7 +55,7 @@ struct OrgView: View {
                         tabSelection = 2
                     } label: {
                         Label("Schedule", systemImage: "calendar")
-                            .foregroundColor(.white)
+                            .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
                             .background(colorMode ? theme.carousel() : Color(.systemGray6))
@@ -88,10 +88,21 @@ struct showLinks: View {
             }, label: {
                 HStack {
                     Text("Links")
-                        .font(.subheadline)
+                        .font(.headline)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                    collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
-                }
+                    if collapsed {
+                        Text("Show")
+                            .foregroundColor(.secondary)
+                            .font(.subheadline)
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Hide")
+                            .foregroundStyle(.secondary)
+                            .font(.subheadline)
+                        Image(systemName: "chevron.down")
+                            .foregroundColor(.secondary)
+                    }                }
             }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
             if !collapsed {
                 VStack(alignment: .leading) {
@@ -106,7 +117,7 @@ struct showLinks: View {
                                     Label(link.url, systemImage: "link")
                                 }
                             }
-                            .foregroundColor(.white)
+                            .foregroundColor(.primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
                             .background(colorMode ? theme.carousel() : Color(.systemGray6))

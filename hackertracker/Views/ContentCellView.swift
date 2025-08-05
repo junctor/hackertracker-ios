@@ -38,11 +38,15 @@ struct ContentCell: View {
                 HStack(alignment: .top) {
                     HStack(alignment: .center) {
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(content.title).font(.headline)
+                            Text(content.title)
+                                .font(.headline)
+                                .multilineTextAlignment(.leading)
                             if !content.people.isEmpty {
-                                Text(content.people.map { p in viewModel.speakers.first(where: { $0.id == p.id })?.name ?? "" }.joined(separator: ", ")).font(.subheadline)
+                                Text(content.people.map { p in viewModel.speakers.first(where: { $0.id == p.id })?.name ?? "" }.joined(separator: ", "))
+                                    .font(.subheadline)
+                                    .multilineTextAlignment(.leading)
                             }
-                            ShowEventCellTags(tagIds: content.tagIds)
+                            ShowEventCellTags(tagIds: content.tagIds, minWidth: 150)
                         }
                     }
                 }

@@ -44,6 +44,47 @@ class InfoViewModel: ObservableObject {
     @AppStorage("notifyAt") var notifyAt: Int = 20
 
     private var db = Firestore.firestore()
+    
+    func bookmarkConflicts(eventId: Int, bookmarks: [Int]) -> Bool {
+        for bookmark in bookmarks {
+            if bookmark == eventId {
+                continue
+            }
+            if let be = self.events.first(where: {$0.id == bookmark}), let e = self.events.first(where: {$0.id == eventId}) {
+                // print("be begin \(be.beginTimestamp), be end \(be.endTimestamp), e begin \(e.beginTimestamp), e end \(e.endTimestamp)")
+                if be.beginTimestamp == e.beginTimestamp || be.endTimestamp == e.endTimestamp {
+                    // print("Start or Stop Time is the same \(e.title), \(be.title)")
+                    return true
+                }
+                if be.beginTimestamp >= e.beginTimestamp && be.beginTimestamp <= e.endTimestamp {
+                    // print("bookmark begins inside event: \(e.title), \(be.title)")
+                    return true
+                }
+                if be.endTimestamp >= e.beginTimestamp && be.endTimestamp <= e.endTimestamp {
+                    // print("bookmark ends inside event: \(e.title), \(be.title)")
+                    return true
+                }
+                if e.beginTimestamp >= be.beginTimestamp && e.beginTimestamp <= be.endTimestamp {
+                    // print("event starts inside bookmark: \(e.title), \(be.title)")
+                    return true
+                }
+                if e.endTimestamp >= be.beginTimestamp && e.endTimestamp <= be.endTimestamp {
+                    // print("event ends inside bookmark: \(e.title), \(be.title)")
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
+    func bookmarkConflicts(bookmarks: [Int]) -> Bool {
+        for bookmark in bookmarks {
+            if bookmarkConflicts(eventId: bookmark, bookmarks: bookmarks) {
+                return true
+            }
+        }
+        return false
+    }
 
     func fetchData(code: String, hidden: Bool = false) {
         self.removeListeners()

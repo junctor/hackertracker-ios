@@ -53,13 +53,14 @@ struct orgSearchRow: View {
 struct orgRow: View {
     let org: Organization
     var theme: Theme
+    @AppStorage("colorMode") var colorMode: Bool = false
 
     var body: some View {
         if let l = org.logo, let lurl = l.url, let logo_url = URL(string: lurl) {
             VStack {
                 Text(org.name)
                     .font(.caption)
-                    .foregroundColor(.white)
+                    .foregroundColor(colorMode ? .white : .primary)
                 KFImage(logo_url)
                     .resizable()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -68,15 +69,15 @@ struct orgRow: View {
             }
             .padding(5)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(theme.carousel().gradient)
+            .background(colorMode ? theme.carousel(): Color(.systemGray6))
             .cornerRadius(15)
 
         } else {
             Text(org.name)
-                .foregroundColor(.white)
+                .foregroundColor(colorMode ? .white : .primary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(15)
-                .background(theme.carousel().gradient)
+                .background(colorMode ? theme.carousel(): Color(.systemGray6))
                 .cornerRadius(15)
         }
     }

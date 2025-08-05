@@ -17,9 +17,11 @@ struct ConferencesView: View {
     @EnvironmentObject var consViewModel: ConferencesViewModel
     @EnvironmentObject var filters: Filters
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
     @AppStorage("showHidden") var showHidden: Bool = false
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
+    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     
     //@StateObject var cViewModel = ConferencesViewModel()
     

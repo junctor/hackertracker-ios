@@ -109,14 +109,20 @@ struct CartView: View {
         
         qrCart = QRCart(i: cart.map {QRItem(v: Int($0.variantId), q: Int($0.count))})
         
-        let encoder = JSONEncoder()
-        if let jsonData = try? encoder.encode(qrCart) {
+        let version = 1
+        let items = qrCart.i.map { "\($0.v):\($0.q)" }.joined(separator: ";")
+        let compact = "\(version):\(viewModel.conference?.id ?? 0):i\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""):\(items):"
+        print("QRCodeView: Encoded Value: \(compact)")
+        return compact
+        
+        // let encoder = JSONEncoder()
+        /* if let jsonData = try? encoder.encode(qrCart) {
             if let jsonString = String(data: jsonData, encoding: .utf8) {
                 print("QRCodeView: JSON Value: \(jsonString)")
                 return jsonString
             }
         }
-        return ""
+        return "" */
     }
 }
 
@@ -133,7 +139,7 @@ struct DeleteAllView: View {
         .foregroundColor(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(15)
-        .background(ThemeColors.red.gradient)
+        .background(ThemeColors.red)
         .cornerRadius(15)
     }
 }

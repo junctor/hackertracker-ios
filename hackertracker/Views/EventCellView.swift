@@ -52,12 +52,17 @@ struct EventCell: View {
                             }
                         }
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(event.title).font(.headline)
+                            Text(event.title)
+                                .font(.headline)
+                                .multilineTextAlignment(.leading)
                             if !event.people.isEmpty {
-                                Text(event.people.map { p in viewModel.speakers.first(where: { $0.id == p.id })?.name ?? "" }.joined(separator: ", ")).font(.subheadline)
+                                Text(event.people.map { p in viewModel.speakers.first(where: { $0.id == p.id })?.name ?? "" }.joined(separator: ", "))
+                                    .font(.subheadline)
+                                    .multilineTextAlignment(.leading)
                             }
                             if let l = viewModel.locations.first(where: {$0.id == event.locationId}) {
                                 Text(l.name).font(.caption2)
+                                    .multilineTextAlignment(.leading)
                             }
                             ShowEventCellTags(tagIds: event.tagIds)
                         }
@@ -68,6 +73,7 @@ struct EventCell: View {
                             bookmarkAction()
                         } label: {
                             Image(systemName: bookmarks.map({$0.id}).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                                .foregroundColor((bookmarks.map({$0.id}).contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
                         }
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -94,11 +100,11 @@ struct EventCell: View {
 
 struct ShowEventCellTags: View {
     var tagIds: [Int]
+    var minWidth: CGFloat = 100
     @EnvironmentObject var viewModel: InfoViewModel
-    let gridItemLayout = [GridItem(.adaptive(minimum: 80))]
 
     var body: some View {
-        LazyVGrid(columns: gridItemLayout, alignment: .leading, spacing: 2) {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: minWidth))], alignment: .leading, spacing: 1) {
             ForEach(tagIds, id: \.self) { tagId in
                 if let tagtype = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == tagId})}), let tag = tagtype.tags.first(where: {$0.id == tagId}) {
                     VStack {
@@ -106,6 +112,8 @@ struct ShowEventCellTags: View {
                             Circle().foregroundColor(Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
                                 .frame(width: 8, height: 8, alignment: .center)
                             Text(tag.label).font(.caption)
+                                .multilineTextAlignment(.leading)
+                                .frame(alignment: .leading)
                         }
                     }
                 }

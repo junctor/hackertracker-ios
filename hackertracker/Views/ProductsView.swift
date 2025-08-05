@@ -124,7 +124,7 @@ struct ProductsRow: View {
                         HStack {
                             Text(product.priceMin < product.priceMax ? "$\(product.priceMin / 100)+" : "$\(product.priceMin/100)")
                                 .font(.subheadline)
-                                .foregroundColor(.white)
+                                .foregroundColor(.primary)
                         }
                         .padding(5)
                         .background(Color(.systemGray6))

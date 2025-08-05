@@ -35,6 +35,7 @@ struct Conference: Codable, Identifiable, Equatable {
     var merchHelpDocId: Int?
     var merchMandatoryAck: String?
     var merchTaxStatement: String?
+    var emergencyDocId: Int?
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -58,5 +59,6 @@ struct Conference: Codable, Identifiable, Equatable {
         case merchHelpDocId = "merch_help_doc_id"
         case merchMandatoryAck = "merch_mandatory_acknowledgement"
         case merchTaxStatement = "merch_tax_statement"
+        case emergencyDocId = "emergency_document_id"
     }
 }

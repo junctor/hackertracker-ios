@@ -14,11 +14,13 @@ struct Map: Codable, Identifiable {
     var url: String
     var description: String?
     var file: String?
+    var sortOrder: Int
 
     private enum CodingKeys: String, CodingKey {
         case id
         case url
         case description = "name_text"
         case file = "filename"
+        case sortOrder = "sort_order"
     }
 }

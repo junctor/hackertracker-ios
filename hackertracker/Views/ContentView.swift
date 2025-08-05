@@ -52,6 +52,7 @@ struct ContentView: View {
     @State private var schedule = UUID()
     @State private var isInit: Bool = false
     @State private var scheduleView = ScheduleView(tagIds: [])
+    @State private var showingEmergencySheet = false
 
     var body: some View {
         if viewModel.conference != nil {
@@ -105,9 +106,6 @@ struct ContentView: View {
                 }
                 viewModel.showNews = showNews
                 viewModel.easterEgg = easterEgg
-                if let con = viewModel.conference {
-                    showLocaltime ? DateFormatterUtility.shared.update(tz: TimeZone.current) : DateFormatterUtility.shared.update(tz: TimeZone(identifier: con.timezone ?? "America/Los_Angeles"))
-                }
 
                 // viewModel.fetchData(code: selected.code)
             }
@@ -132,6 +130,12 @@ struct ContentView: View {
                     .environmentObject(filters)
             } else {
                 _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
+                    .preferredColorScheme(theme.colorScheme)
+                    .environmentObject(selected)
+                    .environmentObject(viewModel)
+                    .environmentObject(consViewModel)
+                    .environmentObject(theme)
+                    .environmentObject(filters)
                     .task {
                         print("ContentView: Selected Conference \(selected.code), Conference Code: \(conferenceCode)")
                         if selected.code != conferenceCode {

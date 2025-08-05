@@ -11,22 +11,30 @@ import SwiftUI
 struct DocumentView: View {
     var title_text: String
     var body_text: String
+    var color: Color?
+    var systemImage: String?
     @EnvironmentObject var theme: Theme
+    @AppStorage("colorMode") var colorMode: Bool = false
 
     var body: some View {
         ScrollView {
             VStack {
                 HStack {
+                    Image(systemName: systemImage ?? "doc")
+                        .frame(alignment: .leading)
+                        .padding(5)
                     Text(title_text)
                         .font(.title)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .foregroundColor(.white)
+                .foregroundColor(colorMode ? .white : .primary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(15)
-                .background(theme.carousel().gradient)
+                .background(color ?? (colorMode ? theme.carousel() : Color(.systemGray6)))
                 .cornerRadius(15)
                 Divider()
                 Markdown(body_text)
+                    .textSelection(.enabled)
                 Divider()
             }
         }

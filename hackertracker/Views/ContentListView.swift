@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentListView: View {
     var content: [Content]
+    var title: String?
     @State private var searchText = ""
     @State private var showFilters = false
     @EnvironmentObject var viewModel: InfoViewModel
@@ -42,7 +43,7 @@ struct ContentListView: View {
               )
             }
         }
-        .navigationTitle("All Content")
+        .navigationTitle(title ?? "All Content")
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 Button {
@@ -82,13 +83,14 @@ struct ContentData: View {
     var body: some View {
         Section(header: Text(String(char.uppercased()))
             .font(.subheadline)
-            .padding(1)
+            .padding(3)
             .frame(maxWidth: .infinity)
             .background(Color(.systemGray6))
         ) {
             ForEach(content, id: \.id) { item in
                 NavigationLink(destination: ContentDetailView(contentId: item.id)) {
                     ContentCell(content: item, bookmarks: bookmarks.map { $0.id }, showDay: false)
+                        .padding(1)
                }
                 .buttonStyle(PlainButtonStyle())
             }

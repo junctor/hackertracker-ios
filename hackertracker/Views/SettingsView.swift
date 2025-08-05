@@ -15,6 +15,13 @@ struct SettingsView: View {
     
     var body: some View {
         NavigationStack {
+            if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
+                NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
+                    CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details")
+                        .frame(height: 40)
+                        .cornerRadius(0)
+                }
+            }
             ScrollView {
                 Text("Settings")
                     .font(.title)
@@ -49,7 +56,6 @@ struct SettingsView: View {
                 NotificationSettingsView()
                 EasterEggSettingsView()
             }
-            .padding(10)
             .analyticsScreen(name: "SettingsView")
         }
     }
@@ -105,6 +111,8 @@ struct NotificationSettingsView: View {
         .padding(5)
         .background(ThemeColors.red)
         .cornerRadius(5)
+        Divider()
+        ShowConflictAlertView()
         Divider()
         ShowMerchInfoSettingsView()
         Divider()
@@ -189,6 +197,24 @@ struct ShowPastEventsSettingsView: View {
                     viewModel.showPastEvents = value
                 }
             Text("Show or hide past events in the conference schedule")
+                .font(.caption)
+        }
+        .padding(5)
+        Divider()
+    }
+}
+
+struct ShowConflictAlertView: View {
+    @EnvironmentObject var viewModel: InfoViewModel
+    @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
+    
+    var body: some View {
+        VStack(alignment: .leading) {
+            Toggle("Show Schedule Conflict Alert", isOn: $showConflictAlert)
+                .onChange(of: showConflictAlert) { value in
+                    print("SettingsView: Changing to showConflictAlert = \(value)")
+                }
+            Text("Show the conflict alert icon on the schedule")
                 .font(.caption)
         }
         .padding(5)

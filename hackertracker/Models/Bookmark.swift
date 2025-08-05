@@ -9,4 +9,5 @@ import Foundation
 
 struct Bookmark: Codable {
     var id: Int
+    var conferenceId: Int?
 }
