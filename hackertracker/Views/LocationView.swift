@@ -10,19 +10,26 @@ import SwiftUI
 struct LocationView: View {
     var locations: [Location]
     var childLocations: [Int: [Location]]
+    
+    @State private var searchText = ""
 
     var body: some View {
         VStack {
-            List {
-                ForEach(locations.filter { $0.hierDepth == 1 }.sorted { $0.hierExtentLeft < $1.hierExtentLeft }) { loc in
-                    // Text(loc.name)
-                    LocationCell(location: loc, childLocations: childLocations)
-                }.listRowBackground(Color.clear)
+            ScrollView {
+                ScrollViewReader { _ in
+                    ForEach(locations.filter { $0.hierDepth == 1 }.sorted { $0.hierExtentLeft < $1.hierExtentLeft }) { loc in
+                        // Text(loc.name)
+                        LocationCell(location: loc, childLocations: childLocations)
+                    }.listRowBackground(Color.clear)
+                }
             }
-        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .accentColor(.primary)
             .navigationTitle("Locations")
+            .searchable(text: $searchText)
             .analyticsScreen(name: "LocationView")
+        }
+        .padding(5)
     }
 
     init(locations: [Location]) {

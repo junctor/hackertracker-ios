@@ -14,14 +14,16 @@ struct FAQListView: View {
     @State private var searchText = ""
 
     var body: some View {
-        List {
-            ForEach(self.viewModel.faqs.search(text: searchText)) { faq in
-                faqRow(faq: faq)
+        ScrollView {
+            ScrollViewReader { _ in
+                ForEach(self.viewModel.faqs.search(text: searchText)) { faq in
+                    faqRow(faq: faq)
+                }
             }
+            .searchable(text: $searchText)
+            .navigationTitle("FAQs")
+            .analyticsScreen(name: "FAQListView")
         }
-        .searchable(text: $searchText)
-        .navigationTitle("FAQs")
-        .analyticsScreen(name: "FAQListView")
     }
 }
 

@@ -15,21 +15,25 @@ struct NewsListView: View {
     @State private var searchText = ""
 
     var body: some View {
-        List {
-            ForEach(self.viewModel.news.search(text: searchText).sorted {
-                $0.updatedAt > $1.updatedAt
-            }) { article in
-                articleRow(article: article)
+        ScrollView {
+            ScrollViewReader { _ in
+                ForEach(self.viewModel.news.search(text: searchText).sorted {
+                    $0.updatedAt > $1.updatedAt
+                }) { article in
+                    articleRow(article: article, pad: true)
+                        .padding(2)
+                }
             }
+            .searchable(text: $searchText)
+            .navigationTitle("News")
+            .analyticsScreen(name: "NewsListView")
         }
-        .searchable(text: $searchText)
-        .navigationTitle("News")
-        .analyticsScreen(name: "NewsListView")
     }
 }
 
 struct articleRow: View {
     let article: Article
+    var pad: Bool = false
     @State private var showText = false
     @FetchRequest(sortDescriptors: []) var readnews: FetchedResults<News>
     @Environment(\.managedObjectContext) private var viewContext
@@ -59,7 +63,18 @@ struct articleRow: View {
             // .overlay(NotificationDot(showDot: !readnews.map({$0.id}).contains(Int32(article.id))))
 
             if showText {
-                Markdown(article.text).padding(.vertical)
+                if pad {
+                    VStack(alignment: .leading) {
+                        Markdown(article.text).padding(.vertical)
+                    }
+                    .foregroundColor(.primary)
+                    .frame(maxWidth: .infinity)
+                    .padding(15)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(15)
+                } else {
+                    Markdown(article.text).padding(.vertical)
+                }
             }
         }
         .onChange(of: showText) { value in

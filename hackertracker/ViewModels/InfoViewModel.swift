@@ -167,23 +167,15 @@ class InfoViewModel: ObservableObject {
                     for map in maps {
                         if let url = URL(string: map.url) {
                             let path = "\(conference.code)/\(url.lastPathComponent)"
-                            let mLocalDir = docDir.appendingPathComponent(conference.code)
-                            if !FileManager.default.fileExists(atPath: mLocalDir.path) {
-                                try! FileManager.default.createDirectory(at: mLocalDir, withIntermediateDirectories: true)
-                            }
-                            // let mRef = storageRef.child(conference.code)
                             let mLocal = docDir.appendingPathComponent(path)
+                            if !fileManager.fileExists(atPath: mLocal.deletingLastPathComponent().path) {
+                                try! fileManager.createDirectory(at: mLocal.deletingLastPathComponent(), withIntermediateDirectories: true)
+                            }
+                            
                             if fileManager.fileExists(atPath: mLocal.path) {
                                 // Add logic to check md5 hash and re-update if it has changed
                                 NSLog("InfoViewModel: (\(conference.code): Map file (\(path)) already exists")
                             } else {
-                                /* _ = mRef.write(toFile: mLocal) { _, error in
-                                    if let error = error {
-                                        print("InfoViewModel: (\(conference.code)): Error \(error) retrieving \(path)")
-                                    } else {
-                                        print("InfoViewModel: (\(conference.code)): Got map \(path)")
-                                    }
-                                } */
                                 self.downloadFileCompletionHandler(url: url, destinationUrl: mLocal) { (destinationUrl, error) in
                                     if let durl = destinationUrl {
                                         NSLog("Finished downloading: \(durl)")
@@ -230,7 +222,15 @@ class InfoViewModel: ObservableObject {
                             if FileManager().fileExists(atPath: destinationUrl.path) {
                                 try! FileManager.default.removeItem(at: destinationUrl)
                             }
-                                try! FileManager.default.moveItem(at: tempFileUrl, to: destinationUrl)
+                            let directoryPath = (destinationUrl.path as NSString).deletingLastPathComponent
+                            if !FileManager.default.fileExists(atPath: directoryPath) {
+                                do {
+                                    try FileManager.default.createDirectory(at: destinationUrl.deletingLastPathComponent(), withIntermediateDirectories: true)
+                                } catch {
+                                    print("Error creating directory: \(error.localizedDescription)")
+                                }
+                            }
+                            try! FileManager.default.moveItem(at: tempFileUrl, to: destinationUrl)
                             completion(destinationUrl, error)
                         } else {
                             completion(nil, error)

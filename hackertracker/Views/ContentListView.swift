@@ -57,21 +57,8 @@ struct ContentListView: View {
                 }
             }
         }
-        /*  */
         .analyticsScreen(name: "ContentListView")
     }
-
-    /* var body: some View {
-        List {
-            //ForEach(self.viewModel.content.search(text: searchText)) { faq in
-            ForEach(self.content) { item in
-                contentRow(item: item)
-            }
-        }
-        // .searchable(text: $searchText)
-        .navigationTitle("All Content")
-        .analyticsScreen(name: "ContentListView")
-    } */
 }
 
 struct ContentData: View {

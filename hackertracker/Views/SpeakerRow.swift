@@ -26,6 +26,7 @@ struct SpeakerRow: View {
                         .foregroundColor(.gray)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 }
