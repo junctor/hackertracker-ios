@@ -17,7 +17,19 @@ class InfoViewModel: ObservableObject {
     @Published var locations = [Location]()
     @Published var products = [Product]()
     @Published var content = [Content]()
-    @Published var events = [Event]()
+    @Published var events = [Event]() {
+        didSet {
+            // Phase 2: O(1) event lookup so bookmarkConflicts is O(b) instead of O(b*n).
+            eventsById = Dictionary(uniqueKeysWithValues: events.map { ($0.id, $0) })
+            conflictCache.removeAll(keepingCapacity: true)
+        }
+    }
+    /// Phase 2: index rebuilt whenever `events` changes.
+    private var eventsById: [Int: Event] = [:]
+    /// Phase 2: cached per-event conflict result for a given bookmark set.
+    /// Cleared when events change or bookmarks change.
+    private var conflictCache: [Int: Bool] = [:]
+    private var conflictCacheBookmarkKey: Int = 0
     @Published var speakers = [Speaker]()
     @Published var orgs = [Organization]()
     @Published var faqs = [FAQ]()
@@ -53,34 +65,31 @@ class InfoViewModel: ObservableObject {
     private var db = Firestore.firestore()
     
     func bookmarkConflicts(eventId: Int, bookmarks: [Int]) -> Bool {
-        for bookmark in bookmarks {
-            if bookmark == eventId {
-                continue
-            }
-            if let be = self.events.first(where: {$0.id == bookmark}), let e = self.events.first(where: {$0.id == eventId}) {
-                // print("be begin \(be.beginTimestamp), be end \(be.endTimestamp), e begin \(e.beginTimestamp), e end \(e.endTimestamp)")
-                if be.beginTimestamp == e.beginTimestamp || be.endTimestamp == e.endTimestamp {
-                    // print("Start or Stop Time is the same \(e.title), \(be.title)")
-                    return true
-                }
-                if be.beginTimestamp >= e.beginTimestamp && be.beginTimestamp <= e.endTimestamp {
-                    // print("bookmark begins inside event: \(e.title), \(be.title)")
-                    return true
-                }
-                if be.endTimestamp >= e.beginTimestamp && be.endTimestamp <= e.endTimestamp {
-                    // print("bookmark ends inside event: \(e.title), \(be.title)")
-                    return true
-                }
-                if e.beginTimestamp >= be.beginTimestamp && e.beginTimestamp <= be.endTimestamp {
-                    // print("event starts inside bookmark: \(e.title), \(be.title)")
-                    return true
-                }
-                if e.endTimestamp >= be.beginTimestamp && e.endTimestamp <= be.endTimestamp {
-                    // print("event ends inside bookmark: \(e.title), \(be.title)")
-                    return true
-                }
+        // Phase 2: O(1) dict lookup + per-event memoization keyed on bookmark identity.
+        var hasher = Hasher()
+        for b in bookmarks { hasher.combine(b) }
+        let bookmarkKey = hasher.finalize()
+        if bookmarkKey != conflictCacheBookmarkKey {
+            conflictCache.removeAll(keepingCapacity: true)
+            conflictCacheBookmarkKey = bookmarkKey
+        }
+        if let cached = conflictCache[eventId] { return cached }
+        guard let e = eventsById[eventId] else {
+            conflictCache[eventId] = false
+            return false
+        }
+        for bookmark in bookmarks where bookmark != eventId {
+            guard let be = eventsById[bookmark] else { continue }
+            if be.beginTimestamp == e.beginTimestamp || be.endTimestamp == e.endTimestamp ||
+               (be.beginTimestamp >= e.beginTimestamp && be.beginTimestamp <= e.endTimestamp) ||
+               (be.endTimestamp >= e.beginTimestamp && be.endTimestamp <= e.endTimestamp) ||
+               (e.beginTimestamp >= be.beginTimestamp && e.beginTimestamp <= be.endTimestamp) ||
+               (e.endTimestamp >= be.beginTimestamp && e.endTimestamp <= be.endTimestamp) {
+                conflictCache[eventId] = true
+                return true
             }
         }
+        conflictCache[eventId] = false
         return false
     }
     
@@ -563,7 +572,10 @@ class InfoViewModel: ObservableObject {
         articleListener = db.collection("conferences")
             .document(code)
             .collection("articles")
-            .order(by: "updated_at", descending: true).addSnapshotListener { querySnapshot, error in
+            .order(by: "updated_at", descending: true)
+            // Phase 2: cap news feed; older articles can be loaded on demand later.
+            .limit(to: 100)
+            .addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("articles: empty snapshot")
                     return

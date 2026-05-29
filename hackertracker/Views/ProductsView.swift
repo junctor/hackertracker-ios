@@ -113,6 +113,7 @@ struct ProductsRow: View {
                 ZStack(alignment: .bottomTrailing) {
                     if product.media.count > 0, let media_url = URL(string: product.media[0].url) {
                         KFImage(media_url)
+                            .htDownsampled(side: 200)
                             .resizable()
                             .scaledToFit()
                             .cornerRadius(5)

@@ -62,6 +62,7 @@ struct orgRow: View {
                     .font(.caption)
                     .foregroundColor(colorMode ? .white : .primary)
                 KFImage(logo_url)
+                    .htDownsampled(side: 200)
                     .resizable()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .aspectRatio(contentMode: .fit)

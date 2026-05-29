@@ -27,6 +27,9 @@ struct EventsView: View {
 
   @State private var eventDay = ""
   @State private var searchText = ""
+  /// Phase 2: debounced copy used by the filter pipeline so we don't recompute
+  /// filter+search+group on every keystroke.
+  @State private var debouncedSearch = ""
   //@Binding var filters: Set<Int>
   @State private var showFilters = false
   @State private var showEmergency = false
@@ -48,7 +51,7 @@ struct EventsView: View {
           events:
             viewModel.events
             .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
-            .search(text: searchText)
+            .search(text: debouncedSearch)
             .eventDayGroup(
                 showLocaltime: showLocaltime, conference: viewModel.conference
             ),
@@ -163,6 +166,11 @@ struct EventsView: View {
             }
         }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+        .task(id: searchText) {
+            // Phase 2: 250ms debounce so filter+search+group only runs once per pause.
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            if !Task.isCancelled { debouncedSearch = searchText }
+        }
       }
       .sheet(isPresented: $showFilters) {
         EventFilters(
@@ -192,7 +200,7 @@ struct EventsView: View {
           events:
             viewModel.events
             .filters(typeIds: filters.filters, bookmarks: bookmarks.map({$0.id}), tagTypes: viewModel.tagtypes)
-            .search(text: searchText).eventDayGroup(
+            .search(text: debouncedSearch).eventDayGroup(
                 showLocaltime: showLocaltime, conference: viewModel.conference
             ),
           dayTag: eventDay,
@@ -253,6 +261,11 @@ struct EventsView: View {
           }
         }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+        .task(id: searchText) {
+            // Phase 2: 250ms debounce so filter+search+group only runs once per pause.
+            try? await Task.sleep(nanoseconds: 250_000_000)
+            if !Task.isCancelled { debouncedSearch = searchText }
+        }
       }
       .onChange(of: viewModel.conference) { con in
         Log.ui.debug("EventsView conference -> \(con?.name ?? "<nil>", privacy: .public)")
@@ -294,6 +307,10 @@ struct EventScrollView: View {
                .listStyle(.plain)
            }
            .searchable(text: $searchText)
+           .task(id: searchText) {
+               try? await Task.sleep(nanoseconds: 250_000_000)
+               if !Task.isCancelled { debouncedSearch = searchText }
+           }
            .sheet(isPresented: $showFilters) {
              EventFilters(
                tagtypes: viewModel.tagtypes.filter {
