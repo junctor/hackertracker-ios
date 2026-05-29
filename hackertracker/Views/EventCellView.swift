@@ -20,11 +20,11 @@ struct EventCell: View {
 
     func bookmarkAction() {
         if bookmarks.map({$0.id}).contains(Int32(event.id)) {
-            print("EventCellView: Removing Bookmark \(event.id)")
+            Log.bookmarks.debug("eventCell remove \(event.id)")
             BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
             NotificationUtility.removeNotification(id: event.id)
         } else {
-            print("EventCellView: Adding Bookmark \(event.id)")
+            Log.bookmarks.debug("eventCell add \(event.id)")
             BookmarkUtility.addBookmark(context: viewContext, id: event.id)
             let notDate = event.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
             NotificationUtility.scheduleNotification(date: notDate, id: event.id, title: event.title, location: viewModel.locations.first(where: {$0.id == event.locationId})?.name ?? "unknown")

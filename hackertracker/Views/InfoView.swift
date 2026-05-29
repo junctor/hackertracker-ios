@@ -78,7 +78,7 @@ struct InfoView: View {
                         } else {
                             _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
                                 .task {
-                                    print("InfoView: Need to fetch data for \(selected.code)")
+                                    Log.app.debug("InfoView fetch data for \(selected.code, privacy: .public)")
                                     viewModel.fetchData(code: selected.code)
                                 }
                         }
@@ -250,7 +250,7 @@ struct InfoView: View {
                             ZStack(alignment: .bottomTrailing){
                                 Button {
                                     playChik()
-                                    print("chikin")
+                                    Log.ui.debug("easter egg: chikin")
                                 } label: {
                                     Label("", systemImage: "bird.circle")
                                         .foregroundColor(.secondary)
@@ -271,14 +271,14 @@ struct InfoView: View {
                  
                 if #available(iOS 17.0, *) {
                     .onChange(of: selected.code) {
-                        print("InfoView: selected changed")
+                        Log.app.debug("InfoView selected changed")
                     }
                     .onChange(of: filters.filters) {
-                        print("InfoView: filters changed")
+                        Log.app.debug("InfoView filters changed")
                     }
                 } */
                 .onAppear {
-                    print("InfoView: selectedCode: \(selected.code)")
+                    Log.app.debug("InfoView selectedCode=\(selected.code, privacy: .public)")
                     if colorMode { theme.index = 0 }
                     checkAppUpdate()
                 }
@@ -288,15 +288,15 @@ struct InfoView: View {
                         let queryItems = urlComponents.queryItems
                         //let path = urlComponents.path
                         //let host = urlComponents.host ?? ""
-                        print("opened with url \(url)")
+                        Log.app.info("deep link opened: \(url, privacy: .public)")
                         if let urlConference = url.host {
                             if urlConference == viewModel.conference?.code {
-                                print("Conference is \(urlConference), checking path to \(url.path)")
+                                Log.app.debug("deep link conference=\(urlConference, privacy: .public) path=\(url.path, privacy: .public)")
                                 filters.filters.removeAll()
                             } else {
-                                print("Need to switch conference to \(urlConference)")
+                                Log.app.info("deep link wants conference \(urlConference, privacy: .public)")
                                 if let conf = consViewModel.conferences.first(where: {$0.code == urlConference}) {
-                                    print("Changing to \(conf.name)")
+                                    Log.app.info("switching to \(conf.name, privacy: .public)")
                                     selected.code = conf.code
                                     filters.filters.removeAll()
                                     viewModel.fetchData(code: conf.code)
@@ -304,18 +304,18 @@ struct InfoView: View {
                             }
                             switch url.path {
                             case "/c", "/content":
-                                print("Open Content ID")
+                                Log.app.debug("deep link: open content id")
                                 
                             case "/s", "/share":
-                                print("Share Content")
+                                Log.app.debug("deep link: share content")
                                 if let sharedIds = queryItems?.first(where: { $0.name == "ids" })?.value {
-                                    print("Share IDs: \(sharedIds)")
+                                    Log.app.debug("share ids: \(sharedIds, privacy: .public)")
                                     
                                     for id in sharedIds.split(separator: ",") {
                                         if let e = viewModel.events.first(where: { $0.id == Int(id) }) {
                                             sharedEvents.append(e)
                                         } else {
-                                            print("Invalid ID: \(id) for conference \(urlConference)")
+                                            Log.app.error("invalid share id=\(id, privacy: .public) conf=\(urlConference, privacy: .public)")
                                         }
                                     }
                                     // Change Tab To Main Screen
@@ -329,7 +329,7 @@ struct InfoView: View {
                                     }
                                 }
                             default:
-                                print("No corresponding URL")
+                                Log.app.error("deep link: no corresponding URL")
                             }
                             
                         }
@@ -352,7 +352,7 @@ struct InfoView: View {
                       showLocaltime: $showLocaltime)
                     //EventsView(sharedEvents: sharedEvents)
                     .onAppear {
-                        print("Navigating to \(value)")
+                        Log.app.debug("navigating to \(value, privacy: .public)")
                     }
                 default:
                     _04View(message: "Unknown destination: \(value)")
@@ -385,7 +385,8 @@ struct InfoView: View {
                         }
                     }
             } catch {
-                print("Error parsing JSON: \(error.localizedDescription)")
+                Log.app.error("JSON parse error: \(error.localizedDescription, privacy: .public)")
+                CrashReport.record(error, context: ["op": "parseDeepLinkJSON"])
             }
         }.resume()
     }
@@ -399,7 +400,7 @@ struct InfoView: View {
                     kidsTags.append(tag.id)
                 }
             } catch {
-                print("Regex failed")
+                Log.app.error("regex failed")
             }
         }
         // print("KidsTags: \(kidsTags)")
@@ -409,7 +410,7 @@ struct InfoView: View {
     func tapped() {
         rick += 1
         if rick >= 7 {
-            print("Roll away!")
+            Log.ui.debug("easter egg: roll away")
             if let url = URL(string: "https://www.youtube.com/watch?v=xMHJGd3wwZk") {
                 openURL(url)
             }

@@ -41,7 +41,14 @@ class InfoViewModel: ObservableObject {
     var listListener: ListenerRegistration?
     var articleListener: ListenerRegistration?
     var menuListener: ListenerRegistration?
+    var feedbackFormsListener: ListenerRegistration?
     @AppStorage("notifyAt") var notifyAt: Int = 20
+
+    deinit {
+        // Phase 1 fix: root-level @StateObjects rarely deallocate, but if they do (e.g. in
+        // tests or previews) the listeners would keep streaming forever otherwise.
+        removeListenersImmediate()
+    }
 
     private var db = Firestore.firestore()
     
@@ -136,6 +143,25 @@ class InfoViewModel: ObservableObject {
         if let ml = menuListener {
             ml.remove()
         }
+        if let fl = feedbackFormsListener {
+            fl.remove()
+        }
+    }
+
+    /// deinit-safe variant that doesn't touch @Published state.
+    private func removeListenersImmediate() {
+        conferenceListener?.remove()
+        documentListener?.remove()
+        tagListener?.remove()
+        locationListener?.remove()
+        productListener?.remove()
+        contentListener?.remove()
+        speakerListener?.remove()
+        orgListener?.remove()
+        listListener?.remove()
+        articleListener?.remove()
+        menuListener?.remove()
+        feedbackFormsListener?.remove()
     }
 
     func fetchConference(code: String) {
@@ -143,7 +169,8 @@ class InfoViewModel: ObservableObject {
             .document(code)
             .addSnapshotListener { documentSnapshot, error in
                 guard let doc = documentSnapshot else {
-                    print("Error fetching document: \(error!)")
+                    Log.firestore.error("conference fetch failed: \(String(describing: error), privacy: .public)")
+                    if let e = error { CrashReport.record(e, context: ["op": "fetchConference"]) }
                     return
                 }
                 
@@ -155,11 +182,12 @@ class InfoViewModel: ObservableObject {
                         NSLog("Pulling conference \(self.conference?.code ?? "none") data from firestore")
                     }
                 } catch {
-                    print("Error \(error)")
+                    Log.firestore.error("conference decode failed: \(error, privacy: .public)")
+                    CrashReport.record(error, context: ["op": "decodeConference"])
                     return
                 }
                 
-                print("InfoViewModel: Conference selected: \(self.conference?.name ?? "none")")
+                Log.app.info("conference selected: \(self.conference?.name ?? "none", privacy: .public)")
                 if let conference = self.conference, let maps = conference.maps, maps.count > 0 {
                     let fileManager = FileManager.default
                     let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -169,7 +197,13 @@ class InfoViewModel: ObservableObject {
                             let path = "\(conference.code)/\(url.lastPathComponent)"
                             let mLocal = docDir.appendingPathComponent(path)
                             if !fileManager.fileExists(atPath: mLocal.deletingLastPathComponent().path) {
-                                try! fileManager.createDirectory(at: mLocal.deletingLastPathComponent(), withIntermediateDirectories: true)
+                                do {
+                                    try fileManager.createDirectory(at: mLocal.deletingLastPathComponent(), withIntermediateDirectories: true)
+                                } catch {
+                                    Log.network.error("map dir create failed: \(error.localizedDescription, privacy: .public)")
+                                    CrashReport.record(error, context: ["op": "createMapDir", "path": path])
+                                    continue
+                                }
                             }
                             
                             if fileManager.fileExists(atPath: mLocal.path) {
@@ -180,7 +214,7 @@ class InfoViewModel: ObservableObject {
                                     if let durl = destinationUrl {
                                         NSLog("Finished downloading: \(durl)")
                                     } else {
-                                        print(error!)
+                                        Log.firestore.error("map storage error: \(String(describing: error), privacy: .public)")
                                     }
                                 }
                             }
@@ -196,10 +230,10 @@ class InfoViewModel: ObservableObject {
             let documentsUrl =  try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
             let destinationUrl = documentsUrl.appendingPathComponent(url.lastPathComponent)
              */
-            print(destinationUrl)
+            Log.network.debug("download dest: \(destinationUrl.lastPathComponent, privacy: .public)")
 
             if FileManager().fileExists(atPath: destinationUrl.path) {
-                print("File already exists [\(destinationUrl.path)]")
+                Log.network.debug("file already exists: \(destinationUrl.lastPathComponent, privacy: .public)")
     //            try! FileManager().removeItem(at: destinationUrl)
                 completion(destinationUrl, nil)
                 return
@@ -218,20 +252,38 @@ class InfoViewModel: ObservableObject {
                 if let response = response as? HTTPURLResponse {
                     if response.statusCode == 200 {
                         if let tempFileUrl = tempFileUrl {
-                            print("download finished")
+                            Log.network.debug("download finished")
+                            // Phase 1 fix: all three filesystem ops below were try! — sandbox
+                            // races or disk-full would crash the app.
                             if FileManager().fileExists(atPath: destinationUrl.path) {
-                                try! FileManager.default.removeItem(at: destinationUrl)
+                                do {
+                                    try FileManager.default.removeItem(at: destinationUrl)
+                                } catch {
+                                    Log.network.error("removeItem failed: \(error.localizedDescription, privacy: .public)")
+                                    CrashReport.record(error, context: ["op": "removeExistingMap"])
+                                    completion(nil, error)
+                                    return
+                                }
                             }
                             let directoryPath = (destinationUrl.path as NSString).deletingLastPathComponent
                             if !FileManager.default.fileExists(atPath: directoryPath) {
                                 do {
                                     try FileManager.default.createDirectory(at: destinationUrl.deletingLastPathComponent(), withIntermediateDirectories: true)
                                 } catch {
-                                    print("Error creating directory: \(error.localizedDescription)")
+                                    Log.network.error("createDirectory failed: \(error.localizedDescription, privacy: .public)")
+                                    CrashReport.record(error, context: ["op": "createDirectory"])
+                                    completion(nil, error)
+                                    return
                                 }
                             }
-                            try! FileManager.default.moveItem(at: tempFileUrl, to: destinationUrl)
-                            completion(destinationUrl, error)
+                            do {
+                                try FileManager.default.moveItem(at: tempFileUrl, to: destinationUrl)
+                                completion(destinationUrl, error)
+                            } catch {
+                                Log.network.error("moveItem failed: \(error.localizedDescription, privacy: .public)")
+                                CrashReport.record(error, context: ["op": "moveDownloadedMap"])
+                                completion(nil, error)
+                            }
                         } else {
                             completion(nil, error)
                         }
@@ -249,7 +301,7 @@ class InfoViewModel: ObservableObject {
             .collection("documents")
             .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
-                    print("No Documents")
+                    Log.firestore.info("documents: empty snapshot")
                     return
                 }
                 var cache = 0
@@ -263,7 +315,8 @@ class InfoViewModel: ObservableObject {
                         }
                         return try queryDocumentSnapshot.data(as: Document.self)
                     } catch {
-                        print("Error \(error)")
+                        Log.firestore.error("document decode failed: \(error, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "decodeDocument"])
                         return nil
                     }
                 }
@@ -277,7 +330,7 @@ class InfoViewModel: ObservableObject {
             .collection("tagtypes")
             .order(by: "sort_order", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
-                    print("No Tags")
+                    Log.firestore.info("tags: empty snapshot")
                     return
                 }
                 var cache = 0
@@ -291,7 +344,8 @@ class InfoViewModel: ObservableObject {
                         }
                         return try queryDocumentSnapshot.data(as: TagType.self)
                     } catch {
-                        print("Error \(error)")
+                        Log.firestore.error("tag decode failed: \(error, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "decodeTag"])
                         return nil
                     }
                 }
@@ -306,7 +360,7 @@ class InfoViewModel: ObservableObject {
             .order(by: "peer_sort_order", descending: false)
             .addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
-                    print("No Locations")
+                    Log.firestore.info("locations: empty snapshot")
                     return
                 }
                 var cache = 0
@@ -320,9 +374,8 @@ class InfoViewModel: ObservableObject {
                         }
                         return try queryDocumentSnapshot.data(as: Location.self)
                     } catch {
-                        print("fetchLocations: Location Parsing Error: \(error)")
-                        print("fetchLocations: Code: \(code)")
-                        print("fetchLocations: qds: \(queryDocumentSnapshot.data())")
+                        Log.firestore.error("location decode failed code=\(code, privacy: .public): \(error, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "decodeLocation", "code": code])
                         return nil
                     }
                 }
@@ -336,7 +389,7 @@ class InfoViewModel: ObservableObject {
             .collection("products")
             .order(by: "sort_order", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
-                    print("No Products")
+                    Log.firestore.info("products: empty snapshot")
                     return
                 }
                 var cache = 0
@@ -350,7 +403,8 @@ class InfoViewModel: ObservableObject {
                         }
                         return try queryDocumentSnapshot.data(as: Product.self)
                     } catch {
-                        print("Error \(error)")
+                        Log.firestore.error("product decode failed: \(error, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "decodeProduct"])
                         return nil
                     }
                 }
@@ -364,15 +418,18 @@ class InfoViewModel: ObservableObject {
             .collection("content")
             .order(by: "title", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
-                    print("No Content")
+                    Log.firestore.info("content: empty snapshot")
                     return
                 }
 
                 var cache = 0
                 var firestore = 0
-                self.content = docs.compactMap { queryDocumentSnapshot -> Content? in
+                // Phase 1 fix: previously `self.events = []` lived inside the per-document
+                // compactMap, so each decoded doc reset events and a concurrent snapshot
+                // mid-decode could duplicate or drop entries. Build a local buffer first,
+                // then assign atomically once decoding completes.
+                let decodedContent: [Content] = docs.compactMap { queryDocumentSnapshot -> Content? in
                     do {
-                        self.events = []
                         if queryDocumentSnapshot.metadata.isFromCache {
                             cache = cache + 1
                         } else {
@@ -380,29 +437,34 @@ class InfoViewModel: ObservableObject {
                         }
                         return try queryDocumentSnapshot.data(as: Content.self)
                     } catch {
-                        print("Error \(error)")
+                        Log.firestore.error("content decode failed: \(error, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "decodeContent"])
                         return nil
                     }
                 }
-                for c in self.content {
+                var rebuiltEvents: [Event] = []
+                var seenEventIds: Set<Int> = []
+                for c in decodedContent {
                     if !c.sessions.isEmpty {
                         for s in c.sessions {
-                            if let _ = self.events.first(where: {$0.id == s.id}) {
-                                // Don't do anything
-                            } else {
-                                let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds, relatedIds: c.relatedIds)
-                                self.events.append(e)
-                                /* Task {
-                                    if await NotificationUtility.notificationExists(id: e.id) {
-                                        NotificationUtility.removeNotification(id: e.id)
-                                        let notDate = e.beginTimestamp.addingTimeInterval(Double((-self.notifyAt)) * 60)
-                                        NotificationUtility.scheduleNotification(date: notDate, id: e.id, title: e.title, location: self.locations.first(where: {$0.id == e.locationId})?.name ?? "unknown")
-                                    }
-                                } */
+                            if seenEventIds.contains(s.id) {
+                                continue
                             }
+                            seenEventIds.insert(s.id)
+                            let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds, relatedIds: c.relatedIds)
+                            rebuiltEvents.append(e)
+                            /* Task {
+                                if await NotificationUtility.notificationExists(id: e.id) {
+                                    NotificationUtility.removeNotification(id: e.id)
+                                    let notDate = e.beginTimestamp.addingTimeInterval(Double((-self.notifyAt)) * 60)
+                                    NotificationUtility.scheduleNotification(date: notDate, id: e.id, title: e.title, location: self.locations.first(where: {$0.id == e.locationId})?.name ?? "unknown")
+                                }
+                            } */
                         }
                     }
                 }
+                self.content = decodedContent
+                self.events = rebuiltEvents
 
                 NSLog("InfoViewModel: \(self.content.count) content (cache hits \(cache), firestore hits \(firestore))")
             }
@@ -414,7 +476,7 @@ class InfoViewModel: ObservableObject {
             .collection("speakers")
             .order(by: "name", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
-                    print("No Speakers")
+                    Log.firestore.info("speakers: empty snapshot")
                     return
                 }
 
@@ -429,7 +491,8 @@ class InfoViewModel: ObservableObject {
                         }
                         return try queryDocumentSnapshot.data(as: Speaker.self)
                     } catch {
-                        print("Error \(error)")
+                        Log.firestore.error("speaker decode failed: \(error, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "decodeSpeaker"])
                         return nil
                     }
                 }
@@ -444,7 +507,7 @@ class InfoViewModel: ObservableObject {
             .collection("organizations")
             .order(by: "name", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
-                    print("No Documents")
+                    Log.firestore.info("orgs: empty snapshot")
                     return
                 }
 
@@ -459,7 +522,8 @@ class InfoViewModel: ObservableObject {
                         }
                         return try queryDocumentSnapshot.data(as: Organization.self)
                     } catch {
-                        print("Error \(error)")
+                        Log.firestore.error("org decode failed: \(error, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "decodeOrg"])
                         return nil
                     }
                 }
@@ -474,7 +538,7 @@ class InfoViewModel: ObservableObject {
             .collection("faqs")
             .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
-                    print("No Documents")
+                    Log.firestore.info("faqs: empty snapshot")
                     return
                 }
 
@@ -489,7 +553,8 @@ class InfoViewModel: ObservableObject {
                         }
                         return try queryDocumentSnapshot.data(as: FAQ.self)
                     } catch {
-                        print("Error \(error)")
+                        Log.firestore.error("faq decode failed: \(error, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "decodeFAQ"])
                         return nil
                     }
                 }
@@ -500,7 +565,7 @@ class InfoViewModel: ObservableObject {
             .collection("articles")
             .order(by: "updated_at", descending: true).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
-                    print("No Documents")
+                    Log.firestore.info("articles: empty snapshot")
                     return
                 }
 
@@ -515,7 +580,8 @@ class InfoViewModel: ObservableObject {
                         }
                         return try queryDocumentSnapshot.data(as: Article.self)
                     } catch {
-                        print("Error \(error)")
+                        Log.firestore.error("article decode failed: \(error, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "decodeArticle"])
                         return nil
                     }
                 }
@@ -529,7 +595,7 @@ class InfoViewModel: ObservableObject {
             .collection("menus")
             .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
-                    print("No Menu Items")
+                    Log.firestore.info("menus: empty snapshot")
                     return
                 }
 
@@ -544,21 +610,24 @@ class InfoViewModel: ObservableObject {
                         }
                         return try queryDocumentSnapshot.data(as: InfoMenu.self)
                     } catch {
-                        print("Error \(error)")
+                        Log.firestore.error("menu decode failed: \(error, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "decodeMenu"])
                         return nil
                     }
                 }
-                print("InfoViewModel: \(self.menus.count) menus (cache hits \(cache), firestore hits \(firestore))")
+                Log.app.debug("menus loaded: \(self.menus.count) (cache=\(cache), firestore=\(firestore))")
             }
     }
     
     func fetchFeedbackForms(code: String) {
-        productListener = db.collection("conferences")
+        // Phase 1 fix: previously this clobbered productListener, leaking the products
+        // snapshot listener and breaking products fetches on reuse.
+        feedbackFormsListener = db.collection("conferences")
             .document(code)
             .collection("feedbackforms")
             .addSnapshotListener { querySnapshot, error in
                 guard let docs = querySnapshot?.documents else {
-                    print("No Products")
+                    Log.firestore.info("feedbackForms: empty snapshot")
                     return
                 }
 
@@ -573,11 +642,12 @@ class InfoViewModel: ObservableObject {
                         }
                         return try queryDocumentSnapshot.data(as: FeedbackForm.self)
                     } catch {
-                        print("Error \(error)")
+                        Log.firestore.error("feedbackForm decode failed: \(error, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "decodeFeedbackForm"])
                         return nil
                     }
                 }
-                print("InfoViewModel: \(self.feedbackForms.count) feedback forms (cache hits \(cache), firestore hits \(firestore))")
+                Log.app.debug("feedbackForms loaded: \(self.feedbackForms.count) (cache=\(cache), firestore=\(firestore))")
             }
     }
 }

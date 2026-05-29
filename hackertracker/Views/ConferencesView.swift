@@ -34,9 +34,9 @@ struct ConferencesView: View {
                 Button(action: {
                     self.presentationMode.wrappedValue.dismiss()
                     if conference.code == selected.code {
-                        print("Already selected \(conference.name)")
+                        Log.app.debug("already selected \(conference.name, privacy: .public)")
                     } else {
-                        print("Selected \(conference.name)")
+                        Log.app.info("selected \(conference.name, privacy: .public)")
                         selected.code = conference.code
                         conferenceCode = conference.code
                         filters.filters.removeAll()

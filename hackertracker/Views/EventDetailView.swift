@@ -124,7 +124,7 @@ struct EventDetailView: View {
     }
     
     func notificationExists() {
-        print("Checking for existence of notification for \(eventId)")
+        Log.notifications.debug("checking notification for \(eventId)")
         UNUserNotificationCenter.current().getPendingNotificationRequests(completionHandler: { notificationRequests in
             for nr in notificationRequests where nr.identifier == "hackertracker-\(self.eventId)" {
                 self.nExists = true

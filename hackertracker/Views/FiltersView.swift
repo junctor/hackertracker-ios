@@ -77,7 +77,7 @@ struct FilterRow: View {
             } else {
                 filters.filters.insert(id)
             }
-            print("FiltersView: Current filters = \(filters.filters)")
+            Log.ui.debug("FiltersView filters=\(filters.filters)")
         }) {
             VStack(alignment: .leading) {
                 HStack {

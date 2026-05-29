@@ -89,7 +89,7 @@ struct ContentDetailView: View {
                 }
             }
             .onAppear() {
-                print("ContentDetailView Loading \(item.id) - \(item.title)")
+                Log.ui.debug("ContentDetailView loading \(item.id) - \(item.title, privacy: .public)")
             }
             /* .alert(isPresented: $showAlert) {
                 Alert(title: Text("Submit Feedback"), message: Text(alertMessage), dismissButton: .default(Text("OK")) {

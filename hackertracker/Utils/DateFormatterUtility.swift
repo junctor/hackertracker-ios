@@ -19,13 +19,13 @@ class DateFormatterUtility {
             if let zone = timeZone {
                 update(tz: zone)
             } else {
-                print("DateFormatterUtility: Set timezone failed.")
+                Log.app.error("DateFormatterUtility: set timezone failed")
             }
         }
     }
 
     func update(tz: TimeZone?) {
-        print("DateFormatterUtility: Updating timezone to \(tz?.identifier ?? "error")")
+        Log.app.info("DateFormatterUtility: tz -> \(tz?.identifier ?? "<nil>", privacy: .public)")
         timeZone = tz
 
         yearMonthDayTimeFormatter.timeZone = timeZone

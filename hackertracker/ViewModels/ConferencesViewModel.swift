@@ -22,7 +22,7 @@ class ConferencesViewModel: ObservableObject {
                 .whereField("hidden", isEqualTo: hidden)
                 .order(by: "start_date", descending: true).addSnapshotListener { querySnapshot, error in
                     guard let documents = querySnapshot?.documents else {
-                        print("No Conferences")
+                        Log.firestore.info("conferences: empty snapshot")
                         return
                     }
                     var cache = 0
@@ -36,11 +36,12 @@ class ConferencesViewModel: ObservableObject {
                             }
                             return try queryDocumentSnapshot.data(as: Conference.self)
                         } catch {
-                            print("Error \(error)")
+                            Log.firestore.error("conference decode failed: \(error, privacy: .public)")
+                            CrashReport.record(error, context: ["op": "decodeConferences"])
                             return nil
                         }
                     }
-                    print("ConferencesViewModel: \(self.conferences.count) conferences (cache hits \(cache), firestore hits \(firestore))")
+                    Log.app.debug("conferences loaded: \(self.conferences.count) (cache=\(cache), firestore=\(firestore))")
                 }
         }
     }

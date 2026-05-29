@@ -94,8 +94,7 @@ struct ContentView: View {
                     tabBarAppearance.configureWithDefaultBackground()
                     UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
                 }
-                print("ContentView: selectedCode: \(selected.code)")
-                print("ContentView: launchScreen: \(launchScreen)")
+                Log.app.debug("ContentView selectedCode=\(selected.code, privacy: .public) launchScreen=\(launchScreen, privacy: .public)")
                 switch launchScreen {
                 case "Maps":
                     self.tabSelection = 3
@@ -137,9 +136,9 @@ struct ContentView: View {
                     .environmentObject(theme)
                     .environmentObject(filters)
                     .task {
-                        print("ContentView: Selected Conference \(selected.code), Conference Code: \(conferenceCode)")
+                        Log.app.debug("ContentView selected=\(selected.code, privacy: .public) stored=\(conferenceCode, privacy: .public)")
                         if selected.code != conferenceCode {
-                            print("ContentView: Switching to conference from AppStorage - \(conferenceCode)")
+                            Log.app.info("ContentView switching to conference \(conferenceCode, privacy: .public)")
                             selected.code = conferenceCode
                         }
                         self.viewModel.fetchData(code: conferenceCode)

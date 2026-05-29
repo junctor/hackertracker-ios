@@ -67,7 +67,7 @@ struct EventsView: View {
                 Label("Display Localtime", systemImage: "clock")
               }
               .onChange(of: showLocaltime) { value in
-                print("EventsView: Changing to showLocaltime = \(value)")
+                Log.ui.debug("EventsView showLocaltime=\(value)")
                 // viewModel.showLocaltime = value
                 if showLocaltime {
                   dfu.update(tz: TimeZone.current)
@@ -80,13 +80,13 @@ struct EventsView: View {
                   Label("Display 24 Hour Time", systemImage: "calendar.badge.clock")
                 }
                 .onChange(of: show24hourtime) { value in
-                  print("EventsView: Changing to show24hourtime = \(value)")
+                  Log.ui.debug("EventsView show24hourtime=\(value)")
                 }
               Toggle(isOn: $showPastEvents) {
                 Label("Show Past Events", systemImage: "calendar")
               }
               .onChange(of: showPastEvents) { value in
-                print("EventsView: Changing to showPastEvents = \(value)")
+                Log.ui.debug("EventsView showPastEvents=\(value)")
                 viewModel.showPastEvents = value
                   toTop.val = true
               }
@@ -255,7 +255,7 @@ struct EventsView: View {
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
       }
       .onChange(of: viewModel.conference) { con in
-        print("EventsView.onChange(of: conference) == \(con?.name ?? "not found")")
+        Log.ui.debug("EventsView conference -> \(con?.name ?? "<nil>", privacy: .public)")
       }
     }
   }

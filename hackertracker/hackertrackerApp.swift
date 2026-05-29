@@ -10,6 +10,9 @@ import FirebaseCore
 import FirebaseMessaging
 import SwiftUI
 import UserNotifications
+#if canImport(FirebaseCrashlytics)
+import FirebaseCrashlytics
+#endif
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     let gcmMessageIDKey = "gcm.message_id"
@@ -20,13 +23,23 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     ) -> Bool {
         FirebaseApp.configure()
         FirebaseConfiguration.shared.setLoggerLevel(.min)
+        #if canImport(FirebaseCrashlytics)
+        Crashlytics.crashlytics().setCrashlyticsCollectionEnabled(true)
+        #endif
+        CrashReport.breadcrumb("app didFinishLaunchingWithOptions")
 
         // 1
         UNUserNotificationCenter.current().delegate = self
         // 2
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
         UNUserNotificationCenter.current().requestAuthorization(
-            options: authOptions) { _, _ in }
+            options: authOptions) { granted, error in
+                if let error = error {
+                    CrashReport.record(error, context: ["phase": "requestAuthorization"])
+                } else {
+                    Log.notifications.info("authorization granted=\(granted, privacy: .public)")
+                }
+            }
         // 3
         UIApplication.shared.registerForRemoteNotifications()
 
@@ -80,7 +93,8 @@ extension AppDelegate: MessagingDelegate {
         _: Messaging,
         didReceiveRegistrationToken fcmToken: String?
     ) {
-        print("Firebase registration token: \(fcmToken ?? "not found")")
+        // Avoid logging the token itself; just signal presence to aid debugging.
+        Log.notifications.info("FCM token received: \(fcmToken != nil, privacy: .public)")
         let tokenDict = ["token": fcmToken ?? ""]
         NotificationCenter.default.post(
             name: Notification.Name("FCMToken"),

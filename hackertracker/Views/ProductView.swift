@@ -93,7 +93,7 @@ struct ProductView: View {
                             Button {
                                 if count > 0 {
                                     CartUtility.addItem(context: viewContext, variantId: selectedVariant, count: count)
-                                    print("ProductView: Add \(selectedVariant) - \(count) to list")
+                                    Log.cart.debug("ProductView add variant=\(selectedVariant) count=\(count)")
                                     message = "Added \(count) \(v.code) \(product.title) to list"
                                 } else {
                                     showAlert = true
@@ -133,7 +133,7 @@ struct ProductView: View {
     }
     
     func addToCart(variant: Variant) {
-        print("ProductView: Add \(variant.variantId) to cart")
+        Log.cart.debug("ProductView add variant=\(variant.variantId)")
     }
 }
 

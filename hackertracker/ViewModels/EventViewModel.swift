@@ -21,14 +21,15 @@ class EventViewModel: ObservableObject {
             .document(String(eventId))
             .addSnapshotListener { documentSnapshot, error in
                 guard let document = documentSnapshot else {
-                    print("Error fetching document: \(error!)")
+                    Log.firestore.error("event fetch failed: \(String(describing: error), privacy: .public)")
+                    if let e = error { CrashReport.record(e, context: ["op": "fetchEvent"]) }
                     return
                 }
 
                 do {
                     self.event = try document.data(as: Event.self)
                 } catch {
-                    print("Error decoding event data")
+                    Log.firestore.error("event decode failed")
                 }
             }
     }

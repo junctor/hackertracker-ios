@@ -13,13 +13,14 @@ class NewsUtility {
     static func addReadNews(context: NSManagedObjectContext, id: Int) {
         let newItem = News(context: context)
         newItem.id = Int32(id)
-        print("Adding ReadNews for content \(id)")
+        Log.app.debug("adding read news \(id)")
 
         do {
             try context.save()
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.app.error("readNews save failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "addReadNews"])
         }
     }
 
@@ -27,15 +28,16 @@ class NewsUtility {
         let fr = NSFetchRequest<NSFetchRequestResult>(entityName: "News")
         do {
             if let res = try context.fetch(fr) as? [NewsItem] {
-                print("NewsUtility.getReadNews: \(res.count) news items returned")
+                Log.app.debug("getReadNews: \(res.count) items")
                 return res.map { $0.id }
             } else {
-                print("NewsUtility.getReadNews: no read news items returned")
+                Log.app.debug("getReadNews: empty")
                 return []
             }
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.app.error("readNews fetch failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "getReadNews"])
         }
         return []
     }

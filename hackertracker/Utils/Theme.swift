@@ -63,6 +63,6 @@ func playChik() {
         player?.play()
         
     } catch let error {
-        print(error.localizedDescription)
+        Log.ui.error("theme color decode failed: \(error.localizedDescription, privacy: .public)")
     }
 }

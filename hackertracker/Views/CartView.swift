@@ -79,14 +79,14 @@ struct CartView: View {
             }
             total = mytotal
             totalItems = mytotalItems
-            print("CartView: made it here \(total) - \(totalItems)")
+            Log.cart.debug("recalculated total=\(total) totalItems=\(totalItems)")
         }
         .onChange(of: totalItems) { _ in
             checkOutOfStock()
-            print("CartView: Detected change in totalItems")
+            Log.cart.debug("totalItems changed")
         }
         .onDisappear {
-            print("CartView: closing")
+            Log.cart.debug("closing")
         }
         .analyticsScreen(name: "CartView")
         .navigationTitle("Merch")
@@ -112,13 +112,13 @@ struct CartView: View {
         let version = 1
         let items = qrCart.i.map { "\($0.v):\($0.q)" }.joined(separator: ";")
         let compact = "\(version):\(viewModel.conference?.id ?? 0):i\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""):\(items):"
-        print("QRCodeView: Encoded Value: \(compact)")
+        Log.cart.debug("QR encoded: \(compact, privacy: .public)")
         return compact
         
         // let encoder = JSONEncoder()
         /* if let jsonData = try? encoder.encode(qrCart) {
             if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("QRCodeView: JSON Value: \(jsonString)")
+                Log.cart.debug("QR json: \(jsonString, privacy: .public)")
                 return jsonString
             }
         }

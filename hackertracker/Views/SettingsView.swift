@@ -69,7 +69,7 @@ struct EasterEggSettingsView: View {
         VStack(alignment: .leading) {
                 Toggle("Easter Eggs", isOn: $easterEgg)
                     .onChange(of: easterEgg) { value in
-                        print("SettingsView: Changing to easterEgg = \(value)")
+                        Log.ui.debug("easterEgg=\(value)")
                         viewModel.easterEgg = value
                     }
         }
@@ -157,7 +157,7 @@ struct ShowNewsSettingsView: View {
         VStack(alignment: .leading) {
                 Toggle("News on Home Screen", isOn: $showNews)
                     .onChange(of: showNews) { value in
-                        print("SettingsView: Changing to showNews = \(value)")
+                        Log.ui.debug("showNews=\(value)")
                         viewModel.showNews = value
                     }
                 Text("Show the most recent news article on the home screen")
@@ -175,7 +175,7 @@ struct ShowMerchInfoSettingsView: View {
         VStack(alignment: .leading) {
                 Toggle("Merch Info on Merchandise Screen", isOn: $showMerchInfo)
                     .onChange(of: showMerchInfo) { value in
-                        print("SettingsView: Changing to showMerchInfo = \(value)")
+                        Log.ui.debug("showMerchInfo=\(value)")
                     }
                 Text("Show the merchandise information link on the merch list")
                     .font(.caption)
@@ -193,7 +193,7 @@ struct ShowPastEventsSettingsView: View {
         VStack(alignment: .leading) {
             Toggle("Show Past Events", isOn: $showPastEvents)
                 .onChange(of: showPastEvents) { value in
-                    print("SettingsView: Changing to showPastEvents = \(value)")
+                    Log.ui.debug("showPastEvents=\(value)")
                     viewModel.showPastEvents = value
                 }
             Text("Show or hide past events in the conference schedule")
@@ -212,7 +212,7 @@ struct ShowConflictAlertView: View {
         VStack(alignment: .leading) {
             Toggle("Show Schedule Conflict Alert", isOn: $showConflictAlert)
                 .onChange(of: showConflictAlert) { value in
-                    print("SettingsView: Changing to showConflictAlert = \(value)")
+                    Log.ui.debug("showConflictAlert=\(value)")
                 }
             Text("Show the conflict alert icon on the schedule")
                 .font(.caption)
@@ -232,7 +232,7 @@ struct LightModeSettingsView: View {
         VStack(alignment: .leading) {
             Toggle("Enable Light Mode", isOn: $lightMode)
                 .onChange(of: lightMode) { value in
-                    print("SettingsView: Changing to lightMode = \(value)")
+                    Log.ui.debug("lightMode=\(value)")
                     if value {
                         theme.colorScheme = .light
                     } else {
@@ -245,7 +245,7 @@ struct LightModeSettingsView: View {
         VStack(alignment: .leading) {
             Toggle("Enable Colorful Mode", isOn: $colorMode)
                 .onChange(of: colorMode) { value in
-                    print("SettingsView: Changing to lightMode = \(value)")
+                    Log.ui.debug("colorMode=\(value)")
                     //colorMode = value
                 }
         }
@@ -284,7 +284,7 @@ struct ShowLocaltimeSettingsView: View {
         VStack(alignment: .leading) {
             Toggle("Show Local Timezone", isOn: $showLocaltime)
                 .onChange(of: showLocaltime) { value in
-                    print("SettingsView: Changing to showLocaltime = \(value)")
+                    Log.ui.debug("showLocaltime=\(value)")
                     // viewModel.showLocaltime = value
                     if value {
                         dfu.update(tz: TimeZone.current)
@@ -300,7 +300,7 @@ struct ShowLocaltimeSettingsView: View {
         VStack(alignment: .leading) {
             Toggle("Show 24 Hour Time", isOn: $show24hourtime)
                 .onChange(of: show24hourtime) { value in
-                    print("SettingsView: Changing to show24hourtime = \(value)")
+                    Log.ui.debug("show24hourtime=\(value)")
                 }
             Text("Show event times in 24 hour time (13:00) instead of 12 hour time (1:00 PM)")
                 .font(.caption)

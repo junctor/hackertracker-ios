@@ -38,7 +38,7 @@ struct MapView: View {
                                 ZStack(alignment: .bottomTrailing) {
                                     PDFView(url: mLocal)
                                         .onAppear() {
-                                            print("MapView: Loading \(mLocal)")
+                                            Log.ui.debug("MapView loading \(mLocal, privacy: .public)")
                                         }
                                         .frame(width: screenSize.width)
                                     if let desc = map.description {

@@ -81,7 +81,7 @@ import UIKit
       }
 
     } else {
-      print("AddEventController: event is nil")
+      Log.ui.error("AddEventController: event is nil")
     }
   }
 }
@@ -167,7 +167,7 @@ class AddContentController: UIViewController, EKEventEditViewDelegate {
       }
 
     } else {
-      print("AddEventController: event is nil")
+      Log.ui.error("AddEventController: event is nil")
     }
   }
 }

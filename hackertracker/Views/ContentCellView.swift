@@ -18,11 +18,11 @@ struct ContentCell: View {
     func bookmarkAction() {
         for s in content.sessions {
             if bookmarks.contains(Int32(s.id)) {
-                print("ContentCell: Removing Bookmark \(s.id)")
+                Log.bookmarks.debug("contentCell remove \(s.id)")
                 BookmarkUtility.deleteBookmark(context: viewContext, id: s.id)
                 NotificationUtility.removeNotification(id: s.id)
             } else {
-                print("ContentCell: Adding Bookmark \(s.id)")
+                Log.bookmarks.debug("contentCell add \(s.id)")
                 BookmarkUtility.addBookmark(context: viewContext, id: s.id)
                 let notDate = s.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
                 NotificationUtility.scheduleNotification(date: notDate, id: s.id, title: content.title, location: viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unknown")
