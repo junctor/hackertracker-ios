@@ -81,7 +81,7 @@ struct CartView: View {
             totalItems = mytotalItems
             Log.cart.debug("recalculated total=\(total) totalItems=\(totalItems)")
         }
-        .onChange(of: totalItems) { _ in
+        .onChange(of: totalItems) { 
             checkOutOfStock()
             Log.cart.debug("totalItems changed")
         }
@@ -203,7 +203,7 @@ struct CartRow: View {
             }
             .frame(maxWidth: .infinity)
         }
-        .onChange(of: count) { value in
+        .onChange(of: count) { _, value in 
             if value == 0 {
                 total -= (Int(item.count) * variant.price)
                 totalItems -= Int(item.count)

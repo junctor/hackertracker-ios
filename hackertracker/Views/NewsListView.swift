@@ -77,7 +77,7 @@ struct articleRow: View {
                 }
             }
         }
-        .onChange(of: showText) { value in
+        .onChange(of: showText) { _, value in 
             if value && !readnews.map({$0.id}).contains(Int32(article.id)) {
                 NewsUtility.addReadNews(context: viewContext, id: article.id)
             }

@@ -10,8 +10,6 @@
 		3C04BD9E2A5FDFD900D01402 /* Filters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C04BD9D2A5FDFD900D01402 /* Filters.swift */; };
 		3C04BDA02A5FE91500D01402 /* FiltersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C04BD9F2A5FE91500D01402 /* FiltersView.swift */; };
 		3C07C209285C6F7600CC9469 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C07C208285C6F7600CC9469 /* Theme.swift */; };
-		5DC0DE0000000000000000A1 /* Logger+HT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000A2 /* Logger+HT.swift */; };
-		5DC0DE0000000000000000B1 /* KFImage+HT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000B2 /* KFImage+HT.swift */; };
 		3C0E05CB2A53E5F500E7154F /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E05CA2A53E5F500E7154F /* EventDetailView.swift */; };
 		3C0E05CD2A53E6AD00E7154F /* GlobalSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E05CC2A53E6AD00E7154F /* GlobalSearchView.swift */; };
 		3C0E05CF2A53E70200E7154F /* Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E05CE2A53E70200E7154F /* Searchable.swift */; };
@@ -91,6 +89,8 @@
 		5DB4E0BA284EA02C0012F6F4 /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0B9284EA02C0012F6F4 /* Map.swift */; };
 		5DB4E0BC284EA0AE0012F6F4 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */; };
 		5DB4E0C8285001820012F6F4 /* events.json in Resources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C7285001820012F6F4 /* events.json */; };
+		5DC0DE0000000000000000A1 /* Logger+HT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000A2 /* Logger+HT.swift */; };
+		5DC0DE0000000000000000B1 /* KFImage+HT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000B2 /* KFImage+HT.swift */; };
 		5DDF035A2C2751670087BA59 /* ContentListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF03592C2751670087BA59 /* ContentListView.swift */; };
 		5DDF035C2C2767750087BA59 /* ContentCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF035B2C2767750087BA59 /* ContentCellView.swift */; };
 		5DDF035E2C28B4F10087BA59 /* ContentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */; };
@@ -128,8 +128,6 @@
 /* Begin PBXFileReference section */
 		3C04BD9D2A5FDFD900D01402 /* Filters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filters.swift; sourceTree = "<group>"; };
 		3C04BD9F2A5FE91500D01402 /* FiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiltersView.swift; sourceTree = "<group>"; };
-		5DC0DE0000000000000000A2 /* Logger+HT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+HT.swift"; sourceTree = "<group>"; };
-		5DC0DE0000000000000000B2 /* KFImage+HT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KFImage+HT.swift"; sourceTree = "<group>"; };
 		3C07C208285C6F7600CC9469 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		3C0E05CA2A53E5F500E7154F /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		3C0E05CC2A53E6AD00E7154F /* GlobalSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSearchView.swift; sourceTree = "<group>"; };
@@ -205,6 +203,8 @@
 		5DB4E0B9284EA02C0012F6F4 /* Map.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
 		5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		5DB4E0C7285001820012F6F4 /* events.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = events.json; sourceTree = "<group>"; };
+		5DC0DE0000000000000000A2 /* Logger+HT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+HT.swift"; sourceTree = "<group>"; };
+		5DC0DE0000000000000000B2 /* KFImage+HT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KFImage+HT.swift"; sourceTree = "<group>"; };
 		5DDF03592C2751670087BA59 /* ContentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentListView.swift; sourceTree = "<group>"; };
 		5DDF035B2C2767750087BA59 /* ContentCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentCellView.swift; sourceTree = "<group>"; };
 		5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailView.swift; sourceTree = "<group>"; };
@@ -596,9 +596,6 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		5DAE04AC2820948B00930A2D /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -771,7 +768,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -831,7 +828,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -849,7 +846,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25090902;
+				CURRENT_PROJECT_VERSION = 26053001;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -865,7 +862,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.9;
+				MARKETING_VERSION = 5.10;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -885,7 +882,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25090902;
+				CURRENT_PROJECT_VERSION = 26053001;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -901,7 +898,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.9;
+				MARKETING_VERSION = 5.10;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -921,7 +918,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertrackerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -939,7 +936,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertrackerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

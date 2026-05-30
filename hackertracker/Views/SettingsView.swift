@@ -68,7 +68,7 @@ struct EasterEggSettingsView: View {
     var body: some View {
         VStack(alignment: .leading) {
                 Toggle("Easter Eggs", isOn: $easterEgg)
-                    .onChange(of: easterEgg) { value in
+                    .onChange(of: easterEgg) { _, value in 
                         Log.ui.debug("easterEgg=\(value)")
                         viewModel.easterEgg = value
                     }
@@ -156,7 +156,7 @@ struct ShowNewsSettingsView: View {
     var body: some View {
         VStack(alignment: .leading) {
                 Toggle("News on Home Screen", isOn: $showNews)
-                    .onChange(of: showNews) { value in
+                    .onChange(of: showNews) { _, value in 
                         Log.ui.debug("showNews=\(value)")
                         viewModel.showNews = value
                     }
@@ -174,7 +174,7 @@ struct ShowMerchInfoSettingsView: View {
     var body: some View {
         VStack(alignment: .leading) {
                 Toggle("Merch Info on Merchandise Screen", isOn: $showMerchInfo)
-                    .onChange(of: showMerchInfo) { value in
+                    .onChange(of: showMerchInfo) { _, value in 
                         Log.ui.debug("showMerchInfo=\(value)")
                     }
                 Text("Show the merchandise information link on the merch list")
@@ -192,7 +192,7 @@ struct ShowPastEventsSettingsView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Show Past Events", isOn: $showPastEvents)
-                .onChange(of: showPastEvents) { value in
+                .onChange(of: showPastEvents) { _, value in 
                     Log.ui.debug("showPastEvents=\(value)")
                     viewModel.showPastEvents = value
                 }
@@ -211,7 +211,7 @@ struct ShowConflictAlertView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Show Schedule Conflict Alert", isOn: $showConflictAlert)
-                .onChange(of: showConflictAlert) { value in
+                .onChange(of: showConflictAlert) { _, value in 
                     Log.ui.debug("showConflictAlert=\(value)")
                 }
             Text("Show the conflict alert icon on the schedule")
@@ -231,7 +231,7 @@ struct LightModeSettingsView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Enable Light Mode", isOn: $lightMode)
-                .onChange(of: lightMode) { value in
+                .onChange(of: lightMode) { _, value in 
                     Log.ui.debug("lightMode=\(value)")
                     if value {
                         theme.colorScheme = .light
@@ -244,7 +244,7 @@ struct LightModeSettingsView: View {
         Divider()
         VStack(alignment: .leading) {
             Toggle("Enable Colorful Mode", isOn: $colorMode)
-                .onChange(of: colorMode) { value in
+                .onChange(of: colorMode) { _, value in 
                     Log.ui.debug("colorMode=\(value)")
                     //colorMode = value
                 }
@@ -283,7 +283,7 @@ struct ShowLocaltimeSettingsView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Show Local Timezone", isOn: $showLocaltime)
-                .onChange(of: showLocaltime) { value in
+                .onChange(of: showLocaltime) { _, value in 
                     Log.ui.debug("showLocaltime=\(value)")
                     // viewModel.showLocaltime = value
                     if value {
@@ -299,7 +299,7 @@ struct ShowLocaltimeSettingsView: View {
         Divider()
         VStack(alignment: .leading) {
             Toggle("Show 24 Hour Time", isOn: $show24hourtime)
-                .onChange(of: show24hourtime) { value in
+                .onChange(of: show24hourtime) { _, value in 
                     Log.ui.debug("show24hourtime=\(value)")
                 }
             Text("Show event times in 24 hour time (13:00) instead of 12 hour time (1:00 PM)")

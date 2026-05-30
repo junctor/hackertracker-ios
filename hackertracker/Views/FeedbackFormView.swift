@@ -152,11 +152,11 @@ struct FeedbackRow: View {
                 }
             })
             .pickerStyle(.inline)
-            .onChange(of: answer, perform: {val in
+            .onChange(of: answer) { _, val in 
                 if let option = item.options.first(where: {$0.captionText == val}) {
                     answers[item.id] = option.id as AnyObject
                 }
-            })
+            }
         } else if item.type == "text" {
             Text(item.captionText).textCase(.uppercase).font(.subheadline).bold()
             TextField("Optional", text: $answer, axis: .vertical)

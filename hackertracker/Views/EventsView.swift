@@ -69,7 +69,7 @@ struct EventsView: View {
               Toggle(isOn: $showLocaltime) {
                 Label("Display Localtime", systemImage: "clock")
               }
-              .onChange(of: showLocaltime) { value in
+              .onChange(of: showLocaltime) { _, value in 
                 Log.ui.debug("EventsView showLocaltime=\(value)")
                 // viewModel.showLocaltime = value
                 if showLocaltime {
@@ -82,13 +82,13 @@ struct EventsView: View {
                 Toggle(isOn: $show24hourtime) {
                   Label("Display 24 Hour Time", systemImage: "calendar.badge.clock")
                 }
-                .onChange(of: show24hourtime) { value in
+                .onChange(of: show24hourtime) { _, value in 
                   Log.ui.debug("EventsView show24hourtime=\(value)")
                 }
               Toggle(isOn: $showPastEvents) {
                 Label("Show Past Events", systemImage: "calendar")
               }
-              .onChange(of: showPastEvents) { value in
+              .onChange(of: showPastEvents) { _, value in 
                 Log.ui.debug("EventsView showPastEvents=\(value)")
                 viewModel.showPastEvents = value
                   toTop.val = true
@@ -267,7 +267,7 @@ struct EventsView: View {
             if !Task.isCancelled { debouncedSearch = searchText }
         }
       }
-      .onChange(of: viewModel.conference) { con in
+      .onChange(of: viewModel.conference) { _, con in 
         Log.ui.debug("EventsView conference -> \(con?.name ?? "<nil>", privacy: .public)")
       }
     }
@@ -334,12 +334,12 @@ struct EventScrollView: View {
                       }
                   }
                   .listStyle(.plain)
-                  .onChange(of: dayTag) { changedValue in
+                  .onChange(of: dayTag) { _, changedValue in 
                       withAnimation {
                           proxy.scrollTo(changedValue, anchor: .top)
                       }
                   }
-                  .onChange(of: toTop.val, perform: { tapTop in
+                  .onChange(of: toTop.val) { _, tapTop in 
                       guard tapTop else { return }
                       if tapTop, showPastEvents {
                           if let e = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first {
@@ -354,8 +354,7 @@ struct EventScrollView: View {
                       }
                       
                   }
-                  )
-                  .onChange(of: toBottom.val, perform: { tapBottom in
+                  .onChange(of: toBottom.val) { _, tapBottom in 
                       guard tapBottom else { return }
                       if tapBottom, let es = events.map({$0.value.sorted{$0.beginTimestamp < $1.beginTimestamp}}).last, let e = es.last {
                           withAnimation {
@@ -363,8 +362,8 @@ struct EventScrollView: View {
                           }
                           toBottom.val = false
                       }
-                  })
-                  .onChange(of: toCurrent.val, perform: { tapCurrent in
+                  }
+                  .onChange(of: toCurrent.val) { _, tapCurrent in 
                       guard tapCurrent else { return }
                       let curDate = Date()
                       // print("events: \(events.key)")
@@ -374,8 +373,8 @@ struct EventScrollView: View {
                           }
                           toCurrent.val = false
                       }
-                  })
-                  .onChange(of: toNext.val, perform: { tapNext in
+                  }
+                  .onChange(of: toNext.val) { _, tapNext in 
                       guard tapNext else { return }
                       let curDate = Date()
                       // print("events: \(events.key)")
@@ -385,7 +384,7 @@ struct EventScrollView: View {
                           }
                           toNext.val = false
                       }
-                  })
+                  }
                   .onAppear {
                       viewShowing = true
                   }
