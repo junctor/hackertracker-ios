@@ -19,7 +19,7 @@ struct InfoView: View {
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var theme: Theme
     @EnvironmentObject var filters: Filters
-    @EnvironmentObject var consViewModel: ConferencesViewModel
+    @Environment(ConferencesViewModel.self) private var consViewModel
     @Environment(\.openURL) private var openURL
     @State private var showUpdateButton = false
     @State private var appStoreVersion: String?

@@ -14,7 +14,7 @@ struct ConferencesView: View {
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var viewModel: InfoViewModel
     @EnvironmentObject var theme: Theme
-    @EnvironmentObject var consViewModel: ConferencesViewModel
+    @Environment(ConferencesViewModel.self) private var consViewModel
     @EnvironmentObject var filters: Filters
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.managedObjectContext) private var viewContext

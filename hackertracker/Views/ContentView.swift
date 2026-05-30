@@ -38,7 +38,7 @@ struct ContentView: View {
 
     @StateObject var selected = SelectedConference()
     @StateObject var viewModel = InfoViewModel()
-    @StateObject var consViewModel = ConferencesViewModel()
+    @State private var consViewModel = ConferencesViewModel()
     @StateObject var theme = Theme()
     @StateObject private var toTop = ToTop()
     @StateObject private var toBottom = ToBottom()
@@ -111,7 +111,7 @@ struct ContentView: View {
             .environmentObject(selected)
             .environmentObject(viewModel)
             .environmentObject(theme)
-            .environmentObject(consViewModel)
+            .environment(consViewModel)
             .environmentObject(toTop)
             .environmentObject(toBottom)
             .environmentObject(toCurrent)
@@ -124,7 +124,7 @@ struct ContentView: View {
                     .preferredColorScheme(theme.colorScheme)
                     .environmentObject(selected)
                     .environmentObject(viewModel)
-                    .environmentObject(consViewModel)
+                    .environment(consViewModel)
                     .environmentObject(theme)
                     .environmentObject(filters)
             } else {
@@ -132,7 +132,7 @@ struct ContentView: View {
                     .preferredColorScheme(theme.colorScheme)
                     .environmentObject(selected)
                     .environmentObject(viewModel)
-                    .environmentObject(consViewModel)
+                    .environment(consViewModel)
                     .environmentObject(theme)
                     .environmentObject(filters)
                     .task {
