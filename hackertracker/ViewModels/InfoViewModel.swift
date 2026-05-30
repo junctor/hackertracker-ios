@@ -14,7 +14,14 @@ import SwiftUI
 // Property-level change tracking; views that read only specific arrays
 // (e.g. speakers) no longer re-render when an unrelated array (e.g. menus)
 // updates.
+// Phase 3c: @MainActor isolation. All published-state mutation now happens
+// on the main actor. Each Firestore snapshot listener decodes in its Sendable
+// closure (off-main when Firebase runs there), then hops onto MainActor via
+// `Task { @MainActor in ... }` for the actual array assignment. This closes
+// the SwiftUI "Publishing changes from background threads" warning surface
+// and is a prerequisite for Swift 6 strict concurrency.
 @Observable
+@MainActor
 final class InfoViewModel {
     var conference: Conference?
     var documents = [Document]()
@@ -63,7 +70,20 @@ final class InfoViewModel {
     deinit {
         // Phase 1 fix: root-level @StateObjects rarely deallocate, but if they do (e.g. in
         // tests or previews) the listeners would keep streaming forever otherwise.
-        removeListenersImmediate()
+        // Phase 3c: inlined so the @MainActor-isolated `removeListenersImmediate` doesn't
+        // need to be called from a nonisolated deinit. `.remove()` is thread-safe.
+        conferenceListener?.remove()
+        documentListener?.remove()
+        tagListener?.remove()
+        locationListener?.remove()
+        productListener?.remove()
+        contentListener?.remove()
+        speakerListener?.remove()
+        orgListener?.remove()
+        listListener?.remove()
+        articleListener?.remove()
+        menuListener?.remove()
+        feedbackFormsListener?.remove()
     }
 
     @ObservationIgnored private var db = Firestore.firestore()

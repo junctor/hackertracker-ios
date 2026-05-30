@@ -12,7 +12,9 @@ import SwiftUI
 
 /// Phase 3b: migrated to @Observable. Currently unused at any callsite but
 /// kept as a working template for the eventual InfoViewModel split.
+// Phase 3c: @MainActor isolation, parallel to InfoViewModel.
 @Observable
+@MainActor
 final class EventViewModel {
     var event: Event?
     @ObservationIgnored private let db = Firestore.firestore()
@@ -26,16 +28,21 @@ final class EventViewModel {
             .collection("events")
             .document(String(eventId))
             .addSnapshotListener { [weak self] documentSnapshot, error in
-                guard let self else { return }
                 guard let document = documentSnapshot else {
                     Log.firestore.error("event fetch failed: \(String(describing: error), privacy: .public)")
                     if let e = error { CrashReport.record(e, context: ["op": "fetchEvent"]) }
                     return
                 }
+                let decoded: Event?
                 do {
-                    self.event = try document.data(as: Event.self)
+                    decoded = try document.data(as: Event.self)
                 } catch {
                     Log.firestore.error("event decode failed")
+                    decoded = nil
+                }
+                Task { @MainActor [weak self] in
+                    guard let self, let decoded else { return }
+                    self.event = decoded
                 }
             }
     }
