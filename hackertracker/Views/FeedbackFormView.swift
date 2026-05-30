@@ -11,7 +11,7 @@ struct FeedbackFormView: View {
     @Binding var showFeedback: Bool
     var item: Content
     var form: FeedbackForm
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @State var test: String = ""
     @State var answers: [Int: AnyObject] = [:]
     let dfu = DateFormatterUtility.shared

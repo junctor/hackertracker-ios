@@ -10,14 +10,19 @@ import Foundation
 import FirebaseStorage
 import SwiftUI
 
-class InfoViewModel: ObservableObject {
-    @Published var conference: Conference?
-    @Published var documents = [Document]()
-    @Published var tagtypes = [TagType]()
-    @Published var locations = [Location]()
-    @Published var products = [Product]()
-    @Published var content = [Content]()
-    @Published var events = [Event]() {
+// Phase 3b: migrated from ObservableObject to @Observable.
+// Property-level change tracking; views that read only specific arrays
+// (e.g. speakers) no longer re-render when an unrelated array (e.g. menus)
+// updates.
+@Observable
+final class InfoViewModel {
+    var conference: Conference?
+    var documents = [Document]()
+    var tagtypes = [TagType]()
+    var locations = [Location]()
+    var products = [Product]()
+    var content = [Content]()
+    var events = [Event]() {
         didSet {
             // Phase 2: O(1) event lookup so bookmarkConflicts is O(b) instead of O(b*n).
             eventsById = Dictionary(uniqueKeysWithValues: events.map { ($0.id, $0) })
@@ -25,36 +30,35 @@ class InfoViewModel: ObservableObject {
         }
     }
     /// Phase 2: index rebuilt whenever `events` changes.
-    private var eventsById: [Int: Event] = [:]
+    @ObservationIgnored private var eventsById: [Int: Event] = [:]
     /// Phase 2: cached per-event conflict result for a given bookmark set.
     /// Cleared when events change or bookmarks change.
-    private var conflictCache: [Int: Bool] = [:]
-    private var conflictCacheBookmarkKey: Int = 0
-    @Published var speakers = [Speaker]()
-    @Published var orgs = [Organization]()
-    @Published var faqs = [FAQ]()
-    @Published var news = [Article]()
-    @Published var menus = [InfoMenu]()
-    @Published var feedbackForms = [FeedbackForm]()
+    @ObservationIgnored private var conflictCache: [Int: Bool] = [:]
+    @ObservationIgnored private var conflictCacheBookmarkKey: Int = 0
+    var speakers = [Speaker]()
+    var orgs = [Organization]()
+    var faqs = [FAQ]()
+    var news = [Article]()
+    var menus = [InfoMenu]()
+    var feedbackForms = [FeedbackForm]()
     // @Published var showLocaltime = false
-    @Published var showPastEvents = true
-    @Published var showNews = true
+    var showPastEvents = true
+    var showNews = true
     // @Published var colorMode = false
-    @Published var outOfStock = false
-    @Published var easterEgg = false
-    var conferenceListener: ListenerRegistration?
-    var documentListener: ListenerRegistration?
-    var tagListener: ListenerRegistration?
-    var locationListener: ListenerRegistration?
-    var productListener: ListenerRegistration?
-    var contentListener: ListenerRegistration?
-    var speakerListener: ListenerRegistration?
-    var orgListener: ListenerRegistration?
-    var listListener: ListenerRegistration?
-    var articleListener: ListenerRegistration?
-    var menuListener: ListenerRegistration?
-    var feedbackFormsListener: ListenerRegistration?
-    @AppStorage("notifyAt") var notifyAt: Int = 20
+    var outOfStock = false
+    var easterEgg = false
+    @ObservationIgnored var conferenceListener: ListenerRegistration?
+    @ObservationIgnored var documentListener: ListenerRegistration?
+    @ObservationIgnored var tagListener: ListenerRegistration?
+    @ObservationIgnored var locationListener: ListenerRegistration?
+    @ObservationIgnored var productListener: ListenerRegistration?
+    @ObservationIgnored var contentListener: ListenerRegistration?
+    @ObservationIgnored var speakerListener: ListenerRegistration?
+    @ObservationIgnored var orgListener: ListenerRegistration?
+    @ObservationIgnored var listListener: ListenerRegistration?
+    @ObservationIgnored var articleListener: ListenerRegistration?
+    @ObservationIgnored var menuListener: ListenerRegistration?
+    @ObservationIgnored var feedbackFormsListener: ListenerRegistration?
 
     deinit {
         // Phase 1 fix: root-level @StateObjects rarely deallocate, but if they do (e.g. in
@@ -62,7 +66,7 @@ class InfoViewModel: ObservableObject {
         removeListenersImmediate()
     }
 
-    private var db = Firestore.firestore()
+    @ObservationIgnored private var db = Firestore.firestore()
     
     func bookmarkConflicts(eventId: Int, bookmarks: [Int]) -> Bool {
         // Phase 2: O(1) dict lookup + per-event memoization keyed on bookmark identity.

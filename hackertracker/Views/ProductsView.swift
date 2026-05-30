@@ -9,7 +9,7 @@ import SwiftUI
 import Kingfisher
 
 struct ProductsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
     @State private var searchText = ""
     @State private var showFilters = false
@@ -76,7 +76,7 @@ struct ProductsView: View {
 
 struct MerchInfo: View {
     @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     
     var body: some View {
         if showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {

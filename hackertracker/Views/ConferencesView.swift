@@ -12,7 +12,7 @@ import SwiftUI
 struct ConferencesView: View {
     // var conferences: [Conference]
     @EnvironmentObject var selected: SelectedConference
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @Environment(ConferencesViewModel.self) private var consViewModel
     @EnvironmentObject var filters: Filters

@@ -12,7 +12,7 @@ import SwiftUI
 struct OrgView: View {
     var org: Organization
     // @Binding var tappedScheduleTwice: Bool
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @EnvironmentObject var filters: Filters
     @AppStorage("colorMode") var colorMode: Bool = false

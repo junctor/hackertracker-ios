@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var selected: SelectedConference
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @AppStorage("showNews") var showNews: Bool = true
     
@@ -62,7 +62,7 @@ struct SettingsView: View {
 }
 
 struct EasterEggSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("easterEgg") var easterEgg: Bool = false
     
     var body: some View {
@@ -79,7 +79,7 @@ struct EasterEggSettingsView: View {
 }
 
 struct NotificationSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("notifyAt") var notifyAt: Int = 20
     @State private var showingAlert = false
 
@@ -150,7 +150,7 @@ struct AboutSettingsView: View {
 }
 
 struct ShowNewsSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showNews") var showNews: Bool = true
     
     var body: some View {
@@ -186,7 +186,7 @@ struct ShowMerchInfoSettingsView: View {
 }
 
 struct ShowPastEventsSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
     
     var body: some View {
@@ -205,7 +205,7 @@ struct ShowPastEventsSettingsView: View {
 }
 
 struct ShowConflictAlertView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
     
     var body: some View {
@@ -223,7 +223,7 @@ struct ShowConflictAlertView: View {
 }
 
 struct LightModeSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("lightMode") var lightMode: Bool = false
     @AppStorage("colorMode") var colorMode: Bool = false
     @EnvironmentObject var theme: Theme
@@ -275,7 +275,7 @@ struct StartScreenSettingsView: View {
 }
 
 struct ShowLocaltimeSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
     let dfu = DateFormatterUtility.shared

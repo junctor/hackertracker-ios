@@ -11,7 +11,7 @@ struct EventCell: View {
     // let bookmarks: [Int32]
     let showDay: Bool
     @Environment(\.managedObjectContext) private var viewContext
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
@@ -101,7 +101,7 @@ struct EventCell: View {
 struct ShowEventCellTags: View {
     var tagIds: [Int]
     var minWidth: CGFloat = 100
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: minWidth))], alignment: .leading, spacing: 1) {

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CartView: View {
     @FetchRequest(sortDescriptors: []) var cart: FetchedResults<Cart>
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.managedObjectContext) private var viewContext
     @State private var total = 0
     @State private var totalItems = 0
@@ -151,7 +151,7 @@ struct CartRow: View {
     @Binding var total: Int
     @Binding var totalItems: Int
     @Environment(\.managedObjectContext) private var viewContext
-    @EnvironmentObject private var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @State private var count: Int = 0
     
     init(product: Product, item: Cart, variant: Variant, total: Binding<Int>, totalItems: Binding<Int>) {

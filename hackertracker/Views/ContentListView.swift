@@ -12,7 +12,7 @@ struct ContentListView: View {
     var title: String?
     @State private var searchText = ""
     @State private var showFilters = false
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var filters: Filters
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     

@@ -25,7 +25,7 @@ import SwiftUI
 struct AddContent: UIViewControllerRepresentable {
     var content: Content
     var session: Session
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     
     func makeUIViewController(context: Context) -> AddContentController {
         let acc = AddContentController()

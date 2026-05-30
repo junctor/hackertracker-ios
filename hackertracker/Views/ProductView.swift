@@ -11,7 +11,7 @@ import Kingfisher
 struct ProductView: View {
     var product: Product
     @Environment(\.managedObjectContext) private var viewContext
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @FetchRequest(sortDescriptors: []) var cart: FetchedResults<Cart>
     @State private var selectedVariant: Int
     @State private var count: Int = 1

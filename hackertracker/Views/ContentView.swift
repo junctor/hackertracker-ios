@@ -37,7 +37,7 @@ struct ContentView: View {
     @AppStorage("easterEgg") var easterEgg: Bool = false
 
     @StateObject var selected = SelectedConference()
-    @StateObject var viewModel = InfoViewModel()
+    @State private var viewModel = InfoViewModel()
     @State private var consViewModel = ConferencesViewModel()
     @StateObject var theme = Theme()
     @StateObject private var toTop = ToTop()
@@ -109,7 +109,7 @@ struct ContentView: View {
                 // viewModel.fetchData(code: selected.code)
             }
             .environmentObject(selected)
-            .environmentObject(viewModel)
+            .environment(viewModel)
             .environmentObject(theme)
             .environment(consViewModel)
             .environmentObject(toTop)
@@ -123,7 +123,7 @@ struct ContentView: View {
                 ConferencesView()
                     .preferredColorScheme(theme.colorScheme)
                     .environmentObject(selected)
-                    .environmentObject(viewModel)
+                    .environment(viewModel)
                     .environment(consViewModel)
                     .environmentObject(theme)
                     .environmentObject(filters)
@@ -131,7 +131,7 @@ struct ContentView: View {
                 _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
                     .preferredColorScheme(theme.colorScheme)
                     .environmentObject(selected)
-                    .environmentObject(viewModel)
+                    .environment(viewModel)
                     .environment(consViewModel)
                     .environmentObject(theme)
                     .environmentObject(filters)

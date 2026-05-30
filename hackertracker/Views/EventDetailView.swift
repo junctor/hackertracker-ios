@@ -12,7 +12,7 @@ struct EventDetailView: View {
     let eventId: Int
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @EnvironmentObject var selected: SelectedConference
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     let dfu = DateFormatterUtility.shared
     @State var showingAlert = false
@@ -135,7 +135,7 @@ struct EventDetailView: View {
 
 struct showSpeakers: View {
     var event: Event
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @State private var collapsed = false
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
@@ -204,7 +204,7 @@ struct showSpeakers: View {
 
 struct showTags: View {
     var tagIds: [Int]
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @State private var collapsed = false
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 

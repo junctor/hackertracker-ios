@@ -10,7 +10,7 @@ import SwiftUI
 struct GlobalSearchView: View {
     @State private var searchText = ""
     @EnvironmentObject var theme: Theme
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("colorMode") var colorMode: Bool = false
     
     var body: some View {

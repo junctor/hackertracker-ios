@@ -11,7 +11,7 @@ import Kingfisher
 import FirebaseAnalytics
 
 struct SpeakerDetailView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.openURL) private var openURL
     @EnvironmentObject var theme: Theme
 
@@ -135,7 +135,7 @@ struct showEvents: View {
     var eventIds: [Int]
     var title: String?
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @State private var collapsed = false
     @State private var myEvents: [Event] = []
     
@@ -215,7 +215,7 @@ struct SpeakerEventView: View {
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     let dfu = DateFormatterUtility.shared
     @Environment(\.managedObjectContext) private var viewContext
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("notifyAt") var notifyAt: Int = 20
 
     var body: some View {

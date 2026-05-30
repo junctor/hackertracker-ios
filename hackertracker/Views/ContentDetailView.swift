@@ -15,7 +15,7 @@ struct ContentDetailView: View {
     // @State private var showFeedbackButton = true
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @FetchRequest(sortDescriptors: []) var feedbacks: FetchedResults<Feedbacks>
     @Environment(\.managedObjectContext) private var viewContext
     let dfu = DateFormatterUtility.shared
@@ -105,7 +105,7 @@ struct ContentDetailView: View {
 
 struct showFeedbackButton: View {
     @Binding var showFeedback: Bool
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
@@ -202,7 +202,7 @@ struct showSessionRow: View {
     @State var notExists: Bool = false
     @AppStorage("notifyAt") var notifyAt: Int = 20
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @Environment(\.managedObjectContext) private var viewContext
@@ -303,7 +303,7 @@ struct MoreView: View {
 struct showRelated: View {
     var eventIds: [Int]
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @State private var collapsed = true
     
     var body: some View {
@@ -358,7 +358,7 @@ struct showRelated: View {
 
 struct showPeople: View {
     var content: Content
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @State private var collapsed = false
     @AppStorage("colorMode") var colorMode: Bool = false

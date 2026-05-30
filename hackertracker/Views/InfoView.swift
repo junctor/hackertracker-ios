@@ -12,7 +12,7 @@ import WebKit
 struct InfoView: View {
     @Binding var tabSelection: Int
     //@Binding var tappedMainTwice: Bool
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("colorMode") var colorMode: Bool = false
@@ -264,7 +264,7 @@ struct InfoView: View {
                 }
                 .padding(5)
                 /*
-                 @EnvironmentObject var viewModel: InfoViewModel
+                 @Environment(InfoViewModel.self) private var viewModel
                  @EnvironmentObject var selected: SelectedConference
                  @EnvironmentObject var theme: Theme
                  @EnvironmentObject var filters: Filters
@@ -424,7 +424,7 @@ struct MenuView: View {
     var useGrid: Bool = true
     @Binding var tabSelection: Int
     // @Binding var tappedMainTwice: Bool
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @EnvironmentObject var filters: Filters
     @AppStorage("colorMode") var colorMode: Bool = false
@@ -525,7 +525,7 @@ struct CardView: View {
     var color: Color
     var subtitle: String?
     var foregroundColor: Color?
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("colorMode") var colorMode: Bool = false
 
     var body: some View {

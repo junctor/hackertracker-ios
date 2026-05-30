@@ -11,7 +11,7 @@ import FirebaseAnalytics
 
 struct MapView: View {
     @EnvironmentObject var selected: SelectedConference
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @State var loading: Bool = false
 

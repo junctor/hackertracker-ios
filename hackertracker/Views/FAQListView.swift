@@ -9,7 +9,7 @@ import MarkdownUI
 import SwiftUI
 
 struct FAQListView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
 
     @State private var searchText = ""
 

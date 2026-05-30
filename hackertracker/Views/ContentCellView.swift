@@ -11,7 +11,7 @@ struct ContentCell: View {
     let bookmarks: [Int32]
     let showDay: Bool
     @Environment(\.managedObjectContext) private var viewContext
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
 

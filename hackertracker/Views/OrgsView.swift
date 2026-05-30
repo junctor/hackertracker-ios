@@ -14,7 +14,7 @@ struct OrgsView: View {
     var tagId: Int
     @Binding var tabSelection: Int
     @EnvironmentObject var theme: Theme
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var selected: SelectedConference
     @State private var searchText = ""
 

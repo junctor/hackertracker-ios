@@ -12,7 +12,7 @@ struct EventsView: View {
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
     @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var toTop: ToTop
     @EnvironmentObject var toBottom: ToBottom
     @EnvironmentObject var toCurrent: ToCurrent

@@ -12,7 +12,7 @@ struct _04View: View {
     var show404: Bool = true
     @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
     @StateObject var selected = SelectedConference()
-    @StateObject var viewModel = InfoViewModel()
+    @State private var viewModel = InfoViewModel()
 
     var body: some View {
         NavigationStack {
