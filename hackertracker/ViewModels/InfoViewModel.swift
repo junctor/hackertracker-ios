@@ -84,11 +84,12 @@ final class InfoViewModel {
         }
         for bookmark in bookmarks where bookmark != eventId {
             guard let be = eventsById[bookmark] else { continue }
-            if be.beginTimestamp == e.beginTimestamp || be.endTimestamp == e.endTimestamp ||
-               (be.beginTimestamp >= e.beginTimestamp && be.beginTimestamp <= e.endTimestamp) ||
-               (be.endTimestamp >= e.beginTimestamp && be.endTimestamp <= e.endTimestamp) ||
-               (e.beginTimestamp >= be.beginTimestamp && e.beginTimestamp <= be.endTimestamp) ||
-               (e.endTimestamp >= be.beginTimestamp && e.endTimestamp <= be.endTimestamp) {
+            // Bugfix: previously used closed-interval checks (<=) which flagged
+            // back-to-back events (10-11 and 11-12) as conflicting because the
+            // shared boundary timestamp counted as overlap. Standard half-open
+            // interval overlap: two intervals [a,b) and [c,d) overlap iff
+            // a < d && c < b. Adjacent events with b == c no longer conflict.
+            if be.beginTimestamp < e.endTimestamp && e.beginTimestamp < be.endTimestamp {
                 conflictCache[eventId] = true
                 return true
             }

@@ -343,7 +343,7 @@ struct InfoView: View {
                     EventScrollView(events:
                         sharedEvents
                             .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
-                            .search(text: searchText)
+                            .search(text: searchText, speakers: viewModel.speakers)
                             .eventDayGroup(
                                 showLocaltime: showLocaltime, conference: viewModel.conference
                             ),

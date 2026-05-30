@@ -51,7 +51,7 @@ struct EventsView: View {
           events:
             viewModel.events
             .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
-            .search(text: debouncedSearch)
+            .search(text: debouncedSearch, speakers: viewModel.speakers)
             .eventDayGroup(
                 showLocaltime: showLocaltime, conference: viewModel.conference
             ),
@@ -200,7 +200,7 @@ struct EventsView: View {
           events:
             viewModel.events
             .filters(typeIds: filters.filters, bookmarks: bookmarks.map({$0.id}), tagTypes: viewModel.tagtypes)
-            .search(text: debouncedSearch).eventDayGroup(
+            .search(text: debouncedSearch, speakers: viewModel.speakers).eventDayGroup(
                 showLocaltime: showLocaltime, conference: viewModel.conference
             ),
           dayTag: eventDay,
