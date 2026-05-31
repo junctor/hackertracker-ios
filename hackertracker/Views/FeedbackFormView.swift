@@ -21,6 +21,9 @@ struct FeedbackFormView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
         VStack {
             Text(form.name)
                 .font(.title)

@@ -39,6 +39,8 @@ struct articleRow: View {
     @Environment(\.managedObjectContext) private var viewContext
 
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility tz changes.
+        let _ = DateFormatterUtility.shared.tzGeneration
         VStack(alignment: .leading) {
             Button(action: {
                 showText.toggle()

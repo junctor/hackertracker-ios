@@ -27,6 +27,9 @@ struct ContentDetailView: View {
     ]
 
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
         if let item = viewModel.content.first(where: { $0.id == contentId }) {
             ScrollView {
                 VStack(alignment: .leading) {
@@ -226,6 +229,9 @@ struct showSessionRow: View {
     }
     
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
         HStack {
             VStack(alignment: .leading) {
                 HStack {

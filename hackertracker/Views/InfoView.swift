@@ -36,6 +36,10 @@ struct InfoView: View {
     @State var schedule = UUID()
 
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility tz changes so
+        // conference start/end date labels (and any descendants reading dfu)
+        // refresh when the active timezone shifts.
+        let _ = DateFormatterUtility.shared.tzGeneration
         NavigationStack(path: $path) {
             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
                 NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {

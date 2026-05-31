@@ -108,6 +108,21 @@ struct ContentView: View {
 
                 // viewModel.fetchData(code: selected.code)
             }
+            .onChange(of: viewModel.conference?.timezone) { _, _ in
+                // Phase 4 follow-up: when Firestore first delivers the Conference
+                // (initial load) or it changes (mid-session edit), sync the
+                // shared DateFormatterUtility to the right timezone. Previously
+                // there was no initial-load sync, so the schedule rendered in
+                // device-current time until the user toggled showLocaltime.
+                ClockService.apply(conference: viewModel.conference, showLocaltime: showLocaltime)
+            }
+            .onChange(of: showLocaltime) { _, _ in
+                // Phase 4 follow-up: top-level mirror of the per-view
+                // (SettingsView / EventsView) handlers. Centralizing here
+                // ensures the TZ flips consistently even when the toggle is
+                // bound somewhere we haven't wired explicitly.
+                ClockService.apply(conference: viewModel.conference, showLocaltime: showLocaltime)
+            }
             .environmentObject(selected)
             .environment(viewModel)
             .environmentObject(theme)

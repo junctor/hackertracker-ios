@@ -37,6 +37,9 @@ struct EventsView: View {
   @State private var showConflictAlertPopup = false
 
   var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
     if includeNav {
       NavigationStack {
         if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
@@ -291,6 +294,9 @@ struct EventScrollView: View {
     @State var eventDayGroup: [(key: String, value: [Event])] = []
 
   var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
       /*
        VStack {
            ScrollView {

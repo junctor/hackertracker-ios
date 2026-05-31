@@ -12,11 +12,23 @@ import Foundation
 // happens from SwiftUI views (already MainActor) or AddEventController's
 // MainActor Task, so isolating the whole class to MainActor is the
 // minimal, behavior-preserving fix.
+//
+// Phase 4 follow-up: @Observable so views can register an observation
+// dependency on the active timezone. The cached DateFormatter instances are
+// mutated in-place by `update(tz:)`; that mutation is invisible to SwiftUI,
+// which is why toggling showLocaltime previously did not refresh the
+// schedule. Views now read `dfu.tzGeneration` in their body so they
+// re-render when the formatters' timezone changes.
 @MainActor
+@Observable
 class DateFormatterUtility {
     // Phase 4: starts at device-current. ClockService.apply switches to the
     // active conference's timezone once Firestore delivers the Conference.
     var timeZone: TimeZone? = .current
+
+    /// Bumped on every successful update(tz:). View bodies that format dates
+    /// should reference this property so SwiftUI registers a dependency.
+    private(set) var tzGeneration: Int = 0
 
     static let shared = DateFormatterUtility(tz: .current)
 
@@ -35,6 +47,7 @@ class DateFormatterUtility {
     func update(tz: TimeZone?) {
         Log.app.info("DateFormatterUtility: tz -> \(tz?.identifier ?? "<nil>", privacy: .public)")
         timeZone = tz
+        tzGeneration &+= 1  // overflow-safe; views observe this for re-render
 
         yearMonthDayTimeFormatter.timeZone = timeZone
         timezoneFormatter.timeZone = timeZone

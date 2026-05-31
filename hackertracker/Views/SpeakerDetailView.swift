@@ -219,6 +219,9 @@ struct SpeakerEventView: View {
     @AppStorage("notifyAt") var notifyAt: Int = 20
 
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
         HStack {
             Rectangle().fill(getEventTagColorBackground(id: event.tagIds[0]))
                 .frame(width: 6)
