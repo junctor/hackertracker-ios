@@ -20,19 +20,48 @@ struct ContentListView: View {
         return Dictionary(grouping: content.search(text: searchText).filter { $0.tagIds.intersects(with: filters.filters) || filters.filters.isEmpty || (filters.filters.contains(1337) && $0.sessions.map {Int32($0.id)}.intersects(with: bookmarks.map{$0.id}))}, by: { $0.title.lowercased().first ?? "-" })
     }
 
+    private var grouped: [(key: String.Element, value: [Content])] {
+        contentGroup().sorted { $0.key < $1.key }
+    }
+
     var body: some View {
         VStack {
+            // Phase 5a: pull-to-refresh + empty-state UX.
             ScrollView {
-                ScrollViewReader { _ in
-                    LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
-                        ForEach(self.contentGroup().sorted {
-                            $0.key < $1.key
-                        }, id: \.key) { char, content in
-                            ContentData(char: char, content: content)
+                if grouped.isEmpty {
+                    if searchText.isEmpty && filters.filters.isEmpty {
+                        ContentUnavailableView(
+                            "No Content",
+                            systemImage: "doc.text",
+                            description: Text("Talks, workshops, and other content will appear here once published.")
+                        )
+                        .padding(.top, 60)
+                    } else if !searchText.isEmpty {
+                        ContentUnavailableView.search(text: searchText)
+                            .padding(.top, 60)
+                    } else {
+                        ContentUnavailableView(
+                            "No Matches",
+                            systemImage: "line.3.horizontal.decrease.circle",
+                            description: Text("No items match the current filters.")
+                        )
+                        .padding(.top, 60)
+                    }
+                } else {
+                    ScrollViewReader { _ in
+                        LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
+                            ForEach(grouped, id: \.key) { char, content in
+                                ContentData(char: char, content: content)
+                            }
                         }
                     }
+                    .listStyle(.plain)
                 }
-                .listStyle(.plain)
+            }
+            .refreshable {
+                if let code = viewModel.conference?.code {
+                    viewModel.fetchData(code: code)
+                }
             }
             .searchable(text: $searchText)
             .sheet(isPresented: $showFilters) {

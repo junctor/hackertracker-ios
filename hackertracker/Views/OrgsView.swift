@@ -20,14 +20,38 @@ struct OrgsView: View {
 
     let gridItemLayout = [GridItem(.flexible(), alignment: .top), GridItem(.flexible(), alignment: .top)]
 
+    private var filteredOrgs: [Organization] {
+        viewModel.orgs.filter { $0.tag_ids.contains(tagId) }.search(text: searchText)
+    }
+
     var body: some View {
+        // Phase 5a: pull-to-refresh + empty-state UX.
         ScrollView {
-            LazyVGrid(columns: gridItemLayout, spacing: 20) {
-                ForEach(self.viewModel.orgs.filter { $0.tag_ids.contains(tagId) }.search(text: searchText), id: \.id) { org in
-                    NavigationLink(destination: OrgView(org: org, tabSelection: $tabSelection)) {
-                        orgRow(org: org, theme: theme)
+            if filteredOrgs.isEmpty {
+                if searchText.isEmpty {
+                    ContentUnavailableView(
+                        "No \(title)",
+                        systemImage: "building.2",
+                        description: Text("Listings will appear here once they're published.")
+                    )
+                    .padding(.top, 60)
+                } else {
+                    ContentUnavailableView.search(text: searchText)
+                        .padding(.top, 60)
+                }
+            } else {
+                LazyVGrid(columns: gridItemLayout, spacing: 20) {
+                    ForEach(filteredOrgs, id: \.id) { org in
+                        NavigationLink(destination: OrgView(org: org, tabSelection: $tabSelection)) {
+                            orgRow(org: org, theme: theme)
+                        }
                     }
                 }
+            }
+        }
+        .refreshable {
+            if let code = viewModel.conference?.code {
+                viewModel.fetchData(code: code)
             }
         }
         .navigationTitle(title)

@@ -285,6 +285,7 @@ struct EventScrollView: View {
     let includeNav: Bool
     let dfu = DateFormatterUtility.shared
     // @Binding var tappedScheduleTwice: Bool
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var toTop: ToTop
     @EnvironmentObject var toCurrent: ToCurrent
     @EnvironmentObject var toBottom: ToBottom
@@ -292,6 +293,16 @@ struct EventScrollView: View {
     @State var viewShowing = false
     @Binding var showLocaltime: Bool
     @State var eventDayGroup: [(key: String, value: [Event])] = []
+
+    /// Phase 5a: events visible after the parent's filter/search pipeline.
+    /// When this is empty we show a ContentUnavailableView instead of a
+    /// blank scroll surface.
+    private var visibleEvents: [(key: String, value: [Event])] {
+        showPastEvents ? events : events.compactMap { (key, day) in
+            let upcoming = day.filter { Date() < $0.endTimestamp }
+            return upcoming.isEmpty ? nil : (key, upcoming)
+        }
+    }
 
   var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
@@ -326,7 +337,18 @@ struct EventScrollView: View {
        }
        */
       VStack {
+          // Phase 5a: pull-to-refresh + empty-state UX.
           ScrollView {
+              if visibleEvents.isEmpty {
+                  ContentUnavailableView(
+                      "No Events",
+                      systemImage: "calendar",
+                      description: Text(showPastEvents
+                          ? "Conference talks and sessions will appear here once scheduled."
+                          : "Nothing upcoming. Try enabling \u{201C}Show Past Events\u{201D} or refresh.")
+                  )
+                  .padding(.top, 60)
+              }
               ScrollViewReader { proxy in
                   LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
                       ForEach(events, id: \.key) { weekday, dayEvents in
@@ -398,7 +420,12 @@ struct EventScrollView: View {
                   }
 
               }
-              
+
+          }
+          .refreshable {
+              if let code = viewModel.conference?.code {
+                  viewModel.fetchData(code: code)
+              }
           }
       }
   }

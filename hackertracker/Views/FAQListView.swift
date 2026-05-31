@@ -13,17 +13,41 @@ struct FAQListView: View {
 
     @State private var searchText = ""
 
+    private var filteredFaqs: [FAQ] {
+        viewModel.faqs.search(text: searchText)
+    }
+
     var body: some View {
+        // Phase 5a: pull-to-refresh + empty-state UX.
         ScrollView {
-            ScrollViewReader { _ in
-                ForEach(self.viewModel.faqs.search(text: searchText)) { faq in
-                    faqRow(faq: faq)
+            if filteredFaqs.isEmpty {
+                if searchText.isEmpty {
+                    ContentUnavailableView(
+                        "No FAQs",
+                        systemImage: "questionmark.circle",
+                        description: Text("Frequently asked questions will appear here once published.")
+                    )
+                    .padding(.top, 60)
+                } else {
+                    ContentUnavailableView.search(text: searchText)
+                        .padding(.top, 60)
+                }
+            } else {
+                ScrollViewReader { _ in
+                    ForEach(filteredFaqs) { faq in
+                        faqRow(faq: faq)
+                    }
                 }
             }
-            .searchable(text: $searchText)
-            .navigationTitle("FAQs")
-            .analyticsScreen(name: "FAQListView")
         }
+        .refreshable {
+            if let code = viewModel.conference?.code {
+                viewModel.fetchData(code: code)
+            }
+        }
+        .searchable(text: $searchText)
+        .navigationTitle("FAQs")
+        .analyticsScreen(name: "FAQListView")
     }
 }
 

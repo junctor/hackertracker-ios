@@ -9,27 +9,46 @@ import SwiftUI
 
 struct SpeakersView: View {
     var speakers: [Speaker]
+    @Environment(InfoViewModel.self) private var viewModel
     @State private var searchText = ""
 
-    func speakerGroup() -> [String.Element: [Speaker]] {
-        return Dictionary(grouping: speakers.search(text: searchText), by: { $0.name.lowercased().first ?? "-" })
+    private var grouped: [(key: String.Element, value: [Speaker])] {
+        Dictionary(grouping: speakers.search(text: searchText),
+                   by: { $0.name.lowercased().first ?? "-" })
+            .sorted { $0.key < $1.key }
     }
 
     var body: some View {
-        VStack {
-            ScrollView {
+        // Phase 5a: pull-to-refresh + empty-state UX.
+        ScrollView {
+            if grouped.isEmpty {
+                if searchText.isEmpty {
+                    ContentUnavailableView(
+                        "No Speakers",
+                        systemImage: "person.2",
+                        description: Text("Conference presenters will appear here once they're announced.")
+                    )
+                    .padding(.top, 60)
+                } else {
+                    ContentUnavailableView.search(text: searchText)
+                        .padding(.top, 60)
+                }
+            } else {
                 ScrollViewReader { _ in
                     LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
-                        ForEach(self.speakerGroup().sorted {
-                            $0.key < $1.key
-                        }, id: \.key) { char, speakers in
+                        ForEach(grouped, id: \.key) { char, speakers in
                             SpeakerData(char: char, speakers: speakers)
                         }
                     }
                 }
             }
-            .searchable(text: $searchText)
         }
+        .refreshable {
+            if let code = viewModel.conference?.code {
+                viewModel.fetchData(code: code)
+            }
+        }
+        .searchable(text: $searchText)
         .analyticsScreen(name: "SpeakersView")
     }
 }

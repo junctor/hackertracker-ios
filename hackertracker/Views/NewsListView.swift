@@ -14,20 +14,42 @@ struct NewsListView: View {
 
     @State private var searchText = ""
 
+    private var filteredNews: [Article] {
+        viewModel.news.search(text: searchText).sorted { $0.updatedAt > $1.updatedAt }
+    }
+
     var body: some View {
+        // Phase 5a: pull-to-refresh + empty-state UX.
         ScrollView {
-            ScrollViewReader { _ in
-                ForEach(self.viewModel.news.search(text: searchText).sorted {
-                    $0.updatedAt > $1.updatedAt
-                }) { article in
-                    articleRow(article: article, pad: true)
-                        .padding(2)
+            if filteredNews.isEmpty {
+                if searchText.isEmpty {
+                    ContentUnavailableView(
+                        "No News Yet",
+                        systemImage: "newspaper",
+                        description: Text("Conference articles will appear here once they're published.")
+                    )
+                    .padding(.top, 60)
+                } else {
+                    ContentUnavailableView.search(text: searchText)
+                        .padding(.top, 60)
+                }
+            } else {
+                ScrollViewReader { _ in
+                    ForEach(filteredNews) { article in
+                        articleRow(article: article, pad: true)
+                            .padding(2)
+                    }
                 }
             }
-            .searchable(text: $searchText)
-            .navigationTitle("News")
-            .analyticsScreen(name: "NewsListView")
         }
+        .refreshable {
+            if let code = viewModel.conference?.code {
+                viewModel.fetchData(code: code)
+            }
+        }
+        .searchable(text: $searchText)
+        .navigationTitle("News")
+        .analyticsScreen(name: "NewsListView")
     }
 }
 

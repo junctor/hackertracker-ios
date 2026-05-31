@@ -17,7 +17,18 @@ struct ProductsView: View {
     
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
+    private var visibleProducts: [Product] {
+        viewModel.products.search(text: searchText)
+            .sorted { $0.sortOrder < $1.sortOrder }
+            .filter { product in
+                filters.filters.count == 0 ||
+                product.tagIds.filter({ filters.filters.contains($0) }).count > 0 ||
+                product.variants.filter({ $0.tagIds.intersects(with: filters.filters) && $0.stockStatus == "IN" }).count > 0
+            }
+    }
+
     var body: some View {
+        // Phase 5a: pull-to-refresh + empty-state UX.
         ScrollView {
             if showMerchInfo {
                 MerchInfo()
@@ -27,16 +38,36 @@ struct ProductsView: View {
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
             Divider()
-            LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
-                ForEach(self.viewModel.products.search(text: searchText).sorted {
-                        $0.sortOrder < $1.sortOrder
-                }) { product in
-                    if filters.filters.count == 0 ||
-                        product.tagIds.filter({ filters.filters.contains($0) }).count > 0 ||
-                        product.variants.filter({ $0.tagIds.intersects(with: filters.filters) && $0.stockStatus == "IN" }).count > 0 {
+            if visibleProducts.isEmpty {
+                if searchText.isEmpty && filters.filters.isEmpty {
+                    ContentUnavailableView(
+                        "No Merch",
+                        systemImage: "tshirt",
+                        description: Text("Merchandise will appear here once it's published.")
+                    )
+                    .padding(.top, 40)
+                } else if !searchText.isEmpty {
+                    ContentUnavailableView.search(text: searchText)
+                        .padding(.top, 40)
+                } else {
+                    ContentUnavailableView(
+                        "No Matches",
+                        systemImage: "line.3.horizontal.decrease.circle",
+                        description: Text("No items match the current filters.")
+                    )
+                    .padding(.top, 40)
+                }
+            } else {
+                LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
+                    ForEach(visibleProducts) { product in
                         ProductsRow(product: product)
                     }
                 }
+            }
+        }
+        .refreshable {
+            if let code = viewModel.conference?.code {
+                viewModel.fetchData(code: code)
             }
         }
         .searchable(text: $searchText)
