@@ -87,7 +87,7 @@ import UIKit
 }
  */
 
-class AddContentController: UIViewController, EKEventEditViewDelegate {
+class AddContentController: UIViewController, @preconcurrency EKEventEditViewDelegate {
   let eventStore = EKEventStore()
   var content: Content?
   var session: Session?

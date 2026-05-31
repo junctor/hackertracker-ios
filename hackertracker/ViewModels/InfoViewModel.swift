@@ -54,18 +54,18 @@ final class InfoViewModel {
     // @Published var colorMode = false
     var outOfStock = false
     var easterEgg = false
-    @ObservationIgnored var conferenceListener: ListenerRegistration?
-    @ObservationIgnored var documentListener: ListenerRegistration?
-    @ObservationIgnored var tagListener: ListenerRegistration?
-    @ObservationIgnored var locationListener: ListenerRegistration?
-    @ObservationIgnored var productListener: ListenerRegistration?
-    @ObservationIgnored var contentListener: ListenerRegistration?
-    @ObservationIgnored var speakerListener: ListenerRegistration?
-    @ObservationIgnored var orgListener: ListenerRegistration?
-    @ObservationIgnored var listListener: ListenerRegistration?
-    @ObservationIgnored var articleListener: ListenerRegistration?
-    @ObservationIgnored var menuListener: ListenerRegistration?
-    @ObservationIgnored var feedbackFormsListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var conferenceListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var documentListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var tagListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var locationListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var productListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var contentListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var speakerListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var orgListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var listListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var articleListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var menuListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) var feedbackFormsListener: ListenerRegistration?
 
     deinit {
         // Phase 1 fix: root-level @StateObjects rarely deallocate, but if they do (e.g. in

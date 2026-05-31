@@ -79,6 +79,7 @@ func childrenLocations(locations: [Location]) -> [Int: [Location]] {
     }
 }
 
+@MainActor
 func circleStatus(location: Location) -> Color {
     let curDate = Date()
     let dfu = DateFormatterUtility.shared

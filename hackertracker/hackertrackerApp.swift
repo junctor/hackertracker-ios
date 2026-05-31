@@ -62,7 +62,7 @@ struct hackertrackerApp: App {
     }
 }
 
-extension AppDelegate: UNUserNotificationCenterDelegate {
+extension AppDelegate: @preconcurrency UNUserNotificationCenterDelegate {
     func userNotificationCenter(
         _: UNUserNotificationCenter,
         willPresent _: UNNotification,
@@ -88,7 +88,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
 }
 
-extension AppDelegate: MessagingDelegate {
+extension AppDelegate: @preconcurrency MessagingDelegate {
     func messaging(
         _: Messaging,
         didReceiveRegistrationToken fcmToken: String?

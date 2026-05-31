@@ -11,7 +11,8 @@ import os
 struct PersistenceController {
     static let shared = PersistenceController()
 
-    static var preview: PersistenceController = {
+    // Phase 3c (Swift 6): preview is a SwiftUI-preview-only singleton; isolation isn't needed.
+    nonisolated(unsafe) static var preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
         for _ in 0 ..< 10 {
@@ -51,7 +52,9 @@ struct PersistenceController {
         // Phase 1 fix: prevent silent save failures when CloudKit imports of Bookmarks/Cart
         // race with local writes. Property-object trump policy biases toward the in-memory
         // user action, which matches the UX intent for these models.
-        container.viewContext.mergePolicy = NSMergeByPropertyObjectTrumpMergePolicy
+        // Swift 6: prefer the NSMergePolicy initializer over the Objective-C global
+        // constant (which is exposed as a non-Sendable `var`).
+        container.viewContext.mergePolicy = NSMergePolicy.mergeByPropertyObjectTrump
         container.viewContext.automaticallyMergesChangesFromParent = true
         container.viewContext.shouldDeleteInaccessibleFaults = true
     }

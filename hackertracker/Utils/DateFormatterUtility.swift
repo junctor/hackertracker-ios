@@ -7,6 +7,12 @@
 
 import Foundation
 
+// Phase 3c: @MainActor isolation. The previous singleton + mutable
+// `timeZone` ivar pattern is not Sendable in Swift 6 mode. All access
+// happens from SwiftUI views (already MainActor) or AddEventController's
+// MainActor Task, so isolating the whole class to MainActor is the
+// minimal, behavior-preserving fix.
+@MainActor
 class DateFormatterUtility {
     var timeZone = TimeZone(identifier: "America/Los_Angeles")
 

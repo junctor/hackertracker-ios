@@ -18,7 +18,7 @@ import SwiftUI
 final class EventViewModel {
     var event: Event?
     @ObservationIgnored private let db = Firestore.firestore()
-    @ObservationIgnored private var listener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) private var listener: ListenerRegistration?
 
     deinit { listener?.remove() }
 

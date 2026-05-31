@@ -7,16 +7,6 @@
 
 import Foundation
 
-extension Date {
-    func dayOfDate() -> Date? {
-        var calendar = Calendar.current
-        if let tz = DateFormatterUtility.shared.timeZone {
-            calendar.timeZone = tz
-        }
-        return calendar.startOfDay(for: self)
-    }
-}
-
 extension [TagType] {
     func tags(category: String) -> [Tag] {
         var retArray: [Tag] = []

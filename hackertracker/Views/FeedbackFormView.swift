@@ -111,6 +111,7 @@ extension FeedbackFormView {
                 if let jd = jsonData, let fb = String(data: jd, encoding: .utf8) {
                     NSLog("Feedback form for submission: \(fb)")
                 }
+                let capturedItemId = item.id
                 URLSession.shared.dataTask(with: request) { data, response, error in
                     if let error = error {
                         DispatchQueue.main.async {
@@ -129,7 +130,7 @@ extension FeedbackFormView {
                     }
                     DispatchQueue.main.async {
                         self.alertMessage = "Feedback Sent"
-                        FeedbackUtility.addFeedback(context: viewContext, id: item.id)
+                        FeedbackUtility.addFeedback(context: viewContext, id: capturedItemId)
                         self.showAlert.toggle()
                     }
                     NSLog("Feedback sent successfully")

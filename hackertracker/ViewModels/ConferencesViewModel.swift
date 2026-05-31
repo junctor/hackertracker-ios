@@ -20,7 +20,7 @@ final class ConferencesViewModel {
     var conferences = [Conference]()
     /// Firestore listener kept out of the observation graph; SwiftUI doesn't
     /// need to re-render on listener handle changes.
-    @ObservationIgnored private var conferenceListener: ListenerRegistration?
+    @ObservationIgnored nonisolated(unsafe) private var conferenceListener: ListenerRegistration?
     @ObservationIgnored private let db = Firestore.firestore()
 
     deinit {
