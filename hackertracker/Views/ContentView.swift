@@ -108,19 +108,18 @@ struct ContentView: View {
 
                 // viewModel.fetchData(code: selected.code)
             }
-            .onChange(of: viewModel.conference?.timezone) { _, _ in
-                // Phase 4 follow-up: when Firestore first delivers the Conference
-                // (initial load) or it changes (mid-session edit), sync the
-                // shared DateFormatterUtility to the right timezone. Previously
-                // there was no initial-load sync, so the schedule rendered in
-                // device-current time until the user toggled showLocaltime.
-                ClockService.apply(conference: viewModel.conference, showLocaltime: showLocaltime)
-            }
-            .onChange(of: showLocaltime) { _, _ in
-                // Phase 4 follow-up: top-level mirror of the per-view
-                // (SettingsView / EventsView) handlers. Centralizing here
-                // ensures the TZ flips consistently even when the toggle is
-                // bound somewhere we haven't wired explicitly.
+            .task(id: "\(viewModel.conference?.timezone ?? "nil")|\(showLocaltime)") {
+                // Phase 4 follow-up (corrected): the TabView only mounts AFTER
+                // viewModel.conference != nil. .onChange(of:) only fires on
+                // subsequent changes -- never on the value present at mount --
+                // so the previous attempt never triggered on initial load and
+                // the schedule rendered in device-current time despite
+                // showLocaltime being off.
+                //
+                // .task(id:) fires both on first appearance AND whenever the
+                // identity composed of (conference.timezone, showLocaltime)
+                // changes. Result: the active timezone is applied at app
+                // launch, on conference switch, and on showLocaltime toggle.
                 ClockService.apply(conference: viewModel.conference, showLocaltime: showLocaltime)
             }
             .environmentObject(selected)
