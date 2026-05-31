@@ -84,6 +84,7 @@ struct ContentListView: View {
                       ? "line.3.horizontal.decrease.circle"
                       : "line.3.horizontal.decrease.circle.fill")
                 }
+                .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
             }
         }
         .analyticsScreen(name: "ContentListView")

@@ -99,6 +99,7 @@ struct EventsView: View {
             } label: {
               Image(systemName: "ellipsis")
             }
+            .accessibilityLabel("Schedule options")
               if showConflictAlert, viewModel.bookmarkConflicts(bookmarks: bookmarks.map({Int($0.id)})) {
                   Button {
                       showConflictAlertPopup = true
@@ -106,6 +107,8 @@ struct EventsView: View {
                       Image(systemName: "exclamationmark.triangle")
                           .foregroundColor(ThemeColors.red)
                   }
+                  .accessibilityLabel("Bookmark schedule conflict")
+                  .accessibilityHint("Shows conflicting bookmarked events")
               }
           }
             ToolbarItemGroup(placement: .navigationBarTrailing) {
@@ -155,7 +158,8 @@ struct EventsView: View {
                 } label: {
                     Image(systemName: "arrow.up.arrow.down")
                 }
-                
+                .accessibilityLabel("Jump to day")
+
                 Button {
                     showFilters.toggle()
                 } label: {
@@ -165,6 +169,7 @@ struct EventsView: View {
                         ? "line.3.horizontal.decrease.circle"
                         : "line.3.horizontal.decrease.circle.fill")
                 }
+                .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
             }
         }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
@@ -260,6 +265,7 @@ struct EventsView: View {
             } label: {
               Image(systemName: "arrow.up.arrow.down")
             }
+            .accessibilityLabel("Jump to day")
           }
         }
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))

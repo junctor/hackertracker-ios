@@ -257,6 +257,7 @@ struct SpeakerEventView: View {
                     Image(systemName: bookmarks.map({$0.id}).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
                         .foregroundColor((bookmarks.map({$0.id}).contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
                 }
+                .accessibilityLabel(bookmarks.map({$0.id}).contains(Int32(event.id)) ? "Remove bookmark" : "Add bookmark")
             }
             .buttonStyle(PlainButtonStyle())
         }

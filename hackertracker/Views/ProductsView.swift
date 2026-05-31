@@ -77,6 +77,7 @@ struct ProductsView: View {
                 NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
                     Image(systemName: "info.circle")
                 }
+                .accessibilityLabel("Merch info")
             }
             Button {
               showFilters.toggle()
@@ -87,10 +88,12 @@ struct ProductsView: View {
                   ? "line.3.horizontal.decrease.circle"
                   : "line.3.horizontal.decrease.circle.fill")
             }
+            .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
             if let c = viewModel.conference, c.enableMerchCart {
                 NavigationLink(destination: CartView()) {
                     Image(systemName: "qrcode")
                 }
+                .accessibilityLabel("Cart")
             }
         }
         .sheet(isPresented: $showFilters) {
@@ -118,6 +121,7 @@ struct MerchInfo: View {
                     } label: {
                         Image(systemName: "x.circle")
                     }
+                    .accessibilityLabel("Hide merch info")
                     VStack(alignment: .leading) {
                         Text(doc.title).font(.subheadline).fontWeight(.bold)
                     }

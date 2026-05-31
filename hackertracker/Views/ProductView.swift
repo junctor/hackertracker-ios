@@ -128,6 +128,7 @@ struct ProductView: View {
                     Image(systemName: "qrcode")
                 }
             }
+            .accessibilityLabel("Cart")
         }
         .analyticsScreen(name: "ProductView")
     }
