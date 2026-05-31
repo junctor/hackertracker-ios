@@ -75,8 +75,7 @@ struct EventsView: View {
                 if showLocaltime {
                   dfu.update(tz: TimeZone.current)
                 } else {
-                  dfu.update(
-                    tz: TimeZone(identifier: viewModel.conference?.timezone ?? "America/Los_Angeles"))
+                  ClockService.apply(conference: viewModel.conference, showLocaltime: false)
                 }
               }
                 Toggle(isOn: $show24hourtime) {

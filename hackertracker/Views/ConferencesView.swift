@@ -41,7 +41,7 @@ struct ConferencesView: View {
                         conferenceCode = conference.code
                         filters.filters.removeAll()
                         viewModel.fetchData(code: conference.code)
-                        showLocaltime ? DateFormatterUtility.shared.update(tz: TimeZone.current) : DateFormatterUtility.shared.update(tz: TimeZone(identifier: conference.timezone ?? "America/Los_Angeles"))
+                        ClockService.apply(conference: conference, showLocaltime: showLocaltime)
                     }
                     
                 }) {

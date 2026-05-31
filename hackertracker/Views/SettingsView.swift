@@ -289,7 +289,7 @@ struct ShowLocaltimeSettingsView: View {
                     if value {
                         dfu.update(tz: TimeZone.current)
                     } else {
-                        dfu.update(tz: TimeZone(identifier: viewModel.conference?.timezone ?? "America/Los_Angeles"))
+                        ClockService.apply(conference: viewModel.conference, showLocaltime: false)
                     }
                 }
             Text("Show event times in current localtime instead of conference time")
