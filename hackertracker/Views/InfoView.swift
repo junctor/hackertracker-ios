@@ -306,15 +306,48 @@ struct InfoView: View {
                                     viewModel.fetchData(code: conf.code)
                                 }
                             }
+                            // Phase 5c: deep-link router. Supported paths:
+                            //   /                        Just switch conferences (handled above).
+                            //   /c, /content?id=N        Open content detail.
+                            //   /e, /event?id=N          Open event detail.
+                            //   /s, /share?ids=N,N,N     Open shared bookmark schedule.
                             switch url.path {
+                            case "", "/":
+                                Log.app.debug("deep link: bare conference path, already switched")
+
                             case "/c", "/content":
-                                Log.app.debug("deep link: open content id")
-                                
+                                Log.app.debug("deep link: open content")
+                                if let raw = queryItems?.first(where: { $0.name == "id" })?.value,
+                                   let id = Int(raw) {
+                                    if tabSelection != 1 { tabSelection = 1 }
+                                    path.append("content/\(id)")
+                                } else {
+                                    Log.app.error("deep link: /content missing or invalid `id` query item")
+                                }
+
+                            case "/e", "/event":
+                                Log.app.debug("deep link: open event")
+                                // Events navigate to their parent Content. Resolve the
+                                // event's contentId now and push the corresponding
+                                // content route. Falls back to a no-op + log if the
+                                // event isn't in the current snapshot.
+                                if let raw = queryItems?.first(where: { $0.name == "id" })?.value,
+                                   let id = Int(raw) {
+                                    if tabSelection != 1 { tabSelection = 1 }
+                                    if let event = viewModel.events.first(where: { $0.id == id }) {
+                                        path.append("content/\(event.contentId)")
+                                    } else {
+                                        Log.app.error("deep link: event \(id) not found in current conference")
+                                    }
+                                } else {
+                                    Log.app.error("deep link: /event missing or invalid `id` query item")
+                                }
+
                             case "/s", "/share":
                                 Log.app.debug("deep link: share content")
                                 if let sharedIds = queryItems?.first(where: { $0.name == "ids" })?.value {
                                     Log.app.debug("share ids: \(sharedIds, privacy: .public)")
-                                    
+
                                     for id in sharedIds.split(separator: ",") {
                                         if let e = viewModel.events.first(where: { $0.id == Int(id) }) {
                                             sharedEvents.append(e)
@@ -322,18 +355,16 @@ struct InfoView: View {
                                             Log.app.error("invalid share id=\(id, privacy: .public) conf=\(urlConference, privacy: .public)")
                                         }
                                     }
-                                    // Change Tab To Main Screen
                                     if tabSelection != 1 {
                                         tabSelection = 1
                                     }
-                                    //print("Valid Ids: \(ids)")
-                                    // NavigationLink("Go to Content List View", destination: ContentListView(content: sharedContent, title: "Shared Content"))
                                     if sharedEvents.count > 0 {
                                         path.append("SharedEvents")
                                     }
                                 }
+
                             default:
-                                Log.app.error("deep link: no corresponding URL")
+                                Log.app.error("deep link: unknown path \(url.path, privacy: .public)")
                             }
                             
                         }
@@ -359,7 +390,18 @@ struct InfoView: View {
                         Log.app.debug("navigating to \(value, privacy: .public)")
                     }
                 default:
-                    _04View(message: "Unknown destination: \(value)")
+                    // Phase 5c: deep-link routes pushed by .onOpenURL.
+                    // Format: "content/<id>". Event deep links resolve to a
+                    // content id before being pushed (events have no detail
+                    // view of their own; tapping a row navigates to the
+                    // parent Content).
+                    if value.hasPrefix("content/"),
+                       let id = Int(value.dropFirst("content/".count)) {
+                        ContentDetailView(contentId: id)
+                            .onAppear { Log.app.debug("deep link nav -> content/\(id)") }
+                    } else {
+                        _04View(message: "Unknown destination: \(value)")
+                    }
                 }
             }
         }
