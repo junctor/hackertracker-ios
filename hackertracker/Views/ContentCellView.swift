@@ -30,6 +30,25 @@ struct ContentCell: View {
         }
     }
     
+    /// Phase 6 follow-up: a Content has multiple sessions. Visual state mirrors
+    /// `bookmarkAction()` semantics (which toggles each session's bookmark
+    /// independently) -- we treat the content as "bookmarked" if ANY of its
+    /// sessions are bookmarked, so the icon highlights as soon as the user
+    /// has saved at least one session.
+    private var isBookmarked: Bool {
+        content.sessions.contains { bookmarks.contains(Int32($0.id)) }
+    }
+
+    /// Red tint when any bookmarked session collides with another bookmark;
+    /// matches the conflict pill behavior in EventCell.
+    private var hasBookmarkConflict: Bool {
+        let bookmarkInts = bookmarks.map { Int($0) }
+        return content.sessions.contains { s in
+            bookmarks.contains(Int32(s.id)) &&
+            viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarkInts)
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             HStack(alignment: .center) {
@@ -49,8 +68,24 @@ struct ContentCell: View {
                             ShowEventCellTags(tagIds: content.tagIds, minWidth: 150)
                         }
                     }
+
+                    HStack(alignment: .center) {
+                        Button {
+                            bookmarkAction()
+                        } label: {
+                            Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                                .foregroundColor(hasBookmarkConflict ? ThemeColors.red : .primary)
+                        }
+                        .accessibilityLabel(isBookmarked ? "Remove bookmark" : "Add bookmark")
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
+        }.swipeActions {
+            Button(isBookmarked ? "Remove Bookmark" : "Bookmark") {
+                bookmarkAction()
+            }.buttonStyle(DefaultButtonStyle())
+                .tint(isBookmarked ? .red : .yellow)
         }
     }
     
