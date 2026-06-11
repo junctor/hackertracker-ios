@@ -73,6 +73,8 @@ struct ContentListView: View {
             }
         }
         .navigationTitle(title ?? "All Content")
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 Button {
@@ -102,7 +104,8 @@ struct ContentData: View {
             .font(.subheadline)
             .padding(3)
             .frame(maxWidth: .infinity)
-            .background(Color(.systemGray6))
+            // Phase 6 polish: match the toolbar's frosted material.
+            .background(.ultraThinMaterial)
         ) {
             ForEach(content, id: \.id) { item in
                 NavigationLink(destination: ContentDetailView(contentId: item.id)) {

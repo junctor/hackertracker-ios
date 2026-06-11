@@ -56,6 +56,8 @@ struct OrgsView: View {
         }
         .navigationTitle(title)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic))
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .analyticsScreen(name: "OrgsView")
     }
 }

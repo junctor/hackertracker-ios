@@ -49,6 +49,8 @@ struct SpeakersView: View {
             }
         }
         .searchable(text: $searchText)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .analyticsScreen(name: "SpeakersView")
     }
 }
@@ -63,7 +65,8 @@ struct SpeakerData: View {
             .font(.subheadline)
             .padding(1)
             .frame(maxWidth: .infinity)
-            .background(Color(.systemGray6))
+            // Phase 6 polish: match the toolbar's frosted material.
+            .background(.ultraThinMaterial)
         ) {
             ForEach(speakers, id: \.id) { speaker in
                 NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {

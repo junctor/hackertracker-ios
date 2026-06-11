@@ -72,6 +72,8 @@ struct ProductsView: View {
         }
         .searchable(text: $searchText)
         .navigationTitle("Merch")
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             if !showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {
                 NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {

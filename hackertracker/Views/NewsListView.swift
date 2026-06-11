@@ -49,6 +49,8 @@ struct NewsListView: View {
         }
         .searchable(text: $searchText)
         .navigationTitle("News")
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .analyticsScreen(name: "NewsListView")
     }
 }

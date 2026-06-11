@@ -63,6 +63,10 @@ struct EventsView: View {
           showLocaltime: $showLocaltime
         )
         .navigationTitle(viewModel.conference?.name ?? "Schedule")
+        // Phase 6 polish: frosted nav bar so the title row reads cleanly when
+        // content scrolls underneath instead of bleeding through transparent.
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
           ToolbarItemGroup(placement: .navigationBarLeading) {
             Menu {
@@ -216,6 +220,8 @@ struct EventsView: View {
           showLocaltime: $showLocaltime
         )
         .navigationTitle(navTitle)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             
           ToolbarItemGroup(placement: .navigationBarTrailing) {
@@ -448,7 +454,10 @@ struct EventData: View {
         .font(.subheadline)
         .padding(3)
         .frame(maxWidth: .infinity)
-        .background(Color(.systemGray6))
+        // Phase 6 polish: match the toolbar's frosted material so the pinned
+        // section header visually nests under the nav bar instead of
+        // showing a hard gray seam.
+        .background(.ultraThinMaterial)
     ) {
       Section {
         ForEach(
