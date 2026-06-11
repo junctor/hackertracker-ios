@@ -47,6 +47,7 @@ struct FAQListView: View {
         }
         .searchable(text: $searchText)
         .navigationTitle("FAQs")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .analyticsScreen(name: "FAQListView")

@@ -73,6 +73,7 @@ struct ContentListView: View {
             }
         }
         .navigationTitle(title ?? "All Content")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {

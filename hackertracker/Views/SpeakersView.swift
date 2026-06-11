@@ -49,6 +49,7 @@ struct SpeakersView: View {
             }
         }
         .searchable(text: $searchText)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .analyticsScreen(name: "SpeakersView")

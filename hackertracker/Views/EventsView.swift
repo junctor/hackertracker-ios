@@ -63,6 +63,10 @@ struct EventsView: View {
           showLocaltime: $showLocaltime
         )
         .navigationTitle(viewModel.conference?.name ?? "Schedule")
+        // Phase 6 polish: compact (inline) title so the nav bar is a single
+        // tight row instead of consuming a third of the screen with the
+        // default `.large` display + frosted band.
+        .navigationBarTitleDisplayMode(.inline)
         // Phase 6 polish: frosted nav bar so the title row reads cleanly when
         // content scrolls underneath instead of bleeding through transparent.
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
@@ -220,6 +224,7 @@ struct EventsView: View {
           showLocaltime: $showLocaltime
         )
         .navigationTitle(navTitle)
+        .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {

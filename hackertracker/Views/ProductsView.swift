@@ -72,6 +72,7 @@ struct ProductsView: View {
         }
         .searchable(text: $searchText)
         .navigationTitle("Merch")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
