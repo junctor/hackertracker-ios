@@ -30,11 +30,7 @@ struct EventsView: View {
   /// Phase 2: debounced copy used by the filter pipeline so we don't recompute
   /// filter+search+group on every keystroke.
   @State private var debouncedSearch = ""
-  /// Polish: drives the iOS 17 isPresented variant of .searchable so the
-  /// search field is hidden on initial load and only appears when the user
-  /// pulls down at the top of the schedule (or taps the search affordance).
-  /// The system flips this to true automatically on pull-down.
-  @State private var isSearchPresented = false
+
   //@Binding var filters: Set<Int>
   @State private var showFilters = false
   @State private var showEmergency = false
@@ -185,7 +181,12 @@ struct EventsView: View {
                 .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
             }
         }
-        .searchable(text: $searchText, isPresented: $isSearchPresented, placement: .navigationBarDrawer(displayMode: .automatic))
+        // Polish: .toolbar placement collapses the search field into a tap-
+        // to-expand magnifying glass in the nav bar. Initial load shows no
+        // search bar at all; user taps the icon to invoke search.
+        // (Tried .searchable(isPresented:) in iOS 17 -- doesn't actually hide
+        // the bar when combined with .navigationBarDrawer placement.)
+        .searchable(text: $searchText, placement: .toolbar)
         .task(id: searchText) {
             // Phase 2: 250ms debounce so filter+search+group only runs once per pause.
             try? await Task.sleep(nanoseconds: 250_000_000)
@@ -284,7 +285,12 @@ struct EventsView: View {
             .accessibilityLabel("Jump to day")
           }
         }
-        .searchable(text: $searchText, isPresented: $isSearchPresented, placement: .navigationBarDrawer(displayMode: .automatic))
+        // Polish: .toolbar placement collapses the search field into a tap-
+        // to-expand magnifying glass in the nav bar. Initial load shows no
+        // search bar at all; user taps the icon to invoke search.
+        // (Tried .searchable(isPresented:) in iOS 17 -- doesn't actually hide
+        // the bar when combined with .navigationBarDrawer placement.)
+        .searchable(text: $searchText, placement: .toolbar)
         .task(id: searchText) {
             // Phase 2: 250ms debounce so filter+search+group only runs once per pause.
             try? await Task.sleep(nanoseconds: 250_000_000)
