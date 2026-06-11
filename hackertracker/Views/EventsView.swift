@@ -70,6 +70,45 @@ struct EventsView: View {
       }
   }
 
+  /// Polish (Option A): consolidated "Jump to Day" submenu. Lives inside the
+  /// leading ellipsis menu so the trailing toolbar capsule only has to host
+  /// Filter + Search, leaving room for the conference title.
+  @ViewBuilder private var jumpToDayMenu: some View {
+      Menu {
+          Button {
+              toTop.val = true
+          } label: {
+              Label("Top", systemImage: "arrow.up")
+          }
+          Button {
+              toCurrent.val = true
+          } label: {
+              Label("Now", systemImage: "clock")
+          }
+          Button {
+              toNext.val = true
+          } label: {
+              Label("Next", systemImage: "arrow.turn.right.down")
+          }
+          Button {
+              toBottom.val = true
+          } label: {
+              Label("Bottom", systemImage: "arrow.down")
+          }
+          Divider()
+          ForEach(
+              viewModel.events.filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
+                  .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
+          ) { day, _ in
+              Button(day) {
+                  eventDay = day
+              }
+          }
+      } label: {
+          Label("Jump to Day", systemImage: "arrow.up.arrow.down")
+      }
+  }
+
   /// Toolbar button that toggles the inline search field.
   @ViewBuilder private var searchToggleButton: some View {
       Button {
@@ -158,6 +197,8 @@ struct EventsView: View {
                   toTop.val = true
               }
               .toggleStyle(.automatic)
+              Divider()
+              jumpToDayMenu
             } label: {
               Image(systemName: "ellipsis")
             }
@@ -174,54 +215,9 @@ struct EventsView: View {
               }
           }
             ToolbarItemGroup(placement: .navigationBarTrailing) {
-                Menu {
-                    Button {
-                        toTop.val = true
-                    } label: {
-                        HStack {
-                            Text("Top")
-                            Image(systemName: "arrow.up")
-                        }
-                    }
-                    Button {
-                        toCurrent.val = true
-                    } label: {
-                        HStack {
-                            Text("Now")
-                            Image(systemName: "clock")
-                        }
-                    }
-                    Button {
-                        toNext.val = true
-                    } label: {
-                        HStack {
-                            Text("Next")
-                            Image(systemName: "arrow.turn.right.down")
-                        }
-                    }
-                    Button {
-                        toBottom.val = true
-                    } label: {
-                        HStack {
-                            Text("Bottom")
-                            Image(systemName: "arrow.down")
-                        }
-                    }
-                    Divider()
-                    ForEach(
-                        viewModel.events.filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
-                            .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
-                    ) { day, _ in
-                        Button(day) {
-                            eventDay = day
-                        }
-                    }
-                    
-                } label: {
-                    Image(systemName: "arrow.up.arrow.down")
-                }
-                .accessibilityLabel("Jump to day")
-
+                // Polish (Option A): Sort/Jump-to-Day menu moved into the leading
+                // ellipsis menu so the title row has room for the conference name.
+                // Trailing capsule now hosts only Filter + Search.
                 Button {
                     showFilters.toggle()
                 } label: {
