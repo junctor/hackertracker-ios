@@ -30,12 +30,62 @@ struct EventsView: View {
   /// Phase 2: debounced copy used by the filter pipeline so we don't recompute
   /// filter+search+group on every keystroke.
   @State private var debouncedSearch = ""
+  /// Polish: manual search affordance. `.searchable` in iOS 17 can't be hidden
+  /// on initial load even with isPresented:false + .navigationBarDrawer or
+  /// .toolbar placement -- the drawer renders anyway at scroll-top. So we
+  /// roll our own: a magnifying glass in the nav bar toggles a thin inline
+  /// search field that animates in above the schedule.
+  @State private var isSearching = false
+  @FocusState private var searchFocused: Bool
 
   //@Binding var filters: Set<Int>
   @State private var showFilters = false
   @State private var showEmergency = false
   @State private var showShareBookmarks = false
   @State private var showConflictAlertPopup = false
+
+  /// Inline search bar shown only when `isSearching` is true.
+  @ViewBuilder private var inlineSearchBar: some View {
+      if isSearching {
+          HStack(spacing: 8) {
+              Image(systemName: "magnifyingglass").foregroundColor(.secondary)
+              TextField("Search title, speaker, or description", text: $searchText)
+                  .focused($searchFocused)
+                  .submitLabel(.search)
+                  .autocorrectionDisabled()
+                  .textInputAutocapitalization(.never)
+              if !searchText.isEmpty {
+                  Button {
+                      searchText = ""
+                  } label: {
+                      Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
+                  }
+                  .accessibilityLabel("Clear search text")
+              }
+          }
+          .padding(.horizontal, 12)
+          .padding(.vertical, 8)
+          .background(.thinMaterial)
+          .transition(.move(edge: .top).combined(with: .opacity))
+      }
+  }
+
+  /// Toolbar button that toggles the inline search field.
+  @ViewBuilder private var searchToggleButton: some View {
+      Button {
+          withAnimation(.easeInOut(duration: 0.2)) {
+              isSearching.toggle()
+          }
+          if isSearching {
+              searchFocused = true
+          } else {
+              searchText = ""
+          }
+      } label: {
+          Image(systemName: isSearching ? "xmark.circle" : "magnifyingglass")
+      }
+      .accessibilityLabel(isSearching ? "Close search" : "Search schedule")
+  }
 
   var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
@@ -51,18 +101,21 @@ struct EventsView: View {
               }
         }
           
-        EventScrollView(
-          events:
-            viewModel.events
-            .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
-            .search(text: debouncedSearch, speakers: viewModel.speakers)
-            .eventDayGroup(
-                showLocaltime: showLocaltime, conference: viewModel.conference
-            ),
-          dayTag: eventDay,
-          showPastEvents: showPastEvents, includeNav: includeNav,
-          showLocaltime: $showLocaltime
-        )
+        VStack(spacing: 0) {
+          inlineSearchBar
+          EventScrollView(
+            events:
+              viewModel.events
+              .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
+              .search(text: debouncedSearch, speakers: viewModel.speakers)
+              .eventDayGroup(
+                  showLocaltime: showLocaltime, conference: viewModel.conference
+              ),
+            dayTag: eventDay,
+            showPastEvents: showPastEvents, includeNav: includeNav,
+            showLocaltime: $showLocaltime
+          )
+        }
         .navigationTitle(viewModel.conference?.name ?? "Schedule")
         // Phase 6 polish: compact (inline) title so the nav bar is a single
         // tight row instead of consuming a third of the screen with the
@@ -179,14 +232,9 @@ struct EventsView: View {
                         : "line.3.horizontal.decrease.circle.fill")
                 }
                 .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
+                searchToggleButton
             }
         }
-        // Polish: .toolbar placement collapses the search field into a tap-
-        // to-expand magnifying glass in the nav bar. Initial load shows no
-        // search bar at all; user taps the icon to invoke search.
-        // (Tried .searchable(isPresented:) in iOS 17 -- doesn't actually hide
-        // the bar when combined with .navigationBarDrawer placement.)
-        .searchable(text: $searchText, placement: .toolbar)
         .task(id: searchText) {
             // Phase 2: 250ms debounce so filter+search+group only runs once per pause.
             try? await Task.sleep(nanoseconds: 250_000_000)
@@ -216,7 +264,8 @@ struct EventsView: View {
           }
       } */
     } else {
-      VStack {
+      VStack(spacing: 0) {
+        inlineSearchBar
         EventScrollView(
           events:
             viewModel.events
@@ -229,6 +278,7 @@ struct EventsView: View {
           // tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
           showLocaltime: $showLocaltime
         )
+      }
         .navigationTitle(navTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
@@ -283,20 +333,14 @@ struct EventsView: View {
               Image(systemName: "arrow.up.arrow.down")
             }
             .accessibilityLabel("Jump to day")
+            searchToggleButton
           }
         }
-        // Polish: .toolbar placement collapses the search field into a tap-
-        // to-expand magnifying glass in the nav bar. Initial load shows no
-        // search bar at all; user taps the icon to invoke search.
-        // (Tried .searchable(isPresented:) in iOS 17 -- doesn't actually hide
-        // the bar when combined with .navigationBarDrawer placement.)
-        .searchable(text: $searchText, placement: .toolbar)
         .task(id: searchText) {
             // Phase 2: 250ms debounce so filter+search+group only runs once per pause.
             try? await Task.sleep(nanoseconds: 250_000_000)
             if !Task.isCancelled { debouncedSearch = searchText }
         }
-      }
       .onChange(of: viewModel.conference) { _, con in 
         Log.ui.debug("EventsView conference -> \(con?.name ?? "<nil>", privacy: .public)")
       }
