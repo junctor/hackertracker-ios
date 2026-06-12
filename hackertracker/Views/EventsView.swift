@@ -77,6 +77,17 @@ struct EventsView: View {
   /// can be reused for other placements if needed.
   @ViewBuilder private var jumpToDayMenu: some View {
       Menu {
+          // Dates first (ascending; eventDayGroup already sorts that way),
+          // then Top / Now / Next / Bottom.
+          ForEach(
+              viewModel.events.filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
+                  .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
+          ) { day, _ in
+              Button(day) {
+                  eventDay = day
+              }
+          }
+          Divider()
           Button {
               toTop.val = true
           } label: {
@@ -97,18 +108,14 @@ struct EventsView: View {
           } label: {
               Label("Bottom", systemImage: "arrow.down")
           }
-          Divider()
-          ForEach(
-              viewModel.events.filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
-                  .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
-          ) { day, _ in
-              Button(day) {
-                  eventDay = day
-              }
-          }
       } label: {
           Image(systemName: "arrow.up.arrow.down")
       }
+      // Default .menuOrder is .priority, which reorders items so the most-
+      // likely-tapped is closest to the trigger -- with a bottom-anchored
+      // trigger that meant the date list rendered in reverse (descending).
+      // .fixed forces declaration order.
+      .menuOrder(.fixed)
   }
 
   /// Toolbar button that toggles the inline search field.
