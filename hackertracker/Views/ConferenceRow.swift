@@ -23,6 +23,16 @@ struct ConferenceRow: View {
                     Text("\(conference.startDate) - \(conference.endDate)")
                         .font(.body)
                 }
+                // Polish: surface the conference timezone so users can see at
+                // a glance which timezone the schedule renders in.
+                if let tz = conference.timezone, !tz.isEmpty {
+                    HStack(spacing: 4) {
+                        Image(systemName: "clock")
+                        Text(tz)
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
             })
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(0)
@@ -35,6 +45,16 @@ struct ConferenceRow: View {
                 })
             }
         }
+        // Polish: card-style background per row so cells visually separate
+        // now that we're using LazyVStack instead of List (which used to
+        // provide its own row separators).
+        .padding(.vertical, 12)
+        .padding(.horizontal, 14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 4)
     }
 }
 
