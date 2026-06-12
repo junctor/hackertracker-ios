@@ -22,6 +22,18 @@ struct ProductsView: View {
 
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
+    /// Polish: the merch filter sheet renders Sections per TagType. If no
+    /// browsable merch-product / merch-variant tag types exist in the
+    /// current conference data, the sheet would open empty. Compute the
+    /// eligible list once and use it to (a) decide whether to show the
+    /// floating Filter button at all, and (b) feed the sheet itself.
+    private var availableFilterTagTypes: [TagType] {
+        viewModel.tagtypes.filter {
+            ($0.category == "merch-product" || $0.category == "merch-variant")
+            && $0.isBrowsable == true
+        }
+    }
+
     private var visibleProducts: [Product] {
         viewModel.products.search(text: searchText)
             .sorted { $0.sortOrder < $1.sortOrder }
@@ -144,18 +156,23 @@ struct ProductsView: View {
         }
         .overlay(alignment: .bottom) {
             HStack {
-                Button {
-                    showFilters.toggle()
-                } label: {
-                    Image(systemName: filters.filters.isEmpty
-                          ? "line.3.horizontal.decrease.circle"
-                          : "line.3.horizontal.decrease.circle.fill")
-                        .font(.title2)
-                        .frame(width: 48, height: 48)
-                        .background(.regularMaterial, in: Circle())
+                // Polish: don't render the filter button when there are no
+                // applicable merch tag types -- opening the sheet would just
+                // show empty Sections.
+                if !availableFilterTagTypes.isEmpty {
+                    Button {
+                        showFilters.toggle()
+                    } label: {
+                        Image(systemName: filters.filters.isEmpty
+                              ? "line.3.horizontal.decrease.circle"
+                              : "line.3.horizontal.decrease.circle.fill")
+                            .font(.title2)
+                            .frame(width: 48, height: 48)
+                            .background(.regularMaterial, in: Circle())
+                    }
+                    .tint(.primary)
+                    .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
                 }
-                .tint(.primary)
-                .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
 
                 Spacer()
 
@@ -192,9 +209,9 @@ struct ProductsView: View {
         }
         .sheet(isPresented: $showFilters) {
           EventFilters(
-            tagtypes: viewModel.tagtypes.filter {
-                ($0.category == "merch-product" || $0.category == "merch-variant") && $0.isBrowsable == true
-            }, showFilters: $showFilters, showBookmarks: false
+            tagtypes: availableFilterTagTypes,
+            showFilters: $showFilters,
+            showBookmarks: false
           )
         }
         .analyticsScreen(name: "ProductsView")
