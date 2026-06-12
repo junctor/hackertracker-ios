@@ -155,6 +155,7 @@ struct SpeakersView: View {
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
         }
+        .navigationTitle("Speakers")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
