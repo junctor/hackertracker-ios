@@ -13,31 +13,41 @@ struct DocumentView: View {
     var body_text: String
     var color: Color?
     var systemImage: String?
+    /// Polish: callers like the About screen want the title only in the nav
+    /// bar (not duplicated in the scroll body). Emergency / merch-help docs
+    /// still want the prominent in-body banner, so this defaults to true.
+    var showInlineTitle: Bool = true
     @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
     var body: some View {
         ScrollView {
             VStack {
-                HStack {
-                    Image(systemName: systemImage ?? "doc")
-                        .frame(alignment: .leading)
-                        .padding(5)
-                    Text(title_text)
-                        .font(.title)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                if showInlineTitle {
+                    HStack {
+                        Image(systemName: systemImage ?? "doc")
+                            .frame(alignment: .leading)
+                            .padding(5)
+                        Text(title_text)
+                            .font(.title)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .foregroundColor(colorMode ? .white : .primary)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .padding(15)
+                    .background(color ?? (colorMode ? theme.carousel() : Color(.systemGray6)))
+                    .cornerRadius(15)
+                    Divider()
                 }
-                .foregroundColor(colorMode ? .white : .primary)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .padding(15)
-                .background(color ?? (colorMode ? theme.carousel() : Color(.systemGray6)))
-                .cornerRadius(15)
-                Divider()
                 Markdown(body_text)
                     .textSelection(.enabled)
                 Divider()
             }
         }
+        .navigationTitle(title_text)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .analyticsScreen(name: "DocumentView")
         .padding(15)
     }

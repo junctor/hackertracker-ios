@@ -7,7 +7,7 @@
 import SwiftUI
 
 /* struct ShareView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     let event: Event
     let title: Bool
 
@@ -31,7 +31,7 @@ import SwiftUI
 } */
 
 struct ShareContentView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     let content: Content
     let session: Session
     let title: Bool

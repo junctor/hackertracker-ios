@@ -26,6 +26,7 @@
 		5D0A5A612A33E65900BD5ECE /* Organization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0A5A602A33E65900BD5ECE /* Organization.swift */; };
 		5D0A5A632A34EECD00BD5ECE /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D0A5A622A34EECD00BD5ECE /* Tag.swift */; };
 		5D0A5A662A35293000BD5ECE /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 5D0A5A652A35293000BD5ECE /* MarkdownUI */; };
+		5D1C77232FC901970042DABC /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5D1C77222FC901970042DABC /* FirebaseCrashlytics */; };
 		5D2FAD992BC095C90043A84C /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 5D2FAD982BC095C90043A84C /* FirebaseStorage */; };
 		5D2FAD9B2BC096150043A84C /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5D2FAD9A2BC096150043A84C /* FirebaseAnalytics */; };
 		5D3E56CA2C27364B001CB419 /* Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3E56C92C27364B001CB419 /* Content.swift */; };
@@ -88,6 +89,11 @@
 		5DB4E0BA284EA02C0012F6F4 /* Map.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0B9284EA02C0012F6F4 /* Map.swift */; };
 		5DB4E0BC284EA0AE0012F6F4 /* Speaker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */; };
 		5DB4E0C8285001820012F6F4 /* events.json in Resources */ = {isa = PBXBuildFile; fileRef = 5DB4E0C7285001820012F6F4 /* events.json */; };
+		5DC0DE0000000000000000A1 /* Logger+HT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000A2 /* Logger+HT.swift */; };
+		5DC0DE0000000000000000B1 /* KFImage+HT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000B2 /* KFImage+HT.swift */; };
+		5DC0DE0000000000000000C1 /* ClockService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000C2 /* ClockService.swift */; };
+		5DC0DE0000000000000000D1 /* TrackingPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000D2 /* TrackingPermission.swift */; };
+		5DC0DE0000000000000000E1 /* ScrollTitleHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000E2 /* ScrollTitleHandoff.swift */; };
 		5DDF035A2C2751670087BA59 /* ContentListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF03592C2751670087BA59 /* ContentListView.swift */; };
 		5DDF035C2C2767750087BA59 /* ContentCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF035B2C2767750087BA59 /* ContentCellView.swift */; };
 		5DDF035E2C28B4F10087BA59 /* ContentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */; };
@@ -200,6 +206,11 @@
 		5DB4E0B9284EA02C0012F6F4 /* Map.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Map.swift; sourceTree = "<group>"; };
 		5DB4E0BB284EA0AE0012F6F4 /* Speaker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Speaker.swift; sourceTree = "<group>"; };
 		5DB4E0C7285001820012F6F4 /* events.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = events.json; sourceTree = "<group>"; };
+		5DC0DE0000000000000000A2 /* Logger+HT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+HT.swift"; sourceTree = "<group>"; };
+		5DC0DE0000000000000000B2 /* KFImage+HT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KFImage+HT.swift"; sourceTree = "<group>"; };
+		5DC0DE0000000000000000C2 /* ClockService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockService.swift; sourceTree = "<group>"; };
+		5DC0DE0000000000000000D2 /* TrackingPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingPermission.swift; sourceTree = "<group>"; };
+		5DC0DE0000000000000000E2 /* ScrollTitleHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollTitleHandoff.swift; sourceTree = "<group>"; };
 		5DDF03592C2751670087BA59 /* ContentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentListView.swift; sourceTree = "<group>"; };
 		5DDF035B2C2767750087BA59 /* ContentCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentCellView.swift; sourceTree = "<group>"; };
 		5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailView.swift; sourceTree = "<group>"; };
@@ -227,6 +238,7 @@
 				5D9681182C5C380000D246B0 /* FirebaseInAppMessagingSwift-Beta in Frameworks */,
 				5D0A5A662A35293000BD5ECE /* MarkdownUI in Frameworks */,
 				5D642D3E2A5725D80064492D /* Kingfisher in Frameworks */,
+				5D1C77232FC901970042DABC /* FirebaseCrashlytics in Frameworks */,
 				5DAE3E982836A76000F9F845 /* FirebaseAnalyticsSwift in Frameworks */,
 				5D2FAD992BC095C90043A84C /* FirebaseStorage in Frameworks */,
 				5DAE3E9A2836A76000F9F845 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
@@ -418,6 +430,11 @@
 				5DF51AB7285007EC007BCB83 /* DateFormatterUtility.swift */,
 				5D9681152C5946E000D246B0 /* FeedbackUtility.swift */,
 				3C04BD9D2A5FDFD900D01402 /* Filters.swift */,
+				5DC0DE0000000000000000A2 /* Logger+HT.swift */,
+				5DC0DE0000000000000000B2 /* KFImage+HT.swift */,
+				5DC0DE0000000000000000C2 /* ClockService.swift */,
+				5DC0DE0000000000000000D2 /* TrackingPermission.swift */,
+				5DC0DE0000000000000000E2 /* ScrollTitleHandoff.swift */,
 				3CD532E22A29ADF5009D17F3 /* ModelExt.swift */,
 				5D9681192C5D948100D246B0 /* NewsUtility.swift */,
 				5DF82B252A5F3B29001395C7 /* NotificationUtility.swift */,
@@ -465,6 +482,7 @@
 				5D2FAD982BC095C90043A84C /* FirebaseStorage */,
 				5D2FAD9A2BC096150043A84C /* FirebaseAnalytics */,
 				5D9681172C5C380000D246B0 /* FirebaseInAppMessagingSwift-Beta */,
+				5D1C77222FC901970042DABC /* FirebaseCrashlytics */,
 			);
 			productName = hackertracker;
 			productReference = 5DAE04B02820948B00930A2D /* hackertracker.app */;
@@ -651,6 +669,11 @@
 				5D642D292A44A1960064492D /* ProductsView.swift in Sources */,
 				5DAE04B62820948B00930A2D /* ContentView.swift in Sources */,
 				3C07C209285C6F7600CC9469 /* Theme.swift in Sources */,
+				5DC0DE0000000000000000A1 /* Logger+HT.swift in Sources */,
+				5DC0DE0000000000000000B1 /* KFImage+HT.swift in Sources */,
+				5DC0DE0000000000000000C1 /* ClockService.swift in Sources */,
+				5DC0DE0000000000000000D1 /* TrackingPermission.swift in Sources */,
+				5DC0DE0000000000000000E1 /* ScrollTitleHandoff.swift in Sources */,
 				5DB4E0BA284EA02C0012F6F4 /* Map.swift in Sources */,
 				5DB4E0B8284E9FEF0012F6F4 /* Conference.swift in Sources */,
 				5D9E5753285A3C25001374D4 /* SpeakersView.swift in Sources */,
@@ -757,7 +780,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -817,7 +840,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -835,7 +858,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25090902;
+				CURRENT_PROJECT_VERSION = 26061101;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -851,7 +874,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.9;
+				MARKETING_VERSION = 6.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -859,7 +882,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -871,7 +894,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 25090902;
+				CURRENT_PROJECT_VERSION = 26061101;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -887,7 +910,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 5.9;
+				MARKETING_VERSION = 6.0;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -895,7 +918,7 @@
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -907,12 +930,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertrackerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hackertracker.app/hackertracker";
 			};
@@ -925,12 +948,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertrackerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/hackertracker.app/hackertracker";
 			};
@@ -946,7 +969,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertrackerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = hackertracker;
 			};
@@ -962,7 +985,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertrackerUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = hackertracker;
 			};
@@ -1041,6 +1064,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5D0A5A642A35293000BD5ECE /* XCRemoteSwiftPackageReference "swift-markdown-ui" */;
 			productName = MarkdownUI;
+		};
+		5D1C77222FC901970042DABC /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 5DAE3E962836A76000F9F845 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
 		};
 		5D2FAD982BC095C90043A84C /* FirebaseStorage */ = {
 			isa = XCSwiftPackageProductDependency;

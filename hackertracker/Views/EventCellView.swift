@@ -11,7 +11,7 @@ struct EventCell: View {
     // let bookmarks: [Int32]
     let showDay: Bool
     @Environment(\.managedObjectContext) private var viewContext
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
@@ -20,11 +20,11 @@ struct EventCell: View {
 
     func bookmarkAction() {
         if bookmarks.map({$0.id}).contains(Int32(event.id)) {
-            print("EventCellView: Removing Bookmark \(event.id)")
+            Log.bookmarks.debug("eventCell remove \(event.id)")
             BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
             NotificationUtility.removeNotification(id: event.id)
         } else {
-            print("EventCellView: Adding Bookmark \(event.id)")
+            Log.bookmarks.debug("eventCell add \(event.id)")
             BookmarkUtility.addBookmark(context: viewContext, id: event.id)
             let notDate = event.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
             NotificationUtility.scheduleNotification(date: notDate, id: event.id, title: event.title, location: viewModel.locations.first(where: {$0.id == event.locationId})?.name ?? "unknown")
@@ -32,6 +32,9 @@ struct EventCell: View {
     }
 
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
         VStack(alignment: .leading) {
             HStack(alignment: .center) {
                 Rectangle().fill(getEventTagColorBackground())
@@ -75,6 +78,7 @@ struct EventCell: View {
                             Image(systemName: bookmarks.map({$0.id}).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
                                 .foregroundColor((bookmarks.map({$0.id}).contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
                         }
+                        .accessibilityLabel(bookmarks.map({$0.id}).contains(Int32(event.id)) ? "Remove bookmark" : "Add bookmark")
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
@@ -101,7 +105,7 @@ struct EventCell: View {
 struct ShowEventCellTags: View {
     var tagIds: [Int]
     var minWidth: CGFloat = 100
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: minWidth))], alignment: .leading, spacing: 1) {

@@ -10,7 +10,7 @@ import SwiftUI
 struct GlobalSearchView: View {
     @State private var searchText = ""
     @EnvironmentObject var theme: Theme
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("colorMode") var colorMode: Bool = false
     
     var body: some View {
@@ -19,7 +19,7 @@ struct GlobalSearchView: View {
                 if !searchText.isEmpty {
                     LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
                         Section(header: GlobalSearchHeader(headerText: "Schedule")) {
-                            ForEach(viewModel.events.search(text: searchText).sorted {$0.beginTimestamp < $1.beginTimestamp}, id: \.id) { event in
+                            ForEach(viewModel.events.search(text: searchText, speakers: viewModel.speakers).sorted {$0.beginTimestamp < $1.beginTimestamp}, id: \.id) { event in
                                 NavigationLink(destination: ContentDetailView(contentId: event.contentId)) {
                                     EventCell(event: event, showDay: true)
                                         .id(event.id)

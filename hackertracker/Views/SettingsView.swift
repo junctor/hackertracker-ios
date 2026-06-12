@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var selected: SelectedConference
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @AppStorage("showNews") var showNews: Bool = true
     
@@ -23,9 +23,6 @@ struct SettingsView: View {
                 }
             }
             ScrollView {
-                Text("Settings")
-                    .font(.title)
-                Divider()
                 AboutSettingsView()
                 HStack {
                     NavigationLink(destination: ConferencesView()) {
@@ -56,20 +53,24 @@ struct SettingsView: View {
                 NotificationSettingsView()
                 EasterEggSettingsView()
             }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .analyticsScreen(name: "SettingsView")
         }
     }
 }
 
 struct EasterEggSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("easterEgg") var easterEgg: Bool = false
     
     var body: some View {
         VStack(alignment: .leading) {
                 Toggle("Easter Eggs", isOn: $easterEgg)
-                    .onChange(of: easterEgg) { value in
-                        print("SettingsView: Changing to easterEgg = \(value)")
+                    .onChange(of: easterEgg) { _, value in 
+                        Log.ui.debug("easterEgg=\(value)")
                         viewModel.easterEgg = value
                     }
         }
@@ -79,7 +80,7 @@ struct EasterEggSettingsView: View {
 }
 
 struct NotificationSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("notifyAt") var notifyAt: Int = 20
     @State private var showingAlert = false
 
@@ -124,7 +125,7 @@ struct AboutSettingsView: View {
     var body: some View {
         HStack {
             if let v1 = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, let v2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-                NavigationLink(destination: DocumentView(title_text: "About", body_text: "# HackerTracker (iOS)\n#### Version \(v1) Build \(v2)\nHackerTracker is a conference scheduling application \n\n## Developers\n * l4wke - [X (@sethlaw)](https://x.com/sethlaw) | [GitHub](https://github.com/sethlaw)\n * derail - [Github](https://github.com/cak)\n * advice - [X (@_advice_dog)](https://x.com/_advice_dog)\n\n## Data Wrangler\n * aNullValue - [@aNullValue@defcon.social](https://defcon.social/@anullvalue)\n")) {
+                NavigationLink(destination: DocumentView(title_text: "About", body_text: "# HackerTracker (iOS)\n#### Version \(v1) Build \(v2)\nHackerTracker is a conference scheduling application \n\n## Developers\n * l4wke - [X (@sethlaw)](https://x.com/sethlaw) | [GitHub](https://github.com/sethlaw)\n * derail - [Github](https://github.com/cak)\n * advice - [X (@_advice_dog)](https://x.com/_advice_dog)\n\n## Data Wrangler\n * aNullValue - [@aNullValue@defcon.social](https://defcon.social/@anullvalue)\n", showInlineTitle: false)) {
                     Image(systemName: "info.circle")
                         .padding(5)
                     VStack(alignment: .leading) {
@@ -150,14 +151,14 @@ struct AboutSettingsView: View {
 }
 
 struct ShowNewsSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showNews") var showNews: Bool = true
     
     var body: some View {
         VStack(alignment: .leading) {
                 Toggle("News on Home Screen", isOn: $showNews)
-                    .onChange(of: showNews) { value in
-                        print("SettingsView: Changing to showNews = \(value)")
+                    .onChange(of: showNews) { _, value in 
+                        Log.ui.debug("showNews=\(value)")
                         viewModel.showNews = value
                     }
                 Text("Show the most recent news article on the home screen")
@@ -174,8 +175,8 @@ struct ShowMerchInfoSettingsView: View {
     var body: some View {
         VStack(alignment: .leading) {
                 Toggle("Merch Info on Merchandise Screen", isOn: $showMerchInfo)
-                    .onChange(of: showMerchInfo) { value in
-                        print("SettingsView: Changing to showMerchInfo = \(value)")
+                    .onChange(of: showMerchInfo) { _, value in 
+                        Log.ui.debug("showMerchInfo=\(value)")
                     }
                 Text("Show the merchandise information link on the merch list")
                     .font(.caption)
@@ -186,14 +187,14 @@ struct ShowMerchInfoSettingsView: View {
 }
 
 struct ShowPastEventsSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
     
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Show Past Events", isOn: $showPastEvents)
-                .onChange(of: showPastEvents) { value in
-                    print("SettingsView: Changing to showPastEvents = \(value)")
+                .onChange(of: showPastEvents) { _, value in 
+                    Log.ui.debug("showPastEvents=\(value)")
                     viewModel.showPastEvents = value
                 }
             Text("Show or hide past events in the conference schedule")
@@ -205,14 +206,14 @@ struct ShowPastEventsSettingsView: View {
 }
 
 struct ShowConflictAlertView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
     
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Show Schedule Conflict Alert", isOn: $showConflictAlert)
-                .onChange(of: showConflictAlert) { value in
-                    print("SettingsView: Changing to showConflictAlert = \(value)")
+                .onChange(of: showConflictAlert) { _, value in 
+                    Log.ui.debug("showConflictAlert=\(value)")
                 }
             Text("Show the conflict alert icon on the schedule")
                 .font(.caption)
@@ -223,7 +224,7 @@ struct ShowConflictAlertView: View {
 }
 
 struct LightModeSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("lightMode") var lightMode: Bool = false
     @AppStorage("colorMode") var colorMode: Bool = false
     @EnvironmentObject var theme: Theme
@@ -231,8 +232,8 @@ struct LightModeSettingsView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Enable Light Mode", isOn: $lightMode)
-                .onChange(of: lightMode) { value in
-                    print("SettingsView: Changing to lightMode = \(value)")
+                .onChange(of: lightMode) { _, value in 
+                    Log.ui.debug("lightMode=\(value)")
                     if value {
                         theme.colorScheme = .light
                     } else {
@@ -244,8 +245,8 @@ struct LightModeSettingsView: View {
         Divider()
         VStack(alignment: .leading) {
             Toggle("Enable Colorful Mode", isOn: $colorMode)
-                .onChange(of: colorMode) { value in
-                    print("SettingsView: Changing to lightMode = \(value)")
+                .onChange(of: colorMode) { _, value in 
+                    Log.ui.debug("colorMode=\(value)")
                     //colorMode = value
                 }
         }
@@ -275,23 +276,51 @@ struct StartScreenSettingsView: View {
 }
 
 struct ShowLocaltimeSettingsView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
     let dfu = DateFormatterUtility.shared
 
+    /// The IANA identifier of the timezone the schedule currently renders in.
+    /// When `showLocaltime` is on we use the device's current zone; otherwise
+    /// we fall back to the active conference's `timezone` field. If neither
+    /// is available (e.g. conference field is empty), show the device zone.
+    private var currentTimezoneDisplay: String {
+        if showLocaltime {
+            return TimeZone.current.identifier
+        }
+        if let confTZ = viewModel.conference?.timezone, !confTZ.isEmpty {
+            return confTZ
+        }
+        return TimeZone.current.identifier
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Show Local Timezone", isOn: $showLocaltime)
-                .onChange(of: showLocaltime) { value in
-                    print("SettingsView: Changing to showLocaltime = \(value)")
+                .onChange(of: showLocaltime) { _, value in 
+                    Log.ui.debug("showLocaltime=\(value)")
                     // viewModel.showLocaltime = value
                     if value {
                         dfu.update(tz: TimeZone.current)
                     } else {
-                        dfu.update(tz: TimeZone(identifier: viewModel.conference?.timezone ?? "America/Los_Angeles"))
+                        ClockService.apply(conference: viewModel.conference, showLocaltime: false)
                     }
                 }
+            // Polish: surface the currently-active timezone so the user can
+            // see what the toggle actually resolves to. Mirrors how
+            // ClockService.resolveTimeZone decides which zone to apply:
+            // showLocaltime ON  -> device-current
+            // showLocaltime OFF -> conference's timezone (or device-current fallback)
+            HStack(spacing: 4) {
+                Image(systemName: "clock")
+                Text(currentTimezoneDisplay)
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            // Polish: same vertical breathing room above the description as
+            // the description has from the Toggle above the clock row.
+            .padding(.bottom, 6)
             Text("Show event times in current localtime instead of conference time")
                 .font(.caption)
         }
@@ -299,8 +328,8 @@ struct ShowLocaltimeSettingsView: View {
         Divider()
         VStack(alignment: .leading) {
             Toggle("Show 24 Hour Time", isOn: $show24hourtime)
-                .onChange(of: show24hourtime) { value in
-                    print("SettingsView: Changing to show24hourtime = \(value)")
+                .onChange(of: show24hourtime) { _, value in 
+                    Log.ui.debug("show24hourtime=\(value)")
                 }
             Text("Show event times in 24 hour time (13:00) instead of 12 hour time (1:00 PM)")
                 .font(.caption)

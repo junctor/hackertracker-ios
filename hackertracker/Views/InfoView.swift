@@ -12,14 +12,14 @@ import WebKit
 struct InfoView: View {
     @Binding var tabSelection: Int
     //@Binding var tappedMainTwice: Bool
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("colorMode") var colorMode: Bool = false
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var theme: Theme
     @EnvironmentObject var filters: Filters
-    @EnvironmentObject var consViewModel: ConferencesViewModel
+    @Environment(ConferencesViewModel.self) private var consViewModel
     @Environment(\.openURL) private var openURL
     @State private var showUpdateButton = false
     @State private var appStoreVersion: String?
@@ -36,6 +36,10 @@ struct InfoView: View {
     @State var schedule = UUID()
 
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility tz changes so
+        // conference start/end date labels (and any descendants reading dfu)
+        // refresh when the active timezone shifts.
+        let _ = DateFormatterUtility.shared.tzGeneration
         NavigationStack(path: $path) {
             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
                 NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
@@ -78,7 +82,7 @@ struct InfoView: View {
                         } else {
                             _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
                                 .task {
-                                    print("InfoView: Need to fetch data for \(selected.code)")
+                                    Log.app.debug("InfoView fetch data for \(selected.code, privacy: .public)")
                                     viewModel.fetchData(code: selected.code)
                                 }
                         }
@@ -250,7 +254,7 @@ struct InfoView: View {
                             ZStack(alignment: .bottomTrailing){
                                 Button {
                                     playChik()
-                                    print("chikin")
+                                    Log.ui.debug("easter egg: chikin")
                                 } label: {
                                     Label("", systemImage: "bird.circle")
                                         .foregroundColor(.secondary)
@@ -264,21 +268,21 @@ struct InfoView: View {
                 }
                 .padding(5)
                 /*
-                 @EnvironmentObject var viewModel: InfoViewModel
+                 @Environment(InfoViewModel.self) private var viewModel
                  @EnvironmentObject var selected: SelectedConference
                  @EnvironmentObject var theme: Theme
                  @EnvironmentObject var filters: Filters
                  
                 if #available(iOS 17.0, *) {
                     .onChange(of: selected.code) {
-                        print("InfoView: selected changed")
+                        Log.app.debug("InfoView selected changed")
                     }
                     .onChange(of: filters.filters) {
-                        print("InfoView: filters changed")
+                        Log.app.debug("InfoView filters changed")
                     }
                 } */
                 .onAppear {
-                    print("InfoView: selectedCode: \(selected.code)")
+                    Log.app.debug("InfoView selectedCode=\(selected.code, privacy: .public)")
                     if colorMode { theme.index = 0 }
                     checkAppUpdate()
                 }
@@ -288,48 +292,79 @@ struct InfoView: View {
                         let queryItems = urlComponents.queryItems
                         //let path = urlComponents.path
                         //let host = urlComponents.host ?? ""
-                        print("opened with url \(url)")
+                        Log.app.info("deep link opened: \(url, privacy: .public)")
                         if let urlConference = url.host {
                             if urlConference == viewModel.conference?.code {
-                                print("Conference is \(urlConference), checking path to \(url.path)")
+                                Log.app.debug("deep link conference=\(urlConference, privacy: .public) path=\(url.path, privacy: .public)")
                                 filters.filters.removeAll()
                             } else {
-                                print("Need to switch conference to \(urlConference)")
+                                Log.app.info("deep link wants conference \(urlConference, privacy: .public)")
                                 if let conf = consViewModel.conferences.first(where: {$0.code == urlConference}) {
-                                    print("Changing to \(conf.name)")
+                                    Log.app.info("switching to \(conf.name, privacy: .public)")
                                     selected.code = conf.code
                                     filters.filters.removeAll()
                                     viewModel.fetchData(code: conf.code)
                                 }
                             }
+                            // Phase 5c: deep-link router. Supported paths:
+                            //   /                        Just switch conferences (handled above).
+                            //   /c, /content?id=N        Open content detail.
+                            //   /e, /event?id=N          Open event detail.
+                            //   /s, /share?ids=N,N,N     Open shared bookmark schedule.
                             switch url.path {
+                            case "", "/":
+                                Log.app.debug("deep link: bare conference path, already switched")
+
                             case "/c", "/content":
-                                print("Open Content ID")
-                                
+                                Log.app.debug("deep link: open content")
+                                if let raw = queryItems?.first(where: { $0.name == "id" })?.value,
+                                   let id = Int(raw) {
+                                    if tabSelection != 1 { tabSelection = 1 }
+                                    path.append("content/\(id)")
+                                } else {
+                                    Log.app.error("deep link: /content missing or invalid `id` query item")
+                                }
+
+                            case "/e", "/event":
+                                Log.app.debug("deep link: open event")
+                                // Events navigate to their parent Content. Resolve the
+                                // event's contentId now and push the corresponding
+                                // content route. Falls back to a no-op + log if the
+                                // event isn't in the current snapshot.
+                                if let raw = queryItems?.first(where: { $0.name == "id" })?.value,
+                                   let id = Int(raw) {
+                                    if tabSelection != 1 { tabSelection = 1 }
+                                    if let event = viewModel.events.first(where: { $0.id == id }) {
+                                        path.append("content/\(event.contentId)")
+                                    } else {
+                                        Log.app.error("deep link: event \(id) not found in current conference")
+                                    }
+                                } else {
+                                    Log.app.error("deep link: /event missing or invalid `id` query item")
+                                }
+
                             case "/s", "/share":
-                                print("Share Content")
+                                Log.app.debug("deep link: share content")
                                 if let sharedIds = queryItems?.first(where: { $0.name == "ids" })?.value {
-                                    print("Share IDs: \(sharedIds)")
-                                    
+                                    Log.app.debug("share ids: \(sharedIds, privacy: .public)")
+
                                     for id in sharedIds.split(separator: ",") {
                                         if let e = viewModel.events.first(where: { $0.id == Int(id) }) {
                                             sharedEvents.append(e)
                                         } else {
-                                            print("Invalid ID: \(id) for conference \(urlConference)")
+                                            Log.app.error("invalid share id=\(id, privacy: .public) conf=\(urlConference, privacy: .public)")
                                         }
                                     }
-                                    // Change Tab To Main Screen
                                     if tabSelection != 1 {
                                         tabSelection = 1
                                     }
-                                    //print("Valid Ids: \(ids)")
-                                    // NavigationLink("Go to Content List View", destination: ContentListView(content: sharedContent, title: "Shared Content"))
                                     if sharedEvents.count > 0 {
                                         path.append("SharedEvents")
                                     }
                                 }
+
                             default:
-                                print("No corresponding URL")
+                                Log.app.error("deep link: unknown path \(url.path, privacy: .public)")
                             }
                             
                         }
@@ -343,7 +378,7 @@ struct InfoView: View {
                     EventScrollView(events:
                         sharedEvents
                             .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
-                            .search(text: searchText)
+                            .search(text: searchText, speakers: viewModel.speakers)
                             .eventDayGroup(
                                 showLocaltime: showLocaltime, conference: viewModel.conference
                             ),
@@ -352,10 +387,21 @@ struct InfoView: View {
                       showLocaltime: $showLocaltime)
                     //EventsView(sharedEvents: sharedEvents)
                     .onAppear {
-                        print("Navigating to \(value)")
+                        Log.app.debug("navigating to \(value, privacy: .public)")
                     }
                 default:
-                    _04View(message: "Unknown destination: \(value)")
+                    // Phase 5c: deep-link routes pushed by .onOpenURL.
+                    // Format: "content/<id>". Event deep links resolve to a
+                    // content id before being pushed (events have no detail
+                    // view of their own; tapping a row navigates to the
+                    // parent Content).
+                    if value.hasPrefix("content/"),
+                       let id = Int(value.dropFirst("content/".count)) {
+                        ContentDetailView(contentId: id)
+                            .onAppear { Log.app.debug("deep link nav -> content/\(id)") }
+                    } else {
+                        _04View(message: "Unknown destination: \(value)")
+                    }
                 }
             }
         }
@@ -385,7 +431,8 @@ struct InfoView: View {
                         }
                     }
             } catch {
-                print("Error parsing JSON: \(error.localizedDescription)")
+                Log.app.error("JSON parse error: \(error.localizedDescription, privacy: .public)")
+                CrashReport.record(error, context: ["op": "parseDeepLinkJSON"])
             }
         }.resume()
     }
@@ -399,7 +446,7 @@ struct InfoView: View {
                     kidsTags.append(tag.id)
                 }
             } catch {
-                print("Regex failed")
+                Log.app.error("regex failed")
             }
         }
         // print("KidsTags: \(kidsTags)")
@@ -409,7 +456,7 @@ struct InfoView: View {
     func tapped() {
         rick += 1
         if rick >= 7 {
-            print("Roll away!")
+            Log.ui.debug("easter egg: roll away")
             if let url = URL(string: "https://www.youtube.com/watch?v=xMHJGd3wwZk") {
                 openURL(url)
             }
@@ -423,7 +470,7 @@ struct MenuView: View {
     var useGrid: Bool = true
     @Binding var tabSelection: Int
     // @Binding var tappedMainTwice: Bool
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @EnvironmentObject var filters: Filters
     @AppStorage("colorMode") var colorMode: Bool = false
@@ -524,7 +571,7 @@ struct CardView: View {
     var color: Color
     var subtitle: String?
     var foregroundColor: Color?
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("colorMode") var colorMode: Bool = false
 
     var body: some View {

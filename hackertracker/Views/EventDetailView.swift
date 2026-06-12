@@ -12,7 +12,7 @@ struct EventDetailView: View {
     let eventId: Int
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @EnvironmentObject var selected: SelectedConference
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     let dfu = DateFormatterUtility.shared
     @State var showingAlert = false
@@ -27,6 +27,9 @@ struct EventDetailView: View {
     ]
 
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
         if let event = viewModel.events.first(where: { $0.id == eventId }) {
             ScrollView {
                 VStack(alignment: .leading) {
@@ -124,7 +127,7 @@ struct EventDetailView: View {
     }
     
     func notificationExists() {
-        print("Checking for existence of notification for \(eventId)")
+        Log.notifications.debug("checking notification for \(eventId)")
         UNUserNotificationCenter.current().getPendingNotificationRequests(completionHandler: { notificationRequests in
             for nr in notificationRequests where nr.identifier == "hackertracker-\(self.eventId)" {
                 self.nExists = true
@@ -135,7 +138,7 @@ struct EventDetailView: View {
 
 struct showSpeakers: View {
     var event: Event
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @State private var collapsed = false
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
@@ -204,7 +207,7 @@ struct showSpeakers: View {
 
 struct showTags: View {
     var tagIds: [Int]
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @State private var collapsed = false
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 

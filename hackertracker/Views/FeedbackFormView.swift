@@ -11,7 +11,7 @@ struct FeedbackFormView: View {
     @Binding var showFeedback: Bool
     var item: Content
     var form: FeedbackForm
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @State var test: String = ""
     @State var answers: [Int: AnyObject] = [:]
     let dfu = DateFormatterUtility.shared
@@ -21,6 +21,9 @@ struct FeedbackFormView: View {
     @Environment(\.managedObjectContext) private var viewContext
     
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
         VStack {
             Text(form.name)
                 .font(.title)
@@ -111,6 +114,7 @@ extension FeedbackFormView {
                 if let jd = jsonData, let fb = String(data: jd, encoding: .utf8) {
                     NSLog("Feedback form for submission: \(fb)")
                 }
+                let capturedItemId = item.id
                 URLSession.shared.dataTask(with: request) { data, response, error in
                     if let error = error {
                         DispatchQueue.main.async {
@@ -129,7 +133,7 @@ extension FeedbackFormView {
                     }
                     DispatchQueue.main.async {
                         self.alertMessage = "Feedback Sent"
-                        FeedbackUtility.addFeedback(context: viewContext, id: item.id)
+                        FeedbackUtility.addFeedback(context: viewContext, id: capturedItemId)
                         self.showAlert.toggle()
                     }
                     NSLog("Feedback sent successfully")
@@ -152,11 +156,11 @@ struct FeedbackRow: View {
                 }
             })
             .pickerStyle(.inline)
-            .onChange(of: answer, perform: {val in
+            .onChange(of: answer) { _, val in 
                 if let option = item.options.first(where: {$0.captionText == val}) {
                     answers[item.id] = option.id as AnyObject
                 }
-            })
+            }
         } else if item.type == "text" {
             Text(item.captionText).textCase(.uppercase).font(.subheadline).bold()
             TextField("Optional", text: $answer, axis: .vertical)

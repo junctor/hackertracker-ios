@@ -7,16 +7,6 @@
 
 import Foundation
 
-extension Date {
-    func dayOfDate() -> Date? {
-        var calendar = Calendar.current
-        if let tz = DateFormatterUtility.shared.timeZone {
-            calendar.timeZone = tz
-        }
-        return calendar.startOfDay(for: self)
-    }
-}
-
 extension [TagType] {
     func tags(category: String) -> [Tag] {
         var retArray: [Tag] = []
@@ -104,12 +94,12 @@ extension [Event] {
         }
     }
     
+    @MainActor
     func eventDayGroup(showLocaltime: Bool, conference: Conference?) -> [(key: String, value: [Event])] {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM d"
-        formatter.timeZone =
-        showLocaltime
-        ? TimeZone.current : TimeZone(identifier: conference?.timezone ?? "America/Los_Angeles")
+        // Phase 4: single source of truth in ClockService; no more hardcoded LA fallback.
+        formatter.timeZone = ClockService.resolveTimeZone(conference: conference, showLocaltime: showLocaltime)
         formatter.locale = Locale(identifier: "en_US_POSIX")
         
         let eventDict = Dictionary(

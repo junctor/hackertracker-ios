@@ -15,7 +15,12 @@ struct ContentDetailView: View {
     // @State private var showFeedbackButton = true
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
-    @EnvironmentObject var viewModel: InfoViewModel
+    /// Polish: drives the iOS Mail-style nav-bar title handoff. Continuous
+    /// 0...1 -- 0 means the body title is still fully in view (nav title
+    /// hidden), 1 means the body title has scrolled fully past the nav bar
+    /// (nav title fully visible). Values in between produce a smooth fade.
+    @State private var navTitleOpacity: CGFloat = 0
+    @Environment(InfoViewModel.self) private var viewModel
     @FetchRequest(sortDescriptors: []) var feedbacks: FetchedResults<Feedbacks>
     @Environment(\.managedObjectContext) private var viewContext
     let dfu = DateFormatterUtility.shared
@@ -27,11 +32,15 @@ struct ContentDetailView: View {
     ]
 
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
         if let item = viewModel.content.first(where: { $0.id == contentId }) {
             ScrollView {
                 VStack(alignment: .leading) {
                     VStack(alignment: .center) {
                         Text(item.title).font(.largeTitle).bold()
+                            .trackTitleScrollOffset()
                         if !item.sessions.isEmpty {
                             showSessions(item: item)
                         }
@@ -82,14 +91,34 @@ struct ContentDetailView: View {
                 
             }
             .analyticsScreen(name: "ContentDetailView")
-            .navigationBarTitle(Text(""), displayMode: .inline)
             .fullScreenCover(isPresented: $showFeedback) {
                 if let form = viewModel.feedbackForms.first(where: {$0.id == item.feedbackFormId}) {
                     FeedbackFormView(showFeedback: $showFeedback, item: item, form: form, showAlert: $showAlert, alertMessage: $alertMessage)
                 }
             }
+            .onPreferenceChange(TitleScrollOffsetKey.self) { value in
+                // Smooth crossfade range. Body title is fully visible when its
+                // bottom edge is at or below `upper`. As it scrolls up and
+                // crosses below `lower` (fully under the frosted nav bar), the
+                // inline nav-bar title is fully opaque. In between it fades.
+                let upper: CGFloat = 130
+                let lower: CGFloat = 70
+                let raw = (upper - value) / (upper - lower)
+                navTitleOpacity = min(max(raw, 0), 1)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(item.title)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .opacity(navTitleOpacity)
+                }
+            }
             .onAppear() {
-                print("ContentDetailView Loading \(item.id) - \(item.title)")
+                Log.ui.debug("ContentDetailView loading \(item.id) - \(item.title, privacy: .public)")
             }
             /* .alert(isPresented: $showAlert) {
                 Alert(title: Text("Submit Feedback"), message: Text(alertMessage), dismissButton: .default(Text("OK")) {
@@ -105,7 +134,7 @@ struct ContentDetailView: View {
 
 struct showFeedbackButton: View {
     @Binding var showFeedback: Bool
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
@@ -202,7 +231,7 @@ struct showSessionRow: View {
     @State var notExists: Bool = false
     @AppStorage("notifyAt") var notifyAt: Int = 20
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @Environment(\.managedObjectContext) private var viewContext
@@ -226,6 +255,9 @@ struct showSessionRow: View {
     }
     
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
         HStack {
             VStack(alignment: .leading) {
                 HStack {
@@ -272,6 +304,7 @@ struct showSessionRow: View {
                         Image(systemName: bookmarks.map{$0.id}.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
                             .foregroundColor((bookmarks.map({$0.id}).contains(Int32(s.id)) && viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
                     }
+                    .accessibilityLabel(bookmarks.map{$0.id}.contains(Int32(s.id)) ? "Remove bookmark" : "Add bookmark")
                     MoreContentMenu(content: item, session: s, notExists: $notExists)
                 }
             }
@@ -303,7 +336,7 @@ struct MoreView: View {
 struct showRelated: View {
     var eventIds: [Int]
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @State private var collapsed = true
     
     var body: some View {
@@ -358,7 +391,7 @@ struct showRelated: View {
 
 struct showPeople: View {
     var content: Content
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @State private var collapsed = false
     @AppStorage("colorMode") var colorMode: Bool = false

@@ -9,26 +9,19 @@ import Foundation
 import UserNotifications
 
 enum NotificationUtility {
-    static var status: UNAuthorizationStatus? {
-        var authorizationStatus: UNAuthorizationStatus?
-        let semasphore = DispatchSemaphore(value: 0)
-
-        DispatchQueue.global().async {
-            UNUserNotificationCenter.current().getNotificationSettings { setttings in
-                authorizationStatus = setttings.authorizationStatus
-                semasphore.signal()
-            }
+    /// Phase 1 fix: previously a DispatchSemaphore-blocking accessor that could deadlock
+    /// under priority inversion when called from the main thread. Now async.
+    static var status: UNAuthorizationStatus {
+        get async {
+            await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
         }
-
-        semasphore.wait()
-
-        return authorizationStatus
     }
 
     static func requestAuthorization() {
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, error in
             if let error = error {
-                print("Request authorization error: \(error.localizedDescription)")
+                Log.notifications.error("requestAuthorization error: \(error.localizedDescription, privacy: .public)")
+                CrashReport.record(error, context: ["op": "requestAuthorization"])
             }
         }
     }
@@ -39,7 +32,8 @@ enum NotificationUtility {
             case .authorized, .provisional:
                 UNUserNotificationCenter.current().add(request) { error in
                     if let error = error {
-                        NSLog("Error: \(error)")
+                        Log.notifications.error("add request failed: \(error.localizedDescription, privacy: .public)")
+                        CrashReport.record(error, context: ["op": "addNotificationRequest"])
                     }
                 }
             case .notDetermined:
@@ -55,12 +49,14 @@ enum NotificationUtility {
     }
 
     static func checkAndRequestAuthorization() {
-        guard let status = NotificationUtility.status else { return }
-        switch status {
-        case .notDetermined:
-            requestAuthorization()
-        default:
-            break
+        Task {
+            let status = await NotificationUtility.status
+            switch status {
+            case .notDetermined:
+                requestAuthorization()
+            default:
+                break
+            }
         }
     }
     
@@ -106,11 +102,13 @@ enum NotificationUtility {
         UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["hackertracker-\(id)"])
     }
     
+    /// Phase 1 fix: previous implementation returned true whenever ANY pending
+    /// notification existed, so bookmark notifications never refreshed correctly.
+    /// Now matches the specific identifier.
     static func notificationExists(id: Int) async -> Bool {
-        var ret : Bool = false
-        let notificationRequests = await UNUserNotificationCenter.current().pendingNotificationRequests()
-        ret = notificationRequests.map({"hackertracker-\($0.identifier)"}).count > 0
-        return ret
+        let target = "hackertracker-\(id)"
+        let requests = await UNUserNotificationCenter.current().pendingNotificationRequests()
+        return requests.contains(where: { $0.identifier == target })
     }
     
     /* static func updateNotificationForEvent(date: Date, event: Event) {

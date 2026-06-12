@@ -7,10 +7,30 @@
 
 import Foundation
 
+// Phase 3c: @MainActor isolation. The previous singleton + mutable
+// `timeZone` ivar pattern is not Sendable in Swift 6 mode. All access
+// happens from SwiftUI views (already MainActor) or AddEventController's
+// MainActor Task, so isolating the whole class to MainActor is the
+// minimal, behavior-preserving fix.
+//
+// Phase 4 follow-up: @Observable so views can register an observation
+// dependency on the active timezone. The cached DateFormatter instances are
+// mutated in-place by `update(tz:)`; that mutation is invisible to SwiftUI,
+// which is why toggling showLocaltime previously did not refresh the
+// schedule. Views now read `dfu.tzGeneration` in their body so they
+// re-render when the formatters' timezone changes.
+@MainActor
+@Observable
 class DateFormatterUtility {
-    var timeZone = TimeZone(identifier: "America/Los_Angeles")
+    // Phase 4: starts at device-current. ClockService.apply switches to the
+    // active conference's timezone once Firestore delivers the Conference.
+    var timeZone: TimeZone? = .current
 
-    static let shared = DateFormatterUtility(tz: TimeZone(identifier: "America/Los_Angeles"))
+    /// Bumped on every successful update(tz:). View bodies that format dates
+    /// should reference this property so SwiftUI registers a dependency.
+    private(set) var tzGeneration: Int = 0
+
+    static let shared = DateFormatterUtility(tz: .current)
 
     init(tz: TimeZone?) {
         if let zone = tz {
@@ -19,14 +39,15 @@ class DateFormatterUtility {
             if let zone = timeZone {
                 update(tz: zone)
             } else {
-                print("DateFormatterUtility: Set timezone failed.")
+                Log.app.error("DateFormatterUtility: set timezone failed")
             }
         }
     }
 
     func update(tz: TimeZone?) {
-        print("DateFormatterUtility: Updating timezone to \(tz?.identifier ?? "error")")
+        Log.app.info("DateFormatterUtility: tz -> \(tz?.identifier ?? "<nil>", privacy: .public)")
         timeZone = tz
+        tzGeneration &+= 1  // overflow-safe; views observe this for re-render
 
         yearMonthDayTimeFormatter.timeZone = timeZone
         timezoneFormatter.timeZone = timeZone
@@ -46,6 +67,9 @@ class DateFormatterUtility {
         hourMinute12TimeFormatter.timeZone = timeZone
         monthDayYearFormatter.timeZone = timeZone
         locationTimeFormatter.timeZone = timeZone
+        // Phase 4: include longMonthDayFormatter ("August 11"-style label) in
+        // the sweep; previously its TZ never tracked the active conference.
+        longMonthDayFormatter.timeZone = timeZone
     }
 
     func preferLocalTime() -> Bool {
@@ -55,7 +79,7 @@ class DateFormatterUtility {
     // time format
     let yearMonthDayTimeFormatter = { () -> DateFormatter in
         let formatter = DateFormatter()
-        formatter.timeZone = TimeZone(abbreviation: "PDT")
+        // Phase 4: timezone set by ClockService.apply on conference load.
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss z"
         formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
@@ -112,7 +136,7 @@ class DateFormatterUtility {
     // UTC iso8601 time format
     let iso8601Formatter = { () -> DateFormatter in
         let formatter = DateFormatter()
-        formatter.timeZone = TimeZone(abbreviation: "PDT")
+        // Phase 4: timezone set by ClockService.apply on conference load.
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.sZ"
         formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
@@ -121,7 +145,7 @@ class DateFormatterUtility {
     // UTC iso8601 time format with colon
     let iso8601ColonFormatter = { () -> DateFormatter in
         let formatter = DateFormatter()
-        formatter.timeZone = TimeZone(abbreviation: "PDT")
+        // Phase 4: timezone set by ClockService.apply on conference load.
         formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssxxx"
         formatter.locale = Locale(identifier: "en_US_POSIX")
         return formatter
@@ -225,28 +249,3 @@ class DateFormatterUtility {
     }
 }
 
-func dateSection(date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.timeZone = TimeZone(abbreviation: "PDT")
-    formatter.dateFormat = "MMMM d"
-    return formatter.string(from: date)
-}
-
-func dateTabs(date: Date) -> String {
-    let formatter = DateFormatter()
-    formatter.timeZone = TimeZone(abbreviation: "PDT")
-    formatter.dateFormat = "MMM d"
-    return formatter.string(from: date)
-}
-
-func tabToDate(date: String) -> Date? {
-    let formatter = DateFormatter()
-    formatter.timeZone = TimeZone(abbreviation: "PDT")
-    formatter.dateFormat = "MMM d"
-    return formatter.date(from: date)
-}
-
-func toTabId(date: String) -> String {
-    let tabDate = tabToDate(date: date) ?? Date()
-    return dateSection(date: tabDate)
-}

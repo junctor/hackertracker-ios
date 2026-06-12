@@ -19,7 +19,8 @@ class BookmarkUtility {
             try context.save()
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.bookmarks.error("add failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "addBookmark"])
         }
     }
 
@@ -28,7 +29,7 @@ class BookmarkUtility {
         fr.predicate = NSPredicate(format: "id = %d", id)
         do {
             if let res = try context.fetch(fr) as? [NSManagedObject] {
-                // print("Deleting \(res.count) Bookmarks")
+                Log.bookmarks.debug("deleting \(res.count) bookmarks")
                 for r in res {
                     context.delete(r)
                 }
@@ -36,7 +37,8 @@ class BookmarkUtility {
             try context.save()
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.bookmarks.error("delete failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "deleteBookmark"])
         }
     }
 
@@ -52,7 +54,8 @@ class BookmarkUtility {
             }
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.bookmarks.error("fetch failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "getBookmarks"])
         }
         return []
     }

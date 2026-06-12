@@ -17,6 +17,8 @@
 	</array>
 	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
 	<string>Add conference events to Calendar</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Permission to track helps us understand how the conference schedule and merch tools are used so we can improve them. We never sell your data or use it for ads.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

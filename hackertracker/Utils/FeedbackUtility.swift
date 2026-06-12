@@ -13,13 +13,14 @@ class FeedbackUtility {
     static func addFeedback(context: NSManagedObjectContext, id: Int) {
         let newItem = Feedbacks(context: context)
         newItem.id = Int32(id)
-        print("Adding Feedback for content \(id)")
+        Log.app.debug("adding feedback for content \(id)")
 
         do {
             try context.save()
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.app.error("feedback save failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "addFeedback"])
         }
     }
 
@@ -27,15 +28,16 @@ class FeedbackUtility {
         let fr = NSFetchRequest<NSFetchRequestResult>(entityName: "Feedbacks")
         do {
             if let res = try context.fetch(fr) as? [Feedback] {
-                print("FeedbackUtility.getFeedbacks: \(res.count) feedback returned")
+                Log.app.debug("getFeedbacks: \(res.count) items")
                 return res.map { $0.id }
             } else {
-                print("FeedbackUtility.getFeedbacks: no feedback returned")
+                Log.app.debug("getFeedbacks: empty")
                 return []
             }
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.app.error("feedback fetch failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "getFeedbacks"])
         }
         return []
     }

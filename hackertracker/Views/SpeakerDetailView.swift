@@ -11,11 +11,16 @@ import Kingfisher
 import FirebaseAnalytics
 
 struct SpeakerDetailView: View {
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.openURL) private var openURL
     @EnvironmentObject var theme: Theme
 
     var id: Int
+
+    /// Polish: drives the nav-bar title handoff. Continuous 0...1 so the
+    /// inline title crossfades in smoothly as the in-body speaker name
+    /// scrolls past the nav bar.
+    @State private var navTitleOpacity: CGFloat = 0
 
     var body: some View {
         if let speaker = viewModel.speakers.first(where: { $0.id == id }) {
@@ -24,6 +29,7 @@ struct SpeakerDetailView: View {
                     VStack(alignment: .leading) {
                         Text(speaker.name)
                             .font(.title)
+                            .trackTitleScrollOffset()
                         if let pronouns = speaker.pronouns {
                             Text("(\(pronouns))")
                                 .font(.caption)
@@ -65,7 +71,25 @@ struct SpeakerDetailView: View {
                 }
                 .padding(15)
             }
-            .navigationBarTitle(Text(""), displayMode: .inline)
+            .onPreferenceChange(TitleScrollOffsetKey.self) { value in
+                let upper: CGFloat = 130
+                let lower: CGFloat = 70
+                let raw = (upper - value) / (upper - lower)
+                navTitleOpacity = min(max(raw, 0), 1)
+            }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    if let speaker = viewModel.speakers.first(where: { $0.id == id }) {
+                        Text(speaker.name)
+                            .font(.headline)
+                            .lineLimit(1)
+                            .opacity(navTitleOpacity)
+                    }
+                }
+            }
             .analyticsScreen(name: "SpeakerDetailView")
         } else {
             _04View(message: "Speaker \(id) not found")
@@ -135,7 +159,7 @@ struct showEvents: View {
     var eventIds: [Int]
     var title: String?
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @State private var collapsed = false
     @State private var myEvents: [Event] = []
     
@@ -215,10 +239,13 @@ struct SpeakerEventView: View {
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     let dfu = DateFormatterUtility.shared
     @Environment(\.managedObjectContext) private var viewContext
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("notifyAt") var notifyAt: Int = 20
 
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
         HStack {
             Rectangle().fill(getEventTagColorBackground(id: event.tagIds[0]))
                 .frame(width: 6)
@@ -254,6 +281,7 @@ struct SpeakerEventView: View {
                     Image(systemName: bookmarks.map({$0.id}).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
                         .foregroundColor((bookmarks.map({$0.id}).contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
                 }
+                .accessibilityLabel(bookmarks.map({$0.id}).contains(Int32(event.id)) ? "Remove bookmark" : "Add bookmark")
             }
             .buttonStyle(PlainButtonStyle())
         }

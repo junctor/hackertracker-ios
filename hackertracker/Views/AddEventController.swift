@@ -81,13 +81,13 @@ import UIKit
       }
 
     } else {
-      print("AddEventController: event is nil")
+      Log.ui.error("AddEventController: event is nil")
     }
   }
 }
  */
 
-class AddContentController: UIViewController, EKEventEditViewDelegate {
+class AddContentController: UIViewController, @preconcurrency EKEventEditViewDelegate {
   let eventStore = EKEventStore()
   var content: Content?
   var session: Session?
@@ -109,65 +109,39 @@ class AddContentController: UIViewController, EKEventEditViewDelegate {
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(animated)
 
-    if let e = content, let s = session {
-      if #available(iOS 17.0, *) {
-        eventStore.requestWriteOnlyAccessToEvents { granted, error in
-          DispatchQueue.main.async {
-            if granted && (error == nil) {
-              let ek = EKEvent(eventStore: self.eventStore)
-              ek.title = e.title
-              ek.startDate = s.beginTimestamp
-              ek.endDate = s.endTimestamp
-              ek.timeZone = DateFormatterUtility.shared.timeZone
-                if let l = self.location {
-                    ek.location = l.name
-                }
-              ek.notes = e.description
-
-              let eventController = EKEventEditViewController()
-
-              eventController.eventStore = self.eventStore
-              eventController.event = ek
-              eventController.editViewDelegate = self
-              eventController.modalPresentationStyle = .overCurrentContext
-              eventController.modalTransitionStyle = .crossDissolve
-
-              self.present(eventController, animated: true, completion: nil)
-            }
-          }
+    guard let e = content, let s = session else {
+      Log.ui.error("AddEventController: event is nil")
+      return
+    }
+    // Phase 3a: async EventKit. iOS 17+ floor lets us drop the legacy
+    // requestAccess(to:completion:) branch entirely.
+    Task { @MainActor [weak self] in
+      guard let self = self else { return }
+      do {
+        let granted = try await self.eventStore.requestWriteOnlyAccessToEvents()
+        guard granted else {
+          Log.ui.info("EventKit write access denied")
+          return
         }
-      } else {
-        eventStore.requestAccess(
-          to: EKEntityType.event,
-          completion: { granted, error in
-            DispatchQueue.main.async {
-              if granted, error == nil {
-                let ek = EKEvent(eventStore: self.eventStore)
-                ek.title = e.title
-                ek.startDate = s.beginTimestamp
-                ek.endDate = s.endTimestamp
-                ek.timeZone = DateFormatterUtility.shared.timeZone
-                  if let l = self.location {
-                      ek.location = l.name
-                  }
-                ek.notes = e.description
+        let ek = EKEvent(eventStore: self.eventStore)
+        ek.title = e.title
+        ek.startDate = s.beginTimestamp
+        ek.endDate = s.endTimestamp
+        ek.timeZone = DateFormatterUtility.shared.timeZone
+        if let l = self.location { ek.location = l.name }
+        ek.notes = e.description
 
-                let eventController = EKEventEditViewController()
-
-                eventController.eventStore = self.eventStore
-                eventController.event = ek
-                eventController.editViewDelegate = self
-                eventController.modalPresentationStyle = .overCurrentContext
-                eventController.modalTransitionStyle = .crossDissolve
-
-                self.present(eventController, animated: true, completion: nil)
-              }
-            }
-          })
+        let eventController = EKEventEditViewController()
+        eventController.eventStore = self.eventStore
+        eventController.event = ek
+        eventController.editViewDelegate = self
+        eventController.modalPresentationStyle = .overCurrentContext
+        eventController.modalTransitionStyle = .crossDissolve
+        self.present(eventController, animated: true, completion: nil)
+      } catch {
+        Log.ui.error("EventKit access request failed: \(error.localizedDescription, privacy: .public)")
+        CrashReport.record(error, context: ["op": "requestWriteOnlyAccessToEvents"])
       }
-
-    } else {
-      print("AddEventController: event is nil")
     }
   }
 }

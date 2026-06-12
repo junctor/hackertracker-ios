@@ -17,13 +17,14 @@ class CartUtility {
         let newItem = Cart(context: context)
         newItem.variantId = Int32(variantId)
         newItem.count = Int32(count)
-        print("Creating Cart item for variant \(variantId) - \(count)")
+        Log.cart.debug("create item variant=\(variantId, privacy: .public) count=\(count)")
         
         do {
             try context.save()
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.cart.error("addItem failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "addItem"])
         }
     }
     
@@ -37,7 +38,8 @@ class CartUtility {
             }
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.cart.error("saveContext failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "saveContext"])
         }
         return 0
     }
@@ -49,13 +51,14 @@ class CartUtility {
             let res = try context.fetch(fr)
             if res.count > 0 {
                 let item = res[0]
-                print("Updating \(item.variantId) Cart Item to \(count)")
+                Log.cart.debug("update item variant=\(item.variantId, privacy: .public) count=\(count)")
                 item.count = Int32(count)
             }            
             try context.save()
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.cart.error("updateItem failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "updateItem"])
         }
     }
     
@@ -64,7 +67,7 @@ class CartUtility {
         fr.predicate = NSPredicate(format: "variantId = %d", variantId)
         do {
             if let res = try context.fetch(fr) as? [NSManagedObject] {
-                print("Deleting \(res.count) cart items")
+                Log.cart.debug("deleting \(res.count) cart items")
                 for r in res {
                     context.delete(r)
                 }
@@ -72,7 +75,8 @@ class CartUtility {
             try context.save()
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.cart.error("deleteItems(product) failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "deleteItemsForProduct"])
         }
     }
     
@@ -80,7 +84,7 @@ class CartUtility {
         let fr = NSFetchRequest<NSFetchRequestResult>(entityName: "Cart")
         do {
             if let res = try context.fetch(fr) as? [NSManagedObject] {
-                print("Deleting \(res.count) cart items")
+                Log.cart.debug("deleting \(res.count) cart items")
                 for r in res {
                     context.delete(r)
                 }
@@ -88,7 +92,8 @@ class CartUtility {
             try context.save()
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.cart.error("deleteAllItems failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "deleteAllItems"])
         }
     }
     
@@ -96,17 +101,18 @@ class CartUtility {
         let fr = NSFetchRequest<NSFetchRequestResult>(entityName: "Cart")
         do {
             if let res = try context.fetch(fr) as? [Cart] {
-                print("CartUtility.getCart: \(res.count) cart items returned")
+                Log.cart.debug("getCart: \(res.count) items")
                 return res.reduce(into: [Int: Int]()) {
                     $0[Int($1.variantId)] = Int($1.count)
                 }
             } else {
-                print("CartUtility.getCart: no cart items returned")
+                Log.cart.debug("getCart: empty")
                 return [:]
             }
         } catch {
             let nsError = error as NSError
-            print("Unresolved error \(nsError), \(nsError.userInfo)")
+            Log.cart.error("getCart failed: \(nsError, privacy: .public)")
+            CrashReport.record(nsError, context: ["op": "getCart"])
         }
         return [:]
     }

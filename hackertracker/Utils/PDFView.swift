@@ -13,14 +13,14 @@ struct PDFView: UIViewRepresentable {
 
     func makeUIView(context _: Context) -> PDFKit.PDFView {
         let pdfView = PDFKit.PDFView()
-        print("PDFView makUIview - Showing pdf from: \(url)")
+        Log.ui.debug("PDFView make: \(url, privacy: .public)")
         pdfView.document = PDFDocument(url: url)
         pdfView.autoScales = true
         return pdfView
     }
 
     func updateUIView(_ pdfView: PDFKit.PDFView, context _: Context) {
-        print("PDFView updateUIView - \(url)")
+        Log.ui.debug("PDFView update: \(url, privacy: .public)")
         pdfView.document = PDFDocument(url: url)
     }
 }

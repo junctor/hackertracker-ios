@@ -51,8 +51,12 @@ enum ThemeColors {
 }
 
 import AVFoundation
-var player: AVAudioPlayer?
 
+/// Phase 3c: easter-egg audio player. Global mutable state pinned to MainActor
+/// since only views (already MainActor) call playChik().
+@MainActor private var player: AVAudioPlayer?
+
+@MainActor
 func playChik() {
     guard let path = Bundle.main.path(forResource: "rubber_\(Int.random(in: 1...5))", ofType:"mp3") else {
         return }
@@ -63,6 +67,6 @@ func playChik() {
         player?.play()
         
     } catch let error {
-        print(error.localizedDescription)
+        Log.ui.error("theme color decode failed: \(error.localizedDescription, privacy: .public)")
     }
 }

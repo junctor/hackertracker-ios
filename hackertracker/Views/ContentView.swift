@@ -37,8 +37,8 @@ struct ContentView: View {
     @AppStorage("easterEgg") var easterEgg: Bool = false
 
     @StateObject var selected = SelectedConference()
-    @StateObject var viewModel = InfoViewModel()
-    @StateObject var consViewModel = ConferencesViewModel()
+    @State private var viewModel = InfoViewModel()
+    @State private var consViewModel = ConferencesViewModel()
     @StateObject var theme = Theme()
     @StateObject private var toTop = ToTop()
     @StateObject private var toBottom = ToBottom()
@@ -94,8 +94,7 @@ struct ContentView: View {
                     tabBarAppearance.configureWithDefaultBackground()
                     UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
                 }
-                print("ContentView: selectedCode: \(selected.code)")
-                print("ContentView: launchScreen: \(launchScreen)")
+                Log.app.debug("ContentView selectedCode=\(selected.code, privacy: .public) launchScreen=\(launchScreen, privacy: .public)")
                 switch launchScreen {
                 case "Maps":
                     self.tabSelection = 3
@@ -107,12 +106,33 @@ struct ContentView: View {
                 viewModel.showNews = showNews
                 viewModel.easterEgg = easterEgg
 
+                // Phase 5d: ATT prompt. Wait briefly so the system alert
+                // doesn't obscure first-frame UI on cold launch. ATT only
+                // shows the system prompt on first launch; later launches
+                // honor the cached decision without re-prompting.
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                await TrackingPermission.requestIfNeeded()
+
                 // viewModel.fetchData(code: selected.code)
             }
+            .task(id: "\(viewModel.conference?.timezone ?? "nil")|\(showLocaltime)") {
+                // Phase 4 follow-up (corrected): the TabView only mounts AFTER
+                // viewModel.conference != nil. .onChange(of:) only fires on
+                // subsequent changes -- never on the value present at mount --
+                // so the previous attempt never triggered on initial load and
+                // the schedule rendered in device-current time despite
+                // showLocaltime being off.
+                //
+                // .task(id:) fires both on first appearance AND whenever the
+                // identity composed of (conference.timezone, showLocaltime)
+                // changes. Result: the active timezone is applied at app
+                // launch, on conference switch, and on showLocaltime toggle.
+                ClockService.apply(conference: viewModel.conference, showLocaltime: showLocaltime)
+            }
             .environmentObject(selected)
-            .environmentObject(viewModel)
+            .environment(viewModel)
             .environmentObject(theme)
-            .environmentObject(consViewModel)
+            .environment(consViewModel)
             .environmentObject(toTop)
             .environmentObject(toBottom)
             .environmentObject(toCurrent)
@@ -121,25 +141,32 @@ struct ContentView: View {
             .analyticsScreen(name: "ContentView")
         } else {
             if conferenceCode == "INIT" {
-                ConferencesView()
+                // Polish: wrap in NavigationStack so ConferencesView's
+                // .navigationTitle / .toolbar / .toolbarBackground actually
+                // render. The other call sites (NavigationLink from InfoView,
+                // SettingsView, 404View) already provide a NavigationStack so
+                // they don't need this wrap.
+                NavigationStack {
+                    ConferencesView()
+                }
                     .preferredColorScheme(theme.colorScheme)
                     .environmentObject(selected)
-                    .environmentObject(viewModel)
-                    .environmentObject(consViewModel)
+                    .environment(viewModel)
+                    .environment(consViewModel)
                     .environmentObject(theme)
                     .environmentObject(filters)
             } else {
                 _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
                     .preferredColorScheme(theme.colorScheme)
                     .environmentObject(selected)
-                    .environmentObject(viewModel)
-                    .environmentObject(consViewModel)
+                    .environment(viewModel)
+                    .environment(consViewModel)
                     .environmentObject(theme)
                     .environmentObject(filters)
                     .task {
-                        print("ContentView: Selected Conference \(selected.code), Conference Code: \(conferenceCode)")
+                        Log.app.debug("ContentView selected=\(selected.code, privacy: .public) stored=\(conferenceCode, privacy: .public)")
                         if selected.code != conferenceCode {
-                            print("ContentView: Switching to conference from AppStorage - \(conferenceCode)")
+                            Log.app.info("ContentView switching to conference \(conferenceCode, privacy: .public)")
                             selected.code = conferenceCode
                         }
                         self.viewModel.fetchData(code: conferenceCode)

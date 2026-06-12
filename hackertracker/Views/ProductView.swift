@@ -11,7 +11,7 @@ import Kingfisher
 struct ProductView: View {
     var product: Product
     @Environment(\.managedObjectContext) private var viewContext
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @FetchRequest(sortDescriptors: []) var cart: FetchedResults<Cart>
     @State private var selectedVariant: Int
     @State private var count: Int = 1
@@ -70,47 +70,66 @@ struct ProductView: View {
                         .labelsHidden()
                     }
                     .frame(maxWidth: .infinity)
-                    Stepper("Quantity: \(count)", value: $count, in: 1...100)
-                        .fixedSize()
+                    // Polish: quantity only makes sense when an actual cart
+                    // exists. Browse-only mode (enableMerch=true,
+                    // enableMerchCart=false) keeps just the variant dropdown.
+                    if viewModel.conference?.enableMerchCart == true {
+                        Stepper("Quantity: \(count)", value: $count, in: 1...100)
+                            .fixedSize()
+                    }
                 }
                 Divider()
                 Text(viewModel.conference?.merchTaxStatement ?? "Tax Included")
                     .font(.subheadline)
                     .multilineTextAlignment(.center)
                 Divider()
-                HStack {
-                    if let v = product.variants.first(where: { $0.variantId == selectedVariant }) {
-                        if v.stockStatus == "OUT" {
-                            Button { } label: {
-                                Text("Out of stock")
-                            }
-                            .foregroundColor(.primary)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .padding(15)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(15)
-                        } else {
-                            Button {
-                                if count > 0 {
-                                    CartUtility.addItem(context: viewContext, variantId: selectedVariant, count: count)
-                                    print("ProductView: Add \(selectedVariant) - \(count) to list")
-                                    message = "Added \(count) \(v.code) \(product.title) to list"
-                                } else {
-                                    showAlert = true
+                // Polish: honor Conference.enableMerchCart. When the cart is
+                // disabled for this conference, show product info but suppress
+                // the "Add to List" affordance entirely (still surface
+                // "Out of stock" so shoppers know variants are unavailable).
+                if viewModel.conference?.enableMerchCart == true {
+                    HStack {
+                        if let v = product.variants.first(where: { $0.variantId == selectedVariant }) {
+                            if v.stockStatus == "OUT" {
+                                Button { } label: {
+                                    Text("Out of stock")
                                 }
-                            } label: {
-                                Text("Add to List")
-                            }
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .padding(15)
-                            .background(ThemeColors.blue)
-                            .cornerRadius(15)
-                            .alert("Quantity must be 1 or more", isPresented: $showAlert) {
-                                Button("Ok") { }
-                            }
-                         }
+                                .foregroundColor(.primary)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .padding(15)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(15)
+                            } else {
+                                Button {
+                                    if count > 0 {
+                                        CartUtility.addItem(context: viewContext, variantId: selectedVariant, count: count)
+                                        Log.cart.debug("ProductView add variant=\(selectedVariant) count=\(count)")
+                                        message = "Added \(count) \(v.code) \(product.title) to list"
+                                    } else {
+                                        showAlert = true
+                                    }
+                                } label: {
+                                    Text("Add to List")
+                                }
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .padding(15)
+                                .background(ThemeColors.blue)
+                                .cornerRadius(15)
+                                .alert("Quantity must be 1 or more", isPresented: $showAlert) {
+                                    Button("Ok") { }
+                                }
+                             }
+                        }
                     }
+                } else if let v = product.variants.first(where: { $0.variantId == selectedVariant }), v.stockStatus == "OUT" {
+                    // Cart disabled but still want to communicate out-of-stock.
+                    Text("Out of stock")
+                        .foregroundColor(.primary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding(15)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(15)
                 }
                 
                 Text(message.uppercased())
@@ -123,17 +142,21 @@ struct ProductView: View {
             self.selectedVariant = self.product.variants[0].variantId
         }
         .toolbar {
-            NavigationLink(destination: CartView()) {
-                ZStack {
-                    Image(systemName: "qrcode")
+            // Polish: only show the Cart link when the conference enables the cart.
+            if viewModel.conference?.enableMerchCart == true {
+                NavigationLink(destination: CartView()) {
+                    ZStack {
+                        Image(systemName: "qrcode")
+                    }
                 }
+                .accessibilityLabel("Cart")
             }
         }
         .analyticsScreen(name: "ProductView")
     }
     
     func addToCart(variant: Variant) {
-        print("ProductView: Add \(variant.variantId) to cart")
+        Log.cart.debug("ProductView add variant=\(variant.variantId)")
     }
 }
 

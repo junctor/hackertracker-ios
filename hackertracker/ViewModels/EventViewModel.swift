@@ -7,28 +7,42 @@
 
 import FirebaseFirestore
 import Foundation
+import Observation
 import SwiftUI
 
-class EventViewModel: ObservableObject {
-    @Published var event: Event?
+/// Phase 3b: migrated to @Observable. Currently unused at any callsite but
+/// kept as a working template for the eventual InfoViewModel split.
+// Phase 3c: @MainActor isolation, parallel to InfoViewModel.
+@Observable
+@MainActor
+final class EventViewModel {
+    var event: Event?
+    @ObservationIgnored private let db = Firestore.firestore()
+    @ObservationIgnored nonisolated(unsafe) private var listener: ListenerRegistration?
 
-    private var db = Firestore.firestore()
+    deinit { listener?.remove() }
 
     func fetchData(code: String, eventId: Int) {
-        db.collection("conferences")
+        listener = db.collection("conferences")
             .document(code)
             .collection("events")
             .document(String(eventId))
-            .addSnapshotListener { documentSnapshot, error in
+            .addSnapshotListener { [weak self] documentSnapshot, error in
                 guard let document = documentSnapshot else {
-                    print("Error fetching document: \(error!)")
+                    Log.firestore.error("event fetch failed: \(String(describing: error), privacy: .public)")
+                    if let e = error { CrashReport.record(e, context: ["op": "fetchEvent"]) }
                     return
                 }
-
+                let decoded: Event?
                 do {
-                    self.event = try document.data(as: Event.self)
+                    decoded = try document.data(as: Event.self)
                 } catch {
-                    print("Error decoding event data")
+                    Log.firestore.error("event decode failed")
+                    decoded = nil
+                }
+                Task { @MainActor [weak self] in
+                    guard let self, let decoded else { return }
+                    self.event = decoded
                 }
             }
     }

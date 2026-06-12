@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CartView: View {
     @FetchRequest(sortDescriptors: []) var cart: FetchedResults<Cart>
-    @EnvironmentObject var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.managedObjectContext) private var viewContext
     @State private var total = 0
     @State private var totalItems = 0
@@ -79,14 +79,14 @@ struct CartView: View {
             }
             total = mytotal
             totalItems = mytotalItems
-            print("CartView: made it here \(total) - \(totalItems)")
+            Log.cart.debug("recalculated total=\(total) totalItems=\(totalItems)")
         }
-        .onChange(of: totalItems) { _ in
+        .onChange(of: totalItems) { 
             checkOutOfStock()
-            print("CartView: Detected change in totalItems")
+            Log.cart.debug("totalItems changed")
         }
         .onDisappear {
-            print("CartView: closing")
+            Log.cart.debug("closing")
         }
         .analyticsScreen(name: "CartView")
         .navigationTitle("Merch")
@@ -112,13 +112,13 @@ struct CartView: View {
         let version = 1
         let items = qrCart.i.map { "\($0.v):\($0.q)" }.joined(separator: ";")
         let compact = "\(version):\(viewModel.conference?.id ?? 0):i\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""):\(items):"
-        print("QRCodeView: Encoded Value: \(compact)")
+        Log.cart.debug("QR encoded: \(compact, privacy: .public)")
         return compact
         
         // let encoder = JSONEncoder()
         /* if let jsonData = try? encoder.encode(qrCart) {
             if let jsonString = String(data: jsonData, encoding: .utf8) {
-                print("QRCodeView: JSON Value: \(jsonString)")
+                Log.cart.debug("QR json: \(jsonString, privacy: .public)")
                 return jsonString
             }
         }
@@ -151,7 +151,7 @@ struct CartRow: View {
     @Binding var total: Int
     @Binding var totalItems: Int
     @Environment(\.managedObjectContext) private var viewContext
-    @EnvironmentObject private var viewModel: InfoViewModel
+    @Environment(InfoViewModel.self) private var viewModel
     @State private var count: Int = 0
     
     init(product: Product, item: Cart, variant: Variant, total: Binding<Int>, totalItems: Binding<Int>) {
@@ -203,7 +203,7 @@ struct CartRow: View {
             }
             .frame(maxWidth: .infinity)
         }
-        .onChange(of: count) { value in
+        .onChange(of: count) { _, value in 
             if value == 0 {
                 total -= (Int(item.count) * variant.price)
                 totalItems -= Int(item.count)
