@@ -198,7 +198,7 @@ struct EventsView: View {
       .navigationTitle(viewModel.conference?.name ?? "Schedule")
       .navigationBarTitleDisplayMode(.inline)
       .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-      .toolbarBackground(.visible, for: .navigationBar)
+      .toolbarBackground(IPadAdaptive.isIPad ? .hidden : .visible, for: .navigationBar)
       .toolbar {
         ToolbarItemGroup(placement: .navigationBarLeading) {
           Menu {
@@ -344,7 +344,7 @@ struct EventsView: View {
         .navigationTitle(navTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbarBackground(IPadAdaptive.isIPad ? .hidden : .visible, for: .navigationBar)
         .toolbar {
             
           ToolbarItemGroup(placement: .navigationBarTrailing) {
