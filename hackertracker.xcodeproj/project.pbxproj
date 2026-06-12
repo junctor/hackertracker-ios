@@ -93,6 +93,7 @@
 		5DC0DE0000000000000000B1 /* KFImage+HT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000B2 /* KFImage+HT.swift */; };
 		5DC0DE0000000000000000C1 /* ClockService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000C2 /* ClockService.swift */; };
 		5DC0DE0000000000000000D1 /* TrackingPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000D2 /* TrackingPermission.swift */; };
+		5DC0DE0000000000000000E1 /* ScrollTitleHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000E2 /* ScrollTitleHandoff.swift */; };
 		5DDF035A2C2751670087BA59 /* ContentListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF03592C2751670087BA59 /* ContentListView.swift */; };
 		5DDF035C2C2767750087BA59 /* ContentCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF035B2C2767750087BA59 /* ContentCellView.swift */; };
 		5DDF035E2C28B4F10087BA59 /* ContentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */; };
@@ -209,6 +210,7 @@
 		5DC0DE0000000000000000B2 /* KFImage+HT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KFImage+HT.swift"; sourceTree = "<group>"; };
 		5DC0DE0000000000000000C2 /* ClockService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockService.swift; sourceTree = "<group>"; };
 		5DC0DE0000000000000000D2 /* TrackingPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingPermission.swift; sourceTree = "<group>"; };
+		5DC0DE0000000000000000E2 /* ScrollTitleHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollTitleHandoff.swift; sourceTree = "<group>"; };
 		5DDF03592C2751670087BA59 /* ContentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentListView.swift; sourceTree = "<group>"; };
 		5DDF035B2C2767750087BA59 /* ContentCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentCellView.swift; sourceTree = "<group>"; };
 		5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailView.swift; sourceTree = "<group>"; };
@@ -432,6 +434,7 @@
 				5DC0DE0000000000000000B2 /* KFImage+HT.swift */,
 				5DC0DE0000000000000000C2 /* ClockService.swift */,
 				5DC0DE0000000000000000D2 /* TrackingPermission.swift */,
+				5DC0DE0000000000000000E2 /* ScrollTitleHandoff.swift */,
 				3CD532E22A29ADF5009D17F3 /* ModelExt.swift */,
 				5D9681192C5D948100D246B0 /* NewsUtility.swift */,
 				5DF82B252A5F3B29001395C7 /* NotificationUtility.swift */,
@@ -670,6 +673,7 @@
 				5DC0DE0000000000000000B1 /* KFImage+HT.swift in Sources */,
 				5DC0DE0000000000000000C1 /* ClockService.swift in Sources */,
 				5DC0DE0000000000000000D1 /* TrackingPermission.swift in Sources */,
+				5DC0DE0000000000000000E1 /* ScrollTitleHandoff.swift in Sources */,
 				5DB4E0BA284EA02C0012F6F4 /* Map.swift in Sources */,
 				5DB4E0B8284E9FEF0012F6F4 /* Conference.swift in Sources */,
 				5D9E5753285A3C25001374D4 /* SpeakersView.swift in Sources */,
