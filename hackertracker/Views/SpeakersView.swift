@@ -134,6 +134,8 @@ struct SpeakersView: View {
                             DispatchQueue.main.async { scrollToGroup = nil }
                         }
                     }
+                    // iPad: readable centered column for rows.
+                    .iPadReadableContent()
                 }
             }
             .refreshable {

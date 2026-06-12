@@ -458,6 +458,8 @@ struct EventScrollView: View {
                       }
                   }
                   .listStyle(.plain)
+                  // iPad: readable centered column for rows.
+                  .iPadReadableContent()
                   .onChange(of: dayTag) { _, changedValue in 
                       withAnimation {
                           proxy.scrollTo(changedValue, anchor: .top)

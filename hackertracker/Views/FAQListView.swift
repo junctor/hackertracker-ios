@@ -107,6 +107,8 @@ struct FAQListView: View {
                             withAnimation { proxy.scrollTo(target, anchor: .top) }
                             DispatchQueue.main.async { jumpTarget = nil }
                         }
+                        // iPad: readable centered column for rows.
+                        .iPadReadableContent()
                     }
                 }
             }
