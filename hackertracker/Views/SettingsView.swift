@@ -23,9 +23,6 @@ struct SettingsView: View {
                 }
             }
             ScrollView {
-                Text("Settings")
-                    .font(.title)
-                Divider()
                 AboutSettingsView()
                 HStack {
                     NavigationLink(destination: ConferencesView()) {
