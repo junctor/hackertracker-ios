@@ -281,6 +281,20 @@ struct ShowLocaltimeSettingsView: View {
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
     let dfu = DateFormatterUtility.shared
 
+    /// The IANA identifier of the timezone the schedule currently renders in.
+    /// When `showLocaltime` is on we use the device's current zone; otherwise
+    /// we fall back to the active conference's `timezone` field. If neither
+    /// is available (e.g. conference field is empty), show the device zone.
+    private var currentTimezoneDisplay: String {
+        if showLocaltime {
+            return TimeZone.current.identifier
+        }
+        if let confTZ = viewModel.conference?.timezone, !confTZ.isEmpty {
+            return confTZ
+        }
+        return TimeZone.current.identifier
+    }
+
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Show Local Timezone", isOn: $showLocaltime)
@@ -293,6 +307,17 @@ struct ShowLocaltimeSettingsView: View {
                         ClockService.apply(conference: viewModel.conference, showLocaltime: false)
                     }
                 }
+            // Polish: surface the currently-active timezone so the user can
+            // see what the toggle actually resolves to. Mirrors how
+            // ClockService.resolveTimeZone decides which zone to apply:
+            // showLocaltime ON  -> device-current
+            // showLocaltime OFF -> conference's timezone (or device-current fallback)
+            HStack(spacing: 4) {
+                Image(systemName: "clock")
+                Text(currentTimezoneDisplay)
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
             Text("Show event times in current localtime instead of conference time")
                 .font(.caption)
         }
