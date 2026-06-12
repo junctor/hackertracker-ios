@@ -28,6 +28,8 @@ struct ContentListView: View {
     // advances correctly.
     @State private var scrollToGroup: String.Element?
     @State private var lastJumpedGroup: String.Element?
+    /// iPad-only: identifies the content currently shown in the detail column.
+    @State private var ipadSelectedContentId: Int?
 
     func contentGroup() -> [String.Element: [Content]] {
         return Dictionary(grouping: content.search(text: searchText).filter { $0.tagIds.intersects(with: filters.filters) || filters.filters.isEmpty || (filters.filters.contains(1337) && $0.sessions.map {Int32($0.id)}.intersects(with: bookmarks.map{$0.id}))}, by: { $0.title.lowercased().first ?? "-" })
@@ -131,7 +133,10 @@ struct ContentListView: View {
         .menuOrder(.fixed)
     }
 
-    var body: some View {
+    /// Content body used inside both the iPhone NavigationStack and the
+    /// iPad NavigationSplitView sidebar.
+    @ViewBuilder
+    private var contentSidebar: some View {
         VStack(spacing: 0) {
             inlineSearchBar
             ScrollView {
@@ -165,12 +170,10 @@ struct ContentListView: View {
                         .onChange(of: scrollToGroup) { _, target in
                             guard let target else { return }
                             withAnimation { proxy.scrollTo(target, anchor: .top) }
-                            // Reset so re-tapping the same letter works.
                             DispatchQueue.main.async { scrollToGroup = nil }
                         }
                     }
                     .listStyle(.plain)
-                    // iPad: readable centered column for rows.
                     .iPadReadableContent()
                 }
             }
@@ -225,6 +228,32 @@ struct ContentListView: View {
         }
         .analyticsScreen(name: "ContentListView")
     }
+
+    var body: some View {
+        if IPadAdaptive.isIPad {
+            NavigationSplitView {
+                contentSidebar
+                    .navigationSplitViewColumnWidth(min: 380, ideal: 460, max: 540)
+            } detail: {
+                NavigationStack {
+                    if let id = ipadSelectedContentId {
+                        ContentDetailView(contentId: id)
+                            .id(id)
+                    } else {
+                        ContentUnavailableView(
+                            "Select Content",
+                            systemImage: "doc.text",
+                            description: Text("Tap an item in the list to view details.")
+                        )
+                    }
+                }
+            }
+            .navigationSplitViewStyle(.balanced)
+            .environment(\.iPadContentSelection, $ipadSelectedContentId)
+        } else {
+            contentSidebar
+        }
+    }
 }
 
 struct ContentData: View {
@@ -232,6 +261,8 @@ struct ContentData: View {
     let content: [Content]
     @EnvironmentObject var theme: Theme
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    /// iPad split-view: row taps update detail column instead of pushing.
+    @Environment(\.iPadContentSelection) private var iPadContentSelection
 
     var body: some View {
         Section(header: Text(String(char.uppercased()))
@@ -242,11 +273,21 @@ struct ContentData: View {
             .background(.ultraThinMaterial)
         ) {
             ForEach(content, id: \.id) { item in
-                NavigationLink(destination: ContentDetailView(contentId: item.id)) {
-                    ContentCell(content: item, bookmarks: bookmarks.map { $0.id }, showDay: false)
-                        .padding(1)
-               }
-                .buttonStyle(PlainButtonStyle())
+                if let sel = iPadContentSelection {
+                    Button {
+                        sel.wrappedValue = item.id
+                    } label: {
+                        ContentCell(content: item, bookmarks: bookmarks.map { $0.id }, showDay: false)
+                            .padding(1)
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    NavigationLink(destination: ContentDetailView(contentId: item.id)) {
+                        ContentCell(content: item, bookmarks: bookmarks.map { $0.id }, showDay: false)
+                            .padding(1)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
             }
         }
         .listStyle(.plain)

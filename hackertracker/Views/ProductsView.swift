@@ -19,6 +19,10 @@ struct ProductsView: View {
     @State private var isSearching = false
     @FocusState private var searchFocused: Bool
     @State private var jumpTarget: String?
+    /// iPad-only: selected product id for the detail column.
+    @State private var ipadSelectedProductId: Int?
+    /// iPad split-view: row taps update detail column instead of pushing.
+    @Environment(\.iPadProductSelection) private var iPadProductSelection
 
     // iPad: GridItem(.adaptive) yields 2 columns on every iPhone width
     // and 4-6 columns on iPad portrait/landscape automatically.
@@ -101,7 +105,8 @@ struct ProductsView: View {
         .menuOrder(.fixed)
     }
 
-    var body: some View {
+    @ViewBuilder
+    private var productsSidebar: some View {
         VStack(spacing: 0) {
             inlineSearchBar
         ScrollView {
@@ -158,9 +163,6 @@ struct ProductsView: View {
         }
         .overlay(alignment: .bottom) {
             HStack {
-                // Polish: don't render the filter button when there are no
-                // applicable merch tag types -- opening the sheet would just
-                // show empty Sections.
                 if !availableFilterTagTypes.isEmpty {
                     Button {
                         showFilters.toggle()
@@ -218,6 +220,33 @@ struct ProductsView: View {
         }
         .analyticsScreen(name: "ProductsView")
     }
+
+    var body: some View {
+        if IPadAdaptive.isIPad {
+            NavigationSplitView {
+                productsSidebar
+                    .navigationSplitViewColumnWidth(min: 380, ideal: 460, max: 540)
+            } detail: {
+                NavigationStack {
+                    if let id = ipadSelectedProductId,
+                       let product = viewModel.products.first(where: { $0.id == id }) {
+                        ProductView(product: product)
+                            .id(id)
+                    } else {
+                        ContentUnavailableView(
+                            "Select Merch",
+                            systemImage: "tshirt",
+                            description: Text("Tap an item in the grid to view details.")
+                        )
+                    }
+                }
+            }
+            .navigationSplitViewStyle(.balanced)
+            .environment(\.iPadProductSelection, $ipadSelectedProductId)
+        } else {
+            productsSidebar
+        }
+    }
 }
 
 struct MerchInfo: View {
@@ -253,11 +282,28 @@ struct MerchInfo: View {
 
 struct ProductsRow: View {
     var product: Product
-    
+    @Environment(\.iPadProductSelection) private var iPadProductSelection
+
     var body: some View {
         HStack {
-            NavigationLink(destination: ProductView(product: product)) {
-                ZStack(alignment: .bottomTrailing) {
+            if let sel = iPadProductSelection {
+                Button {
+                    sel.wrappedValue = product.id
+                } label: {
+                    productInner
+                }
+                .buttonStyle(.plain)
+            } else {
+                NavigationLink(destination: ProductView(product: product)) {
+                productInner
+            }
+            }
+        }
+    }
+
+
+    @ViewBuilder private var productInner: some View {
+        ZStack(alignment: .bottomTrailing) {
                     if product.media.count > 0, let media_url = URL(string: product.media[0].url) {
                         KFImage(media_url)
                             .htDownsampled(side: 200)
@@ -290,8 +336,6 @@ struct ProductsRow: View {
                         .frame(alignment: .center)
                     }
                 }
-            }
-        }
     }
 }
 

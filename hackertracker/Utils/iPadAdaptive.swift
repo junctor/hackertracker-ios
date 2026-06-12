@@ -54,3 +54,61 @@ enum IPadAdaptive {
         [GridItem(.adaptive(minimum: minimum), alignment: alignment)]
     }
 }
+
+// MARK: - iPad split-view selection plumbing
+
+/// Environment value carrying a `Binding<Int?>` for content selection in
+/// an iPad NavigationSplitView. EventData / ContentData rows read this --
+/// when non-nil, a tap sets the binding's wrappedValue instead of pushing
+/// a NavigationLink to ContentDetailView. iPhone leaves the env value
+/// `nil` so rows keep their existing NavigationStack push behavior.
+private struct IPadContentSelectionKey: EnvironmentKey {
+    static let defaultValue: Binding<Int?>? = nil
+}
+
+extension EnvironmentValues {
+    var iPadContentSelection: Binding<Int?>? {
+        get { self[IPadContentSelectionKey.self] }
+        set { self[IPadContentSelectionKey.self] = newValue }
+    }
+}
+
+/// Environment value carrying a `Binding<Int?>` for speaker selection on
+/// iPad. SpeakersView's row Buttons set this; SpeakersView's detail
+/// column renders SpeakerDetailView(id: $0).
+private struct IPadSpeakerSelectionKey: EnvironmentKey {
+    static let defaultValue: Binding<Int?>? = nil
+}
+
+extension EnvironmentValues {
+    var iPadSpeakerSelection: Binding<Int?>? {
+        get { self[IPadSpeakerSelectionKey.self] }
+        set { self[IPadSpeakerSelectionKey.self] = newValue }
+    }
+}
+
+/// Environment value carrying a `Binding<String?>` for org selection on iPad.
+/// Org IDs are Firestore @DocumentID strings, not Ints.
+private struct IPadOrgSelectionKey: EnvironmentKey {
+    static let defaultValue: Binding<String?>? = nil
+}
+
+extension EnvironmentValues {
+    var iPadOrgSelection: Binding<String?>? {
+        get { self[IPadOrgSelectionKey.self] }
+        set { self[IPadOrgSelectionKey.self] = newValue }
+    }
+}
+
+/// Environment value carrying a `Binding<Int?>` for merch product selection
+/// on iPad.
+private struct IPadProductSelectionKey: EnvironmentKey {
+    static let defaultValue: Binding<Int?>? = nil
+}
+
+extension EnvironmentValues {
+    var iPadProductSelection: Binding<Int?>? {
+        get { self[IPadProductSelectionKey.self] }
+        set { self[IPadProductSelectionKey.self] = newValue }
+    }
+}
