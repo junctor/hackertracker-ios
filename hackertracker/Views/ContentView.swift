@@ -141,7 +141,14 @@ struct ContentView: View {
             .analyticsScreen(name: "ContentView")
         } else {
             if conferenceCode == "INIT" {
-                ConferencesView()
+                // Polish: wrap in NavigationStack so ConferencesView's
+                // .navigationTitle / .toolbar / .toolbarBackground actually
+                // render. The other call sites (NavigationLink from InfoView,
+                // SettingsView, 404View) already provide a NavigationStack so
+                // they don't need this wrap.
+                NavigationStack {
+                    ConferencesView()
+                }
                     .preferredColorScheme(theme.colorScheme)
                     .environmentObject(selected)
                     .environment(viewModel)
