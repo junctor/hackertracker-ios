@@ -169,10 +169,12 @@ struct EventsView: View {
                           ? "line.3.horizontal.decrease.circle"
                           : "line.3.horizontal.decrease.circle.fill")
                         .font(.title2)
-                        .foregroundStyle(.primary)
                         .frame(width: 48, height: 48)
                         .background(.regularMaterial, in: Circle())
                 }
+                // Override the system accent-blue Button tint so this circle
+                // matches the white-in-dark-mode menu next to it.
+                .tint(.primary)
                 .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
 
                 Spacer()
