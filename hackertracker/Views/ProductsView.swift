@@ -20,7 +20,9 @@ struct ProductsView: View {
     @FocusState private var searchFocused: Bool
     @State private var jumpTarget: String?
 
-    let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
+    // iPad: GridItem(.adaptive) yields 2 columns on every iPhone width
+    // and 4-6 columns on iPad portrait/landscape automatically.
+    let gridItemLayout = IPadAdaptive.adaptiveGridColumns(minimum: 170)
 
     /// Polish: the merch filter sheet renders Sections per TagType. If no
     /// browsable merch-product / merch-variant tag types exist in the
