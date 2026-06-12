@@ -169,6 +169,7 @@ struct EventsView: View {
                           ? "line.3.horizontal.decrease.circle"
                           : "line.3.horizontal.decrease.circle.fill")
                         .font(.title2)
+                        .foregroundStyle(.primary)
                         .frame(width: 48, height: 48)
                         .background(.regularMaterial, in: Circle())
                 }
@@ -178,6 +179,7 @@ struct EventsView: View {
 
                 jumpToDayMenu
                     .font(.title2)
+                    .foregroundStyle(.primary)
                     .frame(width: 48, height: 48)
                     .background(.regularMaterial, in: Circle())
                     .accessibilityLabel("Jump to day")
