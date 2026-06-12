@@ -258,7 +258,7 @@ final class InfoViewModel {
             }
     }
     
-    private func downloadFileCompletionHandler(url: URL, destinationUrl: URL, completion: @escaping (URL?, Error?) -> Void) {
+    private func downloadFileCompletionHandler(url: URL, destinationUrl: URL, completion: @Sendable @escaping (URL?, Error?) -> Void) {
 
             /* let url = URL(string: urlstring)!
             let documentsUrl =  try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
