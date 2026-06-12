@@ -70,8 +70,13 @@ struct ProductView: View {
                         .labelsHidden()
                     }
                     .frame(maxWidth: .infinity)
-                    Stepper("Quantity: \(count)", value: $count, in: 1...100)
-                        .fixedSize()
+                    // Polish: quantity only makes sense when an actual cart
+                    // exists. Browse-only mode (enableMerch=true,
+                    // enableMerchCart=false) keeps just the variant dropdown.
+                    if viewModel.conference?.enableMerchCart == true {
+                        Stepper("Quantity: \(count)", value: $count, in: 1...100)
+                            .fixedSize()
+                    }
                 }
                 Divider()
                 Text(viewModel.conference?.merchTaxStatement ?? "Tax Included")
