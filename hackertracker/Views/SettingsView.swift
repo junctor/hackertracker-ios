@@ -318,6 +318,9 @@ struct ShowLocaltimeSettingsView: View {
             }
             .font(.caption)
             .foregroundStyle(.secondary)
+            // Polish: same vertical breathing room above the description as
+            // the description has from the Toggle above the clock row.
+            .padding(.bottom, 6)
             Text("Show event times in current localtime instead of conference time")
                 .font(.caption)
         }
