@@ -152,6 +152,7 @@ struct ProductView: View {
                 .accessibilityLabel("Cart")
             }
         }
+        .iPadReadableContent()
         .analyticsScreen(name: "ProductView")
     }
     
