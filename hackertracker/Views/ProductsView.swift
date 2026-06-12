@@ -14,7 +14,12 @@ struct ProductsView: View {
     @State private var searchText = ""
     @State private var showFilters = false
     @EnvironmentObject var filters: Filters
-    
+
+    // Polish parity with schedule / All Content.
+    @State private var isSearching = false
+    @FocusState private var searchFocused: Bool
+    @State private var jumpTarget: String?
+
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
     private var visibleProducts: [Product] {
@@ -27,8 +32,64 @@ struct ProductsView: View {
             }
     }
 
+    @ViewBuilder private var inlineSearchBar: some View {
+        if isSearching {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass").foregroundColor(.secondary)
+                TextField("Search merch", text: $searchText)
+                    .focused($searchFocused)
+                    .submitLabel(.search)
+                    .autocorrectionDisabled()
+                    .textInputAutocapitalization(.never)
+                if !searchText.isEmpty {
+                    Button {
+                        searchText = ""
+                    } label: {
+                        Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
+                    }
+                    .accessibilityLabel("Clear search text")
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(.thinMaterial)
+            .transition(.move(edge: .top).combined(with: .opacity))
+        }
+    }
+
+    @ViewBuilder private var searchToggleButton: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isSearching.toggle()
+            }
+            if isSearching {
+                searchFocused = true
+            } else {
+                searchText = ""
+            }
+        } label: {
+            Image(systemName: isSearching ? "xmark.circle" : "magnifyingglass")
+        }
+        .accessibilityLabel(isSearching ? "Close search" : "Search merch")
+    }
+
+    @ViewBuilder private var jumpMenu: some View {
+        Menu {
+            Button {
+                jumpTarget = "__top"
+            } label: { Label("Top", systemImage: "arrow.up") }
+            Button {
+                jumpTarget = "__bottom"
+            } label: { Label("Bottom", systemImage: "arrow.down") }
+        } label: {
+            Image(systemName: "arrow.up.arrow.down")
+        }
+        .menuOrder(.fixed)
+    }
+
     var body: some View {
-        // Phase 5a: pull-to-refresh + empty-state UX.
+        VStack(spacing: 0) {
+            inlineSearchBar
         ScrollView {
             if showMerchInfo {
                 MerchInfo()
@@ -58,10 +119,19 @@ struct ProductsView: View {
                     .padding(.top, 40)
                 }
             } else {
-                LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
-                    ForEach(visibleProducts) { product in
-                        ProductsRow(product: product)
+                ScrollViewReader { proxy in
+                    Color.clear.frame(height: 1).id("__top")
+                    LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
+                        ForEach(visibleProducts) { product in
+                            ProductsRow(product: product)
+                        }
                     }
+                    Color.clear.frame(height: 1).id("__bottom")
+                        .onChange(of: jumpTarget) { _, target in
+                            guard let target else { return }
+                            withAnimation { proxy.scrollTo(target, anchor: .top) }
+                            DispatchQueue.main.async { jumpTarget = nil }
+                        }
                 }
             }
         }
@@ -70,33 +140,54 @@ struct ProductsView: View {
                 viewModel.fetchData(code: code)
             }
         }
-        .searchable(text: $searchText)
+        .padding(15)
+        }
+        .overlay(alignment: .bottom) {
+            HStack {
+                Button {
+                    showFilters.toggle()
+                } label: {
+                    Image(systemName: filters.filters.isEmpty
+                          ? "line.3.horizontal.decrease.circle"
+                          : "line.3.horizontal.decrease.circle.fill")
+                        .font(.title2)
+                        .frame(width: 48, height: 48)
+                        .background(.regularMaterial, in: Circle())
+                }
+                .tint(.primary)
+                .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
+
+                Spacer()
+
+                jumpMenu
+                    .font(.title2)
+                    .foregroundStyle(.primary)
+                    .frame(width: 48, height: 48)
+                    .background(.regularMaterial, in: Circle())
+                    .accessibilityLabel("Jump")
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 12)
+        }
         .navigationTitle("Merch")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
-            if !showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {
-                NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
-                    Image(systemName: "info.circle")
+            ToolbarItemGroup(placement: .navigationBarTrailing) {
+                if !showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {
+                    NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
+                        Image(systemName: "info.circle")
+                    }
+                    .accessibilityLabel("Merch info")
                 }
-                .accessibilityLabel("Merch info")
-            }
-            Button {
-              showFilters.toggle()
-            } label: {
-              Image(
-                systemName: filters.filters
-                  .isEmpty
-                  ? "line.3.horizontal.decrease.circle"
-                  : "line.3.horizontal.decrease.circle.fill")
-            }
-            .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
-            if let c = viewModel.conference, c.enableMerchCart {
-                NavigationLink(destination: CartView()) {
-                    Image(systemName: "qrcode")
+                searchToggleButton
+                if let c = viewModel.conference, c.enableMerchCart {
+                    NavigationLink(destination: CartView()) {
+                        Image(systemName: "qrcode")
+                    }
+                    .accessibilityLabel("Cart")
                 }
-                .accessibilityLabel("Cart")
             }
         }
         .sheet(isPresented: $showFilters) {
@@ -106,7 +197,6 @@ struct ProductsView: View {
             }, showFilters: $showFilters, showBookmarks: false
           )
         }
-        .padding(15)
         .analyticsScreen(name: "ProductsView")
     }
 }
