@@ -18,6 +18,11 @@ struct MapView: View {
     let screenSize = UIScreen.main.bounds.size
 
     var body: some View {
+        // Polish: wrap in NavigationStack so the screen has the same frosted
+        // title bar as the other tabs. MapView is a TabView item with no
+        // surrounding NavigationStack, so without this wrapper the
+        // .navigationTitle modifier has nothing to attach to.
+        NavigationStack {
         VStack {
             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
                 NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
@@ -68,6 +73,11 @@ struct MapView: View {
             }
         }
         .padding(10)
+        .navigationTitle("Maps")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        }
     }
 }
 

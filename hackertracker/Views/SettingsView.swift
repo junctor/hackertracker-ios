@@ -56,6 +56,10 @@ struct SettingsView: View {
                 NotificationSettingsView()
                 EasterEggSettingsView()
             }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .analyticsScreen(name: "SettingsView")
         }
     }
