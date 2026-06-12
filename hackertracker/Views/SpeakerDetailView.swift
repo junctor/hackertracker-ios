@@ -27,9 +27,11 @@ struct SpeakerDetailView: View {
             ScrollView {
                 VStack(alignment: .leading) {
                     VStack(alignment: .leading) {
-                        Text(speaker.name)
-                            .font(.title)
-                            .trackTitleScrollOffset()
+                        if !IPadAdaptive.isIPad {
+                            Text(speaker.name)
+                                .font(.title)
+                                .trackTitleScrollOffset()
+                        }
                         if let pronouns = speaker.pronouns {
                             Text("(\(pronouns))")
                                 .font(.caption)
@@ -86,7 +88,9 @@ struct SpeakerDetailView: View {
                         Text(speaker.name)
                             .font(.headline)
                             .lineLimit(1)
-                            .opacity(navTitleOpacity)
+                            // iPad: always show title in toolbar (matches sidebar chrome).
+                            // iPhone keeps the scroll-handoff opacity.
+                            .opacity(IPadAdaptive.isIPad ? 1 : navTitleOpacity)
                     }
                 }
             }
