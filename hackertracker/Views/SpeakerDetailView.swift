@@ -17,9 +17,10 @@ struct SpeakerDetailView: View {
 
     var id: Int
 
-    /// Polish: drives the nav-bar title handoff. False until the large
-    /// speaker-name Text scrolls past the nav bar's bottom edge.
-    @State private var showInlineTitle = false
+    /// Polish: drives the nav-bar title handoff. Continuous 0...1 so the
+    /// inline title crossfades in smoothly as the in-body speaker name
+    /// scrolls past the nav bar.
+    @State private var navTitleOpacity: CGFloat = 0
 
     var body: some View {
         if let speaker = viewModel.speakers.first(where: { $0.id == id }) {
@@ -71,12 +72,10 @@ struct SpeakerDetailView: View {
                 .padding(15)
             }
             .onPreferenceChange(TitleScrollOffsetKey.self) { value in
-                let shouldShow = value < 110
-                if shouldShow != showInlineTitle {
-                    withAnimation(.easeInOut(duration: 0.18)) {
-                        showInlineTitle = shouldShow
-                    }
-                }
+                let upper: CGFloat = 130
+                let lower: CGFloat = 70
+                let raw = (upper - value) / (upper - lower)
+                navTitleOpacity = min(max(raw, 0), 1)
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
@@ -87,7 +86,7 @@ struct SpeakerDetailView: View {
                         Text(speaker.name)
                             .font(.headline)
                             .lineLimit(1)
-                            .opacity(showInlineTitle ? 1 : 0)
+                            .opacity(navTitleOpacity)
                     }
                 }
             }

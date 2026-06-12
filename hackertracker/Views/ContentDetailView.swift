@@ -15,9 +15,11 @@ struct ContentDetailView: View {
     // @State private var showFeedbackButton = true
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
-    /// Polish: drives the iOS Mail-style nav-bar title handoff. False until
-    /// the large in-content title scrolls past the nav bar's bottom edge.
-    @State private var showInlineTitle = false
+    /// Polish: drives the iOS Mail-style nav-bar title handoff. Continuous
+    /// 0...1 -- 0 means the body title is still fully in view (nav title
+    /// hidden), 1 means the body title has scrolled fully past the nav bar
+    /// (nav title fully visible). Values in between produce a smooth fade.
+    @State private var navTitleOpacity: CGFloat = 0
     @Environment(InfoViewModel.self) private var viewModel
     @FetchRequest(sortDescriptors: []) var feedbacks: FetchedResults<Feedbacks>
     @Environment(\.managedObjectContext) private var viewContext
@@ -95,15 +97,14 @@ struct ContentDetailView: View {
                 }
             }
             .onPreferenceChange(TitleScrollOffsetKey.self) { value in
-                // Threshold ~110pt covers status bar + nav bar on devices with
-                // and without Dynamic Island. When the title's bottom edge
-                // crosses above that, show the inline nav-bar title.
-                let shouldShow = value < 110
-                if shouldShow != showInlineTitle {
-                    withAnimation(.easeInOut(duration: 0.18)) {
-                        showInlineTitle = shouldShow
-                    }
-                }
+                // Smooth crossfade range. Body title is fully visible when its
+                // bottom edge is at or below `upper`. As it scrolls up and
+                // crosses below `lower` (fully under the frosted nav bar), the
+                // inline nav-bar title is fully opaque. In between it fades.
+                let upper: CGFloat = 130
+                let lower: CGFloat = 70
+                let raw = (upper - value) / (upper - lower)
+                navTitleOpacity = min(max(raw, 0), 1)
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
@@ -113,7 +114,7 @@ struct ContentDetailView: View {
                     Text(item.title)
                         .font(.headline)
                         .lineLimit(1)
-                        .opacity(showInlineTitle ? 1 : 0)
+                        .opacity(navTitleOpacity)
                 }
             }
             .onAppear() {
