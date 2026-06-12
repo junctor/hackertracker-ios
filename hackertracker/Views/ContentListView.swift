@@ -220,7 +220,7 @@ struct ContentListView: View {
         .navigationTitle(title ?? "All Content")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-        .toolbarBackground(IPadAdaptive.isIPad ? .hidden : .visible, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 searchToggleButton
@@ -231,10 +231,15 @@ struct ContentListView: View {
 
     var body: some View {
         if IPadAdaptive.isIPad {
-            NavigationSplitView {
-                contentSidebar
-                    .navigationSplitViewColumnWidth(min: 380, ideal: 460, max: 540)
-            } detail: {
+            // iPad: custom HStack split (NavigationSplitView replaced to avoid
+            // iOS 18's floating-card sidebar styling that misaligned with the
+            // detail column).
+            HStack(spacing: 0) {
+                NavigationStack {
+                    contentSidebar
+                }
+                .frame(width: 420)
+                Divider()
                 NavigationStack {
                     if let id = ipadSelectedContentId {
                         ContentDetailView(contentId: id)
@@ -248,7 +253,6 @@ struct ContentListView: View {
                     }
                 }
             }
-            .navigationSplitViewStyle(.balanced)
             .environment(\.iPadContentSelection, $ipadSelectedContentId)
         } else {
             contentSidebar

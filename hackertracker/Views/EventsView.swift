@@ -198,7 +198,7 @@ struct EventsView: View {
       .navigationTitle(viewModel.conference?.name ?? "Schedule")
       .navigationBarTitleDisplayMode(.inline)
       .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-      .toolbarBackground(IPadAdaptive.isIPad ? .hidden : .visible, for: .navigationBar)
+      .toolbarBackground(.visible, for: .navigationBar)
       .toolbar {
         ToolbarItemGroup(placement: .navigationBarLeading) {
           Menu {
@@ -262,18 +262,20 @@ struct EventsView: View {
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
     if IPadAdaptive.isIPad && includeNav {
-      // iPad: schedule list on the left, content detail on the right.
-      // The sidebar reuses the existing schedule chrome verbatim; rows pick up
-      // the iPadContentSelection environment value so taps update detail
-      // instead of pushing a new NavigationStack frame.
-      NavigationSplitView {
-        scheduleSidebar
-          .navigationSplitViewColumnWidth(min: 380, ideal: 460, max: 540)
-      } detail: {
+      // iPad: HStack-based custom split layout. Two sibling NavigationStacks
+      // align naturally at the top -- no iOS 18 NavigationSplitView
+      // floating-card sidebar styling, no Y misalignment between columns.
+      // Each NavigationStack hosts its own toolbar so chrome stays consistent.
+      HStack(spacing: 0) {
+        NavigationStack {
+          scheduleSidebar
+        }
+        .frame(width: 420)
+        Divider()
         NavigationStack {
           if let id = ipadSelectedContentId {
             ContentDetailView(contentId: id)
-              .id(id) // force refresh when selection changes
+              .id(id)
           } else {
             ContentUnavailableView(
               "Select an Event",
@@ -283,7 +285,6 @@ struct EventsView: View {
           }
         }
       }
-      .navigationSplitViewStyle(.balanced)
       .environment(\.iPadContentSelection, $ipadSelectedContentId)
       .sheet(isPresented: $showFilters) {
         EventFilters(
@@ -344,7 +345,7 @@ struct EventsView: View {
         .navigationTitle(navTitle)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-        .toolbarBackground(IPadAdaptive.isIPad ? .hidden : .visible, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             
           ToolbarItemGroup(placement: .navigationBarTrailing) {

@@ -162,7 +162,7 @@ struct SpeakersView: View {
         .navigationTitle("Speakers")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-        .toolbarBackground(IPadAdaptive.isIPad ? .hidden : .visible, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 searchToggleButton
@@ -173,10 +173,12 @@ struct SpeakersView: View {
 
     var body: some View {
         if IPadAdaptive.isIPad {
-            NavigationSplitView {
-                speakerSidebar
-                    .navigationSplitViewColumnWidth(min: 360, ideal: 420, max: 500)
-            } detail: {
+            HStack(spacing: 0) {
+                NavigationStack {
+                    speakerSidebar
+                }
+                .frame(width: 380)
+                Divider()
                 NavigationStack {
                     if let id = ipadSelectedSpeakerId {
                         SpeakerDetailView(id: id)
@@ -190,7 +192,6 @@ struct SpeakersView: View {
                     }
                 }
             }
-            .navigationSplitViewStyle(.balanced)
             .environment(\.iPadSpeakerSelection, $ipadSelectedSpeakerId)
         } else {
             speakerSidebar

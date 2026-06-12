@@ -193,7 +193,7 @@ struct ProductsView: View {
         .navigationTitle("Merch")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-        .toolbarBackground(IPadAdaptive.isIPad ? .hidden : .visible, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 if !showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {
@@ -223,10 +223,12 @@ struct ProductsView: View {
 
     var body: some View {
         if IPadAdaptive.isIPad {
-            NavigationSplitView {
-                productsSidebar
-                    .navigationSplitViewColumnWidth(min: 380, ideal: 460, max: 540)
-            } detail: {
+            HStack(spacing: 0) {
+                NavigationStack {
+                    productsSidebar
+                }
+                .frame(width: 420)
+                Divider()
                 NavigationStack {
                     if let id = ipadSelectedProductId,
                        let product = viewModel.products.first(where: { $0.id == id }) {
@@ -241,7 +243,6 @@ struct ProductsView: View {
                     }
                 }
             }
-            .navigationSplitViewStyle(.balanced)
             .environment(\.iPadProductSelection, $ipadSelectedProductId)
         } else {
             productsSidebar

@@ -158,7 +158,7 @@ struct OrgsView: View {
         .navigationTitle(title)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-        .toolbarBackground(IPadAdaptive.isIPad ? .hidden : .visible, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 searchToggleButton
@@ -169,10 +169,12 @@ struct OrgsView: View {
 
     var body: some View {
         if IPadAdaptive.isIPad {
-            NavigationSplitView {
-                orgSidebar
-                    .navigationSplitViewColumnWidth(min: 380, ideal: 460, max: 540)
-            } detail: {
+            HStack(spacing: 0) {
+                NavigationStack {
+                    orgSidebar
+                }
+                .frame(width: 420)
+                Divider()
                 NavigationStack {
                     if let id = ipadSelectedOrgId,
                        let org = viewModel.orgs.first(where: { $0.id == id }) {
@@ -187,7 +189,6 @@ struct OrgsView: View {
                     }
                 }
             }
-            .navigationSplitViewStyle(.balanced)
             .environment(\.iPadOrgSelection, $ipadSelectedOrgId)
         } else {
             orgSidebar
