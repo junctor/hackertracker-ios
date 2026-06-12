@@ -70,9 +70,11 @@ struct EventsView: View {
       }
   }
 
-  /// Polish (Option A): consolidated "Jump to Day" submenu. Lives inside the
-  /// leading ellipsis menu so the trailing toolbar capsule only has to host
-  /// Filter + Search, leaving room for the conference title.
+  /// Polish: "Jump to Day" Menu. Now displayed as a floating button at the
+  /// bottom-right of the schedule (see .overlay on the schedule VStack).
+  /// The label here is just the icon; the surrounding floating-button chrome
+  /// (size + Circle background) is applied at the use site so this builder
+  /// can be reused for other placements if needed.
   @ViewBuilder private var jumpToDayMenu: some View {
       Menu {
           Button {
@@ -105,7 +107,7 @@ struct EventsView: View {
               }
           }
       } label: {
-          Label("Jump to Day", systemImage: "arrow.up.arrow.down")
+          Image(systemName: "arrow.up.arrow.down")
       }
   }
 
@@ -155,6 +157,34 @@ struct EventsView: View {
             showLocaltime: $showLocaltime
           )
         }
+        // Polish: floating bottom action buttons. Filter at bottom-left,
+        // Jump-to-Day at bottom-right. Search stays in the top-right
+        // toolbar. Material matches the frosted nav bar / tab bar style.
+        .overlay(alignment: .bottom) {
+            HStack {
+                Button {
+                    showFilters.toggle()
+                } label: {
+                    Image(systemName: filters.filters.isEmpty
+                          ? "line.3.horizontal.decrease.circle"
+                          : "line.3.horizontal.decrease.circle.fill")
+                        .font(.title2)
+                        .frame(width: 48, height: 48)
+                        .background(.regularMaterial, in: Circle())
+                }
+                .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
+
+                Spacer()
+
+                jumpToDayMenu
+                    .font(.title2)
+                    .frame(width: 48, height: 48)
+                    .background(.regularMaterial, in: Circle())
+                    .accessibilityLabel("Jump to day")
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 12)
+        }
         .navigationTitle(viewModel.conference?.name ?? "Schedule")
         // Phase 6 polish: compact (inline) title so the nav bar is a single
         // tight row instead of consuming a third of the screen with the
@@ -197,8 +227,6 @@ struct EventsView: View {
                   toTop.val = true
               }
               .toggleStyle(.automatic)
-              Divider()
-              jumpToDayMenu
             } label: {
               Image(systemName: "ellipsis")
             }
@@ -215,19 +243,9 @@ struct EventsView: View {
               }
           }
             ToolbarItemGroup(placement: .navigationBarTrailing) {
-                // Polish (Option A): Sort/Jump-to-Day menu moved into the leading
-                // ellipsis menu so the title row has room for the conference name.
-                // Trailing capsule now hosts only Filter + Search.
-                Button {
-                    showFilters.toggle()
-                } label: {
-                    Image(
-                        systemName: filters.filters
-                            .isEmpty
-                        ? "line.3.horizontal.decrease.circle"
-                        : "line.3.horizontal.decrease.circle.fill")
-                }
-                .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
+                // Polish: Filter and Jump-to-Day now live in floating bottom
+                // buttons (see .overlay on the VStack below). Trailing toolbar
+                // only carries Search.
                 searchToggleButton
             }
         }
