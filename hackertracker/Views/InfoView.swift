@@ -25,6 +25,10 @@ struct InfoView: View {
     @State private var appStoreVersion: String?
     @State private var showOpenUrl = false
     @State private var path = NavigationPath()
+    /// QA-only flag flipped by the /404, /error, /debug/404 deep-link
+    /// routes. Presents _04View as a sheet so the QA path doesn't have
+    /// to fight NavigationStack races during cold launch.
+    @State private var debug404Visible: Bool = false
     @State private var sharedEvents:[Event] = []
     /// Combined-bookmarks-across-conferences store. Refreshed via .task(id:)
     /// whenever bookmarks or the conferences list changes.
@@ -388,19 +392,17 @@ struct InfoView: View {
                                 }
 
                             case "/404", "/error", "/debug/404":
-                                // QA-only route. Pushes a sentinel so the
-                                // navigationDestination default branch fires
-                                // and shows _04View, which is otherwise
-                                // unreachable via the URL surface. Used to
-                                // verify the beezle ghost on light/dark
-                                // backgrounds.
+                                // QA-only route. Present _04View as a sheet
+                                // rather than push onto NavigationStack —
+                                // path mutations during deep-link launch
+                                // race with tab-switch teardown and get
+                                // silently dropped. Sheet state is
+                                // independent of the navigation path so it
+                                // always survives.
                                 Log.app.info("deep link: forced 404 debug route")
                                 if tabSelection != 1 { tabSelection = 1 }
-                                // Defer the push to the next runloop so it
-                                // applies AFTER any tabSelection switch /
-                                // conference-switch teardown finishes.
                                 DispatchQueue.main.async {
-                                    path.append("debug/404")
+                                    debug404Visible = true
                                 }
                             default:
                                 Log.app.error("deep link: unknown path \(url.path, privacy: .public)")
@@ -410,6 +412,9 @@ struct InfoView: View {
                     }
                        
                 })
+            }
+            .sheet(isPresented: $debug404Visible) {
+                _04View(message: "Debug 404 ghost")
             }
             .navigationDestination(for: String.self) { value in
                 switch value {
