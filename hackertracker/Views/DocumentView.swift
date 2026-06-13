@@ -48,6 +48,7 @@ struct DocumentView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
+        .iPadReadableContent()
         .analyticsScreen(name: "DocumentView")
         .padding(15)
     }

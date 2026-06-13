@@ -37,6 +37,7 @@ struct ContentDetailView: View {
         let _ = dfu.tzGeneration
         if let item = viewModel.content.first(where: { $0.id == contentId }) {
             ScrollView {
+                // iPad: constrain content to a readable centered column.
                 VStack(alignment: .leading) {
                     VStack(alignment: .center) {
                         Text(item.title).font(.largeTitle).bold()
@@ -90,6 +91,7 @@ struct ContentDetailView: View {
                 }
                 
             }
+            .iPadReadableContent()
             .analyticsScreen(name: "ContentDetailView")
             .fullScreenCover(isPresented: $showFeedback) {
                 if let form = viewModel.feedbackForms.first(where: {$0.id == item.feedbackFormId}) {

@@ -170,6 +170,8 @@ struct ContentListView: View {
                         }
                     }
                     .listStyle(.plain)
+                    // iPad: readable centered column for rows.
+                    .iPadReadableContent()
                 }
             }
             .refreshable {

@@ -23,7 +23,9 @@ struct OrgsView: View {
     @FocusState private var searchFocused: Bool
     @State private var jumpTarget: String?
 
-    let gridItemLayout = [GridItem(.flexible(), alignment: .top), GridItem(.flexible(), alignment: .top)]
+    // iPad: GridItem(.adaptive) yields 2 columns on every iPhone width
+    // and 4-6 columns on iPad portrait/landscape automatically.
+    let gridItemLayout = IPadAdaptive.adaptiveGridColumns(minimum: 170, alignment: .top)
 
     private var filteredOrgs: [Organization] {
         viewModel.orgs.filter { $0.tag_ids.contains(tagId) }.search(text: searchText)

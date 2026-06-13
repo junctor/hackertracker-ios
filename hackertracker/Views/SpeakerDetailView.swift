@@ -90,6 +90,7 @@ struct SpeakerDetailView: View {
                     }
                 }
             }
+            .iPadReadableContent()
             .analyticsScreen(name: "SpeakerDetailView")
         } else {
             _04View(message: "Speaker \(id) not found")
