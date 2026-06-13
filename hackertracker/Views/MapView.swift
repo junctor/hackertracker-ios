@@ -398,8 +398,7 @@ struct MapView: View {
     /// fresh swipe).
     private var currentMapHasSVG: Bool {
         guard let m = currentMap,
-              let raw = m.svgUrl,
-              !raw.isEmpty,
+              let raw = m.resolvedSvgPath,
               let remote = URL(string: raw) else { return false }
         let path = "\(selected.code)/\(remote.lastPathComponent)"
         let local = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -459,7 +458,7 @@ private struct MapPage: View {
     }
 
     private var svgLocalURL: URL? {
-        guard let raw = map.svgUrl, let url = URL(string: raw) else { return nil }
+        guard let raw = map.resolvedSvgPath, let url = URL(string: raw) else { return nil }
         return localURL(for: url)
     }
 
@@ -552,14 +551,14 @@ extension MapView {
             let pdfExists = FileManager.default.fileExists(atPath: docDir.appendingPathComponent(pdfFile).path)
             let svgFile: String
             let svgExists: Bool
-            if let raw = m.svgUrl, !raw.isEmpty, let u = URL(string: raw) {
+            if let raw = m.resolvedSvgPath, let u = URL(string: raw) {
                 svgFile = "\(code)/\(u.lastPathComponent)"
                 svgExists = FileManager.default.fileExists(atPath: docDir.appendingPathComponent(svgFile).path)
             } else {
                 svgFile = "<none>"
                 svgExists = false
             }
-            Log.ui.info("MapInventory \(code, privacy: .public) [\(m.id, privacy: .public)] \(m.description ?? "?", privacy: .public) pdf=\(pdfFile, privacy: .public)(\(pdfExists, privacy: .public)) svg=\(svgFile, privacy: .public)(\(svgExists, privacy: .public))")
+            Log.ui.info("MapInventory \(code, privacy: .public) [\(m.id, privacy: .public)] \(m.description ?? "?", privacy: .public) pdf=\(pdfFile, privacy: .public)(\(pdfExists, privacy: .public)) svg=\(svgFile, privacy: .public)(\(svgExists, privacy: .public)) svgFilename=\(m.svgFilename ?? "—", privacy: .public) svgUrl=\(m.svgUrl ?? "—", privacy: .public)")
         }
     }
 }

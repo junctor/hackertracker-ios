@@ -301,7 +301,9 @@ final class InfoViewModel {
                         // When the conference also publishes a searchable
                         // vector version, fetch it too. MapView prefers SVG
                         // when present; the PDF stays for share/export.
-                        if let svg = map.svgUrl, !svg.isEmpty {
+                        // Field name varies (svg_filename / svg_url); the
+                        // model resolves whichever is set.
+                        if let svg = map.resolvedSvgPath {
                             downloadAsset(svg)
                         }
                     }
