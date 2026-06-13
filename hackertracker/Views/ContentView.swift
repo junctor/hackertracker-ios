@@ -226,18 +226,42 @@ private struct BeezleEasterEggOverlay: View {
                 // Hue cycle, period ~12s. Only consulted when colorMode
                 // is on; otherwise we fall back to system primary.
                 let hue = (t.truncatingRemainder(dividingBy: 12.0)) / 12.0
+                // Eye-detail preservation:
+                //  - Rainbow path uses .colorMultiply with a fully-saturated
+                //    hue. White body * hue = hue, slightly-darker eye
+                //    pixels * hue = darker hue — value differences survive.
+                //  - Dark mode without rainbow: leave the image as-is
+                //    (white silhouette on dark background).
+                //  - Light mode without rainbow: .colorInvert() flips
+                //    white -> black while preserving the relative shading
+                //    between body and eyes. .colorMultiply(.black) here
+                //    would collapse everything to one flat color and the
+                //    eyes would vanish (same regression we hit before).
                 Image("beezle")
                     .resizable()
                     .scaledToFit()
                     .frame(maxWidth: 280, maxHeight: 280)
                     .opacity(opacity)
-                    .colorMultiply(
-                        colorMode
-                            ? Color(hue: hue, saturation: 0.85, brightness: 1.0)
-                            : (colorScheme == .light ? .black : .white)
+                    .applyBeezleEasterEggTint(
+                        colorMode: colorMode,
+                        hue: hue,
+                        colorScheme: colorScheme
                     )
                     .accessibilityHidden(true)
             }
+        }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    fileprivate func applyBeezleEasterEggTint(colorMode: Bool, hue: Double, colorScheme: ColorScheme) -> some View {
+        if colorMode {
+            self.colorMultiply(Color(hue: hue, saturation: 0.85, brightness: 1.0))
+        } else if colorScheme == .light {
+            self.colorInvert()
+        } else {
+            self
         }
     }
 }
