@@ -392,8 +392,11 @@ struct MapView: View {
                 .beezleAdaptiveColor(mapViewColorScheme)
                 // Tone down to match the muted gray of
                 // ContentUnavailableView's systemImage so the two icons
-                // read as a pair instead of the beezle stealing focus.
-                .opacity(0.55)
+                // read as a pair when idle. While the user-triggered
+                // bounce is running we punch back to full opacity so
+                // the activity is unmistakable.
+                .opacity(emptyStateBouncing ? 1.0 : 0.55)
+                .animation(.easeInOut(duration: 0.25), value: emptyStateBouncing)
                 .offset(y: emptyStateBounceUp ? -10 : 0)
                 .accessibilityHidden(true)
             Button {
@@ -415,6 +418,7 @@ struct MapView: View {
     /// window so the bounce never gets clipped mid-cycle.
     private func startEmptyStateBounce() {
         emptyStateBounceTask?.cancel()
+        emptyStateBouncing = true
         withAnimation(.spring(response: 0.32, dampingFraction: 0.45).repeatForever(autoreverses: true)) {
             emptyStateBounceUp = true
         }
@@ -424,6 +428,7 @@ struct MapView: View {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 emptyStateBounceUp = false
             }
+            emptyStateBouncing = false
         }
     }
 }
