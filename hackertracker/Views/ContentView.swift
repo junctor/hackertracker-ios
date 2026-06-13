@@ -220,9 +220,12 @@ private struct BeezleEasterEggOverlay: View {
         if easterEgg {
             TimelineView(.animation(minimumInterval: 1.0/30.0)) { context in
                 let t = context.date.timeIntervalSinceReferenceDate
-                // Sine wave for opacity, period ~6s, range 0.05..0.25.
+                // Sine wave for opacity, period ~6s, range 0.0..0.30.
+                // The minimum sits exactly at zero so the ghost
+                // disappears completely each cycle rather than leaving
+                // a faint outline behind.
                 let phase = sin(t * (.pi * 2 / 6.0))
-                let opacity = 0.05 + (phase + 1) / 2 * 0.20
+                let opacity = (phase + 1) / 2 * 0.30
                 // Hue cycle, period ~12s. Only consulted when colorMode
                 // is on; otherwise we fall back to system primary.
                 let hue = (t.truncatingRemainder(dividingBy: 12.0)) / 12.0
