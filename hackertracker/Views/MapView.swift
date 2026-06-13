@@ -22,6 +22,15 @@ struct MapView: View {
     /// swipes hand off control automatically.
     @StateObject private var pdfController = MapController()
 
+    /// Empty-state beezle: vertical offset animated while `bouncing`
+    /// is true. `bounceTask` enforces a minimum 6s bounce window so a
+    /// fast Firestore refresh doesn't snap the animation off the
+    /// instant the data lands.
+    @State private var emptyStateBouncing: Bool = false
+    @State private var emptyStateBounceUp: Bool = false
+    @State private var emptyStateBounceTask: Task<Void, Never>? = nil
+    @Environment(\.colorScheme) private var mapViewColorScheme
+
     /// (#2) Share sheet for the active PDF file. Share always points at
     /// the PDF (better for printing / external apps) even when the screen
     /// is rendering the SVG version.
@@ -363,20 +372,54 @@ struct MapView: View {
     // MARK: - Empty state
 
     @ViewBuilder private func emptyState(conference: Conference) -> some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             ContentUnavailableView(
                 "No Maps Yet",
                 systemImage: "map",
                 description: Text("Maps for \(conference.name) haven't been published. Pull to refresh, or check back closer to the event.")
             )
+            // Smaller, light-mode-safe beezle that bounces when the
+            // user taps Refresh. .offset is driven by a repeating
+            // spring while emptyStateBounceUp is true; we stop the
+            // bounce no earlier than 6s after the tap.
+            Image("beezle")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 80, height: 80)
+                .beezleAdaptiveColor(mapViewColorScheme)
+                .offset(y: emptyStateBounceUp ? -14 : 0)
+                .accessibilityHidden(true)
             Button {
                 viewModel.fetchData(code: conference.code)
+                startEmptyStateBounce()
             } label: {
                 Label("Refresh", systemImage: "arrow.clockwise")
             }
             .buttonStyle(.bordered)
         }
         .frame(maxHeight: .infinity)
+    }
+
+    /// Kick off (or restart) a 6-second bounce on the empty-state
+    /// beezle. A repeated tap cancels the previous timer and starts a
+    /// fresh window so the animation never gets cut short.
+    private func startEmptyStateBounce() {
+        emptyStateBounceTask?.cancel()
+        // Drive the repeating spring by flipping the offset target.
+        // SwiftUI sees the .repeatForever animation in the transaction
+        // and keeps the offset oscillating between -14 and 0.
+        withAnimation(.spring(response: 0.32, dampingFraction: 0.45).repeatForever(autoreverses: true)) {
+            emptyStateBounceUp = true
+        }
+        emptyStateBounceTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 6_000_000_000)
+            guard !Task.isCancelled else { return }
+            // Settle the offset back to 0 with a single (non-repeating)
+            // spring so the bounce cleanly comes to rest.
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                emptyStateBounceUp = false
+            }
+        }
     }
 }
 
