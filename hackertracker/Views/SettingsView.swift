@@ -271,6 +271,7 @@ struct StartScreenSettingsView: View {
             }
             .pickerStyle(.segmented)
         }
+        .padding(5)  // Match the .padding(5) every other settings row uses.
         Divider()
     }
     
