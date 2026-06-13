@@ -92,6 +92,11 @@ struct ContentView: View {
                     .tag(4)
                     .preferredColorScheme(theme.colorScheme)
             }
+            // Easter-egg overlay: faint, fading beezle behind the UI.
+            // Only renders when easterEgg is on. With colorMode also on,
+            // it cycles rainbow hues. allowsHitTesting(false) keeps the
+            // tab bar and content fully interactive.
+            .overlay(BeezleEasterEggOverlay().allowsHitTesting(false))
             .task {
                 if #available(iOS 15.0, *) {
                     let tabBarAppearance: UITabBarAppearance = .init()
@@ -194,5 +199,45 @@ struct ContentView_Previews: PreviewProvider {
         /* Group {
              ContentView(settings: Settings()).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
          } */
+    }
+}
+
+/// Animated beezle watermark, enabled by the Easter Egg toggle in
+/// Settings. Uses TimelineView for a continuous animation tick rather
+/// than .animation().repeatForever() so we don't have to manage @State
+/// flip-flops -- the closure recomputes opacity + hue from the current
+/// time on each frame.
+///
+/// When easterEgg AND colorMode are both on, the silhouette cycles
+/// through the full hue spectrum once every 12s; with just easterEgg
+/// it tints to the system primary so it adapts to light/dark mode.
+private struct BeezleEasterEggOverlay: View {
+    @AppStorage("easterEgg") var easterEgg: Bool = false
+    @AppStorage("colorMode") var colorMode: Bool = false
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        if easterEgg {
+            TimelineView(.animation(minimumInterval: 1.0/30.0)) { context in
+                let t = context.date.timeIntervalSinceReferenceDate
+                // Sine wave for opacity, period ~6s, range 0.05..0.25.
+                let phase = sin(t * (.pi * 2 / 6.0))
+                let opacity = 0.05 + (phase + 1) / 2 * 0.20
+                // Hue cycle, period ~12s. Only consulted when colorMode
+                // is on; otherwise we fall back to system primary.
+                let hue = (t.truncatingRemainder(dividingBy: 12.0)) / 12.0
+                Image("beezle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 280, maxHeight: 280)
+                    .opacity(opacity)
+                    .colorMultiply(
+                        colorMode
+                            ? Color(hue: hue, saturation: 0.85, brightness: 1.0)
+                            : (colorScheme == .light ? .black : .white)
+                    )
+                    .accessibilityHidden(true)
+            }
+        }
     }
 }
