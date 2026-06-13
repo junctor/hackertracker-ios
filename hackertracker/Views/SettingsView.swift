@@ -23,44 +23,75 @@ struct SettingsView: View {
                 }
             }
             ScrollView {
-                AboutSettingsView()
-                HStack {
-                    NavigationLink(destination: ConferencesView()) {
-                        Image(systemName: "list.bullet")
-                            .padding(5)
-                        VStack(alignment: .leading) {
-                            Text("Select Conference")
-                                .bold()
-                            Text("(\(viewModel.conference?.name ?? selected.code))")
-                                .font(.caption)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(5)
-                        Image(systemName: "chevron.right")
-                            .padding(5)
-                    }
-                    .frame(maxWidth: .infinity)
+                // About + conference picker always span the full width
+                // — they read as headers and don't fit naturally into a
+                // 2-column grid row.
+                VStack(spacing: 0) {
+                    AboutSettingsView()
+                    selectConferenceRow
+                    Divider()
                 }
-                .foregroundColor(.primary)
-                .frame(maxWidth: .infinity)
-                .background(Color(.systemGray6))
-                .cornerRadius(5)
-                Divider()
-                StartScreenSettingsView()
-                ShowLocaltimeSettingsView()
-                ShowPastEventsSettingsView()
-                ShowNewsSettingsView()
-                NotificationSettingsView()
-                EasterEggSettingsView()
+                if IPadAdaptive.isIPad {
+                    // iPad: 2-column grid pairs related settings rows so
+                    // we don't leave half the screen blank. Adaptive
+                    // columns keep the panel widths consistent.
+                    LazyVGrid(
+                        columns: [GridItem(.flexible(), spacing: 16),
+                                  GridItem(.flexible(), spacing: 16)],
+                        alignment: .leading,
+                        spacing: 16
+                    ) {
+                        StartScreenSettingsView()
+                        ShowLocaltimeSettingsView()
+                        ShowPastEventsSettingsView()
+                        ShowNewsSettingsView()
+                        NotificationSettingsView()
+                        EasterEggSettingsView()
+                    }
+                    .padding(.horizontal, 12)
+                } else {
+                    StartScreenSettingsView()
+                    ShowLocaltimeSettingsView()
+                    ShowPastEventsSettingsView()
+                    ShowNewsSettingsView()
+                    NotificationSettingsView()
+                    EasterEggSettingsView()
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .iPadReadableContent()
+            // iPad no longer needs the readable-column cap on Settings —
+            // the 2-column grid utilizes the full width directly. iPhone
+            // sees the same single-column flow either way.
             .analyticsScreen(name: "SettingsView")
         }
     }
+    @ViewBuilder private var selectConferenceRow: some View {
+        HStack {
+            NavigationLink(destination: ConferencesView()) {
+                Image(systemName: "list.bullet")
+                    .padding(5)
+                VStack(alignment: .leading) {
+                    Text("Select Conference")
+                        .bold()
+                    Text("(\(viewModel.conference?.name ?? selected.code))")
+                        .font(.caption)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(5)
+                Image(systemName: "chevron.right")
+                    .padding(5)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .foregroundColor(.primary)
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemGray6))
+        .cornerRadius(5)
+    }
+
 }
 
 struct EasterEggSettingsView: View {
