@@ -298,82 +298,22 @@ final class InfoViewModel {
                     }
                     for map in maps {
                         downloadAsset(map.url)
-                        // SVG resolution:
-                        //   1. svg_filename: usually a bare filename (e.g.
-                        //      "map-w1-public-v2-optimal.svg"). Stored in
-                        //      Firebase Storage at <code>/<filename>.
-                        //   2. svg_url: a full HTTPS URL. Older conferences
-                        //      shipped this; current ones don't always keep
-                        //      it reachable.
-                        // We try (1) first via FirebaseStorage, then (2) via
-                        // URLSession, then leave the page to fall back to PDF.
-                        if let filename = map.svgFilename,
-                           !filename.trimmingCharacters(in: .whitespaces).isEmpty,
-                           !filename.lowercased().hasPrefix("http") {
-                            let bucketPath = "\(conference.code)/\(filename)"
-                            let dest = docDir.appendingPathComponent(bucketPath)
-                            self.downloadFromStorage(
-                                bucketPath: bucketPath,
-                                destinationUrl: dest,
-                                fallbackURL: map.svgUrl.flatMap(URL.init(string:))
-                            )
-                        } else if let svg = map.resolvedSvgPath {
-                            downloadAsset(svg)
+                        // SVG variant download — strictly URL-based per the
+                        // server team. Use svg_url first, then svg_filename
+                        // (only if it looks like a URL). Anything else is
+                        // ignored; the page falls back to the PDF.
+                        if let url = map.svgUrl,
+                           !url.trimmingCharacters(in: .whitespaces).isEmpty {
+                            downloadAsset(url)
+                        } else if let filename = map.svgFilename,
+                                  filename.lowercased().hasPrefix("http") {
+                            downloadAsset(filename)
                         }
                     }
                 }
             }
     }
     
-    /// Pull an asset (typically the searchable SVG variant of a map)
-    /// from Firebase Storage. Maps published via `svg_filename` live at
-    /// `<conferenceCode>/<filename>` inside the Storage bucket; HTTPS
-    /// access via info.defcon.org sometimes 404s because that blob host
-    /// doesn't mirror every asset.
-    ///
-    /// `fallbackURL` is consulted only when the Storage fetch fails (no
-    /// such object, permissions, etc.) so callers don't need to chain
-    /// the fallback themselves.
-    private func downloadFromStorage(bucketPath: String, destinationUrl: URL, fallbackURL: URL?) {
-        let fm = FileManager.default
-        if fm.fileExists(atPath: destinationUrl.path) {
-            Log.network.debug("storage cached: \(destinationUrl.lastPathComponent, privacy: .public)")
-            return
-        }
-        let dir = destinationUrl.deletingLastPathComponent()
-        if !fm.fileExists(atPath: dir.path) {
-            do {
-                try fm.createDirectory(at: dir, withIntermediateDirectories: true)
-            } catch {
-                Log.network.error("storage mkdir failed: \(error.localizedDescription, privacy: .public)")
-                CrashReport.record(error, context: ["op": "createStorageDir", "path": bucketPath])
-                return
-            }
-        }
-        let ref = Storage.storage().reference(withPath: bucketPath)
-        Log.network.debug("storage fetch: \(bucketPath, privacy: .public)")
-        // Per Firebase docs the max download size guard is required.
-        // 10 MB is plenty for vector SVG floor plans.
-        _ = ref.write(toFile: destinationUrl) { url, error in
-            if let error {
-                Log.network.error("storage write failed for \(bucketPath, privacy: .public): \(error.localizedDescription, privacy: .public)")
-                CrashReport.record(error, context: ["op": "storageWrite", "path": bucketPath])
-                if let fallback = fallbackURL {
-                    Log.network.debug("storage fallback URLSession: \(fallback.lastPathComponent, privacy: .public)")
-                    self.downloadFileCompletionHandler(url: fallback, destinationUrl: destinationUrl) { result, error in
-                        if let error {
-                            Log.network.error("fallback URLSession failed: \(error.localizedDescription, privacy: .public)")
-                        } else {
-                            Log.network.debug("fallback URLSession ok: \(result?.lastPathComponent ?? "?", privacy: .public)")
-                        }
-                    }
-                }
-            } else {
-                Log.network.debug("storage ok: \(url?.lastPathComponent ?? "?", privacy: .public)")
-            }
-        }
-    }
-
     private func downloadFileCompletionHandler(url: URL, destinationUrl: URL, completion: @Sendable @escaping (URL?, Error?) -> Void) {
 
             /* let url = URL(string: urlstring)!

@@ -25,15 +25,17 @@ struct Map: Codable, Identifiable {
     var svgUrl: String?
     var sortOrder: Int
 
-    /// Resolved SVG asset path. Prefers `svg_filename` (the field
-    /// most current conferences populate) and falls back to
-    /// `svg_url`. Returns nil when neither is set or both are empty.
+    /// Resolved SVG asset URL. Server-side convention is URL-only:
+    /// prefer `svg_url`, then `svg_filename` if it looks like a URL.
+    /// Returns nil when neither yields a fetchable URL.
     var resolvedSvgPath: String? {
-        if let f = svgFilename, !f.trimmingCharacters(in: .whitespaces).isEmpty {
-            return f
-        }
         if let u = svgUrl, !u.trimmingCharacters(in: .whitespaces).isEmpty {
             return u
+        }
+        if let f = svgFilename,
+           !f.trimmingCharacters(in: .whitespaces).isEmpty,
+           f.lowercased().hasPrefix("http") {
+            return f
         }
         return nil
     }
