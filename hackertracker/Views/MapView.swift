@@ -8,80 +8,471 @@
 import FirebaseFirestore
 import SwiftUI
 import FirebaseAnalytics
+import PDFKit
 
 struct MapView: View {
     @EnvironmentObject var selected: SelectedConference
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
-    @State var loading: Bool = false
+
+    /// Current map's position in the sorted list. Bound to the TabView
+    /// selection so the toolbar (title, share, zoom, search) always
+    /// reflects the visible page. Persisted per conference so reopening
+    /// the tab returns to the user's last spot.
+    @State private var currentIndex: Int = 0
+    /// Per-conference last-viewed index (#4). Conferences ship different
+    /// map sets, so we key by conference code rather than a single global.
+    @AppStorage("lastMapIndex") private var storedIndexBlob: String = ""
+
+    /// (#1, #7) Command sink for zoom/search. Bound to the focused map
+    /// page so swipes hand off control automatically.
+    @StateObject private var pdfController = PDFController()
+
+    /// (#7) Search bar visibility + text.
+    @State private var isSearching: Bool = false
+    @State private var searchText: String = ""
+    @State private var searchMissed: Bool = false
+    @FocusState private var searchFocused: Bool
+
+    /// (#2) Share sheet for the active PDF file.
+    @State private var shareURL: URL?
 
     var body: some View {
-        // Polish: wrap in NavigationStack so the screen has the same frosted
-        // title bar as the other tabs. MapView is a TabView item with no
-        // surrounding NavigationStack, so without this wrapper the
-        // .navigationTitle modifier has nothing to attach to.
         NavigationStack {
-        VStack {
-            if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documentsById[emergId] {
-                NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
-                    CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details")
-                        .frame(height: 40)
-                        .cornerRadius(0)
+            content
+                .padding(10)
+                .background(Color(.systemBackground))
+                .navigationTitle(currentMapTitle ?? "Maps")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
+                .toolbar { toolbarItems }
+                .sheet(item: $shareURL) { url in
+                    MapShareSheet(items: [url])
                 }
-            }
+        }
+        .analyticsScreen(name: "MapView")
+    }
+
+    // MARK: - Layouts
+
+    @ViewBuilder private var content: some View {
+        VStack(spacing: 0) {
+            emergencyBanner
             if let con = viewModel.conference {
-                if let maps = con.maps?.sorted(by: {$0.sortOrder < $1.sortOrder}), maps.count > 0 {
-                    TabView {
-                        ForEach(maps, id: \.id) { map in
-                            if let url = URL(string: map.url) {
-                                let path = "\(selected.code)/\(url.lastPathComponent)"
-                                let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                                let mLocal = docDir.appendingPathComponent(path)
-                                
-                                ZStack(alignment: .bottomTrailing) {
-                                    PDFView(url: mLocal)
-                                        .onAppear() {
-                                            Log.ui.debug("MapView loading \(mLocal, privacy: .public)")
-                                        }
-                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                    if let desc = map.description {
-                                        HStack {
-                                            Text(desc)
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                        }
-                                        .padding(5)
-                                        .background(Color(.systemGray6))
-                                        .cornerRadius(5)
-                                        .frame(alignment: .center)
-                                    }
-                                }
-                            }
+                if let maps = sortedMaps, !maps.isEmpty {
+                    if isSearching { searchBar }
+                    GeometryReader { proxy in
+                        if useTwoUpLayout(geometry: proxy) {
+                            twoUpLayout(maps: maps)
+                        } else {
+                            pagedLayout(maps: maps)
                         }
                     }
-                    // Perf/UX: keep the page indicator visible (default on dark
-                    // backgrounds is barely-visible white-on-white). Background
-                    // color set on the VStack below stops the system from
-                    // flashing black between pages while a PDF parses.
-                    .tabViewStyle(.page(indexDisplayMode: .always))
-                    .indexViewStyle(.page(backgroundDisplayMode: .always))
-                    .analyticsScreen(name: "MapView")
                 } else {
-                    _04View(message: "No Maps Provided For \(con.name)",show404: false)
-                        .frame(maxHeight: .infinity)
+                    emptyState(conference: con)
                 }
             } else {
-                _04View(message: "Loading...", show404: false).preferredColorScheme(theme.colorScheme)
+                _04View(message: "Loading...", show404: false)
+                    .preferredColorScheme(theme.colorScheme)
             }
         }
-        .padding(10)
-        .background(Color(.systemBackground))
-        .navigationTitle("Maps")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
+    }
+
+    private var sortedMaps: [Map]? {
+        guard let maps = viewModel.conference?.maps else { return nil }
+        return maps.sorted { $0.sortOrder < $1.sortOrder }
+    }
+
+    @ViewBuilder private var emergencyBanner: some View {
+        if let emergId = viewModel.conference?.emergencyDocId,
+           emergId > 0,
+           let doc = viewModel.documentsById[emergId] {
+            NavigationLink(destination: DocumentView(
+                title_text: doc.title,
+                body_text: doc.body,
+                color: ThemeColors.red,
+                systemImage: "exclamationmark.triangle.fill"
+            )) {
+                CardView(
+                    systemImage: "exclamationmark.triangle.fill",
+                    text: doc.title,
+                    color: ThemeColors.red,
+                    subtitle: "Tap for more details"
+                )
+                .frame(height: 40)
+                .cornerRadius(0)
+            }
         }
     }
+
+    /// Default paged layout (iPhone, iPad portrait). One full-width PDF
+    /// per swipe page.
+    @ViewBuilder private func pagedLayout(maps: [Map]) -> some View {
+        TabView(selection: $currentIndex) {
+            ForEach(Array(maps.enumerated()), id: \.element.id) { (index, map) in
+                MapPage(
+                    map: map,
+                    conferenceCode: selected.code,
+                    isFocused: index == currentIndex,
+                    controller: pdfController
+                )
+                .tag(index)
+            }
+        }
+        .tabViewStyle(.page(indexDisplayMode: .always))
+        .indexViewStyle(.page(backgroundDisplayMode: .always))
+        .onAppear { restoreIndex(maps: maps); applyPendingSearch() }
+        .onChange(of: currentIndex) { _, new in
+            persistIndex(new)
+            prewarmAdjacent(maps: maps, around: new)
+            applyPendingSearch()
+        }
+    }
+
+    /// (#6) iPad landscape: render the current map and its successor side
+    /// by side. Stepper buttons advance the pair so the layout reads as
+    /// a two-page spread.
+    @ViewBuilder private func twoUpLayout(maps: [Map]) -> some View {
+        VStack(spacing: 8) {
+            HStack(spacing: 8) {
+                MapPage(
+                    map: maps[currentIndex],
+                    conferenceCode: selected.code,
+                    isFocused: true,
+                    controller: pdfController
+                )
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                if currentIndex + 1 < maps.count {
+                    Divider()
+                    MapPage(
+                        map: maps[currentIndex + 1],
+                        conferenceCode: selected.code,
+                        isFocused: false,
+                        controller: nil
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            }
+            HStack {
+                Button {
+                    if currentIndex >= 2 { currentIndex -= 2 } else { currentIndex = 0 }
+                } label: {
+                    Image(systemName: "chevron.left.circle.fill").font(.title)
+                }
+                .disabled(currentIndex == 0)
+                Spacer()
+                Text("\(currentIndex + 1)\(maps.count > currentIndex + 1 ? "–\(currentIndex + 2)" : "") of \(maps.count)")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button {
+                    if currentIndex + 2 < maps.count { currentIndex += 2 }
+                } label: {
+                    Image(systemName: "chevron.right.circle.fill").font(.title)
+                }
+                .disabled(currentIndex + 2 >= maps.count)
+            }
+            .padding(.horizontal, 12)
+        }
+        .onAppear { restoreIndex(maps: maps); applyPendingSearch() }
+        .onChange(of: currentIndex) { _, new in
+            persistIndex(new)
+            prewarmAdjacent(maps: maps, around: new)
+            applyPendingSearch()
+        }
+    }
+
+    private func useTwoUpLayout(geometry proxy: GeometryProxy) -> Bool {
+        guard IPadAdaptive.isIPad else { return false }
+        return proxy.size.width > proxy.size.height
+    }
+
+    // MARK: - Toolbar
+
+    @ToolbarContentBuilder private var toolbarItems: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
+            if currentMap != nil {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isSearching.toggle()
+                    }
+                    if isSearching {
+                        searchFocused = true
+                    } else {
+                        searchText = ""
+                        pdfController.clearSearch()
+                        searchMissed = false
+                    }
+                } label: {
+                    Image(systemName: isSearching ? "xmark.circle" : "magnifyingglass")
+                }
+                .accessibilityLabel(isSearching ? "Close search" : "Search map")
+                Menu {
+                    Button { pdfController.zoomIn() } label: { Label("Zoom In", systemImage: "plus.magnifyingglass") }
+                    Button { pdfController.zoomOut() } label: { Label("Zoom Out", systemImage: "minus.magnifyingglass") }
+                    Button { pdfController.resetZoom() } label: { Label("Reset Zoom", systemImage: "arrow.up.left.and.down.right.magnifyingglass") }
+                } label: {
+                    Image(systemName: "plus.magnifyingglass")
+                }
+                .menuOrder(.fixed)
+                .accessibilityLabel("Zoom controls")
+                Button {
+                    if let localURL = currentMapLocalURL,
+                       FileManager.default.fileExists(atPath: localURL.path) {
+                        shareURL = localURL
+                    }
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+                .accessibilityLabel("Share map")
+                .disabled(currentMapLocalURL.flatMap { FileManager.default.fileExists(atPath: $0.path) } != true)
+            }
+        }
+    }
+
+    // MARK: - Search bar (#7)
+
+    @ViewBuilder private var searchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass").foregroundColor(.secondary)
+            TextField("Find on map", text: $searchText)
+                .focused($searchFocused)
+                .submitLabel(.search)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .onSubmit { runSearch() }
+                .onChange(of: searchText) { _, _ in searchMissed = false }
+            if !searchText.isEmpty {
+                Button {
+                    searchText = ""
+                    pdfController.clearSearch()
+                    searchMissed = false
+                } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
+                }
+                .accessibilityLabel("Clear search")
+            }
+            if searchMissed {
+                Text("No match").font(.caption2).foregroundColor(.secondary)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.thinMaterial)
+        .cornerRadius(8)
+        .padding(.horizontal, 6)
+        .padding(.bottom, 4)
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private func runSearch() {
+        let found = pdfController.find(searchText)
+        searchMissed = !found && !searchText.isEmpty
+    }
+
+    /// After a page swipe or layout switch, re-apply the current search
+    /// query against the newly-focused page. Empty queries are a no-op.
+    private func applyPendingSearch() {
+        guard !searchText.isEmpty else { return }
+        // Small async hop so the new PDFView has time to register with the
+        // controller before we ask it to search.
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 50_000_000)
+            runSearch()
+        }
+    }
+
+    // MARK: - Index persistence (#4)
+
+    /// `storedIndexBlob` packs `code1=3,code2=1` pairs so each conference
+    /// remembers its own last-viewed map without colliding.
+    private func decodeStoredIndex(code: String) -> Int? {
+        for pair in storedIndexBlob.split(separator: ",") {
+            let parts = pair.split(separator: "=", maxSplits: 1)
+            if parts.count == 2, parts[0] == code, let i = Int(parts[1]) {
+                return i
+            }
+        }
+        return nil
+    }
+
+    private func encodedStoredIndex(code: String, index: Int) -> String {
+        var pairs: [String] = []
+        var found = false
+        for pair in storedIndexBlob.split(separator: ",") {
+            let parts = pair.split(separator: "=", maxSplits: 1)
+            if parts.count == 2, parts[0] == code {
+                pairs.append("\(code)=\(index)")
+                found = true
+            } else {
+                pairs.append(String(pair))
+            }
+        }
+        if !found {
+            pairs.append("\(code)=\(index)")
+        }
+        return pairs.joined(separator: ",")
+    }
+
+    private func restoreIndex(maps: [Map]) {
+        guard !maps.isEmpty else { return }
+        if let stored = decodeStoredIndex(code: selected.code) {
+            currentIndex = min(max(0, stored), maps.count - 1)
+        } else {
+            currentIndex = 0
+        }
+        prewarmAdjacent(maps: maps, around: currentIndex)
+    }
+
+    private func persistIndex(_ index: Int) {
+        storedIndexBlob = encodedStoredIndex(code: selected.code, index: index)
+    }
+
+    // MARK: - Adjacent prewarm (#5)
+
+    private func prewarmAdjacent(maps: [Map], around index: Int) {
+        for offset in [-1, 1] {
+            let i = index + offset
+            guard maps.indices.contains(i) else { continue }
+            if let url = URL(string: maps[i].url) {
+                let path = "\(selected.code)/\(url.lastPathComponent)"
+                let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+                let local = docDir.appendingPathComponent(path)
+                PDFDocumentCache.prewarm(local)
+            }
+        }
+    }
+
+    // MARK: - Current map helpers
+
+    private var currentMap: Map? {
+        guard let maps = sortedMaps, maps.indices.contains(currentIndex) else { return nil }
+        return maps[currentIndex]
+    }
+
+    private var currentMapTitle: String? {
+        currentMap?.description ?? currentMap.map { _ in "Maps" }
+    }
+
+    private var currentMapLocalURL: URL? {
+        guard let m = currentMap, let url = URL(string: m.url) else { return nil }
+        let path = "\(selected.code)/\(url.lastPathComponent)"
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(path)
+    }
+
+    // MARK: - Empty state (#9)
+
+    @ViewBuilder private func emptyState(conference: Conference) -> some View {
+        VStack(spacing: 12) {
+            ContentUnavailableView(
+                "No Maps Yet",
+                systemImage: "map",
+                description: Text("Maps for \(conference.name) haven't been published. Pull to refresh, or check back closer to the event.")
+            )
+            Button {
+                viewModel.fetchData(code: conference.code)
+            } label: {
+                Label("Refresh", systemImage: "arrow.clockwise")
+            }
+            .buttonStyle(.bordered)
+        }
+        .frame(maxHeight: .infinity)
+    }
+}
+
+/// One map page in the swipe TabView (or one cell in the iPad two-up
+/// layout). Owns the file-existence check (#8) and the per-page
+/// accessibility label (#10).
+private struct MapPage: View {
+    let map: Map
+    let conferenceCode: String
+    let isFocused: Bool
+    let controller: PDFController?
+
+    @State private var fileExists: Bool = false
+
+    private var localURL: URL? {
+        guard let url = URL(string: map.url) else { return nil }
+        let path = "\(conferenceCode)/\(url.lastPathComponent)"
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(path)
+    }
+
+    var body: some View {
+        ZStack(alignment: .bottomTrailing) {
+            if let url = localURL, fileExists {
+                PDFView(url: url, controller: controller, isFocused: isFocused)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if localURL != nil {
+                downloadingPlaceholder
+            } else {
+                ContentUnavailableView("Invalid Map", systemImage: "questionmark.square")
+            }
+            if let desc = map.description {
+                Text(desc)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.thinMaterial)
+                    .cornerRadius(6)
+                    .padding(8)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(map.description ?? "Conference map")
+        .accessibilityHint("Pinch to zoom; swipe to switch maps")
+        .task(id: localURL?.path) { refreshExists() }
+        .onAppear {
+            Log.ui.debug("MapView loading \(localURL?.lastPathComponent ?? "?", privacy: .public)")
+        }
+    }
+
+    @ViewBuilder private var downloadingPlaceholder: some View {
+        VStack(spacing: 12) {
+            ProgressView()
+                .scaleEffect(1.5)
+            Text("Map downloading…")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .task(id: localURL?.path) { await pollForFile() }
+    }
+
+    private func refreshExists() {
+        fileExists = localURL.map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+    }
+
+    /// (#8) Map files are downloaded by InfoViewModel on conference load.
+    /// If the user reaches MapView before that finishes, poll every
+    /// half-second for up to 30s so the placeholder swaps in once the
+    /// file arrives without forcing a manual refresh.
+    @MainActor private func pollForFile() async {
+        for _ in 0..<60 {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            refreshExists()
+            if fileExists { return }
+        }
+    }
+}
+
+/// (#2) Plain UIActivityViewController wrapper so SwiftUI can present it
+/// via `.sheet(item:)`. Items are URLs to local PDF files in the
+/// per-conference cache directory.
+struct MapShareSheet: UIViewControllerRepresentable {
+    let items: [Any]
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items, applicationActivities: nil)
+    }
+    func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
+}
+
+/// Make URL `Identifiable` so `.sheet(item:)` can present it directly.
+extension URL: @retroactive Identifiable {
+    public var id: String { absoluteString }
 }
 
 struct MapView_Previews: PreviewProvider {
@@ -91,14 +482,9 @@ struct MapView_Previews: PreviewProvider {
 }
 
 struct SpinnerView: View {
-      var body: some View {
-            ProgressView()
-              .progressViewStyle(CircularProgressViewStyle(tint: ThemeColors.blue))
-              .scaleEffect(2.0, anchor: .center) // Makes the spinner larger
-              .onAppear {
-                  DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-
-                  }
-            }
-      }
+    var body: some View {
+        ProgressView()
+            .progressViewStyle(CircularProgressViewStyle(tint: ThemeColors.blue))
+            .scaleEffect(2.0, anchor: .center)
+    }
 }
