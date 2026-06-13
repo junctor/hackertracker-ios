@@ -28,18 +28,13 @@ struct MapView: View {
     /// page so swipes hand off control automatically.
     @StateObject private var pdfController = PDFController()
 
-    /// (#7) Search bar visibility + text.
-    @State private var isSearching: Bool = false
-    @State private var searchText: String = ""
-    @State private var searchMissed: Bool = false
-    @FocusState private var searchFocused: Bool
-
     /// (#2) Share sheet for the active PDF file.
     @State private var shareURL: URL?
 
     var body: some View {
         NavigationStack {
             content
+                .overlay(alignment: .bottomLeading) { zoomFloatingControls }
                 .padding(10)
                 .background(Color(.systemBackground))
                 .navigationTitle(currentMapTitle ?? "Maps")
@@ -54,6 +49,39 @@ struct MapView: View {
         .analyticsScreen(name: "MapView")
     }
 
+    /// Floating zoom stack in the bottom-leading corner. Three buttons
+    /// stacked vertically — In / Out / Reset — so they sit within easy
+    /// thumb reach without competing with the page indicator dots in
+    /// the bottom-center. Hidden when no map is loaded.
+    @ViewBuilder private var zoomFloatingControls: some View {
+        if currentMap != nil {
+            VStack(spacing: 8) {
+                zoomButton(systemName: "plus.magnifyingglass", label: "Zoom in") {
+                    pdfController.zoomIn()
+                }
+                zoomButton(systemName: "minus.magnifyingglass", label: "Zoom out") {
+                    pdfController.zoomOut()
+                }
+                zoomButton(systemName: "arrow.up.left.and.down.right.magnifyingglass", label: "Reset zoom") {
+                    pdfController.resetZoom()
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.bottom, 20)
+        }
+    }
+
+    private func zoomButton(systemName: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.title2)
+                .foregroundStyle(.primary)
+                .frame(width: 44, height: 44)
+                .background(.regularMaterial, in: Circle())
+        }
+        .accessibilityLabel(label)
+    }
+
     // MARK: - Layouts
 
     @ViewBuilder private var content: some View {
@@ -61,7 +89,6 @@ struct MapView: View {
             emergencyBanner
             if let con = viewModel.conference {
                 if let maps = sortedMaps, !maps.isEmpty {
-                    if isSearching { searchBar }
                     GeometryReader { proxy in
                         if useTwoUpLayout(geometry: proxy) {
                             twoUpLayout(maps: maps)
@@ -122,11 +149,10 @@ struct MapView: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(.page(backgroundDisplayMode: .always))
-        .onAppear { restoreIndex(maps: maps); applyPendingSearch() }
+        .onAppear { restoreIndex(maps: maps) }
         .onChange(of: currentIndex) { _, new in
             persistIndex(new)
             prewarmAdjacent(maps: maps, around: new)
-            applyPendingSearch()
         }
     }
 
@@ -175,11 +201,10 @@ struct MapView: View {
             }
             .padding(.horizontal, 12)
         }
-        .onAppear { restoreIndex(maps: maps); applyPendingSearch() }
+        .onAppear { restoreIndex(maps: maps) }
         .onChange(of: currentIndex) { _, new in
             persistIndex(new)
             prewarmAdjacent(maps: maps, around: new)
-            applyPendingSearch()
         }
     }
 
@@ -194,30 +219,6 @@ struct MapView: View {
         ToolbarItemGroup(placement: .navigationBarTrailing) {
             if currentMap != nil {
                 Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isSearching.toggle()
-                    }
-                    if isSearching {
-                        searchFocused = true
-                    } else {
-                        searchText = ""
-                        pdfController.clearSearch()
-                        searchMissed = false
-                    }
-                } label: {
-                    Image(systemName: isSearching ? "xmark.circle" : "magnifyingglass")
-                }
-                .accessibilityLabel(isSearching ? "Close search" : "Search map")
-                Menu {
-                    Button { pdfController.zoomIn() } label: { Label("Zoom In", systemImage: "plus.magnifyingglass") }
-                    Button { pdfController.zoomOut() } label: { Label("Zoom Out", systemImage: "minus.magnifyingglass") }
-                    Button { pdfController.resetZoom() } label: { Label("Reset Zoom", systemImage: "arrow.up.left.and.down.right.magnifyingglass") }
-                } label: {
-                    Image(systemName: "plus.magnifyingglass")
-                }
-                .menuOrder(.fixed)
-                .accessibilityLabel("Zoom controls")
-                Button {
                     if let localURL = currentMapLocalURL,
                        FileManager.default.fileExists(atPath: localURL.path) {
                         shareURL = localURL
@@ -228,58 +229,6 @@ struct MapView: View {
                 .accessibilityLabel("Share map")
                 .disabled(currentMapLocalURL.flatMap { FileManager.default.fileExists(atPath: $0.path) } != true)
             }
-        }
-    }
-
-    // MARK: - Search bar (#7)
-
-    @ViewBuilder private var searchBar: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass").foregroundColor(.secondary)
-            TextField("Find on map", text: $searchText)
-                .focused($searchFocused)
-                .submitLabel(.search)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .onSubmit { runSearch() }
-                .onChange(of: searchText) { _, _ in searchMissed = false }
-            if !searchText.isEmpty {
-                Button {
-                    searchText = ""
-                    pdfController.clearSearch()
-                    searchMissed = false
-                } label: {
-                    Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
-                }
-                .accessibilityLabel("Clear search")
-            }
-            if searchMissed {
-                Text("No match").font(.caption2).foregroundColor(.secondary)
-            }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(.thinMaterial)
-        .cornerRadius(8)
-        .padding(.horizontal, 6)
-        .padding(.bottom, 4)
-        .transition(.move(edge: .top).combined(with: .opacity))
-    }
-
-    private func runSearch() {
-        let found = pdfController.find(searchText)
-        searchMissed = !found && !searchText.isEmpty
-    }
-
-    /// After a page swipe or layout switch, re-apply the current search
-    /// query against the newly-focused page. Empty queries are a no-op.
-    private func applyPendingSearch() {
-        guard !searchText.isEmpty else { return }
-        // Small async hop so the new PDFView has time to register with the
-        // controller before we ask it to search.
-        Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 50_000_000)
-            runSearch()
         }
     }
 
@@ -423,7 +372,7 @@ private struct MapPage: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(map.description ?? "Conference map")
-        .accessibilityHint("Pinch to zoom; swipe to switch maps")
+        .accessibilityHint("Pinch or use the zoom buttons; swipe to switch maps")
         .task(id: localURL?.path) { refreshExists() }
         .onAppear {
             Log.ui.debug("MapView loading \(localURL?.lastPathComponent ?? "?", privacy: .public)")

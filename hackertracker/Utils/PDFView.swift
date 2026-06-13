@@ -95,7 +95,7 @@ struct PDFView: UIViewRepresentable {
         view.displayMode = .singlePageContinuous
         view.displayDirection = .vertical
         view.maxScaleFactor = 5.0
-        view.minScaleFactor = 0.5
+        view.minScaleFactor = 0.1
         configure(view, with: url)
         if isFocused {
             controller?.pdfView = view
@@ -118,6 +118,7 @@ struct PDFView: UIViewRepresentable {
     private func configure(_ view: PDFKit.PDFView, with url: URL) {
         if let cached = PDFDocumentCache.shared[url] {
             view.document = cached
+            scheduleFitToView(view)
             return
         }
         // Off-main load so the swipe gesture stays responsive on large maps.
@@ -126,14 +127,32 @@ struct PDFView: UIViewRepresentable {
             await MainActor.run {
                 if let doc {
                     PDFDocumentCache.shared[url] = doc
-                    // Only assign if this view still wants the same URL.
                     if view.document?.documentURL != url {
                         view.document = doc
                     } else if view.document == nil {
                         view.document = doc
                     }
+                    scheduleFitToView(view)
                 }
             }
+        }
+    }
+
+    /// Force a fit-to-view scale on the next runloop tick so the
+    /// initial paint of each map shows the whole page. `autoScales`
+    /// alone is unreliable when the document is assigned before the
+    /// view has laid out (it returns 0 from `scaleFactorForSizeToFit`).
+    /// Hopping to the next runloop guarantees layout has run. Done
+    /// twice (immediate + small delay) so cached documents that come
+    /// in pre-laid-out also get the fit.
+    @MainActor private func scheduleFitToView(_ view: PDFKit.PDFView) {
+        DispatchQueue.main.async {
+            let fit = view.scaleFactorForSizeToFit
+            if fit > 0 { view.scaleFactor = fit }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            let fit = view.scaleFactorForSizeToFit
+            if fit > 0 { view.scaleFactor = fit }
         }
     }
 }
