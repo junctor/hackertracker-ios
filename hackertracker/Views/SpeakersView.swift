@@ -174,12 +174,10 @@ struct SpeakersView: View {
     var body: some View {
         if IPadAdaptive.isIPad {
             HStack(spacing: 0) {
-                NavigationStack {
-                    speakerSidebar
-                }
-                .frame(width: 380)
+                speakerSidebar
+                    .frame(width: 380)
                 Divider()
-                NavigationStack {
+                Group {
                     if let id = ipadSelectedSpeakerId {
                         SpeakerDetailView(id: id)
                             .id(id)

@@ -27,11 +27,9 @@ struct SpeakerDetailView: View {
             ScrollView {
                 VStack(alignment: .leading) {
                     VStack(alignment: .leading) {
-                        if !IPadAdaptive.isIPad {
-                            Text(speaker.name)
-                                .font(.title)
-                                .trackTitleScrollOffset()
-                        }
+                        Text(speaker.name)
+                            .font(.title)
+                            .trackTitleScrollOffset()
                         if let pronouns = speaker.pronouns {
                             Text("(\(pronouns))")
                                 .font(.caption)
@@ -83,14 +81,18 @@ struct SpeakerDetailView: View {
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    if let speaker = viewModel.speakers.first(where: { $0.id == id }) {
-                        Text(speaker.name)
-                            .font(.headline)
-                            .lineLimit(1)
-                            // iPad: always show title in toolbar (matches sidebar chrome).
-                            // iPhone keeps the scroll-handoff opacity.
-                            .opacity(IPadAdaptive.isIPad ? 1 : navTitleOpacity)
+                // iPad: parent NavigationStack already shows the sidebar's
+                // section title ("Speakers"). Skip the per-item principal
+                // contribution here to avoid two views fighting for the
+                // navbar slot. iPhone keeps the scroll-handoff title.
+                if !IPadAdaptive.isIPad {
+                    ToolbarItem(placement: .principal) {
+                        if let speaker = viewModel.speakers.first(where: { $0.id == id }) {
+                            Text(speaker.name)
+                                .font(.headline)
+                                .lineLimit(1)
+                                .opacity(navTitleOpacity)
+                        }
                     }
                 }
             }

@@ -13,6 +13,10 @@ struct ProductsView: View {
     @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
     @State private var searchText = ""
     @State private var showFilters = false
+    /// Local merch-size filter state. Variant titles carry the size
+    /// label (e.g. "XS"); kept here rather than in the shared Filters
+    /// env object so it does not collide with the Schedule tag filters.
+    @State private var selectedSizes: Set<String> = []
     @EnvironmentObject var filters: Filters
 
     // Polish parity with schedule / All Content.
@@ -28,25 +32,46 @@ struct ProductsView: View {
     // and 4-6 columns on iPad portrait/landscape automatically.
     let gridItemLayout = IPadAdaptive.adaptiveGridColumns(minimum: 170)
 
-    /// Polish: the merch filter sheet renders Sections per TagType. If no
-    /// browsable merch-product / merch-variant tag types exist in the
-    /// current conference data, the sheet would open empty. Compute the
-    /// eligible list once and use it to (a) decide whether to show the
-    /// floating Filter button at all, and (b) feed the sheet itself.
-    private var availableFilterTagTypes: [TagType] {
-        viewModel.tagtypes.filter {
-            ($0.category == "merch-product" || $0.category == "merch-variant")
-            && $0.isBrowsable == true
+    /// Sizes available across merch in the current conference. Sourced
+    /// from `Variant.title` (e.g. "XS", "M") because this conference's
+    /// Firestore data carries size as a variant title rather than a tag,
+    /// so the original tag-based filter rendered empty.
+    private var availableSizes: [String] {
+        struct Entry { let title: String; let sortOrder: Int }
+        var bestSortByTitle: [String: Int] = [:]
+        for product in viewModel.products {
+            for variant in product.variants {
+                let key = variant.title
+                guard !key.isEmpty else { continue }
+                if let existing = bestSortByTitle[key] {
+                    bestSortByTitle[key] = min(existing, variant.sortOrder)
+                } else {
+                    bestSortByTitle[key] = variant.sortOrder
+                }
+            }
         }
+        return bestSortByTitle
+            .map { (title: $0.key, sortOrder: $0.value) }
+            .sorted { lhs, rhs in
+                if lhs.sortOrder != rhs.sortOrder { return lhs.sortOrder < rhs.sortOrder }
+                return lhs.title.localizedStandardCompare(rhs.title) == .orderedAscending
+            }
+            .map(\.title)
     }
 
     private var visibleProducts: [Product] {
         viewModel.products.search(text: searchText)
             .sorted { $0.sortOrder < $1.sortOrder }
             .filter { product in
-                filters.filters.count == 0 ||
-                product.tagIds.filter({ filters.filters.contains($0) }).count > 0 ||
-                product.variants.filter({ $0.tagIds.intersects(with: filters.filters) && $0.stockStatus == "IN" }).count > 0
+                // No size selected -> show everything (after search).
+                // Otherwise keep products that stock at least one variant
+                // whose title matches a selected size. Out-of-stock SKUs
+                // do not satisfy the filter so the grid only shows items
+                // the user could actually buy in that size.
+                guard !selectedSizes.isEmpty else { return true }
+                return product.variants.contains { variant in
+                    selectedSizes.contains(variant.title) && variant.stockStatus == "IN"
+                }
             }
     }
 
@@ -163,11 +188,11 @@ struct ProductsView: View {
         }
         .overlay(alignment: .bottom) {
             HStack {
-                if !availableFilterTagTypes.isEmpty {
+                if !availableSizes.isEmpty {
                     Button {
                         showFilters.toggle()
                     } label: {
-                        Image(systemName: filters.filters.isEmpty
+                        Image(systemName: selectedSizes.isEmpty
                               ? "line.3.horizontal.decrease.circle"
                               : "line.3.horizontal.decrease.circle.fill")
                             .font(.title2)
@@ -175,7 +200,7 @@ struct ProductsView: View {
                             .background(.regularMaterial, in: Circle())
                     }
                     .tint(.primary)
-                    .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
+                    .accessibilityLabel(selectedSizes.isEmpty ? "Filters" : "Filters active")
                 }
 
                 Spacer()
@@ -212,11 +237,11 @@ struct ProductsView: View {
             }
         }
         .sheet(isPresented: $showFilters) {
-          EventFilters(
-            tagtypes: availableFilterTagTypes,
-            showFilters: $showFilters,
-            showBookmarks: false
-          )
+            MerchSizeFilter(
+                sizes: availableSizes,
+                selected: $selectedSizes,
+                showFilters: $showFilters
+            )
         }
         .analyticsScreen(name: "ProductsView")
     }
@@ -224,12 +249,10 @@ struct ProductsView: View {
     var body: some View {
         if IPadAdaptive.isIPad {
             HStack(spacing: 0) {
-                NavigationStack {
-                    productsSidebar
-                }
-                .frame(width: 420)
+                productsSidebar
+                    .frame(width: 420)
                 Divider()
-                NavigationStack {
+                Group {
                     if let id = ipadSelectedProductId,
                        let product = viewModel.products.first(where: { $0.id == id }) {
                         ProductView(product: product)
@@ -337,6 +360,61 @@ struct ProductsRow: View {
                         .frame(alignment: .center)
                     }
                 }
+    }
+}
+
+struct MerchSizeFilter: View {
+    let sizes: [String]
+    @Binding var selected: Set<String>
+    @Binding var showFilters: Bool
+
+    private let columns = [GridItem(.flexible()), GridItem(.flexible())]
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Button {
+                    selected.removeAll()
+                } label: {
+                    Image(systemName: "x.circle")
+                    Text("Clear")
+                }
+                Spacer()
+                Text("Filter by Size").font(.headline)
+                Spacer()
+                Button {
+                    showFilters = false
+                } label: {
+                    Text("Close")
+                    Image(systemName: "checkmark.circle")
+                }
+            }
+            .padding(10)
+            Divider()
+            ScrollView {
+                LazyVGrid(columns: columns, alignment: .center, spacing: 10) {
+                    ForEach(sizes, id: \.self) { size in
+                        let isOn = selected.contains(size)
+                        Button {
+                            if isOn { selected.remove(size) } else { selected.insert(size) }
+                        } label: {
+                            Text(size)
+                                .font(.subheadline)
+                                .padding(8)
+                                .frame(maxWidth: .infinity)
+                                .foregroundColor(isOn ? .white : .primary)
+                                .background(isOn ? Color.accentColor : Color.clear)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(isOn ? Color.clear : Color.accentColor, lineWidth: 2)
+                                )
+                                .cornerRadius(10)
+                        }
+                    }
+                }
+                .padding(10)
+            }
+        }
     }
 }
 

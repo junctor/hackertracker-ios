@@ -25,8 +25,6 @@ struct OrgsView: View {
     /// iPad-only: selected org for the detail column.
     /// iPad-only: selected org id for the detail column.
     @State private var ipadSelectedOrgId: String?
-    /// iPad split-view: row taps update detail column instead of pushing.
-    @Environment(\.iPadOrgSelection) private var iPadOrgSelection
 
     // iPad: GridItem(.adaptive) yields 2 columns on every iPhone width
     // and 4-6 columns on iPad portrait/landscape automatically.
@@ -113,18 +111,7 @@ struct OrgsView: View {
                         Color.clear.frame(height: 1).id("__top")
                         LazyVGrid(columns: gridItemLayout, spacing: 20) {
                             ForEach(filteredOrgs, id: \.id) { org in
-                                if let sel = iPadOrgSelection {
-                                    Button {
-                                        sel.wrappedValue = org.id
-                                    } label: {
-                                        orgRow(org: org, theme: theme)
-                                    }
-                                    .buttonStyle(.plain)
-                                } else {
-                                    NavigationLink(destination: OrgView(org: org, tabSelection: $tabSelection)) {
-                                        orgRow(org: org, theme: theme)
-                                    }
-                                }
+                                OrgCell(org: org, theme: theme, tabSelection: $tabSelection)
                             }
                         }
                         Color.clear.frame(height: 1).id("__bottom")
@@ -170,12 +157,10 @@ struct OrgsView: View {
     var body: some View {
         if IPadAdaptive.isIPad {
             HStack(spacing: 0) {
-                NavigationStack {
-                    orgSidebar
-                }
-                .frame(width: 420)
+                orgSidebar
+                    .frame(width: 420)
                 Divider()
-                NavigationStack {
+                Group {
                     if let id = ipadSelectedOrgId,
                        let org = viewModel.orgs.first(where: { $0.id == id }) {
                         OrgView(org: org, tabSelection: $tabSelection)
@@ -192,6 +177,28 @@ struct OrgsView: View {
             .environment(\.iPadOrgSelection, $ipadSelectedOrgId)
         } else {
             orgSidebar
+        }
+    }
+}
+
+struct OrgCell: View {
+    let org: Organization
+    let theme: Theme
+    @Binding var tabSelection: Int
+    @Environment(\.iPadOrgSelection) private var iPadOrgSelection
+
+    var body: some View {
+        if let sel = iPadOrgSelection {
+            Button {
+                sel.wrappedValue = org.id
+            } label: {
+                orgRow(org: org, theme: theme)
+            }
+            .buttonStyle(.plain)
+        } else {
+            NavigationLink(destination: OrgView(org: org, tabSelection: $tabSelection)) {
+                orgRow(org: org, theme: theme)
+            }
         }
     }
 }

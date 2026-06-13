@@ -40,10 +40,8 @@ struct ContentDetailView: View {
                 // iPad: constrain content to a readable centered column.
                 VStack(alignment: .leading) {
                     VStack(alignment: .center) {
-                        if !IPadAdaptive.isIPad {
-                            Text(item.title).font(.largeTitle).bold()
-                                .trackTitleScrollOffset()
-                        }
+                        Text(item.title).font(.largeTitle).bold()
+                            .trackTitleScrollOffset()
                         if !item.sessions.isEmpty {
                             showSessions(item: item)
                         }
@@ -114,14 +112,15 @@ struct ContentDetailView: View {
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text(item.title)
-                        .font(.headline)
-                        .lineLimit(1)
-                        // iPad: always show the title in the toolbar to match
-                        // the sidebar's chrome. iPhone keeps the scroll-handoff
-                        // opacity so the title fades in on scroll-up.
-                        .opacity(IPadAdaptive.isIPad ? 1 : navTitleOpacity)
+                // iPad: sidebar's section title owns the parent navbar.
+                // Skip per-item principal here to avoid title flicker.
+                if !IPadAdaptive.isIPad {
+                    ToolbarItem(placement: .principal) {
+                        Text(item.title)
+                            .font(.headline)
+                            .lineLimit(1)
+                            .opacity(navTitleOpacity)
+                    }
                 }
             }
             .onAppear() {

@@ -231,16 +231,11 @@ struct ContentListView: View {
 
     var body: some View {
         if IPadAdaptive.isIPad {
-            // iPad: custom HStack split (NavigationSplitView replaced to avoid
-            // iOS 18's floating-card sidebar styling that misaligned with the
-            // detail column).
             HStack(spacing: 0) {
-                NavigationStack {
-                    contentSidebar
-                }
-                .frame(width: 420)
+                contentSidebar
+                    .frame(width: 420)
                 Divider()
-                NavigationStack {
+                Group {
                     if let id = ipadSelectedContentId {
                         ContentDetailView(contentId: id)
                             .id(id)

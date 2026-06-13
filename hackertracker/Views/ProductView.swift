@@ -143,7 +143,10 @@ struct ProductView: View {
         }
         .toolbar {
             // Polish: only show the Cart link when the conference enables the cart.
-            if viewModel.conference?.enableMerchCart == true {
+            // iPad split-view: ProductsView sidebar already provides the
+            // Cart link in the shared parent NavigationStack; suppress
+            // here to avoid a duplicate QR icon in the navbar.
+            if !IPadAdaptive.isIPad, viewModel.conference?.enableMerchCart == true {
                 NavigationLink(destination: CartView()) {
                     ZStack {
                         Image(systemName: "qrcode")
