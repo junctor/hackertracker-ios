@@ -390,6 +390,10 @@ struct MapView: View {
                 .scaledToFit()
                 .frame(width: 40, height: 40)
                 .beezleAdaptiveColor(mapViewColorScheme)
+                // Tone down to match the muted gray of
+                // ContentUnavailableView's systemImage so the two icons
+                // read as a pair instead of the beezle stealing focus.
+                .opacity(0.55)
                 .offset(y: emptyStateBounceUp ? -10 : 0)
                 .accessibilityHidden(true)
             Button {
