@@ -27,6 +27,7 @@ extension View {
     /// Place this *inside* a ScrollView around the row content so the
     /// scroll surface stays full-width while the visible content sits in a
     /// readable centered column.
+    @MainActor
     @ViewBuilder
     func iPadReadableContent(maxWidth: CGFloat = 740) -> some View {
         if UIDevice.current.userInterfaceIdiom == .pad {
@@ -42,6 +43,11 @@ extension View {
 enum IPadAdaptive {
     /// `true` when running on iPad. Use sparingly -- prefer the
     /// `iPadReadableContent` modifier when possible.
+    ///
+    /// `@MainActor` because `UIDevice.current` is main-actor isolated
+    /// under Swift 6 strict concurrency. All current call sites are
+    /// SwiftUI view bodies, which are already on the main actor.
+    @MainActor
     static var isIPad: Bool {
         UIDevice.current.userInterfaceIdiom == .pad
     }

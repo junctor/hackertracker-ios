@@ -450,8 +450,12 @@ struct InfoView: View {
                     let results = json["results"] as? [[String: Any]],
                     let latestAppStoreVersion = results.first?["version"] as? String {
                         if latestAppStoreVersion.compare(currentVersion, options: .numeric) == .orderedDescending {
-                            self.appStoreVersion = latestAppStoreVersion
-                            self.showUpdateButton = true
+                            // URLSession completion runs off the main actor;
+                            // hop back before mutating @State properties.
+                            Task { @MainActor in
+                                self.appStoreVersion = latestAppStoreVersion
+                                self.showUpdateButton = true
+                            }
                         }
                     }
             } catch {
