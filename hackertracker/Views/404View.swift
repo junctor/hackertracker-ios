@@ -26,8 +26,10 @@ struct _04View: View {
                     .multilineTextAlignment(.center)
                 
                 Image("beezle")
+                    .renderingMode(.template)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
+                    .foregroundStyle(.primary)
                     .frame(width: 140)
                     .frame(maxHeight: .infinity)
                 

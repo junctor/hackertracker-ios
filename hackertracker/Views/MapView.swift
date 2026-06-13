@@ -458,8 +458,14 @@ private struct MapPage: View {
     @ViewBuilder private var downloadingPlaceholder: some View {
         VStack(spacing: 16) {
             Image("beezle")
+                // Asset is a white-on-transparent silhouette, so render
+                // it as a template and fill with .primary; that way it's
+                // visible against both light and dark backgrounds without
+                // shipping a second asset.
+                .renderingMode(.template)
                 .resizable()
                 .scaledToFit()
+                .foregroundStyle(.primary)
                 .frame(width: 140, height: 140)
                 .offset(y: beezleBob ? -8 : 8)
                 .rotationEffect(.degrees(beezleBob ? 4 : -4))
