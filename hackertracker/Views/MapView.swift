@@ -102,7 +102,7 @@ struct MapView: View {
             emergencyBanner
             if let con = viewModel.conference {
                 if let maps = sortedMaps, !maps.isEmpty {
-                    if isSearching && pdfController.canSearch { searchBar }
+                    if isSearching && currentMapHasSVG { searchBar }
                     GeometryReader { proxy in
                         if useTwoUpLayout(geometry: proxy) {
                             twoUpLayout(maps: maps)
@@ -148,6 +148,7 @@ struct MapView: View {
     }
 
     @ViewBuilder private func pagedLayout(maps: [Map]) -> some View {
+        let _ = Self.logMapInventory(maps: maps, code: selected.code)
         TabView(selection: $currentIndex) {
             ForEach(Array(maps.enumerated()), id: \.element.id) { (index, map) in
                 MapPage(
@@ -249,7 +250,7 @@ struct MapView: View {
         // carry indexable text, so a search button on a PDF would be
         // false advertising).
         ToolbarItemGroup(placement: .navigationBarTrailing) {
-            if currentMap != nil && pdfController.canSearch {
+            if currentMap != nil && currentMapHasSVG {
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         isSearching.toggle()
@@ -390,6 +391,22 @@ struct MapView: View {
         currentMap?.description ?? currentMap.map { _ in "Maps" }
     }
 
+    /// True when the focused map has an `svg_url` and the local SVG
+    /// file exists on disk. Drives the search button visibility so
+    /// the button shows up even before the WKWebView has finished
+    /// registering itself with the controller (which is racy on a
+    /// fresh swipe).
+    private var currentMapHasSVG: Bool {
+        guard let m = currentMap,
+              let raw = m.svgUrl,
+              !raw.isEmpty,
+              let remote = URL(string: raw) else { return false }
+        let path = "\(selected.code)/\(remote.lastPathComponent)"
+        let local = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(path)
+        return FileManager.default.fileExists(atPath: local.path)
+    }
+
     /// Always the PDF URL (share button target).
     private var currentMapPDFLocalURL: URL? {
         guard let m = currentMap, let url = URL(string: m.url) else { return nil }
@@ -522,6 +539,29 @@ struct MapShareSheet: UIViewControllerRepresentable {
 
 extension URL: @retroactive Identifiable {
     public var id: String { absoluteString }
+}
+
+extension MapView {
+    @MainActor private static var loggedCodes: Set<String> = []
+    static func logMapInventory(maps: [Map], code: String) {
+        guard !loggedCodes.contains(code) else { return }
+        loggedCodes.insert(code)
+        let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        for m in maps {
+            let pdfFile = (URL(string: m.url)?.lastPathComponent).map { "\(code)/\($0)" } ?? "?"
+            let pdfExists = FileManager.default.fileExists(atPath: docDir.appendingPathComponent(pdfFile).path)
+            let svgFile: String
+            let svgExists: Bool
+            if let raw = m.svgUrl, !raw.isEmpty, let u = URL(string: raw) {
+                svgFile = "\(code)/\(u.lastPathComponent)"
+                svgExists = FileManager.default.fileExists(atPath: docDir.appendingPathComponent(svgFile).path)
+            } else {
+                svgFile = "<none>"
+                svgExists = false
+            }
+            Log.ui.info("MapInventory \(code, privacy: .public) [\(m.id, privacy: .public)] \(m.description ?? "?", privacy: .public) pdf=\(pdfFile, privacy: .public)(\(pdfExists, privacy: .public)) svg=\(svgFile, privacy: .public)(\(svgExists, privacy: .public))")
+        }
+    }
 }
 
 struct MapView_Previews: PreviewProvider {
