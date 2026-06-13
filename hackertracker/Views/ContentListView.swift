@@ -11,6 +11,9 @@ struct ContentListView: View {
     var content: [Content]
     var title: String?
     @State private var searchText = ""
+    /// Perf C: debounced mirror of `searchText`. contentGroup() reads
+    /// this so the group/filter pipeline runs once per typing pause.
+    @State private var debouncedSearch = ""
     @State private var showFilters = false
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var filters: Filters
@@ -33,7 +36,7 @@ struct ContentListView: View {
 
     func contentGroup() -> [String.Element: [Content]] {
         let bookmarkIds = Set(bookmarks.map(\.id))
-        return Dictionary(grouping: content.search(text: searchText).filter { $0.tagIds.intersects(with: filters.filters) || filters.filters.isEmpty || (filters.filters.contains(1337) && $0.sessions.contains { bookmarkIds.contains(Int32($0.id)) })}, by: { $0.title.lowercased().first ?? "-" })
+        return Dictionary(grouping: content.search(text: debouncedSearch).filter { $0.tagIds.intersects(with: filters.filters) || filters.filters.isEmpty || (filters.filters.contains(1337) && $0.sessions.contains { bookmarkIds.contains(Int32($0.id)) })}, by: { $0.title.lowercased().first ?? "-" })
     }
 
     private var grouped: [(key: String.Element, value: [Content])] {
@@ -226,6 +229,10 @@ struct ContentListView: View {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 searchToggleButton
             }
+        }
+        .task(id: searchText) {
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            if !Task.isCancelled { debouncedSearch = searchText }
         }
         .analyticsScreen(name: "ContentListView")
     }
