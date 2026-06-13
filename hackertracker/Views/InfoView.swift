@@ -387,6 +387,21 @@ struct InfoView: View {
                                     }
                                 }
 
+                            case "/404", "/error", "/debug/404":
+                                // QA-only route. Pushes a sentinel so the
+                                // navigationDestination default branch fires
+                                // and shows _04View, which is otherwise
+                                // unreachable via the URL surface. Used to
+                                // verify the beezle ghost on light/dark
+                                // backgrounds.
+                                Log.app.info("deep link: forced 404 debug route")
+                                if tabSelection != 1 { tabSelection = 1 }
+                                // Defer the push to the next runloop so it
+                                // applies AFTER any tabSelection switch /
+                                // conference-switch teardown finishes.
+                                DispatchQueue.main.async {
+                                    path.append("debug/404")
+                                }
                             default:
                                 Log.app.error("deep link: unknown path \(url.path, privacy: .public)")
                             }
