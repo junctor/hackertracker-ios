@@ -26,6 +26,9 @@ struct InfoView: View {
     @State private var showOpenUrl = false
     @State private var path = NavigationPath()
     @State private var sharedEvents:[Event] = []
+    /// Combined-bookmarks-across-conferences store. Refreshed via .task(id:)
+    /// whenever bookmarks or the conferences list changes.
+    @State private var sharedSchedule = SharedScheduleStore()
     @State private var eventDay = ""
     @State private var searchText = ""
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
@@ -163,6 +166,13 @@ struct InfoView: View {
                             } label: {
                                 CardView(systemImage: "map", text: "Maps", color: colorMode ? theme.carousel() : Color(.systemGray6))
                             }
+                            // Combined-schedule entry-point: only when SharedScheduleStore
+                            // has resolved >=2 overlapping conferences with bookmarks in each.
+                            if sharedSchedule.isAvailable {
+                                NavigationLink(destination: SharedScheduleView()) {
+                                    CardView(systemImage: "calendar.badge.plus", text: "Combined Schedule", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                                }
+                            }
                             NavigationLink(destination: SpeakersView(speakers: viewModel.speakers)) {
                                 CardView(systemImage: "person.crop.rectangle", text: "Speakers", color: colorMode ? theme.carousel() : Color(.systemGray6))
                             }
@@ -281,12 +291,26 @@ struct InfoView: View {
                         Log.app.debug("InfoView filters changed")
                     }
                 } */
+                .task(id: SharedScheduleRefreshKey(
+                    bookmarkCount: bookmarks.count,
+                    confCount: consViewModel.conferences.count
+                )) {
+                    // Polish: refresh combined-schedule data when the bookmark
+                    // set or conferences list changes. Triggers on first appear
+                    // (id changes from nil) plus any subsequent edit.
+                    let ids = Set(bookmarks.map { Int($0.id) })
+                    await sharedSchedule.refresh(
+                        bookmarkIds: ids,
+                        allConferences: consViewModel.conferences
+                    )
+                }
                 .onAppear {
                     Log.app.debug("InfoView selectedCode=\(selected.code, privacy: .public)")
                     if colorMode { theme.index = 0 }
                     checkAppUpdate()
                 }
                 .analyticsScreen(name: "InfoView")
+                .environment(sharedSchedule)
                 .onOpenURL(perform: { url in
                     if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false) {
                         let queryItems = urlComponents.queryItems
@@ -621,4 +645,12 @@ struct InfoView_Previews: PreviewProvider {
     static var previews: some View {
         Text("Info View")
     }
+}
+
+/// Composed identity used by InfoView's .task(id:) to trigger a
+/// SharedScheduleStore refresh whenever the bookmark count or the conferences
+/// list changes. Hashable so SwiftUI can use it as a task identity.
+private struct SharedScheduleRefreshKey: Hashable {
+    let bookmarkCount: Int
+    let confCount: Int
 }
