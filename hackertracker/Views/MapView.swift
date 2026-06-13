@@ -15,8 +15,6 @@ struct MapView: View {
     @EnvironmentObject var theme: Theme
     @State var loading: Bool = false
 
-    let screenSize = UIScreen.main.bounds.size
-
     var body: some View {
         // Polish: wrap in NavigationStack so the screen has the same frosted
         // title bar as the other tabs. MapView is a TabView item with no
@@ -45,7 +43,7 @@ struct MapView: View {
                                         .onAppear() {
                                             Log.ui.debug("MapView loading \(mLocal, privacy: .public)")
                                         }
-                                        .frame(width: screenSize.width)
+                                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                                     if let desc = map.description {
                                         HStack {
                                             Text(desc)
@@ -61,8 +59,12 @@ struct MapView: View {
                             }
                         }
                     }
-                    .tabViewStyle(.page)
-                    .scaledToFill()
+                    // Perf/UX: keep the page indicator visible (default on dark
+                    // backgrounds is barely-visible white-on-white). Background
+                    // color set on the VStack below stops the system from
+                    // flashing black between pages while a PDF parses.
+                    .tabViewStyle(.page(indexDisplayMode: .always))
+                    .indexViewStyle(.page(backgroundDisplayMode: .always))
                     .analyticsScreen(name: "MapView")
                 } else {
                     _04View(message: "No Maps Provided For \(con.name)",show404: false)
@@ -73,6 +75,7 @@ struct MapView: View {
             }
         }
         .padding(10)
+        .background(Color(.systemBackground))
         .navigationTitle("Maps")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
