@@ -448,14 +448,35 @@ private struct MapPage: View {
         }
     }
 
+    @State private var beezleBob: Bool = false
+
+    /// Friendlier placeholder while the PDF/SVG is still downloading.
+    /// Borrows the beezle ghost from 404View and gives it a gentle
+    /// bob + tilt so users see the app is alive instead of a static
+    /// spinner. The ProgressView under it carries the actual semantic
+    /// "still working" signal for VoiceOver.
     @ViewBuilder private var downloadingPlaceholder: some View {
-        VStack(spacing: 12) {
-            ProgressView().scaleEffect(1.5)
-            Text("Map downloading…")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+        VStack(spacing: 16) {
+            Image("beezle")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 140, height: 140)
+                .offset(y: beezleBob ? -8 : 8)
+                .rotationEffect(.degrees(beezleBob ? 4 : -4))
+                .animation(
+                    .easeInOut(duration: 1.4).repeatForever(autoreverses: true),
+                    value: beezleBob
+                )
+                .accessibilityHidden(true)
+            VStack(spacing: 6) {
+                ProgressView()
+                Text("Map downloading…")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear { beezleBob = true }
         .task(id: pdfLocalURL?.path) { await pollForFiles() }
     }
 

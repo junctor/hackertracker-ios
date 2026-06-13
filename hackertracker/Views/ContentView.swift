@@ -75,7 +75,11 @@ struct ContentView: View {
                     .preferredColorScheme(theme.colorScheme)
                 MapView()
                     .tabItem {
-                        Image(systemName: "map")
+                        // Animate the SF Symbol while map assets are
+                        // downloading in the background so users get
+                        // immediate feedback that work is happening.
+                        Image(systemName: viewModel.mapsLoading ? "map.fill" : "map")
+                            .symbolEffect(.variableColor.iterative.reversing, options: .repeating, isActive: viewModel.mapsLoading)
                         // Text("Maps")
                     }
                     .tag(3)

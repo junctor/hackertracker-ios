@@ -96,6 +96,13 @@ final class InfoViewModel {
     // @Published var colorMode = false
     var outOfStock = false
     var easterEgg = false
+    /// True while one or more map asset downloads are in flight for
+    /// the current conference. Drives the Maps tab icon's loading
+    /// indicator. Files that already exist on disk don't increment
+    /// the counter, so a returning user who already has every map
+    /// cached never sees the spinner.
+    var mapsLoading: Bool = false
+    @ObservationIgnored private var pendingMapDownloads: Int = 0
     @ObservationIgnored nonisolated(unsafe) var conferenceListener: ListenerRegistration?
     @ObservationIgnored nonisolated(unsafe) var documentListener: ListenerRegistration?
     @ObservationIgnored nonisolated(unsafe) var tagListener: ListenerRegistration?
@@ -298,17 +305,21 @@ final class InfoViewModel {
                                 PDFDocumentCache.prewarm(mLocal)
                             }
                         } else {
+                            self.mapDownloadStarted()
                             self.downloadFileCompletionHandler(url: url, destinationUrl: mLocal) { destinationUrl, error in
-                                if let durl = destinationUrl {
-                                    Log.network.debug("map asset downloaded: \(durl.lastPathComponent, privacy: .public)")
-                                    if durl.pathExtension.lowercased() == "pdf" {
-                                        // prewarm() itself dispatches to a
-                                        // background priority task; safe to
-                                        // call from URLSession's queue.
-                                        PDFDocumentCache.prewarm(durl)
+                                // URLSession callback runs off-main; hop
+                                // back to MainActor to mutate observable
+                                // state safely.
+                                Task { @MainActor [weak self] in
+                                    if let durl = destinationUrl {
+                                        Log.network.debug("map asset downloaded: \(durl.lastPathComponent, privacy: .public)")
+                                        if durl.pathExtension.lowercased() == "pdf" {
+                                            PDFDocumentCache.prewarm(durl)
+                                        }
+                                    } else {
+                                        Log.firestore.error("map storage error: \(String(describing: error), privacy: .public)")
                                     }
-                                } else {
-                                    Log.firestore.error("map storage error: \(String(describing: error), privacy: .public)")
+                                    self?.mapDownloadFinished()
                                 }
                             }
                         }
@@ -331,6 +342,19 @@ final class InfoViewModel {
             }
     }
     
+    private func mapDownloadStarted() {
+        pendingMapDownloads += 1
+        if !mapsLoading { mapsLoading = true }
+    }
+
+    private func mapDownloadFinished() {
+        pendingMapDownloads -= 1
+        if pendingMapDownloads <= 0 {
+            pendingMapDownloads = 0
+            mapsLoading = false
+        }
+    }
+
     private func downloadFileCompletionHandler(url: URL, destinationUrl: URL, completion: @Sendable @escaping (URL?, Error?) -> Void) {
 
             /* let url = URL(string: urlstring)!
