@@ -44,7 +44,7 @@ struct InfoView: View {
         // refresh when the active timezone shifts.
         let _ = DateFormatterUtility.shared.tzGeneration
         NavigationStack(path: $path) {
-            if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
+            if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documentsById[emergId] {
                 NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
                     CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details" )
                         .frame(height: 40)
@@ -147,7 +147,7 @@ struct InfoView: View {
                             .font(.subheadline)
                         LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0 {
-                                if let doc = viewModel.documents.first(where: {$0.id == emergId}) {
+                                if let doc = viewModel.documentsById[emergId] {
                                     NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
                                         CardView(systemImage: "doc", text: doc.title, color: ThemeColors.red)
                                     }
@@ -513,7 +513,7 @@ struct MenuView: View {
             ForEach(menu.items.sorted(by: {$0.sortOrder < $1.sortOrder}), id: \.id) { item in
                 switch item.function {
                 case "document":
-                    if let doc = self.viewModel.documents.first(where: { $0.id == item.documentId }) {
+                    if let docId = item.documentId, let doc = self.viewModel.documentsById[docId] {
                         NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
                             CardView(systemImage: item.symbol ?? "doc", text: doc.title, color: colorMode ? ThemeColors.blue : Color(.systemGray6))
                             }

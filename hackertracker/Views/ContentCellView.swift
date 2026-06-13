@@ -25,7 +25,7 @@ struct ContentCell: View {
                 Log.bookmarks.debug("contentCell add \(s.id)")
                 BookmarkUtility.addBookmark(context: viewContext, id: s.id)
                 let notDate = s.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
-                NotificationUtility.scheduleNotification(date: notDate, id: s.id, title: content.title, location: viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unknown")
+                NotificationUtility.scheduleNotification(date: notDate, id: s.id, title: content.title, location: viewModel.locationsById[s.locationId]?.name ?? "unknown")
             }
         }
     }
@@ -61,7 +61,7 @@ struct ContentCell: View {
                                 .font(.headline)
                                 .multilineTextAlignment(.leading)
                             if !content.people.isEmpty {
-                                Text(content.people.map { p in viewModel.speakers.first(where: { $0.id == p.id })?.name ?? "" }.joined(separator: ", "))
+                                Text(content.people.map { p in viewModel.speakersById[p.id]?.name ?? "" }.joined(separator: ", "))
                                     .font(.subheadline)
                                     .multilineTextAlignment(.leading)
                             }
@@ -90,8 +90,7 @@ struct ContentCell: View {
     }
     
     func getEventTagColorBackground() -> Color {
-        if let tagtype = viewModel.tagtypes.first(where: {$0.tags.contains(where: {$0.id == content.tagIds[0]})}),
-           let tag = tagtype.tags.first(where: { $0.id == content.tagIds[0]}),
+        if let tag = viewModel.tagsById[content.tagIds[0]],
            let colorHex = tag.colorBackground, let uicolor = UIColor(hex: colorHex) {
             return Color(uiColor: uicolor)
         }

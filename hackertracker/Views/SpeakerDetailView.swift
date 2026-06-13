@@ -23,7 +23,7 @@ struct SpeakerDetailView: View {
     @State private var navTitleOpacity: CGFloat = 0
 
     var body: some View {
-        if let speaker = viewModel.speakers.first(where: { $0.id == id }) {
+        if let speaker = viewModel.speakersById[id] {
             ScrollView {
                 VStack(alignment: .leading) {
                     VStack(alignment: .leading) {
@@ -87,7 +87,7 @@ struct SpeakerDetailView: View {
                 // navbar slot. iPhone keeps the scroll-handoff title.
                 if !IPadAdaptive.isIPad {
                     ToolbarItem(placement: .principal) {
-                        if let speaker = viewModel.speakers.first(where: { $0.id == id }) {
+                        if let speaker = viewModel.speakersById[id] {
                             Text(speaker.name)
                                 .font(.headline)
                                 .lineLimit(1)
@@ -262,11 +262,11 @@ struct SpeakerEventView: View {
                     .multilineTextAlignment(.leading)
                 Text(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.beginTimestamp))
                     .font(.subheadline)
-                if let l = viewModel.locations.first(where: {$0.id == event.locationId}) {
+                if let l = viewModel.locationsById[event.locationId] {
                     Text(l.name).font(.caption2)
                 }
-                // if let tagtype = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == tagId})}), let tag = tagtype.tags.first(where: {$0.id == tagId})
-                if let tagType = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == event.tagIds[0]})}), let tag = tagType.tags.first(where: {$0.id == event.tagIds[0]}) {
+                // if let tagtype = viewModel.tagTypeByTagId[tagId], let tag = tagtype.tags.first(where: {$0.id == tagId})
+                if let tag = viewModel.tagsById[event.tagIds[0]] {
                     VStack {
                         HStack {
                             Circle().foregroundColor(Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
@@ -301,13 +301,12 @@ struct SpeakerEventView: View {
         } else {
             BookmarkUtility.addBookmark(context: viewContext, id: event.id)
             let notDate = event.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
-            NotificationUtility.scheduleNotification(date: notDate, id: event.id, title: event.title, location: viewModel.locations.first(where: {$0.id == event.locationId})?.name ?? "unknown")
+            NotificationUtility.scheduleNotification(date: notDate, id: event.id, title: event.title, location: viewModel.locationsById[event.locationId]?.name ?? "unknown")
         }
     }
     
     func getEventTagColorBackground(id: Int) -> Color {
-        if let tagtype = viewModel.tagtypes.first(where: {$0.tags.contains(where: {$0.id == id})}),
-           let tag = tagtype.tags.first(where: { $0.id == id}),
+        if let tag = viewModel.tagsById[id],
            let colorHex = tag.colorBackground, let uicolor = UIColor(hex: colorHex) {
             return Color(uiColor: uicolor)
         }

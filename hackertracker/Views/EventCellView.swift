@@ -27,7 +27,7 @@ struct EventCell: View {
             Log.bookmarks.debug("eventCell add \(event.id)")
             BookmarkUtility.addBookmark(context: viewContext, id: event.id)
             let notDate = event.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
-            NotificationUtility.scheduleNotification(date: notDate, id: event.id, title: event.title, location: viewModel.locations.first(where: {$0.id == event.locationId})?.name ?? "unknown")
+            NotificationUtility.scheduleNotification(date: notDate, id: event.id, title: event.title, location: viewModel.locationsById[event.locationId]?.name ?? "unknown")
         }
     }
 
@@ -59,11 +59,11 @@ struct EventCell: View {
                                 .font(.headline)
                                 .multilineTextAlignment(.leading)
                             if !event.people.isEmpty {
-                                Text(event.people.map { p in viewModel.speakers.first(where: { $0.id == p.id })?.name ?? "" }.joined(separator: ", "))
+                                Text(event.people.map { p in viewModel.speakersById[p.id]?.name ?? "" }.joined(separator: ", "))
                                     .font(.subheadline)
                                     .multilineTextAlignment(.leading)
                             }
-                            if let l = viewModel.locations.first(where: {$0.id == event.locationId}) {
+                            if let l = viewModel.locationsById[event.locationId] {
                                 Text(l.name).font(.caption2)
                                     .multilineTextAlignment(.leading)
                             }
@@ -93,8 +93,7 @@ struct EventCell: View {
     }
     
     func getEventTagColorBackground() -> Color {
-        if let tagtype = viewModel.tagtypes.first(where: {$0.tags.contains(where: {$0.id == event.tagIds[0]})}),
-           let tag = tagtype.tags.first(where: { $0.id == event.tagIds[0]}),
+        if let tag = viewModel.tagsById[event.tagIds[0]],
            let colorHex = tag.colorBackground, let uicolor = UIColor(hex: colorHex) {
             return Color(uiColor: uicolor)
         }
@@ -110,7 +109,7 @@ struct ShowEventCellTags: View {
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: minWidth))], alignment: .leading, spacing: 1) {
             ForEach(tagIds, id: \.self) { tagId in
-                if let tagtype = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == tagId})}), let tag = tagtype.tags.first(where: {$0.id == tagId}) {
+                if let tag = viewModel.tagsById[tagId] {
                     VStack {
                         HStack {
                             Circle().foregroundColor(Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))

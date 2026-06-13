@@ -221,7 +221,7 @@ struct ProductsView: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
-                if !showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {
+                if !showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documentsById[docId] {
                     NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
                         Image(systemName: "info.circle")
                     }
@@ -254,7 +254,7 @@ struct ProductsView: View {
                 Divider()
                 Group {
                     if let id = ipadSelectedProductId,
-                       let product = viewModel.products.first(where: { $0.id == id }) {
+                       let product = viewModel.productsById[id] {
                         ProductView(product: product)
                             .id(id)
                     } else {
@@ -278,7 +278,7 @@ struct MerchInfo: View {
     @Environment(InfoViewModel.self) private var viewModel
     
     var body: some View {
-        if showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {
+        if showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documentsById[docId] {
             NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
                 HStack {
                     Button {

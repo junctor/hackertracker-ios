@@ -35,7 +35,7 @@ struct ContentDetailView: View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
-        if let item = viewModel.content.first(where: { $0.id == contentId }) {
+        if let item = viewModel.contentById[contentId] {
             ScrollView {
                 // iPad: constrain content to a readable centered column.
                 VStack(alignment: .leading) {
@@ -253,7 +253,7 @@ struct showSessionRow: View {
             BookmarkUtility.addBookmark(context: viewContext, id: id)
             if !notExists {
                 let notDate = s.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
-                NotificationUtility.scheduleNotification(date: notDate, id: s.id, title: item.title, location: viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unknown")
+                NotificationUtility.scheduleNotification(date: notDate, id: s.id, title: item.title, location: viewModel.locationsById[s.locationId]?.name ?? "unknown")
                 notExists.toggle()
             } else {
             }
@@ -295,7 +295,7 @@ struct showSessionRow: View {
                 }
                 HStack {
                     Image(systemName: "map")
-                    Text(viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unkown").font(.caption)
+                    Text(viewModel.locationsById[s.locationId]?.name ?? "unkown").font(.caption)
                 }
             }
             .padding(.leading, 5)
@@ -372,7 +372,7 @@ struct showRelated: View {
             if !collapsed {
                 VStack {
                     ForEach(eventIds, id: \.self) { eventId in
-                        if let c = viewModel.content.first(where: {$0.id == eventId}) {
+                        if let c = viewModel.contentById[eventId] {
                             NavigationLink(destination: ContentDetailView(contentId: c.id)) {
                                 ContentCell(content: c, bookmarks: bookmarks.map { $0.id }, showDay: true)
                             }
@@ -383,7 +383,7 @@ struct showRelated: View {
             } else {
                 VStack {
                         let eventId = eventIds[0]
-                        if let c = viewModel.content.first(where: {$0.id == eventId}) {
+                        if let c = viewModel.contentById[eventId] {
                             NavigationLink(destination: ContentDetailView(contentId: c.id)) {
                                 ContentCell(content: c, bookmarks: bookmarks.map { $0.id }, showDay: true)
                             }
@@ -434,7 +434,7 @@ struct showPeople: View {
                 if people.count > 1 {
                     LazyVGrid(columns: columns, spacing: 20) {
                         ForEach(people, id: \.id) { person in
-                            if let speaker = viewModel.speakers.first(where: {$0.id == person.id}) {
+                            if let speaker = viewModel.speakersById[person.id] {
                                 HStack {
                                     NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                                         VStack {
@@ -453,7 +453,7 @@ struct showPeople: View {
                             }
                         }
                     }
-                } else if let speaker = viewModel.speakers.first(where: {$0.id == content.people[0].id}) {
+                } else if let speaker = viewModel.speakersById[content.people[0].id] {
                     HStack {
                         NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                             VStack {

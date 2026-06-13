@@ -24,11 +24,45 @@ import SwiftUI
 @MainActor
 final class InfoViewModel {
     var conference: Conference?
-    var documents = [Document]()
-    var tagtypes = [TagType]()
-    var locations = [Location]()
-    var products = [Product]()
-    var content = [Content]()
+    var documents = [Document]() {
+        didSet { documentsById = Dictionary(uniqueKeysWithValues: documents.map { ($0.id, $0) }) }
+    }
+    var tagtypes = [TagType]() {
+        didSet {
+            // Build a flat tag id -> TagType lookup so cells can resolve a tag's
+            // parent TagType in O(1) instead of scanning all tagtypes per tag.
+            var byTagId: [Int: TagType] = [:]
+            var tagById: [Int: Tag] = [:]
+            for tt in tagtypes {
+                for tag in tt.tags {
+                    byTagId[tag.id] = tt
+                    tagById[tag.id] = tag
+                }
+            }
+            tagTypeByTagId = byTagId
+            tagsById = tagById
+        }
+    }
+    var locations = [Location]() {
+        didSet { locationsById = Dictionary(uniqueKeysWithValues: locations.map { ($0.id, $0) }) }
+    }
+    var products = [Product]() {
+        didSet { productsById = Dictionary(uniqueKeysWithValues: products.map { ($0.id, $0) }) }
+    }
+    var content = [Content]() {
+        didSet { contentById = Dictionary(uniqueKeysWithValues: content.map { ($0.id, $0) }) }
+    }
+
+    // Phase Perf-A: id-keyed indexes rebuilt on each array assignment.
+    // ObservationIgnored so dependents observe the source array, not the index.
+    @ObservationIgnored private(set) var documentsById: [Int: Document] = [:]
+    @ObservationIgnored private(set) var locationsById: [Int: Location] = [:]
+    @ObservationIgnored private(set) var productsById: [Int: Product] = [:]
+    @ObservationIgnored private(set) var contentById: [Int: Content] = [:]
+    @ObservationIgnored private(set) var speakersById: [Int: Speaker] = [:]
+    @ObservationIgnored private(set) var orgsById: [String: Organization] = [:]
+    @ObservationIgnored private(set) var tagTypeByTagId: [Int: TagType] = [:]
+    @ObservationIgnored private(set) var tagsById: [Int: Tag] = [:]
     var events = [Event]() {
         didSet {
             // Phase 2: O(1) event lookup so bookmarkConflicts is O(b) instead of O(b*n).
@@ -42,8 +76,16 @@ final class InfoViewModel {
     /// Cleared when events change or bookmarks change.
     @ObservationIgnored private var conflictCache: [Int: Bool] = [:]
     @ObservationIgnored private var conflictCacheBookmarkKey: Int = 0
-    var speakers = [Speaker]()
-    var orgs = [Organization]()
+    var speakers = [Speaker]() {
+        didSet { speakersById = Dictionary(uniqueKeysWithValues: speakers.map { ($0.id, $0) }) }
+    }
+    var orgs = [Organization]() {
+        didSet {
+            var idx: [String: Organization] = [:]
+            for org in orgs { if let id = org.id { idx[id] = org } }
+            orgsById = idx
+        }
+    }
     var faqs = [FAQ]()
     var news = [Article]()
     var menus = [InfoMenu]()

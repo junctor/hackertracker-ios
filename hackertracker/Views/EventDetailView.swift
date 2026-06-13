@@ -161,7 +161,7 @@ struct showSpeakers: View {
                 if people.count > 1 {
                     LazyVGrid(columns: columns, spacing: 20) {
                         ForEach(people, id: \.id) { person in
-                            if let speaker = viewModel.speakers.first(where: {$0.id == person.id}) {
+                            if let speaker = viewModel.speakersById[person.id] {
                                 HStack {
                                     NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                                         VStack {
@@ -229,7 +229,7 @@ struct showTags: View {
                 VStack(alignment: .leading) {
                     LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
                         ForEach(tagIds, id: \.self) { tagId in
-                            if let tagtype = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == tagId})}), let tag = tagtype.tags.first(where: {$0.id == tagId}) {
+                            if let tag = viewModel.tagsById[tagId] {
                                 VStack {
                                     HStack {
                                         Text(tag.label)

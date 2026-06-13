@@ -162,7 +162,7 @@ struct OrgsView: View {
                 Divider()
                 Group {
                     if let id = ipadSelectedOrgId,
-                       let org = viewModel.orgs.first(where: { $0.id == id }) {
+                       let org = viewModel.orgsById[id] {
                         OrgView(org: org, tabSelection: $tabSelection)
                             .id(id)
                     } else {
