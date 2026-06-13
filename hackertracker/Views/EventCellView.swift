@@ -19,7 +19,8 @@ struct EventCell: View {
     
 
     func bookmarkAction() {
-        if bookmarks.map({$0.id}).contains(Int32(event.id)) {
+        let bookmarkIds = Set(bookmarks.map(\.id))
+        if bookmarkIds.contains(Int32(event.id)) {
             Log.bookmarks.debug("eventCell remove \(event.id)")
             BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
             NotificationUtility.removeNotification(id: event.id)
@@ -35,6 +36,8 @@ struct EventCell: View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
+        let bookmarkIds = Set(bookmarks.map(\.id))
+        let bookmarkIntsForConflict = bookmarks.map { Int($0.id) }
         VStack(alignment: .leading) {
             HStack(alignment: .center) {
                 Rectangle().fill(getEventTagColorBackground())
@@ -75,20 +78,20 @@ struct EventCell: View {
                         Button {
                             bookmarkAction()
                         } label: {
-                            Image(systemName: bookmarks.map({$0.id}).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
-                                .foregroundColor((bookmarks.map({$0.id}).contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
+                            Image(systemName: bookmarkIds.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                                .foregroundColor((bookmarkIds.contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkIntsForConflict)) ? ThemeColors.red : .primary)
                         }
-                        .accessibilityLabel(bookmarks.map({$0.id}).contains(Int32(event.id)) ? "Remove bookmark" : "Add bookmark")
+                        .accessibilityLabel(bookmarkIds.contains(Int32(event.id)) ? "Remove bookmark" : "Add bookmark")
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
             }
 
         }.swipeActions {
-            Button(bookmarks.map({$0.id}).contains(Int32(event.id)) ? "Remove Bookmark" : "Bookmark") {
+            Button(bookmarkIds.contains(Int32(event.id)) ? "Remove Bookmark" : "Bookmark") {
                 bookmarkAction()
             }.buttonStyle(DefaultButtonStyle())
-                .tint(bookmarks.map({$0.id}).contains(Int32(event.id)) ? .red : .yellow)
+                .tint(bookmarkIds.contains(Int32(event.id)) ? .red : .yellow)
         }
     }
     

@@ -243,7 +243,7 @@ struct showSessionRow: View {
     @Environment(\.managedObjectContext) private var viewContext
     
     func bookmarkAction(id: Int) {
-        if bookmarks.map({$0.id}).contains(Int32(id)) {
+        if Set(bookmarks.map(\.id)).contains(Int32(id)) {
             BookmarkUtility.deleteBookmark(context: viewContext, id: id)
             if notExists {
                 NotificationUtility.removeNotification(id: id)
@@ -261,6 +261,7 @@ struct showSessionRow: View {
     }
     
     var body: some View {
+        let bookmarkIds = Set(bookmarks.map(\.id))
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
@@ -307,10 +308,10 @@ struct showSessionRow: View {
                     Button {
                         bookmarkAction(id: s.id)
                     } label: {
-                        Image(systemName: bookmarks.map{$0.id}.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
-                            .foregroundColor((bookmarks.map({$0.id}).contains(Int32(s.id)) && viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
+                        Image(systemName: bookmarkIds.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
+                            .foregroundColor((bookmarkIds.contains(Int32(s.id)) && viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
                     }
-                    .accessibilityLabel(bookmarks.map{$0.id}.contains(Int32(s.id)) ? "Remove bookmark" : "Add bookmark")
+                    .accessibilityLabel(bookmarkIds.contains(Int32(s.id)) ? "Remove bookmark" : "Add bookmark")
                     MoreContentMenu(content: item, session: s, notExists: $notExists)
                 }
             }
@@ -346,6 +347,7 @@ struct showRelated: View {
     @State private var collapsed = true
     
     var body: some View {
+        let bookmarkIds = bookmarks.map { $0.id }
         VStack(alignment: .leading) {
             Button(action: {
                 collapsed.toggle()
@@ -374,7 +376,7 @@ struct showRelated: View {
                     ForEach(eventIds, id: \.self) { eventId in
                         if let c = viewModel.contentById[eventId] {
                             NavigationLink(destination: ContentDetailView(contentId: c.id)) {
-                                ContentCell(content: c, bookmarks: bookmarks.map { $0.id }, showDay: true)
+                                ContentCell(content: c, bookmarks: bookmarkIds, showDay: true)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
@@ -385,7 +387,7 @@ struct showRelated: View {
                         let eventId = eventIds[0]
                         if let c = viewModel.contentById[eventId] {
                             NavigationLink(destination: ContentDetailView(contentId: c.id)) {
-                                ContentCell(content: c, bookmarks: bookmarks.map { $0.id }, showDay: true)
+                                ContentCell(content: c, bookmarks: bookmarkIds, showDay: true)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }

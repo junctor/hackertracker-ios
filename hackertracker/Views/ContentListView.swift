@@ -32,7 +32,8 @@ struct ContentListView: View {
     @State private var ipadSelectedContentId: Int?
 
     func contentGroup() -> [String.Element: [Content]] {
-        return Dictionary(grouping: content.search(text: searchText).filter { $0.tagIds.intersects(with: filters.filters) || filters.filters.isEmpty || (filters.filters.contains(1337) && $0.sessions.map {Int32($0.id)}.intersects(with: bookmarks.map{$0.id}))}, by: { $0.title.lowercased().first ?? "-" })
+        let bookmarkIds = Set(bookmarks.map(\.id))
+        return Dictionary(grouping: content.search(text: searchText).filter { $0.tagIds.intersects(with: filters.filters) || filters.filters.isEmpty || (filters.filters.contains(1337) && $0.sessions.contains { bookmarkIds.contains(Int32($0.id)) })}, by: { $0.title.lowercased().first ?? "-" })
     }
 
     private var grouped: [(key: String.Element, value: [Content])] {
@@ -264,6 +265,7 @@ struct ContentData: View {
     @Environment(\.iPadContentSelection) private var iPadContentSelection
 
     var body: some View {
+        let contentRowBookmarks = bookmarks.map { $0.id }
         Section(header: Text(String(char.uppercased()))
             .font(.subheadline)
             .padding(3)
@@ -276,13 +278,13 @@ struct ContentData: View {
                     Button {
                         sel.wrappedValue = item.id
                     } label: {
-                        ContentCell(content: item, bookmarks: bookmarks.map { $0.id }, showDay: false)
+                        ContentCell(content: item, bookmarks: contentRowBookmarks, showDay: false)
                             .padding(1)
                     }
                     .buttonStyle(.plain)
                 } else {
                     NavigationLink(destination: ContentDetailView(contentId: item.id)) {
-                        ContentCell(content: item, bookmarks: bookmarks.map { $0.id }, showDay: false)
+                        ContentCell(content: item, bookmarks: contentRowBookmarks, showDay: false)
                             .padding(1)
                     }
                     .buttonStyle(PlainButtonStyle())

@@ -27,6 +27,7 @@ struct EventDetailView: View {
     ]
 
     var body: some View {
+                        let bookmarkIds = Set(bookmarks.map(\.id))
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
@@ -84,14 +85,14 @@ struct EventDetailView: View {
                 ToolbarItemGroup {
                     if let event = viewModel.events.first(where: { $0.id == eventId }) {
                         Button {
-                            if bookmarks.map({ $0.id }).contains(Int32(event.id)) {
+                            if bookmarkIds.contains(Int32(event.id)) {
                                 BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
                             } else {
                                 BookmarkUtility.addBookmark(context: viewContext, id: event.id)
                             }
                         } label: {
                             if let event = viewModel.events.first(where: { $0.id == eventId }) {
-                                Image(systemName: bookmarks.map({ $0.id }).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                                Image(systemName: bookmarkIds.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
                             }
                         }
                         MoreMenu(event: event, showingAlert: $showingAlert, notExists: $nExists)

@@ -18,7 +18,7 @@ extension [TagType] {
 }
 
 extension [Content] {
-    func filters(typeIds: Set<Int>, bookmarks: [Int32], tagTypes: [TagType]) -> Self {
+    func filters(typeIds: Set<Int>, bookmarks: Set<Int32>, tagTypes: [TagType]) -> Self {
         if typeIds.isEmpty {
             return self
         } else {
@@ -68,7 +68,7 @@ extension [Event] {
         }
     } */
     
-    func filters(typeIds: Set<Int>, bookmarks: [Int32], tagTypes: [TagType]) -> Self {
+    func filters(typeIds: Set<Int>, bookmarks: Set<Int32>, tagTypes: [TagType]) -> Self {
         if typeIds.isEmpty {
             return self
         } else {
