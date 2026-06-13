@@ -59,15 +59,15 @@ struct MapView: View {
     /// the app accent color.
     @ViewBuilder private var zoomFloatingControls: some View {
         if currentMap != nil {
-            VStack(spacing: 0) {
+            HStack(spacing: 0) {
                 zoomIcon(systemName: "plus.magnifyingglass", label: "Zoom in") {
                     pdfController.zoomIn()
                 }
-                Divider().opacity(0.5)
+                Divider().frame(height: 22).opacity(0.5)
                 zoomIcon(systemName: "minus.magnifyingglass", label: "Zoom out") {
                     pdfController.zoomOut()
                 }
-                Divider().opacity(0.5)
+                Divider().frame(height: 22).opacity(0.5)
                 zoomIcon(systemName: "arrow.up.left.and.down.right.magnifyingglass", label: "Reset zoom") {
                     pdfController.resetZoom()
                 }
@@ -79,7 +79,9 @@ struct MapView: View {
                     .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
             )
             .padding(.leading, 14)
-            .padding(.bottom, 20)
+            // Sit above the TabView's page indicator dots (~24pt high
+            // including the background pill) plus a comfortable gap.
+            .padding(.bottom, 52)
         }
     }
 
@@ -103,13 +105,11 @@ struct MapView: View {
             if let con = viewModel.conference {
                 if let maps = sortedMaps, !maps.isEmpty {
                     if isSearching && currentMapHasSVG { searchBar }
-                    GeometryReader { proxy in
-                        if useTwoUpLayout(geometry: proxy) {
-                            twoUpLayout(maps: maps)
-                        } else {
-                            pagedLayout(maps: maps)
-                        }
-                    }
+                    // One-map-per-screen on every device. The previous iPad
+                    // two-up landscape layout left too much whitespace
+                    // between asymmetric floor plans; the single-pane swipe
+                    // reads better at every size.
+                    pagedLayout(maps: maps)
                 } else {
                     emptyState(conference: con)
                 }
@@ -170,61 +170,7 @@ struct MapView: View {
         }
     }
 
-    /// iPad landscape: render currentIndex and currentIndex+1 side by side.
-    @ViewBuilder private func twoUpLayout(maps: [Map]) -> some View {
-        VStack(spacing: 8) {
-            HStack(spacing: 8) {
-                MapPage(
-                    map: maps[currentIndex],
-                    conferenceCode: selected.code,
-                    isFocused: true,
-                    controller: pdfController
-                )
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                if currentIndex + 1 < maps.count {
-                    Divider()
-                    MapPage(
-                        map: maps[currentIndex + 1],
-                        conferenceCode: selected.code,
-                        isFocused: false,
-                        controller: nil
-                    )
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
-            }
-            HStack {
-                Button {
-                    if currentIndex >= 2 { currentIndex -= 2 } else { currentIndex = 0 }
-                } label: {
-                    Image(systemName: "chevron.left.circle.fill").font(.title)
-                }
-                .disabled(currentIndex == 0)
-                Spacer()
-                Text("\(currentIndex + 1)\(maps.count > currentIndex + 1 ? "–\(currentIndex + 2)" : "") of \(maps.count)")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Button {
-                    if currentIndex + 2 < maps.count { currentIndex += 2 }
-                } label: {
-                    Image(systemName: "chevron.right.circle.fill").font(.title)
-                }
-                .disabled(currentIndex + 2 >= maps.count)
-            }
-            .padding(.horizontal, 12)
-        }
-        .onAppear { restoreIndex(maps: maps); applyPendingSearch() }
-        .onChange(of: currentIndex) { _, new in
-            persistIndex(new)
-            prewarmAdjacent(maps: maps, around: new)
-            applyPendingSearch()
-        }
-    }
 
-    private func useTwoUpLayout(geometry proxy: GeometryProxy) -> Bool {
-        guard IPadAdaptive.isIPad else { return false }
-        return proxy.size.width > proxy.size.height
-    }
 
     // MARK: - Toolbar
 
