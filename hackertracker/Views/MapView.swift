@@ -49,36 +49,45 @@ struct MapView: View {
         .analyticsScreen(name: "MapView")
     }
 
-    /// Floating zoom stack in the bottom-leading corner. Three buttons
-    /// stacked vertically — In / Out / Reset — so they sit within easy
-    /// thumb reach without competing with the page indicator dots in
-    /// the bottom-center. Hidden when no map is loaded.
+    /// Floating zoom control in the bottom-leading corner. The three
+    /// icons (In / Out / Reset) share a single rounded-rect Material
+    /// pill so the affordance reads as one cohesive control instead
+    /// of three disconnected circles. `.buttonStyle(.plain)` keeps
+    /// SwiftUI from tinting the icons with the app accent color (blue).
     @ViewBuilder private var zoomFloatingControls: some View {
         if currentMap != nil {
-            VStack(spacing: 8) {
-                zoomButton(systemName: "plus.magnifyingglass", label: "Zoom in") {
+            VStack(spacing: 0) {
+                zoomIcon(systemName: "plus.magnifyingglass", label: "Zoom in") {
                     pdfController.zoomIn()
                 }
-                zoomButton(systemName: "minus.magnifyingglass", label: "Zoom out") {
+                Divider().opacity(0.5)
+                zoomIcon(systemName: "minus.magnifyingglass", label: "Zoom out") {
                     pdfController.zoomOut()
                 }
-                zoomButton(systemName: "arrow.up.left.and.down.right.magnifyingglass", label: "Reset zoom") {
+                Divider().opacity(0.5)
+                zoomIcon(systemName: "arrow.up.left.and.down.right.magnifyingglass", label: "Reset zoom") {
                     pdfController.resetZoom()
                 }
             }
-            .padding(.horizontal, 14)
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22))
+            .overlay(
+                RoundedRectangle(cornerRadius: 22)
+                    .stroke(Color.primary.opacity(0.08), lineWidth: 0.5)
+            )
+            .padding(.leading, 14)
             .padding(.bottom, 20)
         }
     }
 
-    private func zoomButton(systemName: String, label: String, action: @escaping () -> Void) -> some View {
+    private func zoomIcon(systemName: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.title2)
+                .font(.title3)
                 .foregroundStyle(.primary)
                 .frame(width: 44, height: 44)
-                .background(.regularMaterial, in: Circle())
+                .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
         .accessibilityLabel(label)
     }
 
