@@ -32,25 +32,34 @@ struct SettingsView: View {
                     Divider()
                 }
                 if IPadAdaptive.isIPad {
-                    // iPad: 2-column grid pairs related settings rows so
-                    // we don't leave half the screen blank. Adaptive
-                    // columns keep the panel widths consistent.
-                    LazyVGrid(
-                        columns: [GridItem(.flexible(), spacing: 16),
-                                  GridItem(.flexible(), spacing: 16)],
-                        alignment: .leading,
-                        spacing: 16
-                    ) {
-                        StartScreenSettingsView()
-                        ShowLocaltimeSettingsView()
-                        ShowPastEventsSettingsView()
-                        ShowNewsSettingsView()
-                        NotificationSettingsView()
-                        EasterEggSettingsView()
+                    // iPad: explicit 2-column HStack. Each panel is
+                    // wrapped in VStack(spacing: 0) { ... } so its
+                    // multi-Item @ViewBuilder body counts as ONE cell.
+                    // (Subviews like LightModeSettingsView return a
+                    // TupleView of VStack + Divider + VStack + Divider,
+                    // which a LazyVGrid would explode into separate
+                    // grid items.)
+                    HStack(alignment: .top, spacing: 16) {
+                        VStack(spacing: 12) {
+                            VStack(spacing: 0) { LightModeSettingsView() }
+                            VStack(spacing: 0) { ShowLocaltimeSettingsView() }
+                            VStack(spacing: 0) { ShowPastEventsSettingsView() }
+                            VStack(spacing: 0) { ShowNewsSettingsView() }
+                            Spacer(minLength: 0)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .top)
+                        VStack(spacing: 12) {
+                            VStack(spacing: 0) { StartScreenPickerView() }
+                            VStack(spacing: 0) { NotificationSettingsView() }
+                            VStack(spacing: 0) { EasterEggSettingsView() }
+                            Spacer(minLength: 0)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .top)
                     }
                     .padding(.horizontal, 12)
                 } else {
-                    StartScreenSettingsView()
+                    LightModeSettingsView()
+                    StartScreenPickerView()
                     ShowLocaltimeSettingsView()
                     ShowPastEventsSettingsView()
                     ShowNewsSettingsView()
@@ -288,11 +297,22 @@ struct LightModeSettingsView: View {
 }
 
 struct StartScreenSettingsView: View {
+    var body: some View {
+        // Compatibility wrapper: legacy callers got LightMode + the
+        // Start Screen picker stacked together. New code should call
+        // LightModeSettingsView and StartScreenPickerView separately.
+        VStack(spacing: 0) {
+            LightModeSettingsView()
+            StartScreenPickerView()
+        }
+    }
+}
+
+struct StartScreenPickerView: View {
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     let startScreens = ["Main", "Schedule", "Maps"]
 
     var body: some View {
-        LightModeSettingsView()
         VStack(alignment: .leading) {
             Text("Start Screen")
             Picker("Start Screen", selection: $launchScreen) {
@@ -302,10 +322,8 @@ struct StartScreenSettingsView: View {
             }
             .pickerStyle(.segmented)
         }
-        .padding(5)  // Match the .padding(5) every other settings row uses.
-        Divider()
+        .padding(5)
     }
-    
 }
 
 struct ShowLocaltimeSettingsView: View {
