@@ -49,6 +49,7 @@ struct SpeakerDetailView: View {
                             ForEach(media, id: \.assetId) { m in
                                 if let url = URL(string: m.url) {
                                     KFImage(url)
+                                        .htDownsampled(side: 400)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
                                         .frame(width: 150)

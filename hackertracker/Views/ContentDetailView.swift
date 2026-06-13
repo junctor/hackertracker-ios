@@ -169,6 +169,7 @@ struct showMedia: View {
                     ForEach(media, id: \.assetId) { m in
                         if let url = URL(string: m.url) {
                             KFImage(url)
+                                .htDownsampled(side: 600)
                                 .resizable()
                                 .scaledToFit()
                                 .aspectRatio(contentMode: .fit)
