@@ -69,6 +69,10 @@ struct MapView: View {
                     pdfController.resetZoom()
                 }
             }
+            .fixedSize()  // Divider() inside a VStack expands to fill
+                          // the available width, which made the pill
+                          // span the whole screen. fixedSize collapses
+                          // it back to the natural width of the icons.
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22))
             .overlay(
                 RoundedRectangle(cornerRadius: 22)
