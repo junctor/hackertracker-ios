@@ -448,6 +448,7 @@ private struct MapPage: View {
         }
     }
 
+    @Environment(\.colorScheme) private var beezleColorScheme
     @State private var beezleBob: Bool = false
 
     /// Friendlier placeholder while the PDF/SVG is still downloading.
@@ -458,15 +459,10 @@ private struct MapPage: View {
     @ViewBuilder private var downloadingPlaceholder: some View {
         VStack(spacing: 16) {
             Image("beezle")
-                // Asset is a white-on-transparent silhouette, so render
-                // it as a template and fill with .primary; that way it's
-                // visible against both light and dark backgrounds without
-                // shipping a second asset.
-                .renderingMode(.template)
                 .resizable()
                 .scaledToFit()
-                .foregroundStyle(.primary)
                 .frame(width: 140, height: 140)
+                .beezleAdaptiveColor(beezleColorScheme)
                 .offset(y: beezleBob ? -8 : 8)
                 .rotationEffect(.degrees(beezleBob ? 4 : -4))
                 .animation(
@@ -547,5 +543,26 @@ struct SpinnerView: View {
         ProgressView()
             .progressViewStyle(CircularProgressViewStyle(tint: ThemeColors.blue))
             .scaleEffect(2.0, anchor: .center)
+    }
+}
+
+// Beezle is a white-on-transparent silhouette. It looks fine on dark
+// backgrounds but vanishes on light ones. .colorInvert() flips white
+// pixels to black while preserving the asset's internal value
+// differences (the eye shading was being collapsed when we ran it
+// through .renderingMode(.template) + .foregroundStyle(.primary)).
+//
+// Has to live as a View extension rather than a ViewModifier struct
+// because this module's own `Content` model shadows ViewModifier's
+// associated type `Content`, which makes the modifier protocol fail
+// to resolve inside `body(content:)`.
+extension View {
+    @ViewBuilder
+    func beezleAdaptiveColor(_ scheme: ColorScheme) -> some View {
+        if scheme == .light {
+            self.colorInvert()
+        } else {
+            self
+        }
     }
 }

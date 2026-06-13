@@ -13,6 +13,7 @@ struct _04View: View {
     @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
     @StateObject var selected = SelectedConference()
     @State private var viewModel = InfoViewModel()
+    @Environment(\.colorScheme) private var beezleColorScheme
 
     var body: some View {
         NavigationStack {
@@ -26,11 +27,10 @@ struct _04View: View {
                     .multilineTextAlignment(.center)
                 
                 Image("beezle")
-                    .renderingMode(.template)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .foregroundStyle(.primary)
                     .frame(width: 140)
+                    .beezleAdaptiveColor(beezleColorScheme)
                     .frame(maxHeight: .infinity)
                 
                     NavigationLink(destination: ConferencesView()) {
