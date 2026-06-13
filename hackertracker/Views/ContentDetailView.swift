@@ -112,11 +112,15 @@ struct ContentDetailView: View {
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text(item.title)
-                        .font(.headline)
-                        .lineLimit(1)
-                        .opacity(navTitleOpacity)
+                // iPad: sidebar's section title owns the parent navbar.
+                // Skip per-item principal here to avoid title flicker.
+                if !IPadAdaptive.isIPad {
+                    ToolbarItem(placement: .principal) {
+                        Text(item.title)
+                            .font(.headline)
+                            .lineLimit(1)
+                            .opacity(navTitleOpacity)
+                    }
                 }
             }
             .onAppear() {

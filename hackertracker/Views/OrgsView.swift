@@ -22,6 +22,9 @@ struct OrgsView: View {
     @State private var isSearching = false
     @FocusState private var searchFocused: Bool
     @State private var jumpTarget: String?
+    /// iPad-only: selected org for the detail column.
+    /// iPad-only: selected org id for the detail column.
+    @State private var ipadSelectedOrgId: String?
 
     // iPad: GridItem(.adaptive) yields 2 columns on every iPhone width
     // and 4-6 columns on iPad portrait/landscape automatically.
@@ -86,7 +89,8 @@ struct OrgsView: View {
         .menuOrder(.fixed)
     }
 
-    var body: some View {
+    @ViewBuilder
+    private var orgSidebar: some View {
         VStack(spacing: 0) {
             inlineSearchBar
             ScrollView {
@@ -107,9 +111,7 @@ struct OrgsView: View {
                         Color.clear.frame(height: 1).id("__top")
                         LazyVGrid(columns: gridItemLayout, spacing: 20) {
                             ForEach(filteredOrgs, id: \.id) { org in
-                                NavigationLink(destination: OrgView(org: org, tabSelection: $tabSelection)) {
-                                    orgRow(org: org, theme: theme)
-                                }
+                                OrgCell(org: org, theme: theme, tabSelection: $tabSelection)
                             }
                         }
                         Color.clear.frame(height: 1).id("__bottom")
@@ -150,6 +152,54 @@ struct OrgsView: View {
             }
         }
         .analyticsScreen(name: "OrgsView")
+    }
+
+    var body: some View {
+        if IPadAdaptive.isIPad {
+            HStack(spacing: 0) {
+                orgSidebar
+                    .frame(width: 420)
+                Divider()
+                Group {
+                    if let id = ipadSelectedOrgId,
+                       let org = viewModel.orgs.first(where: { $0.id == id }) {
+                        OrgView(org: org, tabSelection: $tabSelection)
+                            .id(id)
+                    } else {
+                        ContentUnavailableView(
+                            "Select an Organization",
+                            systemImage: "building.2",
+                            description: Text("Tap an item in the list to view details.")
+                        )
+                    }
+                }
+            }
+            .environment(\.iPadOrgSelection, $ipadSelectedOrgId)
+        } else {
+            orgSidebar
+        }
+    }
+}
+
+struct OrgCell: View {
+    let org: Organization
+    let theme: Theme
+    @Binding var tabSelection: Int
+    @Environment(\.iPadOrgSelection) private var iPadOrgSelection
+
+    var body: some View {
+        if let sel = iPadOrgSelection {
+            Button {
+                sel.wrappedValue = org.id
+            } label: {
+                orgRow(org: org, theme: theme)
+            }
+            .buttonStyle(.plain)
+        } else {
+            NavigationLink(destination: OrgView(org: org, tabSelection: $tabSelection)) {
+                orgRow(org: org, theme: theme)
+            }
+        }
     }
 }
 

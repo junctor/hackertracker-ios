@@ -43,6 +43,10 @@ struct EventsView: View {
   @State private var showEmergency = false
   @State private var showShareBookmarks = false
   @State private var showConflictAlertPopup = false
+  /// iPad-only: identifies the content currently shown in the detail column
+  /// of the schedule's NavigationSplitView. Nil = placeholder. Has no effect
+  /// on iPhone (NavigationSplitView is bypassed there).
+  @State private var ipadSelectedContentId: Int?
 
   /// Inline search bar shown only when `isSearching` is true.
   @ViewBuilder private var inlineSearchBar: some View {
@@ -135,136 +139,171 @@ struct EventsView: View {
       .accessibilityLabel(isSearching ? "Close search" : "Search schedule")
   }
 
+  /// Schedule body content used inside both the iPhone NavigationStack
+  /// and the iPad NavigationSplitView sidebar. Contains the emergency
+  /// banner, inline-search bar, EventScrollView, floating Filter +
+  /// Jump-to-Day buttons, and the full toolbar.
+  @ViewBuilder
+  private var scheduleSidebar: some View {
+    Group {
+      if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
+        NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
+          CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details")
+            .frame(height: 40)
+            .cornerRadius(0)
+        }
+      }
+      VStack(spacing: 0) {
+        inlineSearchBar
+        EventScrollView(
+          events:
+            viewModel.events
+            .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
+            .search(text: debouncedSearch, speakers: viewModel.speakers)
+            .eventDayGroup(
+              showLocaltime: showLocaltime, conference: viewModel.conference
+            ),
+          dayTag: eventDay,
+          showPastEvents: showPastEvents, includeNav: includeNav,
+          showLocaltime: $showLocaltime
+        )
+      }
+      .overlay(alignment: .bottom) {
+        HStack {
+          Button {
+            showFilters.toggle()
+          } label: {
+            Image(systemName: filters.filters.isEmpty
+                  ? "line.3.horizontal.decrease.circle"
+                  : "line.3.horizontal.decrease.circle.fill")
+              .font(.title2)
+              .frame(width: 48, height: 48)
+              .background(.regularMaterial, in: Circle())
+          }
+          .tint(.primary)
+          .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
+
+          Spacer()
+
+          jumpToDayMenu
+            .font(.title2)
+            .foregroundStyle(.primary)
+            .frame(width: 48, height: 48)
+            .background(.regularMaterial, in: Circle())
+            .accessibilityLabel("Jump to day")
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 12)
+      }
+      .navigationTitle(viewModel.conference?.name ?? "Schedule")
+      .navigationBarTitleDisplayMode(.inline)
+      .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+      .toolbarBackground(.visible, for: .navigationBar)
+      .toolbar {
+        ToolbarItemGroup(placement: .navigationBarLeading) {
+          Menu {
+            NavigationLink(destination: ShareBookmarksView()) {
+              Label("Share Schedule", systemImage: "qrcode")
+            }
+            Toggle(isOn: $showLocaltime) {
+              Label("Display Localtime", systemImage: "clock")
+            }
+            .onChange(of: showLocaltime) { _, value in
+              Log.ui.debug("EventsView showLocaltime=\(value)")
+              if showLocaltime {
+                dfu.update(tz: TimeZone.current)
+              } else {
+                ClockService.apply(conference: viewModel.conference, showLocaltime: false)
+              }
+            }
+            Toggle(isOn: $show24hourtime) {
+              Label("Display 24 Hour Time", systemImage: "calendar.badge.clock")
+            }
+            .onChange(of: show24hourtime) { _, value in
+              Log.ui.debug("EventsView show24hourtime=\(value)")
+            }
+            Toggle(isOn: $showPastEvents) {
+              Label("Show Past Events", systemImage: "calendar")
+            }
+            .onChange(of: showPastEvents) { _, value in
+              Log.ui.debug("EventsView showPastEvents=\(value)")
+              viewModel.showPastEvents = value
+              toTop.val = true
+            }
+            .toggleStyle(.automatic)
+          } label: {
+            Image(systemName: "ellipsis")
+          }
+          .accessibilityLabel("Schedule options")
+          if showConflictAlert, viewModel.bookmarkConflicts(bookmarks: bookmarks.map({Int($0.id)})) {
+            Button {
+              showConflictAlertPopup = true
+            } label: {
+              Image(systemName: "exclamationmark.triangle")
+                .foregroundColor(ThemeColors.red)
+            }
+            .accessibilityLabel("Bookmark schedule conflict")
+            .accessibilityHint("Shows conflicting bookmarked events")
+          }
+        }
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
+          searchToggleButton
+        }
+      }
+      .task(id: searchText) {
+        try? await Task.sleep(nanoseconds: 250_000_000)
+        if !Task.isCancelled { debouncedSearch = searchText }
+      }
+    }
+  }
+
   var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
-    if includeNav {
-      NavigationStack {
-        if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
-              NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
-                  CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details")
-                      .frame(height: 40)
-                      .cornerRadius(0)
-              }
+    if IPadAdaptive.isIPad && includeNav {
+      // iPad: HStack-based custom split layout. Two sibling NavigationStacks
+      // align naturally at the top -- no iOS 18 NavigationSplitView
+      // floating-card sidebar styling, no Y misalignment between columns.
+      // Each NavigationStack hosts its own toolbar so chrome stays consistent.
+      HStack(spacing: 0) {
+        NavigationStack {
+          scheduleSidebar
         }
-          
-        VStack(spacing: 0) {
-          inlineSearchBar
-          EventScrollView(
-            events:
-              viewModel.events
-              .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
-              .search(text: debouncedSearch, speakers: viewModel.speakers)
-              .eventDayGroup(
-                  showLocaltime: showLocaltime, conference: viewModel.conference
-              ),
-            dayTag: eventDay,
-            showPastEvents: showPastEvents, includeNav: includeNav,
-            showLocaltime: $showLocaltime
-          )
-        }
-        // Polish: floating bottom action buttons. Filter at bottom-left,
-        // Jump-to-Day at bottom-right. Search stays in the top-right
-        // toolbar. Material matches the frosted nav bar / tab bar style.
-        .overlay(alignment: .bottom) {
-            HStack {
-                Button {
-                    showFilters.toggle()
-                } label: {
-                    Image(systemName: filters.filters.isEmpty
-                          ? "line.3.horizontal.decrease.circle"
-                          : "line.3.horizontal.decrease.circle.fill")
-                        .font(.title2)
-                        .frame(width: 48, height: 48)
-                        .background(.regularMaterial, in: Circle())
-                }
-                // Override the system accent-blue Button tint so this circle
-                // matches the white-in-dark-mode menu next to it.
-                .tint(.primary)
-                .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
-
-                Spacer()
-
-                jumpToDayMenu
-                    .font(.title2)
-                    .foregroundStyle(.primary)
-                    .frame(width: 48, height: 48)
-                    .background(.regularMaterial, in: Circle())
-                    .accessibilityLabel("Jump to day")
-            }
-            .padding(.horizontal, 20)
-            .padding(.bottom, 12)
-        }
-        .navigationTitle(viewModel.conference?.name ?? "Schedule")
-        // Phase 6 polish: compact (inline) title so the nav bar is a single
-        // tight row instead of consuming a third of the screen with the
-        // default `.large` display + frosted band.
-        .navigationBarTitleDisplayMode(.inline)
-        // Phase 6 polish: frosted nav bar so the title row reads cleanly when
-        // content scrolls underneath instead of bleeding through transparent.
-        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .toolbar {
-          ToolbarItemGroup(placement: .navigationBarLeading) {
-            Menu {
-                NavigationLink(destination: ShareBookmarksView()) {
-                    Label("Share Schedule", systemImage: "qrcode")
-                }
-              Toggle(isOn: $showLocaltime) {
-                Label("Display Localtime", systemImage: "clock")
-              }
-              .onChange(of: showLocaltime) { _, value in 
-                Log.ui.debug("EventsView showLocaltime=\(value)")
-                // viewModel.showLocaltime = value
-                if showLocaltime {
-                  dfu.update(tz: TimeZone.current)
-                } else {
-                  ClockService.apply(conference: viewModel.conference, showLocaltime: false)
-                }
-              }
-                Toggle(isOn: $show24hourtime) {
-                  Label("Display 24 Hour Time", systemImage: "calendar.badge.clock")
-                }
-                .onChange(of: show24hourtime) { _, value in 
-                  Log.ui.debug("EventsView show24hourtime=\(value)")
-                }
-              Toggle(isOn: $showPastEvents) {
-                Label("Show Past Events", systemImage: "calendar")
-              }
-              .onChange(of: showPastEvents) { _, value in 
-                Log.ui.debug("EventsView showPastEvents=\(value)")
-                viewModel.showPastEvents = value
-                  toTop.val = true
-              }
-              .toggleStyle(.automatic)
-            } label: {
-              Image(systemName: "ellipsis")
-            }
-            .accessibilityLabel("Schedule options")
-              if showConflictAlert, viewModel.bookmarkConflicts(bookmarks: bookmarks.map({Int($0.id)})) {
-                  Button {
-                      showConflictAlertPopup = true
-                  } label: {
-                      Image(systemName: "exclamationmark.triangle")
-                          .foregroundColor(ThemeColors.red)
-                  }
-                  .accessibilityLabel("Bookmark schedule conflict")
-                  .accessibilityHint("Shows conflicting bookmarked events")
-              }
+        .frame(width: 420)
+        Divider()
+        NavigationStack {
+          if let id = ipadSelectedContentId {
+            ContentDetailView(contentId: id)
+              .id(id)
+          } else {
+            ContentUnavailableView(
+              "Select an Event",
+              systemImage: "calendar",
+              description: Text("Tap an event in the schedule to view details.")
+            )
           }
-            ToolbarItemGroup(placement: .navigationBarTrailing) {
-                // Polish: Filter and Jump-to-Day now live in floating bottom
-                // buttons (see .overlay on the VStack below). Trailing toolbar
-                // only carries Search.
-                searchToggleButton
-            }
         }
-        .task(id: searchText) {
-            // Phase 2: 250ms debounce so filter+search+group only runs once per pause.
-            try? await Task.sleep(nanoseconds: 250_000_000)
-            if !Task.isCancelled { debouncedSearch = searchText }
+      }
+      .environment(\.iPadContentSelection, $ipadSelectedContentId)
+      .sheet(isPresented: $showFilters) {
+        EventFilters(
+          tagtypes: viewModel.tagtypes.filter {
+            $0.category == "content" && $0.isBrowsable == true
+          }, showFilters: $showFilters
+        )
+      }
+      .alert("Schedule Conflicts", isPresented: $showConflictAlertPopup) {
+        Button("OK", role: .cancel) { }
+        Button("Hide") {
+          showConflictAlert = false
         }
+      } message: {
+        Text("Bookmarked events have conflicting times")
+      }
+    } else if includeNav {
+      NavigationStack {
+        scheduleSidebar
       }
       .sheet(isPresented: $showFilters) {
         EventFilters(
@@ -274,13 +313,12 @@ struct EventsView: View {
         )
       }
       .alert("Schedule Conflicts", isPresented: $showConflictAlertPopup) {
-          Button("OK", role: .cancel) {
-          }
-          Button("Hide") {
-              showConflictAlert = false
-          }
+        Button("OK", role: .cancel) { }
+        Button("Hide") {
+          showConflictAlert = false
+        }
       } message: {
-          Text("Bookmarked events have conflicting times")
+        Text("Bookmarked events have conflicting times")
       }
       /*.sheet(isPresented: $showShareBookmarks) {
           QRCodeView(qrString: "hackertracker://\(viewModel.conference.code)/s?ids=\(bookmarks.map(\.id).joined(separator: ","))")
@@ -535,6 +573,9 @@ struct EventData: View {
   let events: [Event]
   // let bookmarks: [Int32]
   let showPastEvents: Bool
+  /// iPad split-view selection: when present, row taps set the binding
+  /// instead of pushing a NavigationLink. iPhone passes no env value.
+  @Environment(\.iPadContentSelection) private var iPadContentSelection
 
   var body: some View {
       Section(header: Text(weekday.uppercased())
@@ -553,11 +594,23 @@ struct EventData: View {
           }, id: \.id
         ) { event in
           if showPastEvents || event.endTimestamp >= Date() {
+            if let sel = iPadContentSelection {
+              Button {
+                sel.wrappedValue = event.contentId
+              } label: {
+                EventCell(event: event, showDay: false)
+                  .id(event.id)
+                  .foregroundColor(.primary)
+                  .padding(1)
+              }
+              .buttonStyle(.plain)
+            } else {
               NavigationLink(destination: ContentDetailView(contentId:event.contentId)) {
-              EventCell(event: event, showDay: false)
-                      .id(event.id)
-                      .foregroundColor(.primary)
-                      .padding(1)
+                EventCell(event: event, showDay: false)
+                  .id(event.id)
+                  .foregroundColor(.primary)
+                  .padding(1)
+              }
             }
           }
         }

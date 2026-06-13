@@ -17,6 +17,8 @@ struct SpeakersView: View {
     @FocusState private var searchFocused: Bool
     @State private var scrollToGroup: String.Element?
     @State private var lastJumpedGroup: String.Element?
+    /// iPad-only: identifies the speaker currently shown in the detail column.
+    @State private var ipadSelectedSpeakerId: Int?
 
     private var grouped: [(key: String.Element, value: [Speaker])] {
         Dictionary(grouping: speakers.search(text: searchText),
@@ -104,7 +106,8 @@ struct SpeakersView: View {
         .menuOrder(.fixed)
     }
 
-    var body: some View {
+    @ViewBuilder
+    private var speakerSidebar: some View {
         VStack(spacing: 0) {
             inlineSearchBar
             ScrollView {
@@ -134,7 +137,6 @@ struct SpeakersView: View {
                             DispatchQueue.main.async { scrollToGroup = nil }
                         }
                     }
-                    // iPad: readable centered column for rows.
                     .iPadReadableContent()
                 }
             }
@@ -168,12 +170,39 @@ struct SpeakersView: View {
         }
         .analyticsScreen(name: "SpeakersView")
     }
+
+    var body: some View {
+        if IPadAdaptive.isIPad {
+            HStack(spacing: 0) {
+                speakerSidebar
+                    .frame(width: 380)
+                Divider()
+                Group {
+                    if let id = ipadSelectedSpeakerId {
+                        SpeakerDetailView(id: id)
+                            .id(id)
+                    } else {
+                        ContentUnavailableView(
+                            "Select a Speaker",
+                            systemImage: "person.2",
+                            description: Text("Tap a speaker in the list to view their details.")
+                        )
+                    }
+                }
+            }
+            .environment(\.iPadSpeakerSelection, $ipadSelectedSpeakerId)
+        } else {
+            speakerSidebar
+        }
+    }
 }
 
 struct SpeakerData: View {
     let char: String.Element
     let speakers: [Speaker]
     @EnvironmentObject var theme: Theme
+    /// iPad split-view: row taps update detail column instead of pushing.
+    @Environment(\.iPadSpeakerSelection) private var iPadSpeakerSelection
 
     var body: some View {
         Section(header: Text(String(char.uppercased()))
@@ -184,8 +213,17 @@ struct SpeakerData: View {
             .background(.ultraThinMaterial)
         ) {
             ForEach(speakers, id: \.id) { speaker in
-                NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
-                    SpeakerRow(speaker: speaker, themeColor: theme.carousel())
+                if let sel = iPadSpeakerSelection {
+                    Button {
+                        sel.wrappedValue = speaker.id
+                    } label: {
+                        SpeakerRow(speaker: speaker, themeColor: theme.carousel())
+                    }
+                    .buttonStyle(.plain)
+                } else {
+                    NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
+                        SpeakerRow(speaker: speaker, themeColor: theme.carousel())
+                    }
                 }
             }
         }
