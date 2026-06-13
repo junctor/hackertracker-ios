@@ -379,20 +379,18 @@ struct MapView: View {
                 description: Text("Maps for \(conference.name) haven't been published. Pull to refresh, or check back closer to the event.")
             )
             // 40pt beezle, light-mode safe via .beezleAdaptiveColor.
-            // While emptyStateBounceUp is true the bob+tilt mirrors
-            // the MapPage downloading placeholder so both loading
-            // states feel like the same character.
+            // Bounce is driven via withAnimation(... .repeatForever ...)
+            // on tap rather than a permanent .animation modifier — the
+            // modifier form picks up the bool flip back to false too and
+            // keeps animating, so the bob never actually stops. The
+            // explicit start/stop transactions in startEmptyStateBounce
+            // settle cleanly after the 3s window.
             Image("beezle")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 40, height: 40)
                 .beezleAdaptiveColor(mapViewColorScheme)
-                .offset(y: emptyStateBounceUp ? -8 : 8)
-                .rotationEffect(.degrees(emptyStateBounceUp ? 4 : -4))
-                .animation(
-                    .easeInOut(duration: 1.4).repeatForever(autoreverses: true),
-                    value: emptyStateBounceUp
-                )
+                .offset(y: emptyStateBounceUp ? -10 : 0)
                 .accessibilityHidden(true)
             Button {
                 viewModel.fetchData(code: conference.code)
@@ -405,18 +403,23 @@ struct MapView: View {
         .frame(maxHeight: .infinity)
     }
 
-    /// Kick off (or restart) a 3-second bob on the empty-state beezle.
-    /// The .easeInOut(duration: 1.4).repeatForever animation modifier on
-    /// the Image picks up the bool flip and oscillates offset + rotation
-    /// until we flip it back. Repeated taps cancel the previous timer
-    /// and start a fresh 3s window so the bob never gets cut short.
+    /// Kick off (or restart) a 3-second spring bounce on the empty-state
+    /// beezle. The explicit withAnimation(...repeatForever...) starts the
+    /// oscillation in one transaction, and a follow-up withAnimation(...)
+    /// without repeatForever after 3s cleanly settles the offset back to
+    /// 0. Repeated taps cancel the previous timer and start a fresh 3s
+    /// window so the bounce never gets clipped mid-cycle.
     private func startEmptyStateBounce() {
         emptyStateBounceTask?.cancel()
-        emptyStateBounceUp = true
+        withAnimation(.spring(response: 0.32, dampingFraction: 0.45).repeatForever(autoreverses: true)) {
+            emptyStateBounceUp = true
+        }
         emptyStateBounceTask = Task { @MainActor in
             try? await Task.sleep(nanoseconds: 3_000_000_000)
             guard !Task.isCancelled else { return }
-            emptyStateBounceUp = false
+            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                emptyStateBounceUp = false
+            }
         }
     }
 }
