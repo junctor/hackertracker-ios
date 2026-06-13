@@ -33,6 +33,7 @@
 		5D4DC6FD2A783B7400264955 /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4DC6FC2A783B7400264955 /* Menu.swift */; };
 		5D4F07B928598AC8006772A2 /* 404View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4F07B828598AC8006772A2 /* 404View.swift */; };
 		5D642D232A4388D50064492D /* PDFView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D222A4388D50064492D /* PDFView.swift */; };
+		5DC0DE000000000000020002 /* SVGMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000020001 /* SVGMapView.swift */; };
 		5D642D252A438FB50064492D /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D242A438FB50064492D /* LocationView.swift */; };
 		5D642D272A43AEA00064492D /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D262A43AEA00064492D /* Product.swift */; };
 		5D642D292A44A1960064492D /* ProductsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D282A44A1960064492D /* ProductsView.swift */; };
@@ -155,6 +156,7 @@
 		5D4DC6FC2A783B7400264955 /* Menu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Menu.swift; sourceTree = "<group>"; };
 		5D4F07B828598AC8006772A2 /* 404View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = 404View.swift; sourceTree = "<group>"; };
 		5D642D222A4388D50064492D /* PDFView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFView.swift; sourceTree = "<group>"; };
+		5DC0DE000000000000020001 /* SVGMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SVGMapView.swift; sourceTree = "<group>"; };
 		5D642D242A438FB50064492D /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		5D642D262A43AEA00064492D /* Product.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
 		5D642D282A44A1960064492D /* ProductsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductsView.swift; sourceTree = "<group>"; };
@@ -447,6 +449,7 @@
 				5D9681192C5D948100D246B0 /* NewsUtility.swift */,
 				5DF82B252A5F3B29001395C7 /* NotificationUtility.swift */,
 				5D642D222A4388D50064492D /* PDFView.swift */,
+				5DC0DE000000000000020001 /* SVGMapView.swift */,
 				3C0E05CE2A53E70200E7154F /* Searchable.swift */,
 				3C07C208285C6F7600CC9469 /* Theme.swift */,
 			);
@@ -698,6 +701,7 @@
 				5D642D442A59E8EE0064492D /* QRCodeView.swift in Sources */,
 				5DF51ACB28514F70007BCB83 /* EventType.swift in Sources */,
 				5D642D232A4388D50064492D /* PDFView.swift in Sources */,
+				5DC0DE000000000000020002 /* SVGMapView.swift in Sources */,
 				5DF51ABC2851203F007BCB83 /* Document.swift in Sources */,
 				5DDF035E2C28B4F10087BA59 /* ContentDetailView.swift in Sources */,
 				5D9681162C5946E000D246B0 /* FeedbackUtility.swift in Sources */,

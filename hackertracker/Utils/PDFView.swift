@@ -8,53 +8,55 @@
 import PDFKit
 import SwiftUI
 
-/// Command sink the MapView attaches to so its toolbar zoom/search buttons
-/// can drive the focused page's underlying `PDFKit.PDFView`. Held weakly
-/// so swapping the focused page (a swipe) doesn't keep the previous view
+/// Command sink the MapView attaches to so toolbar/floating-pill
+/// commands hit the right backing view (PDF or SVG WebView). Held
+/// weakly so swapping the focused page doesn't keep the previous view
 /// alive past its dismantle.
+///
+/// The controller is intentionally simple: it dispatches to whichever
+/// target is non-nil. MapPage sets the appropriate ref when it becomes
+/// the focused page (and clears its peers via reassignment).
 @MainActor
-final class PDFController: ObservableObject {
-    weak var pdfView: PDFKit.PDFView?
+final class MapController: ObservableObject {
+    weak var pdfTarget: PDFKit.PDFView?
+    weak var svgTarget: SVGMapWebContainer?
+
+    var canSearch: Bool { svgTarget != nil }
 
     func zoomIn() {
-        guard let v = pdfView else { return }
+        if let svg = svgTarget { svg.zoomIn(); return }
+        guard let v = pdfTarget else { return }
         v.scaleFactor = min(v.scaleFactor * 1.25, v.maxScaleFactor)
     }
 
     func zoomOut() {
-        guard let v = pdfView else { return }
+        if let svg = svgTarget { svg.zoomOut(); return }
+        guard let v = pdfTarget else { return }
         v.scaleFactor = max(v.scaleFactor / 1.25, v.minScaleFactor)
     }
 
     func resetZoom() {
-        guard let v = pdfView else { return }
+        if let svg = svgTarget { svg.resetZoom(); return }
+        guard let v = pdfTarget else { return }
         v.scaleFactor = v.scaleFactorForSizeToFit
     }
 
-    /// Find the first occurrence of `query` in the focused PDF and scroll
-    /// to it. Returns `true` when a match was found. Empty queries clear
-    /// the highlight and return `false`.
-    @discardableResult
-    func find(_ query: String) -> Bool {
-        guard let v = pdfView else { return false }
-        guard let doc = v.document, !query.trimmingCharacters(in: .whitespaces).isEmpty else {
-            v.clearSelection()
-            return false
-        }
-        let matches = doc.findString(query, withOptions: [.caseInsensitive])
-        guard let first = matches.first else {
-            v.clearSelection()
-            return false
-        }
-        v.setCurrentSelection(first, animate: true)
-        v.go(to: first)
-        return true
+    /// SVG-only. Returns the match count for the focused page.
+    /// Returns 0 when there's no SVG target (PDF doesn't expose search).
+    func search(_ query: String) async -> Int {
+        guard let svg = svgTarget else { return 0 }
+        let res = await svg.search(query)
+        return res.matches
     }
 
     func clearSearch() {
-        pdfView?.clearSelection()
+        Task { _ = await svgTarget?.search("") }
     }
 }
+
+// Back-compat alias so we don't have to rename every PDFController
+// reference in views in this pass.
+typealias PDFController = MapController
 
 /// SwiftUI wrapper around `PDFKit.PDFView`.
 ///
@@ -98,7 +100,8 @@ struct PDFView: UIViewRepresentable {
         view.minScaleFactor = 0.1
         configure(view, with: url)
         if isFocused {
-            controller?.pdfView = view
+            controller?.pdfTarget = view
+            controller?.svgTarget = nil
         }
         return view
     }
@@ -111,7 +114,8 @@ struct PDFView: UIViewRepresentable {
             configure(pdfView, with: url)
         }
         if isFocused {
-            controller?.pdfView = pdfView
+            controller?.pdfTarget = pdfView
+            controller?.svgTarget = nil
         }
     }
 

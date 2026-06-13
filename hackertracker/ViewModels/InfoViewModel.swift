@@ -268,32 +268,41 @@ final class InfoViewModel {
                     let fileManager = FileManager.default
                     let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
                     
+                    // Inline helper: download a single PDF/SVG asset for
+                    // a map. Same on-disk layout as before — files land at
+                    // <docs>/<code>/<lastPathComponent>.
+                    let downloadAsset: (String) -> Void = { assetURLString in
+                        guard let url = URL(string: assetURLString) else { return }
+                        let path = "\(conference.code)/\(url.lastPathComponent)"
+                        let mLocal = docDir.appendingPathComponent(path)
+                        if !fileManager.fileExists(atPath: mLocal.deletingLastPathComponent().path) {
+                            do {
+                                try fileManager.createDirectory(at: mLocal.deletingLastPathComponent(), withIntermediateDirectories: true)
+                            } catch {
+                                Log.network.error("map dir create failed: \(error.localizedDescription, privacy: .public)")
+                                CrashReport.record(error, context: ["op": "createMapDir", "path": path])
+                                return
+                            }
+                        }
+                        if fileManager.fileExists(atPath: mLocal.path) {
+                            NSLog("InfoViewModel: (\(conference.code): Map asset (\(path)) already exists")
+                        } else {
+                            self.downloadFileCompletionHandler(url: url, destinationUrl: mLocal) { destinationUrl, error in
+                                if let durl = destinationUrl {
+                                    NSLog("Finished downloading: \(durl)")
+                                } else {
+                                    Log.firestore.error("map storage error: \(String(describing: error), privacy: .public)")
+                                }
+                            }
+                        }
+                    }
                     for map in maps {
-                        if let url = URL(string: map.url) {
-                            let path = "\(conference.code)/\(url.lastPathComponent)"
-                            let mLocal = docDir.appendingPathComponent(path)
-                            if !fileManager.fileExists(atPath: mLocal.deletingLastPathComponent().path) {
-                                do {
-                                    try fileManager.createDirectory(at: mLocal.deletingLastPathComponent(), withIntermediateDirectories: true)
-                                } catch {
-                                    Log.network.error("map dir create failed: \(error.localizedDescription, privacy: .public)")
-                                    CrashReport.record(error, context: ["op": "createMapDir", "path": path])
-                                    continue
-                                }
-                            }
-                            
-                            if fileManager.fileExists(atPath: mLocal.path) {
-                                // Add logic to check md5 hash and re-update if it has changed
-                                NSLog("InfoViewModel: (\(conference.code): Map file (\(path)) already exists")
-                            } else {
-                                self.downloadFileCompletionHandler(url: url, destinationUrl: mLocal) { (destinationUrl, error) in
-                                    if let durl = destinationUrl {
-                                        NSLog("Finished downloading: \(durl)")
-                                    } else {
-                                        Log.firestore.error("map storage error: \(String(describing: error), privacy: .public)")
-                                    }
-                                }
-                            }
+                        downloadAsset(map.url)
+                        // When the conference also publishes a searchable
+                        // vector version, fetch it too. MapView prefers SVG
+                        // when present; the PDF stays for share/export.
+                        if let svg = map.svgUrl, !svg.isEmpty {
+                            downloadAsset(svg)
                         }
                     }
                 }

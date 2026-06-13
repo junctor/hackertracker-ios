@@ -15,21 +15,24 @@ struct MapView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
 
-    /// Current map's position in the sorted list. Bound to the TabView
-    /// selection so the toolbar (title, share, zoom, search) always
-    /// reflects the visible page. Persisted per conference so reopening
-    /// the tab returns to the user's last spot.
     @State private var currentIndex: Int = 0
-    /// Per-conference last-viewed index (#4). Conferences ship different
-    /// map sets, so we key by conference code rather than a single global.
     @AppStorage("lastMapIndex") private var storedIndexBlob: String = ""
 
-    /// (#1, #7) Command sink for zoom/search. Bound to the focused map
-    /// page so swipes hand off control automatically.
-    @StateObject private var pdfController = PDFController()
+    /// Command sink for zoom + search. Bound to the focused map page so
+    /// swipes hand off control automatically.
+    @StateObject private var pdfController = MapController()
 
-    /// (#2) Share sheet for the active PDF file.
+    /// (#2) Share sheet for the active PDF file. Share always points at
+    /// the PDF (better for printing / external apps) even when the screen
+    /// is rendering the SVG version.
     @State private var shareURL: URL?
+
+    /// Search UI state. Visible only when the focused page has an SVG
+    /// loaded (`pdfController.canSearch`).
+    @State private var isSearching: Bool = false
+    @State private var searchText: String = ""
+    @State private var searchMatches: Int = 0
+    @FocusState private var searchFocused: Bool
 
     var body: some View {
         NavigationStack {
@@ -49,11 +52,11 @@ struct MapView: View {
         .analyticsScreen(name: "MapView")
     }
 
-    /// Floating zoom control in the bottom-leading corner. The three
-    /// icons (In / Out / Reset) share a single rounded-rect Material
-    /// pill so the affordance reads as one cohesive control instead
-    /// of three disconnected circles. `.buttonStyle(.plain)` keeps
-    /// SwiftUI from tinting the icons with the app accent color (blue).
+    /// Floating zoom pill (In / Out / Reset) overlaid in the bottom-leading
+    /// corner. .fixedSize() keeps it from stretching across the screen
+    /// (Divider() inside a VStack defaults to filling the width).
+    /// .buttonStyle(.plain) keeps SwiftUI from tinting the SF Symbols with
+    /// the app accent color.
     @ViewBuilder private var zoomFloatingControls: some View {
         if currentMap != nil {
             VStack(spacing: 0) {
@@ -69,10 +72,7 @@ struct MapView: View {
                     pdfController.resetZoom()
                 }
             }
-            .fixedSize()  // Divider() inside a VStack expands to fill
-                          // the available width, which made the pill
-                          // span the whole screen. fixedSize collapses
-                          // it back to the natural width of the icons.
+            .fixedSize()
             .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 22))
             .overlay(
                 RoundedRectangle(cornerRadius: 22)
@@ -102,6 +102,7 @@ struct MapView: View {
             emergencyBanner
             if let con = viewModel.conference {
                 if let maps = sortedMaps, !maps.isEmpty {
+                    if isSearching && pdfController.canSearch { searchBar }
                     GeometryReader { proxy in
                         if useTwoUpLayout(geometry: proxy) {
                             twoUpLayout(maps: maps)
@@ -146,8 +147,6 @@ struct MapView: View {
         }
     }
 
-    /// Default paged layout (iPhone, iPad portrait). One full-width PDF
-    /// per swipe page.
     @ViewBuilder private func pagedLayout(maps: [Map]) -> some View {
         TabView(selection: $currentIndex) {
             ForEach(Array(maps.enumerated()), id: \.element.id) { (index, map) in
@@ -162,16 +161,15 @@ struct MapView: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .always))
         .indexViewStyle(.page(backgroundDisplayMode: .always))
-        .onAppear { restoreIndex(maps: maps) }
+        .onAppear { restoreIndex(maps: maps); applyPendingSearch() }
         .onChange(of: currentIndex) { _, new in
             persistIndex(new)
             prewarmAdjacent(maps: maps, around: new)
+            applyPendingSearch()
         }
     }
 
-    /// (#6) iPad landscape: render the current map and its successor side
-    /// by side. Stepper buttons advance the pair so the layout reads as
-    /// a two-page spread.
+    /// iPad landscape: render currentIndex and currentIndex+1 side by side.
     @ViewBuilder private func twoUpLayout(maps: [Map]) -> some View {
         VStack(spacing: 8) {
             HStack(spacing: 8) {
@@ -214,10 +212,11 @@ struct MapView: View {
             }
             .padding(.horizontal, 12)
         }
-        .onAppear { restoreIndex(maps: maps) }
+        .onAppear { restoreIndex(maps: maps); applyPendingSearch() }
         .onChange(of: currentIndex) { _, new in
             persistIndex(new)
             prewarmAdjacent(maps: maps, around: new)
+            applyPendingSearch()
         }
     }
 
@@ -229,26 +228,98 @@ struct MapView: View {
     // MARK: - Toolbar
 
     @ToolbarContentBuilder private var toolbarItems: some ToolbarContent {
-        ToolbarItemGroup(placement: .navigationBarTrailing) {
+        // Share lives on the leading side of the nav bar (always points
+        // at the PDF version, which is what users want to AirDrop / save).
+        ToolbarItemGroup(placement: .navigationBarLeading) {
             if currentMap != nil {
                 Button {
-                    if let localURL = currentMapLocalURL,
+                    if let localURL = currentMapPDFLocalURL,
                        FileManager.default.fileExists(atPath: localURL.path) {
                         shareURL = localURL
                     }
                 } label: {
                     Image(systemName: "square.and.arrow.up")
                 }
-                .accessibilityLabel("Share map")
-                .disabled(currentMapLocalURL.flatMap { FileManager.default.fileExists(atPath: $0.path) } != true)
+                .accessibilityLabel("Share map (PDF)")
+                .disabled(currentMapPDFLocalURL.flatMap { FileManager.default.fileExists(atPath: $0.path) } != true)
+            }
+        }
+        // Search lives on the trailing side, but ONLY when the focused
+        // page is rendering the SVG version (PDFs in this dataset rarely
+        // carry indexable text, so a search button on a PDF would be
+        // false advertising).
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
+            if currentMap != nil && pdfController.canSearch {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        isSearching.toggle()
+                    }
+                    if isSearching {
+                        searchFocused = true
+                    } else {
+                        searchText = ""
+                        searchMatches = 0
+                        pdfController.clearSearch()
+                    }
+                } label: {
+                    Image(systemName: isSearching ? "xmark.circle" : "magnifyingglass")
+                }
+                .accessibilityLabel(isSearching ? "Close search" : "Search map")
             }
         }
     }
 
-    // MARK: - Index persistence (#4)
+    // MARK: - Search bar (SVG-only)
 
-    /// `storedIndexBlob` packs `code1=3,code2=1` pairs so each conference
-    /// remembers its own last-viewed map without colliding.
+    @ViewBuilder private var searchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass").foregroundColor(.secondary)
+            TextField("Find on map (e.g. room number, village)", text: $searchText)
+                .focused($searchFocused)
+                .submitLabel(.search)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .onSubmit { Task { await runSearch() } }
+                .onChange(of: searchText) { _, _ in
+                    Task { await runSearch() }
+                }
+            if !searchText.isEmpty {
+                Text(searchMatches == 0 ? "no match" : "\(searchMatches) hit\(searchMatches == 1 ? "" : "s")")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+                Button {
+                    searchText = ""
+                    searchMatches = 0
+                    pdfController.clearSearch()
+                } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
+                }
+                .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.thinMaterial)
+        .cornerRadius(8)
+        .padding(.horizontal, 6)
+        .padding(.bottom, 4)
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private func runSearch() async {
+        searchMatches = await pdfController.search(searchText)
+    }
+
+    private func applyPendingSearch() {
+        guard !searchText.isEmpty else { return }
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 100_000_000)
+            await runSearch()
+        }
+    }
+
+    // MARK: - Index persistence
+
     private func decodeStoredIndex(code: String) -> Int? {
         for pair in storedIndexBlob.split(separator: ",") {
             let parts = pair.split(separator: "=", maxSplits: 1)
@@ -291,12 +362,14 @@ struct MapView: View {
         storedIndexBlob = encodedStoredIndex(code: selected.code, index: index)
     }
 
-    // MARK: - Adjacent prewarm (#5)
+    // MARK: - Prewarm
 
     private func prewarmAdjacent(maps: [Map], around index: Int) {
         for offset in [-1, 1] {
             let i = index + offset
             guard maps.indices.contains(i) else { continue }
+            // PDF prewarm only — SVG load through WKWebView is fast enough
+            // and parsing an SVG twice isn't catastrophic.
             if let url = URL(string: maps[i].url) {
                 let path = "\(selected.code)/\(url.lastPathComponent)"
                 let docDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -317,14 +390,15 @@ struct MapView: View {
         currentMap?.description ?? currentMap.map { _ in "Maps" }
     }
 
-    private var currentMapLocalURL: URL? {
+    /// Always the PDF URL (share button target).
+    private var currentMapPDFLocalURL: URL? {
         guard let m = currentMap, let url = URL(string: m.url) else { return nil }
         let path = "\(selected.code)/\(url.lastPathComponent)"
         return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent(path)
     }
 
-    // MARK: - Empty state (#9)
+    // MARK: - Empty state
 
     @ViewBuilder private func emptyState(conference: Conference) -> some View {
         VStack(spacing: 12) {
@@ -345,29 +419,48 @@ struct MapView: View {
 }
 
 /// One map page in the swipe TabView (or one cell in the iPad two-up
-/// layout). Owns the file-existence check (#8) and the per-page
-/// accessibility label (#10).
+/// layout).
+///
+/// Display rules:
+///   - If the conference published an `svg_url` AND the local file exists,
+///     render `SVGMapView` (searchable, vector, pinch-zoom).
+///   - Otherwise render the PDF via `PDFView`.
+/// The PDF download still happens regardless so the share button always
+/// has something to hand to UIActivityViewController.
 private struct MapPage: View {
     let map: Map
     let conferenceCode: String
     let isFocused: Bool
-    let controller: PDFController?
+    let controller: MapController?
 
-    @State private var fileExists: Bool = false
+    @State private var pdfExists: Bool = false
+    @State private var svgExists: Bool = false
 
-    private var localURL: URL? {
+    private var pdfLocalURL: URL? {
         guard let url = URL(string: map.url) else { return nil }
-        let path = "\(conferenceCode)/\(url.lastPathComponent)"
+        return localURL(for: url)
+    }
+
+    private var svgLocalURL: URL? {
+        guard let raw = map.svgUrl, let url = URL(string: raw) else { return nil }
+        return localURL(for: url)
+    }
+
+    private func localURL(for remote: URL) -> URL {
+        let path = "\(conferenceCode)/\(remote.lastPathComponent)"
         return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent(path)
     }
 
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            if let url = localURL, fileExists {
-                PDFView(url: url, controller: controller, isFocused: isFocused)
+            if let svg = svgLocalURL, svgExists {
+                SVGMapView(url: svg, controller: controller, isFocused: isFocused)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if localURL != nil {
+            } else if let pdf = pdfLocalURL, pdfExists {
+                PDFView(url: pdf, controller: controller, isFocused: isFocused)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if pdfLocalURL != nil || svgLocalURL != nil {
                 downloadingPlaceholder
             } else {
                 ContentUnavailableView("Invalid Map", systemImage: "questionmark.square")
@@ -386,44 +479,39 @@ private struct MapPage: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(map.description ?? "Conference map")
         .accessibilityHint("Pinch or use the zoom buttons; swipe to switch maps")
-        .task(id: localURL?.path) { refreshExists() }
+        .task(id: pdfLocalURL?.path) { refreshExists() }
+        .task(id: svgLocalURL?.path) { refreshExists() }
         .onAppear {
-            Log.ui.debug("MapView loading \(localURL?.lastPathComponent ?? "?", privacy: .public)")
+            Log.ui.debug("MapView loading pdf=\(pdfLocalURL?.lastPathComponent ?? "?", privacy: .public) svg=\(svgLocalURL?.lastPathComponent ?? "—", privacy: .public)")
         }
     }
 
     @ViewBuilder private var downloadingPlaceholder: some View {
         VStack(spacing: 12) {
-            ProgressView()
-                .scaleEffect(1.5)
+            ProgressView().scaleEffect(1.5)
             Text("Map downloading…")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .task(id: localURL?.path) { await pollForFile() }
+        .task(id: pdfLocalURL?.path) { await pollForFiles() }
     }
 
     private func refreshExists() {
-        fileExists = localURL.map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+        pdfExists = pdfLocalURL.map { FileManager.default.fileExists(atPath: $0.path) } ?? false
+        svgExists = svgLocalURL.map { FileManager.default.fileExists(atPath: $0.path) } ?? false
     }
 
-    /// (#8) Map files are downloaded by InfoViewModel on conference load.
-    /// If the user reaches MapView before that finishes, poll every
-    /// half-second for up to 30s so the placeholder swaps in once the
-    /// file arrives without forcing a manual refresh.
-    @MainActor private func pollForFile() async {
+    @MainActor private func pollForFiles() async {
         for _ in 0..<60 {
             try? await Task.sleep(nanoseconds: 500_000_000)
             refreshExists()
-            if fileExists { return }
+            if pdfExists || svgExists { return }
         }
     }
 }
 
-/// (#2) Plain UIActivityViewController wrapper so SwiftUI can present it
-/// via `.sheet(item:)`. Items are URLs to local PDF files in the
-/// per-conference cache directory.
+/// UIActivityViewController wrapper.
 struct MapShareSheet: UIViewControllerRepresentable {
     let items: [Any]
     func makeUIViewController(context: Context) -> UIActivityViewController {
@@ -432,7 +520,6 @@ struct MapShareSheet: UIViewControllerRepresentable {
     func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
 }
 
-/// Make URL `Identifiable` so `.sheet(item:)` can present it directly.
 extension URL: @retroactive Identifiable {
     public var id: String { absoluteString }
 }
