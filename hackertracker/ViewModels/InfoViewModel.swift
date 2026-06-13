@@ -271,6 +271,14 @@ final class InfoViewModel {
                     // Inline helper: download a single PDF/SVG asset for
                     // a map. Same on-disk layout as before — files land at
                     // <docs>/<code>/<lastPathComponent>.
+                    //
+                    // After a download lands (or if the file was already on
+                    // disk) we proactively warm PDFDocumentCache so the
+                    // first render of MapView is paint-only, no parse.
+                    // PDFDocument(url:) on a multi-MB floor plan can stall
+                    // the main thread for ~200-400ms; doing it here at app
+                    // launch / conference-switch time pushes that cost out
+                    // of the user's interaction path entirely.
                     let downloadAsset: (String) -> Void = { assetURLString in
                         guard let url = URL(string: assetURLString) else { return }
                         let path = "\(conference.code)/\(url.lastPathComponent)"
@@ -285,11 +293,20 @@ final class InfoViewModel {
                             }
                         }
                         if fileManager.fileExists(atPath: mLocal.path) {
-                            NSLog("InfoViewModel: (\(conference.code): Map asset (\(path)) already exists")
+                            Log.network.debug("map asset cached: \(path, privacy: .public)")
+                            if mLocal.pathExtension.lowercased() == "pdf" {
+                                PDFDocumentCache.prewarm(mLocal)
+                            }
                         } else {
                             self.downloadFileCompletionHandler(url: url, destinationUrl: mLocal) { destinationUrl, error in
                                 if let durl = destinationUrl {
-                                    NSLog("Finished downloading: \(durl)")
+                                    Log.network.debug("map asset downloaded: \(durl.lastPathComponent, privacy: .public)")
+                                    if durl.pathExtension.lowercased() == "pdf" {
+                                        // prewarm() itself dispatches to a
+                                        // background priority task; safe to
+                                        // call from URLSession's queue.
+                                        PDFDocumentCache.prewarm(durl)
+                                    }
                                 } else {
                                     Log.firestore.error("map storage error: \(String(describing: error), privacy: .public)")
                                 }
