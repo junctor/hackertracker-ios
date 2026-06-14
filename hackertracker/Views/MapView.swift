@@ -391,12 +391,13 @@ struct MapView: View {
                 .frame(width: 40, height: 40)
                 .beezleAdaptiveColor(mapViewColorScheme)
                 // Tone down to match the muted gray of
-                // ContentUnavailableView's systemImage so the two icons
-                // read as a pair when idle. While the user-triggered
-                // bounce is running we punch back to full opacity so
-                // the activity is unmistakable.
+                // ContentUnavailableView's systemImage when idle.
+                // The bounce trigger punches opacity to full via an
+                // explicit withAnimation(easeInOut) — we deliberately
+                // avoid attaching .animation(_:value:) here because that
+                // modifier was collapsing with the spring transaction
+                // and killing the .repeatForever on the offset.
                 .opacity(emptyStateBouncing ? 1.0 : 0.55)
-                .animation(.easeInOut(duration: 0.25), value: emptyStateBouncing)
                 .offset(y: emptyStateBounceUp ? -10 : 0)
                 .accessibilityHidden(true)
             Button {
@@ -418,7 +419,11 @@ struct MapView: View {
     /// window so the bounce never gets clipped mid-cycle.
     private func startEmptyStateBounce() {
         emptyStateBounceTask?.cancel()
-        emptyStateBouncing = true
+        // Crossfade opacity in its own transaction so the easeInOut on
+        // .opacity doesn't get folded into the spring transaction below.
+        withAnimation(.easeInOut(duration: 0.25)) {
+            emptyStateBouncing = true
+        }
         withAnimation(.spring(response: 0.32, dampingFraction: 0.45).repeatForever(autoreverses: true)) {
             emptyStateBounceUp = true
         }
@@ -428,7 +433,9 @@ struct MapView: View {
             withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                 emptyStateBounceUp = false
             }
-            emptyStateBouncing = false
+            withAnimation(.easeInOut(duration: 0.25)) {
+                emptyStateBouncing = false
+            }
         }
     }
 }
