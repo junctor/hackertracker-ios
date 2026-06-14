@@ -27,10 +27,29 @@ struct ContentListView: View {
 
     private func refreshNoteContentIDs() {
         let fr = NSFetchRequest<Note>(entityName: "Note")
-        fr.predicate = NSPredicate(format: "targetKind == %@", NoteKind.content.rawValue)
+        // Fetch BOTH .content notes (direct) and .event notes
+        // (indirect — reverse-map to the parent contentId so a note
+        // authored from EventDetailView also lights up the All-Content
+        // row). One fetch instead of two; partition by kind in code.
+        fr.predicate = NSPredicate(
+            format: "targetKind == %@ OR targetKind == %@",
+            NoteKind.content.rawValue, NoteKind.event.rawValue
+        )
         do {
             let rows = try viewContext.fetch(fr)
-            noteContentIDsForScope = Set(rows.map { $0.targetID })
+            var combined: Set<Int32> = []
+            for r in rows {
+                guard let kind = r.targetKind else { continue }
+                if kind == NoteKind.content.rawValue {
+                    combined.insert(r.targetID)
+                } else if kind == NoteKind.event.rawValue {
+                    // Reverse-lookup: which content does this event belong to?
+                    if let event = viewModel.events.first(where: { Int32($0.id) == r.targetID }) {
+                        combined.insert(Int32(event.contentId))
+                    }
+                }
+            }
+            noteContentIDsForScope = combined
             Log.coreData.debug("ContentListView noteContentIDsForScope count=\(noteContentIDsForScope.count, privacy: .public)")
         } catch {
             Log.coreData.error("ContentListView note fetch failed: \(error as NSError, privacy: .public)")
@@ -295,22 +314,6 @@ struct ContentData: View {
     @EnvironmentObject var theme: Theme
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
-    /// Membership set of content ids that currently have a saved
-    /// Note. Manual @State + remote-change observers rather than
-    /// @FetchRequest so CloudKit-imported rows refresh the badge.
-    @State private var noteContentIDsForScope: Set<Int32> = []
-
-    private func refreshNoteContentIDs() {
-        let fr = NSFetchRequest<Note>(entityName: "Note")
-        fr.predicate = NSPredicate(format: "targetKind == %@", NoteKind.content.rawValue)
-        do {
-            let rows = try viewContext.fetch(fr)
-            noteContentIDsForScope = Set(rows.map { $0.targetID })
-            Log.coreData.debug("ContentListView noteContentIDsForScope count=\(noteContentIDsForScope.count, privacy: .public)")
-        } catch {
-            Log.coreData.error("ContentListView note fetch failed: \(error as NSError, privacy: .public)")
-        }
-    }
     /// iPad split-view: row taps update detail column instead of pushing.
     @Environment(\.iPadContentSelection) private var iPadContentSelection
 

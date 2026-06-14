@@ -25,6 +25,9 @@ struct EventCell: View {
     /// to empty when this cell renders inside a screen that doesn't
     /// publish the value (GlobalSearchView, SharedScheduleView, etc.).
     @Environment(\.noteEventIDs) private var noteEventIDs
+    /// Mirror for content-kind notes — same talk may have been noted
+    /// from the All-Content side; the pencil should still appear here.
+    @Environment(\.noteContentIDs) private var noteContentIDs
     
 
     func bookmarkAction() {
@@ -111,7 +114,11 @@ struct EventCell: View {
                         // saved private note. Tap-through to the row's
                         // NavigationLink — the badge is purely
                         // informational, not independently interactive.
-                        if noteEventIDs.contains(Int32(event.id)) {
+                        // Pencil lights up when the event id has a
+                        // note OR when the event's contentId has a
+                        // note authored from the All-Content side.
+                        if noteEventIDs.contains(Int32(event.id))
+                            || noteContentIDs.contains(Int32(event.contentId)) {
                             Image(systemName: "square.and.pencil")
                                 .foregroundStyle(.secondary)
                                 .accessibilityLabel("Has a saved note")

@@ -43,21 +43,35 @@ struct EventsView: View {
     /// arrivals. Manual @State + dual-notification subscription is
     /// the reliable shape.
     @State private var noteEventIDsForScope: Set<Int32> = []
+    /// Mirror for .content-kind notes. Schedule cells light up the
+    /// pencil when EITHER the event id has a note OR the event's
+    /// contentId has a note authored from the All-Content side.
+    @State private var noteContentIDsForScope: Set<Int32> = []
 
     private func refreshNoteEventIDs() {
         let fr = NSFetchRequest<Note>(entityName: "Note")
-        // Schedule rows can be Firestore events OR locally-stored
-        // custom events. Include both kinds in the membership set so
-        // a note made from a custom-event detail screen also shows
-        // its pencil on the schedule.
+        // One pass over all schedule-relevant kinds. Partition into
+        // event/customEvent vs content based on each row's kind so the
+        // cell can do an OR check on the env values it reads.
         fr.predicate = NSPredicate(
-            format: "targetKind == %@ OR targetKind == %@",
-            NoteKind.event.rawValue, NoteKind.customEvent.rawValue
+            format: "targetKind == %@ OR targetKind == %@ OR targetKind == %@",
+            NoteKind.event.rawValue, NoteKind.customEvent.rawValue, NoteKind.content.rawValue
         )
         do {
             let rows = try viewContext.fetch(fr)
-            noteEventIDsForScope = Set(rows.map { $0.targetID })
-            Log.coreData.debug("EventsView noteEventIDsForScope count=\(noteEventIDsForScope.count, privacy: .public)")
+            var events: Set<Int32> = []
+            var contents: Set<Int32> = []
+            for r in rows {
+                guard let kind = r.targetKind else { continue }
+                if kind == NoteKind.content.rawValue {
+                    contents.insert(r.targetID)
+                } else {
+                    events.insert(r.targetID)
+                }
+            }
+            noteEventIDsForScope = events
+            noteContentIDsForScope = contents
+            Log.coreData.debug("EventsView notes events=\(events.count, privacy: .public) contents=\(contents.count, privacy: .public)")
         } catch {
             Log.coreData.error("EventsView note fetch failed: \(error as NSError, privacy: .public)")
         }
@@ -324,6 +338,7 @@ struct EventsView: View {
         if !Task.isCancelled { debouncedSearch = searchText }
       }
       .environment(\.noteEventIDs, noteEventIDsForScope)
+      .environment(\.noteContentIDs, noteContentIDsForScope)
       .onAppear { refreshNoteEventIDs() }
       .onReceive(NotificationCenter.default.publisher(
           for: .NSManagedObjectContextDidSave
@@ -372,6 +387,7 @@ struct EventsView: View {
       .environment(\.iPadContentSelection, $ipadSelectedContentId)
       .environment(\.iPadCustomEventSelection, $ipadSelectedCustomEventId)
       .environment(\.noteEventIDs, noteEventIDsForScope)
+      .environment(\.noteContentIDs, noteContentIDsForScope)
       .onAppear { refreshNoteEventIDs() }
       .onReceive(NotificationCenter.default.publisher(
           for: .NSManagedObjectContextDidSave
