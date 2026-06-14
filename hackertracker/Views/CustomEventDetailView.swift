@@ -27,7 +27,20 @@ struct CustomEventDetailView: View {
     @State private var showingEditor: Bool = false
     @State private var showingDeleteConfirm: Bool = false
     @State private var showingShareSheet: Bool = false
+    /// Live bookmark state shared with EventDetailView / EventCellView.
+    /// Custom events bookmark under the SAME synthesized Int id that
+    /// `Event.from(custom:...)` uses, so toggling the bookmark here
+    /// makes the row pop in the Bookmarks (1337) filter too.
+    @FetchRequest(sortDescriptors: []) private var bookmarks: FetchedResults<Bookmarks>
     let dfu = DateFormatterUtility.shared
+
+    private func bookmarkInt(_ event: CustomEvent) -> Int {
+        CustomEventUtility.notificationID(for: event)
+    }
+    private func isBookmarked(_ event: CustomEvent) -> Bool {
+        let id = Int32(bookmarkInt(event))
+        return bookmarks.contains(where: { $0.id == id })
+    }
 
     init(eventID: UUID) {
         self.eventID = eventID
@@ -55,8 +68,27 @@ struct CustomEventDetailView: View {
         }
         .navigationBarTitle(Text(""), displayMode: .inline)
         .toolbar {
-            if events.first != nil {
+            if let event = events.first {
                 ToolbarItemGroup(placement: .topBarTrailing) {
+                    // Bookmark toggle. Custom events live on the
+                    // schedule unconditionally; bookmarking them is
+                    // about opting them into the Bookmarks (1337)
+                    // filter rather than visibility.
+                    Button {
+                        toggleBookmark(event)
+                    } label: {
+                        Image(systemName: isBookmarked(event) ? "bookmark.fill" : "bookmark")
+                    }
+                    .accessibilityLabel(isBookmarked(event) ? "Remove bookmark" : "Add bookmark")
+                    // One-tap notifications toggle. Goes through
+                    // touchAndSave so scheduling / cancellation is
+                    // handled by CustomEventUtility automatically.
+                    Button {
+                        toggleNotifications(event)
+                    } label: {
+                        Image(systemName: event.notificationsEnabled ? "bell.fill" : "bell.slash")
+                    }
+                    .accessibilityLabel(event.notificationsEnabled ? "Turn off notifications" : "Turn on notifications")
                     Button {
                         showingShareSheet = true
                     } label: {
@@ -232,5 +264,21 @@ struct CustomEventDetailView: View {
         )
         .font(.caption)
         .foregroundStyle(.secondary)
+    }
+
+    // MARK: - Actions
+
+    private func toggleBookmark(_ event: CustomEvent) {
+        let id = bookmarkInt(event)
+        if isBookmarked(event) {
+            BookmarkUtility.deleteBookmark(context: viewContext, id: id)
+        } else {
+            BookmarkUtility.addBookmark(context: viewContext, id: id)
+        }
+    }
+
+    private func toggleNotifications(_ event: CustomEvent) {
+        event.notificationsEnabled.toggle()
+        _ = CustomEventUtility.touchAndSave(context: viewContext, event: event)
     }
 }
