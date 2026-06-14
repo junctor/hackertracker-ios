@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "beezle_200.png",
+      "filename" : "beezle_tab_1x.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "beezle_400.png",
+      "filename" : "beezle_tab_2x.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "beezle_800.png",
+      "filename" : "beezle_tab_3x.png",
       "idiom" : "universal",
       "scale" : "3x"
     }
@@ -19,5 +19,8 @@
   "info" : {
     "author" : "xcode",
     "version" : 1
+  },
+  "properties" : {
+    "template-rendering-intent" : "template"
   }
 }
