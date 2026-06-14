@@ -183,6 +183,8 @@ struct ContentDescriptionPeekSheet: View {
                         .foregroundStyle(.secondary)
                     Text(description)
                         .font(.body)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .textSelection(.enabled)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
