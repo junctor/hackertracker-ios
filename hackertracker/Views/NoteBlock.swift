@@ -22,6 +22,10 @@ struct NoteBlock: View {
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest private var notes: FetchedResults<Note>
     @State private var showingEditor: Bool = false
+    /// Hidden by default — the section is opt-in on every detail
+    /// screen. Per-target persistence felt like overkill so this is
+    /// ephemeral @State; collapsing on dismiss + re-open is fine.
+    @State private var expanded: Bool = false
 
     /// Scope the FetchRequest to the supplied target. Init wires it
     /// up so each NoteBlock listens for changes to its row only —
@@ -42,53 +46,71 @@ struct NoteBlock: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: "note.text")
-                    .foregroundStyle(.secondary)
-                Text("My Notes")
-                    .font(.headline)
-                Spacer()
-                if body_text != nil {
-                    Button {
-                        showingEditor = true
-                    } label: {
-                        Image(systemName: "pencil")
+            // Always-visible header. Tap anywhere to expand/collapse;
+            // chevron rotates so the affordance reads even without
+            // the body being on screen. A small (\u{2022}) dot appears when
+            // a note exists so users can tell at a glance whether the
+            // collapsed row holds content.
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "note.text")
+                        .foregroundStyle(.secondary)
+                    Text("My Notes")
+                        .font(.headline)
+                    if body_text != nil {
+                        Circle()
+                            .fill(Color.accentColor)
+                            .frame(width: 6, height: 6)
+                            .accessibilityHidden(true)
                     }
-                    .buttonStyle(.borderless)
-                    .accessibilityLabel("Edit note")
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(expanded ? 0 : -90))
                 }
+                .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .accessibilityLabel("My Notes")
+            .accessibilityHint(expanded ? "Hide note" : "Show note")
 
-            if let text = body_text {
-                Markdown(text)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .onTapGesture { showingEditor = true }
-                    .accessibilityAddTraits(.isButton)
-                    .accessibilityHint("Tap to edit your note")
-            } else {
-                Button {
-                    showingEditor = true
-                } label: {
-                    HStack {
-                        Image(systemName: "plus.circle")
-                        Text("Add a note")
-                        Spacer()
+            if expanded {
+                Group {
+                    if let text = body_text {
+                        Markdown(text)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(12)
+                            .onTapGesture { showingEditor = true }
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilityHint("Tap to edit your note")
+                    } else {
+                        Button {
+                            showingEditor = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "plus.circle")
+                                Text("Add a note")
+                                Spacer()
+                            }
+                            .padding(12)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(12)
+                            .foregroundStyle(.primary)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(12)
-                    .foregroundStyle(.primary)
+                    Text("Notes are stored privately on your device and synced via iCloud.")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
                 }
-                .buttonStyle(.plain)
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
-
-            Text("Notes are stored privately on your device and synced via iCloud.")
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
