@@ -59,7 +59,17 @@ struct ContentView: View {
             TabView(selection: $tabSelection) {
                 InfoView(tabSelection: $tabSelection)
                     .tabItem {
-                        Image(systemName: "house")
+                        // Easter Egg: swap the SF Symbol "house" for the
+                        // bespoke beezle_icon asset when the user has
+                        // Easter Eggs enabled in Settings. .renderingMode
+                        // template + the system's tab bar tinting keep
+                        // the icon looking like a native tab item.
+                        if easterEgg {
+                            Image("beezle_icon")
+                                .renderingMode(.template)
+                        } else {
+                            Image(systemName: "house")
+                        }
                         // Text("Info")
                     }
                     .tag(1)
