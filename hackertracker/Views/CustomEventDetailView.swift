@@ -2,14 +2,20 @@
 //  CustomEventDetailView.swift
 //  hackertracker
 //
-//  Destination for a tap on a custom event row in the schedule. Shows
-//  the human-readable fields and offers Edit / Delete via the toolbar.
-//  Fetches by UUID via @FetchRequest so the view auto-refreshes when
-//  the underlying Core Data row is edited or deleted (e.g. CloudKit
-//  sync arrives from another device).
+//  Destination for a tap on a custom event row in the schedule.
+//  Visually mirrors EventDetailView so the two detail experiences
+//  feel like one design system:
+//    - Centered large-title header
+//    - Frosted gray card with time + location rows and the tags grid
+//      (which includes the synthetic "Custom Event" chip)
+//    - Markdown body
+//    - Editable / deletable via toolbar Edit + a destructive Delete
+//      at the bottom (the only piece that differs from EventDetailView,
+//      since Firestore events have no edit lifecycle).
 //
 
 import CoreData
+import MarkdownUI
 import SwiftUI
 
 struct CustomEventDetailView: View {
@@ -20,9 +26,8 @@ struct CustomEventDetailView: View {
     @FetchRequest private var events: FetchedResults<CustomEvent>
     @State private var showingEditor: Bool = false
     @State private var showingDeleteConfirm: Bool = false
+    let dfu = DateFormatterUtility.shared
 
-    /// FetchRequest needs a predicate referencing `eventID`. Init wires
-    /// it up so each instance scopes to a single row.
     init(eventID: UUID) {
         self.eventID = eventID
         _events = FetchRequest<CustomEvent>(
@@ -32,6 +37,9 @@ struct CustomEventDetailView: View {
     }
 
     var body: some View {
+        // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
+        // re-renders this view when the active timezone changes.
+        let _ = dfu.tzGeneration
         Group {
             if let event = events.first {
                 detail(for: event)
@@ -44,12 +52,9 @@ struct CustomEventDetailView: View {
                 .frame(maxHeight: .infinity)
             }
         }
-        .navigationTitle("Event")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
+        .navigationBarTitle(Text(""), displayMode: .inline)
         .toolbar {
-            if let event = events.first {
+            if events.first != nil {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button {
                         showingEditor = true
@@ -57,8 +62,6 @@ struct CustomEventDetailView: View {
                         Image(systemName: "pencil")
                     }
                     .accessibilityLabel("Edit event")
-                    .accessibilityIdentifier("EditCustomEvent")
-                    .opacity(event.id == nil ? 0 : 1) // hide if mid-deletion race
                 }
             }
         }
@@ -68,56 +71,73 @@ struct CustomEventDetailView: View {
             }
         }
         .iPadReadableContent()
+        .analyticsScreen(name: "CustomEventDetailView")
     }
 
     @ViewBuilder private func detail(for event: CustomEvent) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                if let title = event.title, !title.isEmpty {
-                    Text(title)
-                        .font(.largeTitle.weight(.bold))
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+            // Header card: title + time + location + tag chips.
+            // Mirrors the EventDetailView layout exactly so the two
+            // detail screens read as the same component family.
+            VStack(alignment: .leading) {
+                VStack(alignment: .center) {
+                    Text(event.title ?? "Untitled Event")
+                        .font(.largeTitle).bold()
+                    VStack(alignment: .leading) {
+                        whenRow(event: event)
+                        if let location = event.location, !location.isEmpty {
+                            locationRow(text: location)
+                        }
+                        ShowEventCellTags(
+                            tagIds: [],
+                            minWidth: 150,
+                            customEvent: true,
+                            customColorHex: event.colorHex
+                        )
+                    }
                 }
-                whenSection(event: event)
-                if let location = event.location, !location.isEmpty {
-                    Label(location, systemImage: "mappin.and.ellipse")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(15)
+            }
+
+            // Description (Markdown-rendered, matches EventDetailView).
+            if let desc = event.eventDescription, !desc.isEmpty {
+                VStack(alignment: .leading) {
+                    Markdown(desc)
+                        .padding()
                 }
-                if let desc = event.eventDescription, !desc.isEmpty {
-                    Divider()
-                    Text("Description")
-                        .font(.headline)
-                    Text(desc)
-                        .font(.body)
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .textSelection(.enabled)
-                }
-                if let notes = event.notes, !notes.isEmpty {
-                    Divider()
+            }
+
+            // Notes — private to the user; EventDetailView has no
+            // parallel concept, so render under its own header.
+            if let notes = event.notes, !notes.isEmpty {
+                Divider()
+                VStack(alignment: .leading, spacing: 8) {
                     Text("Notes")
                         .font(.headline)
                     Text(notes)
                         .font(.body)
+                        .foregroundStyle(.secondary)
                         .multilineTextAlignment(.leading)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundStyle(.secondary)
                         .textSelection(.enabled)
                 }
-                conferenceBadges(event: event)
-                notificationsRow(event: event)
-                Divider()
-                Button(role: .destructive) {
-                    showingDeleteConfirm = true
-                } label: {
-                    Label("Delete this event", systemImage: "trash")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.bordered)
-                .tint(.red)
+                .padding()
             }
+
+            Divider()
+            metadataFooter(event: event)
+            Divider()
+
+            Button(role: .destructive) {
+                showingDeleteConfirm = true
+            } label: {
+                Label("Delete this event", systemImage: "trash")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
+            .tint(.red)
             .padding()
         }
         .confirmationDialog(
@@ -133,23 +153,47 @@ struct CustomEventDetailView: View {
         }
     }
 
-    @ViewBuilder private func whenSection(event: CustomEvent) -> some View {
-        let dfu = DateFormatterUtility.shared
+    // MARK: - Header rows
+
+    @ViewBuilder private func whenRow(event: CustomEvent) -> some View {
         let begin = event.beginTimestamp ?? Date()
         let end = event.endTimestamp ?? begin
-        VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Image(systemName: "calendar")
-                Text(dfu.dayMonthDayOfWeekFormatter.string(from: begin))
-            }
-            HStack {
-                Image(systemName: "clock")
-                Text("\(dfu.hourMinuteTimeFormatter.string(from: begin)) – \(dfu.hourMinuteTimeFormatter.string(from: end))")
-                    .monospacedDigit()
-            }
+        HStack {
+            Image(systemName: "clock")
+            Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: begin)) - \(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: end))")
+                .font(.subheadline).bold()
         }
-        .font(.subheadline)
-        .foregroundStyle(.secondary)
+        .padding(.leading, 10)
+        .padding(.trailing, 5)
+        .padding(.vertical, 5)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.background)
+        .cornerRadius(10)
+        .padding(.bottom, 5)
+    }
+
+    @ViewBuilder private func locationRow(text: String) -> some View {
+        HStack {
+            Image(systemName: "map")
+            Text(text).font(.subheadline).bold()
+        }
+        .padding(.leading, 10)
+        .padding(.trailing, 5)
+        .padding(.vertical, 5)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.background)
+        .cornerRadius(10)
+        .padding(.bottom, 5)
+    }
+
+    // MARK: - Metadata footer
+
+    @ViewBuilder private func metadataFooter(event: CustomEvent) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            conferenceBadges(event: event)
+            notificationsRow(event: event)
+        }
+        .padding(.horizontal)
     }
 
     @ViewBuilder private func conferenceBadges(event: CustomEvent) -> some View {
