@@ -79,15 +79,22 @@ final class TalkSummaryCache {
         return nil
     }
 
+    /// Minimum description length that warrants summarization.
+    /// Below this, a one-sentence summary won't be shorter than
+    /// (or substantively different from) the source — and burning
+    /// the user's battery on a marginal gain isn't worth it.
+    private let minDescriptionChars = 100
+
     /// Schedule a summary generation for `content`, deduplicated.
     /// No-op when:
     ///   - the device can't run FoundationModels right now,
-    ///   - we already have an up-to-date summary,
-    ///   - there's already an inflight task for this id, or
-    ///   - the description is empty.
+    ///   - the description is missing or under `minDescriptionChars`,
+    ///   - we already have an up-to-date summary, or
+    ///   - there's already an inflight task for this id.
     func warm(_ content: Content) {
         guard AISummaryAvailability.isSupported else { return }
-        guard !content.description.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        let trimmed = content.description.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= minDescriptionChars else { return }
         guard summary(for: content) == nil else { return }
         guard inflight[content.id] == nil else { return }
 

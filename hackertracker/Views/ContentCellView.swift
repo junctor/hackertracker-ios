@@ -14,6 +14,11 @@ struct ContentCell: View {
     @Environment(InfoViewModel.self) private var viewModel
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
+    /// Step 3 of the AI summary spike: warm the on-device LLM
+    /// cache when this cell materializes IF the user has opted in.
+    /// TalkSummaryCache.warm is a no-op when the device can't run
+    /// FoundationModels, so this stays safe on iOS < 26.
+    @AppStorage("aiSummaries") private var aiSummaries: Bool = false
 
     func bookmarkAction() {
         for s in content.sessions {
@@ -81,11 +86,22 @@ struct ContentCell: View {
                     .buttonStyle(PlainButtonStyle())
                 }
             }
-        }.swipeActions {
+        }
+        .swipeActions {
             Button(isBookmarked ? "Remove Bookmark" : "Bookmark") {
                 bookmarkAction()
             }.buttonStyle(DefaultButtonStyle())
                 .tint(isBookmarked ? .red : .yellow)
+        }
+        // LazyVStack inside ContentListView materializes cells as they
+        // scroll into view; this .task runs once per materialization.
+        // Cheap no-op when aiSummaries is off or the device can't run
+        // FoundationModels, and the cache itself dedups concurrent
+        // requests so there's no risk of spamming.
+        .task {
+            if aiSummaries {
+                TalkSummaryCache.shared.warm(content)
+            }
         }
     }
     
