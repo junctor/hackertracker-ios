@@ -72,6 +72,10 @@ struct EventsView: View {
   /// of the schedule's NavigationSplitView. Nil = placeholder. Has no effect
   /// on iPhone (NavigationSplitView is bypassed there).
   @State private var ipadSelectedContentId: Int?
+  /// iPad split: selected custom-event id for the right pane. Mutually
+  /// exclusive with ipadSelectedContentId — setting one clears the
+  /// other so the detail pane never shows stale state.
+  @State private var ipadSelectedCustomEventId: UUID? = nil
 
   /// Inline search bar shown only when `isSearching` is true.
   @ViewBuilder private var inlineSearchBar: some View {
@@ -308,7 +312,10 @@ struct EventsView: View {
         .frame(width: 420)
         Divider()
         NavigationStack {
-          if let id = ipadSelectedContentId {
+          if let cid = ipadSelectedCustomEventId {
+            CustomEventDetailView(eventID: cid)
+              .id(cid)
+          } else if let id = ipadSelectedContentId {
             ContentDetailView(contentId: id)
               .id(id)
           } else {
@@ -321,6 +328,7 @@ struct EventsView: View {
         }
       }
       .environment(\.iPadContentSelection, $ipadSelectedContentId)
+      .environment(\.iPadCustomEventSelection, $ipadSelectedCustomEventId)
       .sheet(isPresented: $showFilters) {
         EventFilters(
           tagtypes: viewModel.tagtypes.filter {
@@ -611,6 +619,7 @@ struct EventData: View {
   /// iPad split-view selection: when present, row taps set the binding
   /// instead of pushing a NavigationLink. iPhone passes no env value.
   @Environment(\.iPadContentSelection) private var iPadContentSelection
+  @Environment(\.iPadCustomEventSelection) private var iPadCustomEventSelection
 
   var body: some View {
       Section(header: Text(weekday.uppercased())
@@ -629,9 +638,43 @@ struct EventData: View {
           }, id: \.id
         ) { event in
           if showPastEvents || event.endTimestamp >= Date() {
-            // Custom-event rows always route to their own detail screen;
-            // they have no parent Content document to push.
-            if let cid = event.customEventID {
+            // Three row variants:
+            //   1. iPad split + custom event -> set the custom-event
+            //      selection (clears the content selection) so the
+            //      right pane swaps in CustomEventDetailView. Without
+            //      this branch we'd push onto the sidebar stack and
+            //      cover the list instead.
+            //   2. iPad split + Firestore event -> set the content
+            //      selection (existing behavior).
+            //   3. iPhone / non-split: NavigationLink as before, with
+            //      a separate branch for custom vs Firestore so we
+            //      route to the correct detail view.
+            if let custSel = iPadCustomEventSelection,
+               let contentSel = iPadContentSelection {
+              if let cid = event.customEventID {
+                Button {
+                  contentSel.wrappedValue = nil
+                  custSel.wrappedValue = cid
+                } label: {
+                  EventCell(event: event, showDay: false)
+                    .id(event.id)
+                    .foregroundColor(.primary)
+                    .padding(1)
+                }
+                .buttonStyle(.plain)
+              } else {
+                Button {
+                  custSel.wrappedValue = nil
+                  contentSel.wrappedValue = event.contentId
+                } label: {
+                  EventCell(event: event, showDay: false)
+                    .id(event.id)
+                    .foregroundColor(.primary)
+                    .padding(1)
+                }
+                .buttonStyle(.plain)
+              }
+            } else if let cid = event.customEventID {
               NavigationLink(destination: CustomEventDetailView(eventID: cid)) {
                 EventCell(event: event, showDay: false)
                   .id(event.id)

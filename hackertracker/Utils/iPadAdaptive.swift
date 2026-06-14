@@ -118,3 +118,19 @@ extension EnvironmentValues {
         set { self[IPadProductSelectionKey.self] = newValue }
     }
 }
+
+/// Environment value carrying a `Binding<UUID?>` for custom-event
+/// selection on iPad. EventsView's row branch sets this when the
+/// tapped event is locally-stored (event.customEventID is non-nil)
+/// so the detail lands in the right pane instead of pushing onto
+/// the sidebar's NavigationStack (which would replace the list).
+private struct IPadCustomEventSelectionKey: EnvironmentKey {
+    static let defaultValue: Binding<UUID?>? = nil
+}
+
+extension EnvironmentValues {
+    var iPadCustomEventSelection: Binding<UUID?>? {
+        get { self[IPadCustomEventSelectionKey.self] }
+        set { self[IPadCustomEventSelectionKey.self] = newValue }
+    }
+}
