@@ -92,7 +92,8 @@ extension [Event] {
         typeIds: Set<Int>,
         bookmarks: Set<Int32>,
         tagTypes: [TagType],
-        eventNoteIDs: Set<Int32> = []
+        eventNoteIDs: Set<Int32> = [],
+        contentNoteIDs: Set<Int32> = []
     ) -> Self {
         if typeIds.isEmpty {
             return self
@@ -116,7 +117,15 @@ extension [Event] {
                 guard isFiltered(tagIds: event.tagIds, filterTypes: filterTypes) else { return false }
                 if typeIds.contains(PseudoTagID.bookmarks) && !bookmarks.contains(Int32(event.id)) { return false }
                 if typeIds.contains(PseudoTagID.customEvents) && event.customEventID == nil { return false }
-                if typeIds.contains(PseudoTagID.hasNotes) && !eventNoteIDs.contains(Int32(event.id)) { return false }
+                if typeIds.contains(PseudoTagID.hasNotes) {
+                    // Match either the event's own id or its parent
+                    // content id — same cross-kind logic the pencil
+                    // badge uses so the filter never disagrees with
+                    // what the cell visibly shows.
+                    let directHit = eventNoteIDs.contains(Int32(event.id))
+                    let parentHit = contentNoteIDs.contains(Int32(event.contentId))
+                    if !(directHit || parentHit) { return false }
+                }
                 return true
             }
         }

@@ -73,7 +73,26 @@ struct ContentListView: View {
 
     func contentGroup() -> [String.Element: [Content]] {
         let bookmarkIds = Set(bookmarks.map(\.id))
-        return Dictionary(grouping: content.search(text: debouncedSearch).filter { $0.tagIds.intersects(with: filters.filters) || filters.filters.isEmpty || (filters.filters.contains(1337) && $0.sessions.contains { bookmarkIds.contains(Int32($0.id)) })}, by: { $0.title.lowercased().first ?? "-" })
+        // Predicate composes search text + filter chips. The chips OR
+        // with each other (matches any one keeps the row). Real tags
+        // hit via tagIds.intersects; pseudo-tags 1337 (Bookmarks),
+        // 1339 (Has Notes) hit via their dedicated membership sets.
+        return Dictionary(
+            grouping: content.search(text: debouncedSearch).filter { c in
+                if filters.filters.isEmpty { return true }
+                if c.tagIds.intersects(with: filters.filters) { return true }
+                if filters.filters.contains(PseudoTagID.bookmarks),
+                   c.sessions.contains(where: { bookmarkIds.contains(Int32($0.id)) }) {
+                    return true
+                }
+                if filters.filters.contains(PseudoTagID.hasNotes),
+                   noteContentIDsForScope.contains(Int32(c.id)) {
+                    return true
+                }
+                return false
+            },
+            by: { $0.title.lowercased().first ?? "-" }
+        )
     }
 
     private var grouped: [(key: String.Element, value: [Content])] {
