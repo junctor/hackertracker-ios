@@ -153,22 +153,13 @@ struct CustomEventDetailView: View {
                 }
             }
 
-            // Notes — private to the user; EventDetailView has no
-            // parallel concept, so render under its own header.
-            if let notes = event.notes, !notes.isEmpty {
-                Divider()
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Notes")
-                        .font(.headline)
-                    Text(notes)
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .textSelection(.enabled)
-                }
-                .padding()
-            }
+            // Shared NoteBlock — same widget used by EventDetailView
+            // and ContentDetailView so private notes feel uniform
+            // across detail screens. One-time migration of any
+            // legacy CustomEvent.notes happens in the .task below.
+            Divider()
+            NoteBlock(targetID: CustomEventUtility.notificationID(for: event), kind: .customEvent)
+                .task { migrateLegacyNotesIfNeeded(event) }
 
             Divider()
             metadataFooter(event: event)
@@ -279,6 +270,23 @@ struct CustomEventDetailView: View {
 
     private func toggleNotifications(_ event: CustomEvent) {
         event.notificationsEnabled.toggle()
+        _ = CustomEventUtility.touchAndSave(context: viewContext, event: event)
+    }
+
+    /// Move CustomEvent.notes content into the shared Note store the
+    /// first time we render. The form's Notes field has been removed,
+    /// so this one-shot migration keeps existing copies visible in
+    /// the new NoteBlock. Safe to call repeatedly: the upsert is a
+    /// no-op once the Note exists, and we clear CustomEvent.notes
+    /// after migration so we don't keep two copies in sync.
+    private func migrateLegacyNotesIfNeeded(_ event: CustomEvent) {
+        guard let legacy = event.notes,
+              !legacy.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        let id = CustomEventUtility.notificationID(for: event)
+        if NotesUtility.note(context: viewContext, targetID: id, kind: .customEvent) == nil {
+            _ = NotesUtility.upsert(context: viewContext, targetID: id, kind: .customEvent, body: legacy)
+        }
+        event.notes = nil
         _ = CustomEventUtility.touchAndSave(context: viewContext, event: event)
     }
 }

@@ -89,7 +89,11 @@ struct ContentDetailView: View {
                     showFeedbackButton(showFeedback: $showFeedback)
                         .padding(15)
                 }
-                
+                // Shared notes block. Same NoteBlock used by
+                // EventDetailView + CustomEventDetailView, scoped to
+                // this content's id.
+                Divider()
+                NoteBlock(targetID: item.id, kind: .content)
             }
             .iPadReadableContent()
             .analyticsScreen(name: "ContentDetailView")

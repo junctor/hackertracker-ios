@@ -80,6 +80,11 @@ struct EventDetailView: View {
                         .(links: event.links)
                         .padding(15)
                 }
+                // Shared notes block. Lives at the bottom of every
+                // detail screen so the affordance is in a predictable
+                // place. Empty state shows "Add a note" CTA.
+                Divider()
+                NoteBlock(targetID: event.id, kind: .event)
             }
             .toolbar {
                 ToolbarItemGroup {

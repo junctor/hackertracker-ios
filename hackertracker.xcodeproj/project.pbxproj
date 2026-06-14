@@ -40,6 +40,8 @@
 		5DC0DE000000000000060002 /* CustomEventFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000060001 /* CustomEventFormView.swift */; };
 		5DC0DE000000000000060004 /* CustomEventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000060003 /* CustomEventDetailView.swift */; };
 		5DC0DE000000000000070002 /* CustomEventShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000070001 /* CustomEventShare.swift */; };
+		5DC0DE000000000000080002 /* NotesUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000080001 /* NotesUtility.swift */; };
+		5DC0DE000000000000080004 /* NoteBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000080003 /* NoteBlock.swift */; };
 		5DC0DE000000000000070004 /* CustomEventShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000070003 /* CustomEventShareSheet.swift */; };
 		5D642D252A438FB50064492D /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D242A438FB50064492D /* LocationView.swift */; };
 		5D642D272A43AEA00064492D /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D262A43AEA00064492D /* Product.swift */; };
@@ -170,6 +172,8 @@
 		5DC0DE000000000000060001 /* CustomEventFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomEventFormView.swift; sourceTree = "<group>"; };
 		5DC0DE000000000000060003 /* CustomEventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomEventDetailView.swift; sourceTree = "<group>"; };
 		5DC0DE000000000000070001 /* CustomEventShare.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomEventShare.swift; sourceTree = "<group>"; };
+		5DC0DE000000000000080001 /* NotesUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesUtility.swift; sourceTree = "<group>"; };
+		5DC0DE000000000000080003 /* NoteBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBlock.swift; sourceTree = "<group>"; };
 		5DC0DE000000000000070003 /* CustomEventShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomEventShareSheet.swift; sourceTree = "<group>"; };
 		5D642D242A438FB50064492D /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		5D642D262A43AEA00064492D /* Product.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
@@ -386,6 +390,7 @@
 				5DC0DE000000000000060001 /* CustomEventFormView.swift */,
 				5DC0DE000000000000060003 /* CustomEventDetailView.swift */,
 				5DC0DE000000000000070003 /* CustomEventShareSheet.swift */,
+				5DC0DE000000000000080003 /* NoteBlock.swift */,
 				5DDF035B2C2767750087BA59 /* ContentCellView.swift */,
 				5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */,
 				5DDF03592C2751670087BA59 /* ContentListView.swift */,
@@ -471,6 +476,7 @@
 				5DC0DE000000000000040001 /* TalkSummaryCache.swift */,
 				5DC0DE000000000000050001 /* CustomEventUtility.swift */,
 				5DC0DE000000000000070001 /* CustomEventShare.swift */,
+				5DC0DE000000000000080001 /* NotesUtility.swift */,
 				3C0E05CE2A53E70200E7154F /* Searchable.swift */,
 				3C07C208285C6F7600CC9469 /* Theme.swift */,
 			);
@@ -729,6 +735,8 @@
 				5DC0DE000000000000060002 /* CustomEventFormView.swift in Sources */,
 				5DC0DE000000000000060004 /* CustomEventDetailView.swift in Sources */,
 				5DC0DE000000000000070002 /* CustomEventShare.swift in Sources */,
+				5DC0DE000000000000080002 /* NotesUtility.swift in Sources */,
+				5DC0DE000000000000080004 /* NoteBlock.swift in Sources */,
 				5DC0DE000000000000070004 /* CustomEventShareSheet.swift in Sources */,
 				5DF51ABC2851203F007BCB83 /* Document.swift in Sources */,
 				5DDF035E2C28B4F10087BA59 /* ContentDetailView.swift in Sources */,
