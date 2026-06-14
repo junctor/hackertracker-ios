@@ -40,6 +40,13 @@ struct InfoView: View {
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
     @State var rick: Int = 0
+    /// Easter-egg activation chain (7 taps on the version tag):
+    /// flip both AppStorage toggles, show a celebratory overlay for
+    /// 3s, then fire the rickroll. State is local so the overlay can
+    /// be triggered independently of the global enable flags.
+    @AppStorage("easterEgg") private var easterEgg: Bool = false
+    @State private var easterEggOverlayVisible: Bool = false
+    @Environment(\.colorScheme) private var easterEggOverlayColorScheme
     @State var schedule = UUID()
 
     var body: some View {
@@ -416,6 +423,12 @@ struct InfoView: View {
             .sheet(isPresented: $debug404Visible) {
                 _04View(message: "Debug 404 ghost")
             }
+            .overlay {
+                if easterEggOverlayVisible {
+                    easterEggActivatedOverlay
+                        .transition(.opacity)
+                }
+            }
             .navigationDestination(for: String.self) { value in
                 switch value {
                 case "SharedEvents":
@@ -503,13 +516,59 @@ struct InfoView: View {
 
     func tapped() {
         rick += 1
-        if rick >= 7 {
-            Log.ui.debug("easter egg: roll away")
+        guard rick >= 7 else { return }
+        Log.ui.debug("easter egg: enabling + rickroll")
+        rick = 0
+        // Flip the AppStorage toggles so the rest of the app picks up
+        // the new state. viewModel mirrors easterEgg so the watermark
+        // overlay in ContentView starts pulsing immediately.
+        easterEgg = true
+        colorMode = true
+        viewModel.easterEgg = true
+        // Show the celebratory overlay…
+        withAnimation(.easeInOut(duration: 0.25)) {
+            easterEggOverlayVisible = true
+        }
+        // …hold for 3s, then dismiss and fire the rickroll.
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            withAnimation(.easeInOut(duration: 0.25)) {
+                easterEggOverlayVisible = false
+            }
+            // Tiny pause so the overlay's fade-out animation reads
+            // before we hand off to Safari/YouTube.
+            try? await Task.sleep(nanoseconds: 250_000_000)
             if let url = URL(string: "https://www.youtube.com/watch?v=xMHJGd3wwZk") {
                 openURL(url)
             }
-            rick = 0
         }
+    }
+
+    /// Big, brief celebration when the 7-tap chord lands. Renders the
+    /// beezle image (light-mode safe via .beezleAdaptiveColor) on a
+    /// dimmed scrim so it stands out regardless of background.
+    @ViewBuilder private var easterEggActivatedOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.55)
+                .ignoresSafeArea()
+            VStack(spacing: 16) {
+                Image("beezle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 140, height: 140)
+                    .beezleAdaptiveColor(easterEggOverlayColorScheme)
+                Text("Easter Eggs Enabled")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.white)
+            }
+            .padding(28)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(.ultraThinMaterial)
+            )
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Easter Eggs Enabled")
     }
 }
 
