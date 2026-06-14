@@ -35,7 +35,7 @@ struct ContentDetailView: View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
-        if let item = viewModel.content.first(where: { $0.id == contentId }) {
+        if let item = viewModel.contentById[contentId] {
             ScrollView {
                 // iPad: constrain content to a readable centered column.
                 VStack(alignment: .leading) {
@@ -169,6 +169,7 @@ struct showMedia: View {
                     ForEach(media, id: \.assetId) { m in
                         if let url = URL(string: m.url) {
                             KFImage(url)
+                                .htDownsampled(side: 600)
                                 .resizable()
                                 .scaledToFit()
                                 .aspectRatio(contentMode: .fit)
@@ -243,7 +244,7 @@ struct showSessionRow: View {
     @Environment(\.managedObjectContext) private var viewContext
     
     func bookmarkAction(id: Int) {
-        if bookmarks.map({$0.id}).contains(Int32(id)) {
+        if Set(bookmarks.map(\.id)).contains(Int32(id)) {
             BookmarkUtility.deleteBookmark(context: viewContext, id: id)
             if notExists {
                 NotificationUtility.removeNotification(id: id)
@@ -253,7 +254,7 @@ struct showSessionRow: View {
             BookmarkUtility.addBookmark(context: viewContext, id: id)
             if !notExists {
                 let notDate = s.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
-                NotificationUtility.scheduleNotification(date: notDate, id: s.id, title: item.title, location: viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unknown")
+                NotificationUtility.scheduleNotification(date: notDate, id: s.id, title: item.title, location: viewModel.locationsById[s.locationId]?.name ?? "unknown")
                 notExists.toggle()
             } else {
             }
@@ -261,6 +262,7 @@ struct showSessionRow: View {
     }
     
     var body: some View {
+        let bookmarkIds = Set(bookmarks.map(\.id))
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
@@ -295,7 +297,7 @@ struct showSessionRow: View {
                 }
                 HStack {
                     Image(systemName: "map")
-                    Text(viewModel.locations.first(where: {$0.id == s.locationId})?.name ?? "unkown").font(.caption)
+                    Text(viewModel.locationsById[s.locationId]?.name ?? "unkown").font(.caption)
                 }
             }
             .padding(.leading, 5)
@@ -307,10 +309,10 @@ struct showSessionRow: View {
                     Button {
                         bookmarkAction(id: s.id)
                     } label: {
-                        Image(systemName: bookmarks.map{$0.id}.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
-                            .foregroundColor((bookmarks.map({$0.id}).contains(Int32(s.id)) && viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
+                        Image(systemName: bookmarkIds.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
+                            .foregroundColor((bookmarkIds.contains(Int32(s.id)) && viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
                     }
-                    .accessibilityLabel(bookmarks.map{$0.id}.contains(Int32(s.id)) ? "Remove bookmark" : "Add bookmark")
+                    .accessibilityLabel(bookmarkIds.contains(Int32(s.id)) ? "Remove bookmark" : "Add bookmark")
                     MoreContentMenu(content: item, session: s, notExists: $notExists)
                 }
             }
@@ -346,6 +348,7 @@ struct showRelated: View {
     @State private var collapsed = true
     
     var body: some View {
+        let bookmarkIds = bookmarks.map { $0.id }
         VStack(alignment: .leading) {
             Button(action: {
                 collapsed.toggle()
@@ -372,9 +375,9 @@ struct showRelated: View {
             if !collapsed {
                 VStack {
                     ForEach(eventIds, id: \.self) { eventId in
-                        if let c = viewModel.content.first(where: {$0.id == eventId}) {
+                        if let c = viewModel.contentById[eventId] {
                             NavigationLink(destination: ContentDetailView(contentId: c.id)) {
-                                ContentCell(content: c, bookmarks: bookmarks.map { $0.id }, showDay: true)
+                                ContentCell(content: c, bookmarks: bookmarkIds, showDay: true)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
@@ -383,9 +386,9 @@ struct showRelated: View {
             } else {
                 VStack {
                         let eventId = eventIds[0]
-                        if let c = viewModel.content.first(where: {$0.id == eventId}) {
+                        if let c = viewModel.contentById[eventId] {
                             NavigationLink(destination: ContentDetailView(contentId: c.id)) {
-                                ContentCell(content: c, bookmarks: bookmarks.map { $0.id }, showDay: true)
+                                ContentCell(content: c, bookmarks: bookmarkIds, showDay: true)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }
@@ -434,7 +437,7 @@ struct showPeople: View {
                 if people.count > 1 {
                     LazyVGrid(columns: columns, spacing: 20) {
                         ForEach(people, id: \.id) { person in
-                            if let speaker = viewModel.speakers.first(where: {$0.id == person.id}) {
+                            if let speaker = viewModel.speakersById[person.id] {
                                 HStack {
                                     NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                                         VStack {
@@ -453,7 +456,7 @@ struct showPeople: View {
                             }
                         }
                     }
-                } else if let speaker = viewModel.speakers.first(where: {$0.id == content.people[0].id}) {
+                } else if let speaker = viewModel.speakersById[content.people[0].id] {
                     HStack {
                         NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                             VStack {

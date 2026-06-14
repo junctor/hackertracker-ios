@@ -43,7 +43,7 @@ struct ShareContentView: View {
     }
 
     func shareText() -> String {
-        if let l = viewModel.locations.first(where: {$0.id == session.locationId}) {
+        if let l = viewModel.locationsById[session.locationId] {
             return """
         \(viewModel.conference?.name ?? "HT"): Attending \(content.title) on \(session.beginTimestamp.formatted(date: .abbreviated, time: .shortened)) in \(l.name)
         #hackertracker

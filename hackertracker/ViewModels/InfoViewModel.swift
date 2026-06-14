@@ -24,11 +24,45 @@ import SwiftUI
 @MainActor
 final class InfoViewModel {
     var conference: Conference?
-    var documents = [Document]()
-    var tagtypes = [TagType]()
-    var locations = [Location]()
-    var products = [Product]()
-    var content = [Content]()
+    var documents = [Document]() {
+        didSet { documentsById = Dictionary(uniqueKeysWithValues: documents.map { ($0.id, $0) }) }
+    }
+    var tagtypes = [TagType]() {
+        didSet {
+            // Build a flat tag id -> TagType lookup so cells can resolve a tag's
+            // parent TagType in O(1) instead of scanning all tagtypes per tag.
+            var byTagId: [Int: TagType] = [:]
+            var tagById: [Int: Tag] = [:]
+            for tt in tagtypes {
+                for tag in tt.tags {
+                    byTagId[tag.id] = tt
+                    tagById[tag.id] = tag
+                }
+            }
+            tagTypeByTagId = byTagId
+            tagsById = tagById
+        }
+    }
+    var locations = [Location]() {
+        didSet { locationsById = Dictionary(uniqueKeysWithValues: locations.map { ($0.id, $0) }) }
+    }
+    var products = [Product]() {
+        didSet { productsById = Dictionary(uniqueKeysWithValues: products.map { ($0.id, $0) }) }
+    }
+    var content = [Content]() {
+        didSet { contentById = Dictionary(uniqueKeysWithValues: content.map { ($0.id, $0) }) }
+    }
+
+    // Phase Perf-A: id-keyed indexes rebuilt on each array assignment.
+    // ObservationIgnored so dependents observe the source array, not the index.
+    @ObservationIgnored private(set) var documentsById: [Int: Document] = [:]
+    @ObservationIgnored private(set) var locationsById: [Int: Location] = [:]
+    @ObservationIgnored private(set) var productsById: [Int: Product] = [:]
+    @ObservationIgnored private(set) var contentById: [Int: Content] = [:]
+    @ObservationIgnored private(set) var speakersById: [Int: Speaker] = [:]
+    @ObservationIgnored private(set) var orgsById: [String: Organization] = [:]
+    @ObservationIgnored private(set) var tagTypeByTagId: [Int: TagType] = [:]
+    @ObservationIgnored private(set) var tagsById: [Int: Tag] = [:]
     var events = [Event]() {
         didSet {
             // Phase 2: O(1) event lookup so bookmarkConflicts is O(b) instead of O(b*n).
@@ -42,8 +76,16 @@ final class InfoViewModel {
     /// Cleared when events change or bookmarks change.
     @ObservationIgnored private var conflictCache: [Int: Bool] = [:]
     @ObservationIgnored private var conflictCacheBookmarkKey: Int = 0
-    var speakers = [Speaker]()
-    var orgs = [Organization]()
+    var speakers = [Speaker]() {
+        didSet { speakersById = Dictionary(uniqueKeysWithValues: speakers.map { ($0.id, $0) }) }
+    }
+    var orgs = [Organization]() {
+        didSet {
+            var idx: [String: Organization] = [:]
+            for org in orgs { if let id = org.id { idx[id] = org } }
+            orgsById = idx
+        }
+    }
     var faqs = [FAQ]()
     var news = [Article]()
     var menus = [InfoMenu]()
@@ -54,6 +96,13 @@ final class InfoViewModel {
     // @Published var colorMode = false
     var outOfStock = false
     var easterEgg = false
+    /// True while one or more map asset downloads are in flight for
+    /// the current conference. Drives the Maps tab icon's loading
+    /// indicator. Files that already exist on disk don't increment
+    /// the counter, so a returning user who already has every map
+    /// cached never sees the spinner.
+    var mapsLoading: Bool = false
+    @ObservationIgnored private var pendingMapDownloads: Int = 0
     @ObservationIgnored nonisolated(unsafe) var conferenceListener: ListenerRegistration?
     @ObservationIgnored nonisolated(unsafe) var documentListener: ListenerRegistration?
     @ObservationIgnored nonisolated(unsafe) var tagListener: ListenerRegistration?
@@ -226,38 +275,86 @@ final class InfoViewModel {
                     let fileManager = FileManager.default
                     let docDir = fileManager.urls(for: .documentDirectory, in: .userDomainMask)[0]
                     
-                    for map in maps {
-                        if let url = URL(string: map.url) {
-                            let path = "\(conference.code)/\(url.lastPathComponent)"
-                            let mLocal = docDir.appendingPathComponent(path)
-                            if !fileManager.fileExists(atPath: mLocal.deletingLastPathComponent().path) {
-                                do {
-                                    try fileManager.createDirectory(at: mLocal.deletingLastPathComponent(), withIntermediateDirectories: true)
-                                } catch {
-                                    Log.network.error("map dir create failed: \(error.localizedDescription, privacy: .public)")
-                                    CrashReport.record(error, context: ["op": "createMapDir", "path": path])
-                                    continue
-                                }
+                    // Inline helper: download a single PDF/SVG asset for
+                    // a map. Same on-disk layout as before — files land at
+                    // <docs>/<code>/<lastPathComponent>.
+                    //
+                    // After a download lands (or if the file was already on
+                    // disk) we proactively warm PDFDocumentCache so the
+                    // first render of MapView is paint-only, no parse.
+                    // PDFDocument(url:) on a multi-MB floor plan can stall
+                    // the main thread for ~200-400ms; doing it here at app
+                    // launch / conference-switch time pushes that cost out
+                    // of the user's interaction path entirely.
+                    let downloadAsset: (String) -> Void = { assetURLString in
+                        guard let url = URL(string: assetURLString) else { return }
+                        let path = "\(conference.code)/\(url.lastPathComponent)"
+                        let mLocal = docDir.appendingPathComponent(path)
+                        if !fileManager.fileExists(atPath: mLocal.deletingLastPathComponent().path) {
+                            do {
+                                try fileManager.createDirectory(at: mLocal.deletingLastPathComponent(), withIntermediateDirectories: true)
+                            } catch {
+                                Log.network.error("map dir create failed: \(error.localizedDescription, privacy: .public)")
+                                CrashReport.record(error, context: ["op": "createMapDir", "path": path])
+                                return
                             }
-                            
-                            if fileManager.fileExists(atPath: mLocal.path) {
-                                // Add logic to check md5 hash and re-update if it has changed
-                                NSLog("InfoViewModel: (\(conference.code): Map file (\(path)) already exists")
-                            } else {
-                                self.downloadFileCompletionHandler(url: url, destinationUrl: mLocal) { (destinationUrl, error) in
+                        }
+                        if fileManager.fileExists(atPath: mLocal.path) {
+                            Log.network.debug("map asset cached: \(path, privacy: .public)")
+                            if mLocal.pathExtension.lowercased() == "pdf" {
+                                PDFDocumentCache.prewarm(mLocal)
+                            }
+                        } else {
+                            self.mapDownloadStarted()
+                            self.downloadFileCompletionHandler(url: url, destinationUrl: mLocal) { destinationUrl, error in
+                                // URLSession callback runs off-main; hop
+                                // back to MainActor to mutate observable
+                                // state safely.
+                                Task { @MainActor [weak self] in
                                     if let durl = destinationUrl {
-                                        NSLog("Finished downloading: \(durl)")
+                                        Log.network.debug("map asset downloaded: \(durl.lastPathComponent, privacy: .public)")
+                                        if durl.pathExtension.lowercased() == "pdf" {
+                                            PDFDocumentCache.prewarm(durl)
+                                        }
                                     } else {
                                         Log.firestore.error("map storage error: \(String(describing: error), privacy: .public)")
                                     }
+                                    self?.mapDownloadFinished()
                                 }
                             }
+                        }
+                    }
+                    for map in maps {
+                        downloadAsset(map.url)
+                        // SVG variant download — strictly URL-based per the
+                        // server team. Use svg_url first, then svg_filename
+                        // (only if it looks like a URL). Anything else is
+                        // ignored; the page falls back to the PDF.
+                        if let url = map.svgUrl,
+                           !url.trimmingCharacters(in: .whitespaces).isEmpty {
+                            downloadAsset(url)
+                        } else if let filename = map.svgFilename,
+                                  filename.lowercased().hasPrefix("http") {
+                            downloadAsset(filename)
                         }
                     }
                 }
             }
     }
     
+    private func mapDownloadStarted() {
+        pendingMapDownloads += 1
+        if !mapsLoading { mapsLoading = true }
+    }
+
+    private func mapDownloadFinished() {
+        pendingMapDownloads -= 1
+        if pendingMapDownloads <= 0 {
+            pendingMapDownloads = 0
+            mapsLoading = false
+        }
+    }
+
     private func downloadFileCompletionHandler(url: URL, destinationUrl: URL, completion: @Sendable @escaping (URL?, Error?) -> Void) {
 
             /* let url = URL(string: urlstring)!

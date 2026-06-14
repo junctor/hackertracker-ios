@@ -50,7 +50,7 @@ struct NotificationButton: View {
                 notExists = false
             } else {
                 let notDate = session.beginTimestamp.addingTimeInterval(Double((-notifyAt)) * 60)
-                NotificationUtility.scheduleNotification(date: notDate, id: session.id, title: content.title, location: viewModel.locations.first(where: {$0.id == session.locationId})?.name ?? "unknown")
+                NotificationUtility.scheduleNotification(date: notDate, id: session.id, title: content.title, location: viewModel.locationsById[session.locationId]?.name ?? "unknown")
                 notExists = true
             }
         } label: {

@@ -46,6 +46,7 @@ struct ProductView: View {
                             ForEach(product.media, id: \.assetId) { med in
                                 if let media_url = URL(string: med.url) {
                                     KFImage(media_url)
+                                        .htDownsampled(side: 600)
                                         .resizable()
                                         .scaledToFit()
                                 }

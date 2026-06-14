@@ -84,7 +84,7 @@ struct EventsView: View {
           // Dates first (ascending; eventDayGroup already sorts that way),
           // then Top / Now / Next / Bottom.
           ForEach(
-              viewModel.events.filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
+              viewModel.events.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
                   .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
           ) { day, _ in
               Button(day) {
@@ -146,7 +146,7 @@ struct EventsView: View {
   @ViewBuilder
   private var scheduleSidebar: some View {
     Group {
-      if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
+      if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documentsById[emergId] {
         NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
           CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details")
             .frame(height: 40)
@@ -158,7 +158,7 @@ struct EventsView: View {
         EventScrollView(
           events:
             viewModel.events
-            .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
             .search(text: debouncedSearch, speakers: viewModel.speakers)
             .eventDayGroup(
               showLocaltime: showLocaltime, conference: viewModel.conference
@@ -332,7 +332,7 @@ struct EventsView: View {
         EventScrollView(
           events:
             viewModel.events
-            .filters(typeIds: filters.filters, bookmarks: bookmarks.map({$0.id}), tagTypes: viewModel.tagtypes)
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
             .search(text: debouncedSearch, speakers: viewModel.speakers).eventDayGroup(
                 showLocaltime: showLocaltime, conference: viewModel.conference
             ),
@@ -384,7 +384,7 @@ struct EventsView: View {
                   }
                   Divider()
               ForEach(
-                viewModel.events.filters(typeIds: filters.filters, bookmarks: bookmarks.map({$0.id}), tagTypes: viewModel.tagtypes)
+                viewModel.events.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
                     .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
               ) { day, _ in
                 Button(day) {

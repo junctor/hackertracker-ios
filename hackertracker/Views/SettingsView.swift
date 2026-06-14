@@ -15,7 +15,7 @@ struct SettingsView: View {
     
     var body: some View {
         NavigationStack {
-            if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
+            if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documentsById[emergId] {
                 NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
                     CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details")
                         .frame(height: 40)
@@ -23,57 +23,140 @@ struct SettingsView: View {
                 }
             }
             ScrollView {
-                AboutSettingsView()
-                HStack {
-                    NavigationLink(destination: ConferencesView()) {
-                        Image(systemName: "list.bullet")
-                            .padding(5)
-                        VStack(alignment: .leading) {
-                            Text("Select Conference")
-                                .bold()
-                            Text("(\(viewModel.conference?.name ?? selected.code))")
-                                .font(.caption)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(5)
-                        Image(systemName: "chevron.right")
-                            .padding(5)
-                    }
-                    .frame(maxWidth: .infinity)
+                // About + conference picker always span the full width
+                // — they read as headers and don't fit naturally into a
+                // 2-column grid row.
+                VStack(spacing: 0) {
+                    AboutSettingsView()
+                    selectConferenceRow
+                    Divider()
                 }
-                .foregroundColor(.primary)
-                .frame(maxWidth: .infinity)
-                .background(Color(.systemGray6))
-                .cornerRadius(5)
-                Divider()
-                StartScreenSettingsView()
-                ShowLocaltimeSettingsView()
-                ShowPastEventsSettingsView()
-                ShowNewsSettingsView()
-                NotificationSettingsView()
-                EasterEggSettingsView()
+                if IPadAdaptive.isIPad {
+                    // iPad: explicit 2-column HStack. Each panel is
+                    // wrapped in VStack(spacing: 0) { ... } so its
+                    // multi-Item @ViewBuilder body counts as ONE cell.
+                    // (Subviews like LightModeSettingsView return a
+                    // TupleView of VStack + Divider + VStack + Divider,
+                    // which a LazyVGrid would explode into separate
+                    // grid items.)
+                    HStack(alignment: .top, spacing: 16) {
+                        VStack(spacing: 12) {
+                            VStack(spacing: 0) { LightModeSettingsView() }
+                            VStack(spacing: 0) { ShowLocaltimeSettingsView() }
+                            VStack(spacing: 0) { ShowPastEventsSettingsView() }
+                            VStack(spacing: 0) { ShowNewsSettingsView() }
+                            Spacer(minLength: 0)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .top)
+                        VStack(spacing: 12) {
+                            VStack(spacing: 0) { StartScreenPickerView() }
+                            VStack(spacing: 0) { NotificationSettingsView() }
+                            VStack(spacing: 0) { EasterEggSettingsView() }
+                            Spacer(minLength: 0)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .top)
+                    }
+                    .padding(.horizontal, 12)
+                } else {
+                    LightModeSettingsView()
+                    StartScreenPickerView()
+                    ShowLocaltimeSettingsView()
+                    ShowPastEventsSettingsView()
+                    ShowNewsSettingsView()
+                    NotificationSettingsView()
+                    EasterEggSettingsView()
+                }
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
-            .iPadReadableContent()
+            // iPad no longer needs the readable-column cap on Settings —
+            // the 2-column grid utilizes the full width directly. iPhone
+            // sees the same single-column flow either way.
             .analyticsScreen(name: "SettingsView")
         }
     }
+    @ViewBuilder private var selectConferenceRow: some View {
+        HStack {
+            NavigationLink(destination: ConferencesView()) {
+                Image(systemName: "list.bullet")
+                    .padding(5)
+                VStack(alignment: .leading) {
+                    Text("Select Conference")
+                        .bold()
+                    Text("(\(viewModel.conference?.name ?? selected.code))")
+                        .font(.caption)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(5)
+                Image(systemName: "chevron.right")
+                    .padding(5)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .foregroundColor(.primary)
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemGray6))
+        .cornerRadius(5)
+    }
+
 }
 
 struct EasterEggSettingsView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("easterEgg") var easterEgg: Bool = false
-    
+    @AppStorage("easterEggMaxOpacity") var easterEggMaxOpacity: Double = 0.20
+    @AppStorage("easterEggPeriod") var easterEggPeriod: Double = 12.0
+
     var body: some View {
-        VStack(alignment: .leading) {
-                Toggle("Easter Eggs", isOn: $easterEgg)
-                    .onChange(of: easterEgg) { _, value in 
-                        Log.ui.debug("easterEgg=\(value)")
-                        viewModel.easterEgg = value
+        VStack(alignment: .leading, spacing: 12) {
+            Toggle("Easter Eggs", isOn: $easterEgg)
+                .onChange(of: easterEgg) { _, value in
+                    Log.ui.debug("easterEgg=\(value)")
+                    viewModel.easterEgg = value
+                }
+            if easterEgg {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Peak Opacity")
+                        Spacer()
+                        Text(String(format: "%.0f%%", easterEggMaxOpacity * 100))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
                     }
+                    // Floor at 0.05 so accidental drag to zero doesn't
+                    // make the feature look broken; ceiling at 1.0.
+                    Slider(value: $easterEggMaxOpacity, in: 0.05...1.0, step: 0.05)
+                    Text("How bright the background beezle gets at the peak of its pulse.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Pulse Period")
+                        Spacer()
+                        Text(easterEggPeriod <= 0
+                             ? "off"
+                             : String(format: "%.0fs", easterEggPeriod))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                    // 0 = hold peak; otherwise a full sine cycle every
+                    // N seconds. Cap at 60 because anything slower than
+                    // a minute reads as "off" anyway.
+                    Stepper("Period",
+                            value: $easterEggPeriod,
+                            in: 0.0...60.0,
+                            step: 1.0)
+                        .labelsHidden()
+                    Text("Seconds for a full fade in + out. 0 holds the ghost steady at the peak opacity.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .padding(5)
         Divider()
@@ -257,11 +340,22 @@ struct LightModeSettingsView: View {
 }
 
 struct StartScreenSettingsView: View {
+    var body: some View {
+        // Compatibility wrapper: legacy callers got LightMode + the
+        // Start Screen picker stacked together. New code should call
+        // LightModeSettingsView and StartScreenPickerView separately.
+        VStack(spacing: 0) {
+            LightModeSettingsView()
+            StartScreenPickerView()
+        }
+    }
+}
+
+struct StartScreenPickerView: View {
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     let startScreens = ["Main", "Schedule", "Maps"]
 
     var body: some View {
-        LightModeSettingsView()
         VStack(alignment: .leading) {
             Text("Start Screen")
             Picker("Start Screen", selection: $launchScreen) {
@@ -271,9 +365,8 @@ struct StartScreenSettingsView: View {
             }
             .pickerStyle(.segmented)
         }
-        Divider()
+        .padding(5)
     }
-    
 }
 
 struct ShowLocaltimeSettingsView: View {

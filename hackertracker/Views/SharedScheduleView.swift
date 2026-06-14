@@ -137,11 +137,10 @@ struct SharedScheduleRow: View {
     /// Format event start time in the device-current zone so the combined
     /// view stays self-consistent regardless of which conference the row
     /// came from.
+    /// Perf D: reuse two static formatters keyed by show24hourtime
+    /// rather than allocating per row.
     private func timeString(_ date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = show24hourtime ? "HH:mm" : "h:mm a"
-        f.timeZone = TimeZone.current
-        f.locale = Locale(identifier: "en_US_POSIX")
+        let f = show24hourtime ? SharedScheduleFormatters.h24 : SharedScheduleFormatters.h12
         return f.string(from: date)
     }
 
@@ -174,4 +173,24 @@ struct SharedScheduleRow: View {
         .background(Color(.systemGray6))
         .cornerRadius(12)
     }
+}
+
+/// Perf D: shared formatter pool for SharedScheduleRow. Row is
+/// rendered on the main actor so concurrent access is impossible.
+@MainActor
+private enum SharedScheduleFormatters {
+    static let h24: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        f.timeZone = TimeZone.current
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f
+    }()
+    static let h12: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "h:mm a"
+        f.timeZone = TimeZone.current
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f
+    }()
 }

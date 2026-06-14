@@ -7,6 +7,18 @@
 
 import Foundation
 
+/// Perf D: shared DateFormatter pool for ModelExt groupers.
+/// Single-instance + main-actor-only mutation.
+@MainActor
+private enum ModelExtFormatters {
+    static let eventDay: DateFormatter = {
+        let f = DateFormatter()
+        f.dateFormat = "MMMM d"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        return f
+    }()
+}
+
 extension [TagType] {
     func tags(category: String) -> [Tag] {
         var retArray: [Tag] = []
@@ -18,7 +30,7 @@ extension [TagType] {
 }
 
 extension [Content] {
-    func filters(typeIds: Set<Int>, bookmarks: [Int32], tagTypes: [TagType]) -> Self {
+    func filters(typeIds: Set<Int>, bookmarks: Set<Int32>, tagTypes: [TagType]) -> Self {
         if typeIds.isEmpty {
             return self
         } else {
@@ -68,7 +80,7 @@ extension [Event] {
         }
     } */
     
-    func filters(typeIds: Set<Int>, bookmarks: [Int32], tagTypes: [TagType]) -> Self {
+    func filters(typeIds: Set<Int>, bookmarks: Set<Int32>, tagTypes: [TagType]) -> Self {
         if typeIds.isEmpty {
             return self
         } else {
@@ -96,11 +108,11 @@ extension [Event] {
     
     @MainActor
     func eventDayGroup(showLocaltime: Bool, conference: Conference?) -> [(key: String, value: [Event])] {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMMM d"
+        // Perf D: reuse a single DateFormatter across calls; the
+        // function is @MainActor so concurrent mutation is impossible.
+        let formatter = ModelExtFormatters.eventDay
         // Phase 4: single source of truth in ClockService; no more hardcoded LA fallback.
         formatter.timeZone = ClockService.resolveTimeZone(conference: conference, showLocaltime: showLocaltime)
-        formatter.locale = Locale(identifier: "en_US_POSIX")
         
         let eventDict = Dictionary(
             grouping: self,

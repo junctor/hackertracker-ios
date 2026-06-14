@@ -59,7 +59,17 @@ struct ContentView: View {
             TabView(selection: $tabSelection) {
                 InfoView(tabSelection: $tabSelection)
                     .tabItem {
-                        Image(systemName: "house")
+                        // Easter Egg: swap the SF Symbol "house" for the
+                        // bespoke beezle_icon asset when the user has
+                        // Easter Eggs enabled in Settings. .renderingMode
+                        // template + the system's tab bar tinting keep
+                        // the icon looking like a native tab item.
+                        if easterEgg {
+                            Image("beezle_icon")
+                                .renderingMode(.template)
+                        } else {
+                            Image(systemName: "house")
+                        }
                         // Text("Info")
                     }
                     .tag(1)
@@ -75,7 +85,11 @@ struct ContentView: View {
                     .preferredColorScheme(theme.colorScheme)
                 MapView()
                     .tabItem {
-                        Image(systemName: "map")
+                        // Animate the SF Symbol while map assets are
+                        // downloading in the background so users get
+                        // immediate feedback that work is happening.
+                        Image(systemName: viewModel.mapsLoading ? "map.fill" : "map")
+                            .symbolEffect(.variableColor.iterative.reversing, options: .repeating, isActive: viewModel.mapsLoading)
                         // Text("Maps")
                     }
                     .tag(3)
@@ -88,6 +102,11 @@ struct ContentView: View {
                     .tag(4)
                     .preferredColorScheme(theme.colorScheme)
             }
+            // Easter-egg overlay: faint, fading beezle behind the UI.
+            // Only renders when easterEgg is on. With colorMode also on,
+            // it cycles rainbow hues. allowsHitTesting(false) keeps the
+            // tab bar and content fully interactive.
+            .overlay(BeezleEasterEggOverlay().allowsHitTesting(false))
             .task {
                 if #available(iOS 15.0, *) {
                     let tabBarAppearance: UITabBarAppearance = .init()
@@ -190,5 +209,83 @@ struct ContentView_Previews: PreviewProvider {
         /* Group {
              ContentView(settings: Settings()).environment(\.managedObjectContext, PersistenceController.preview.container.viewContext)
          } */
+    }
+}
+
+/// Animated beezle watermark, enabled by the Easter Egg toggle in
+/// Settings. Uses TimelineView for a continuous animation tick rather
+/// than .animation().repeatForever() so we don't have to manage @State
+/// flip-flops -- the closure recomputes opacity + hue from the current
+/// time on each frame.
+///
+/// When easterEgg AND colorMode are both on, the silhouette cycles
+/// through the full hue spectrum once every 12s; with just easterEgg
+/// it tints to the system primary so it adapts to light/dark mode.
+private struct BeezleEasterEggOverlay: View {
+    @AppStorage("easterEgg") var easterEgg: Bool = false
+    @AppStorage("colorMode") var colorMode: Bool = false
+    /// User-tunable peak opacity of the breathing watermark. Floor at
+    /// 0.05 so we never persist a fully-invisible setting that looks
+    /// like the feature is broken; ceiling at 1.0 if the user wants
+    /// the ghost solid-on at peak.
+    @AppStorage("easterEggMaxOpacity") var easterEggMaxOpacity: Double = 0.20
+    /// Period of the sine-wave pulse, in seconds. 0 turns the pulse
+    /// off entirely — the watermark stays held at peak opacity.
+    @AppStorage("easterEggPeriod") var easterEggPeriod: Double = 12.0
+    @Environment(\.colorScheme) private var colorScheme
+
+    var body: some View {
+        if easterEgg {
+            TimelineView(.animation(minimumInterval: 1.0/30.0)) { context in
+                let t = context.date.timeIntervalSinceReferenceDate
+                // Opacity. easterEggPeriod == 0 holds the ghost at
+                // peak; otherwise we draw a sine wave from 0 up to
+                // easterEggMaxOpacity with the user-chosen period.
+                let peak = max(0.05, min(easterEggMaxOpacity, 1.0))
+                let opacity: Double = {
+                    if easterEggPeriod <= 0 { return peak }
+                    let phase = sin(t * (.pi * 2 / easterEggPeriod))
+                    return (phase + 1) / 2 * peak
+                }()
+                // Hue cycle, period ~12s. Only consulted when colorMode
+                // is on; otherwise we fall back to system primary.
+                let hue = (t.truncatingRemainder(dividingBy: 12.0)) / 12.0
+                // Eye-detail preservation:
+                //  - Rainbow path uses .colorMultiply with a fully-saturated
+                //    hue. White body * hue = hue, slightly-darker eye
+                //    pixels * hue = darker hue — value differences survive.
+                //  - Dark mode without rainbow: leave the image as-is
+                //    (white silhouette on dark background).
+                //  - Light mode without rainbow: .colorInvert() flips
+                //    white -> black while preserving the relative shading
+                //    between body and eyes. .colorMultiply(.black) here
+                //    would collapse everything to one flat color and the
+                //    eyes would vanish (same regression we hit before).
+                Image("beezle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(maxWidth: 280, maxHeight: 280)
+                    .opacity(opacity)
+                    .applyBeezleEasterEggTint(
+                        colorMode: colorMode,
+                        hue: hue,
+                        colorScheme: colorScheme
+                    )
+                    .accessibilityHidden(true)
+            }
+        }
+    }
+}
+
+extension View {
+    @ViewBuilder
+    fileprivate func applyBeezleEasterEggTint(colorMode: Bool, hue: Double, colorScheme: ColorScheme) -> some View {
+        if colorMode {
+            self.colorMultiply(Color(hue: hue, saturation: 0.85, brightness: 1.0))
+        } else if colorScheme == .light {
+            self.colorInvert()
+        } else {
+            self
+        }
     }
 }

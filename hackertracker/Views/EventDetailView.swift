@@ -27,6 +27,7 @@ struct EventDetailView: View {
     ]
 
     var body: some View {
+                        let bookmarkIds = Set(bookmarks.map(\.id))
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
@@ -84,14 +85,14 @@ struct EventDetailView: View {
                 ToolbarItemGroup {
                     if let event = viewModel.events.first(where: { $0.id == eventId }) {
                         Button {
-                            if bookmarks.map({ $0.id }).contains(Int32(event.id)) {
+                            if bookmarkIds.contains(Int32(event.id)) {
                                 BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
                             } else {
                                 BookmarkUtility.addBookmark(context: viewContext, id: event.id)
                             }
                         } label: {
                             if let event = viewModel.events.first(where: { $0.id == eventId }) {
-                                Image(systemName: bookmarks.map({ $0.id }).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                                Image(systemName: bookmarkIds.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
                             }
                         }
                         MoreMenu(event: event, showingAlert: $showingAlert, notExists: $nExists)
@@ -161,7 +162,7 @@ struct showSpeakers: View {
                 if people.count > 1 {
                     LazyVGrid(columns: columns, spacing: 20) {
                         ForEach(people, id: \.id) { person in
-                            if let speaker = viewModel.speakers.first(where: {$0.id == person.id}) {
+                            if let speaker = viewModel.speakersById[person.id] {
                                 HStack {
                                     NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                                         VStack {
@@ -229,7 +230,7 @@ struct showTags: View {
                 VStack(alignment: .leading) {
                     LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
                         ForEach(tagIds, id: \.self) { tagId in
-                            if let tagtype = viewModel.tagtypes.first(where: { $0.tags.contains(where: {$0.id == tagId})}), let tag = tagtype.tags.first(where: {$0.id == tagId}) {
+                            if let tag = viewModel.tagsById[tagId] {
                                 VStack {
                                     HStack {
                                         Text(tag.label)

@@ -7,11 +7,22 @@
 
 import Foundation
 
+// Perf D: Every overload previously called `.lowercased()` on the haystack
+// *and* on the needle inside the filter closure — once per item, twice per
+// field per item. With 500–1000 items per list and a normal typing cadence
+// that's tens of thousands of String allocations per keystroke. We now
+// lowercase the needle once and use `.range(of:options:.caseInsensitive)`
+// against the original strings, matching the pattern already used by the
+// Event+speakers overload.
+private func _searchMatches(_ haystack: String, needle: String) -> Bool {
+    haystack.range(of: needle, options: .caseInsensitive) != nil
+}
+
 extension [Event] {
-    /// Search title + description. Use the overload with `speakers:` when you
-    /// want to also match by presenter name.
     func search(text: String) -> Self {
-        text.isEmpty ? self : self.filter { $0.title.lowercased().contains(text.lowercased()) || $0.description.lowercased().contains(text.lowercased()) }
+        guard !text.isEmpty else { return self }
+        let needle = text
+        return filter { _searchMatches($0.title, needle: needle) || _searchMatches($0.description, needle: needle) }
     }
 
     /// Bugfix: previously search ignored presenter names because Event.people
@@ -39,44 +50,49 @@ extension [Event] {
 
 extension [Product] {
     func search(text: String) -> Self {
-        text.isEmpty ? self : self.filter { $0.title.lowercased().contains(text.lowercased()) }
+        guard !text.isEmpty else { return self }
+        return filter { _searchMatches($0.title, needle: text) }
     }
 }
 
 extension [Speaker] {
     func search(text: String) -> Self {
-        text.isEmpty ? self : self.filter { $0.name.lowercased().contains(text.lowercased()) || $0.description.lowercased().contains(text.lowercased()) }
+        guard !text.isEmpty else { return self }
+        return filter { _searchMatches($0.name, needle: text) || _searchMatches($0.description, needle: text) }
     }
 }
 
 extension [Content] {
     func search(text: String) -> Self {
-        text.isEmpty ? self : self.filter { $0.title.lowercased().contains(text.lowercased()) || $0.description.lowercased().contains(text.lowercased()) }
+        guard !text.isEmpty else { return self }
+        return filter { _searchMatches($0.title, needle: text) || _searchMatches($0.description, needle: text) }
     }
 }
 
 extension [Organization] {
     func search(text: String) -> Self {
-        text.isEmpty ? self : self.filter { $0.name.lowercased().contains(text.lowercased()) }
+        guard !text.isEmpty else { return self }
+        return filter { _searchMatches($0.name, needle: text) }
     }
 }
 
 extension [FAQ] {
     func search(text: String) -> Self {
-        text.isEmpty ? self : self.filter { $0.question.lowercased().contains(text.lowercased()) || $0.answer.lowercased().contains(text.lowercased()) }
+        guard !text.isEmpty else { return self }
+        return filter { _searchMatches($0.question, needle: text) || _searchMatches($0.answer, needle: text) }
     }
 }
 
 extension [Article] {
     func search(text: String) -> Self {
-        text.isEmpty ? self : self.filter { $0.name.lowercased().contains(text.lowercased()) || $0.text.lowercased().contains(text.lowercased()) }
+        guard !text.isEmpty else { return self }
+        return filter { _searchMatches($0.name, needle: text) || _searchMatches($0.text, needle: text) }
     }
 }
 
 extension [Document] {
     func search(text: String) -> Self {
-        text.isEmpty ? self: self.filter { $0.title.lowercased().contains(text.lowercased()) ||
-            $0.body.lowercased().contains(text.lowercased())
-        }
+        guard !text.isEmpty else { return self }
+        return filter { _searchMatches($0.title, needle: text) || _searchMatches($0.body, needle: text) }
     }
 }

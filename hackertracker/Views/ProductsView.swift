@@ -12,6 +12,10 @@ struct ProductsView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
     @State private var searchText = ""
+    /// Perf C: debounced mirror of `searchText`. Updated on a 200ms
+    /// .task(id:) so visibleProducts re-filters once per pause rather
+    /// than on every keystroke.
+    @State private var debouncedSearch = ""
     @State private var showFilters = false
     /// Local merch-size filter state. Variant titles carry the size
     /// label (e.g. "XS"); kept here rather than in the shared Filters
@@ -60,7 +64,7 @@ struct ProductsView: View {
     }
 
     private var visibleProducts: [Product] {
-        viewModel.products.search(text: searchText)
+        viewModel.products.search(text: debouncedSearch)
             .sorted { $0.sortOrder < $1.sortOrder }
             .filter { product in
                 // No size selected -> show everything (after search).
@@ -221,7 +225,7 @@ struct ProductsView: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
-                if !showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {
+                if !showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documentsById[docId] {
                     NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
                         Image(systemName: "info.circle")
                     }
@@ -243,6 +247,10 @@ struct ProductsView: View {
                 showFilters: $showFilters
             )
         }
+        .task(id: searchText) {
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            if !Task.isCancelled { debouncedSearch = searchText }
+        }
         .analyticsScreen(name: "ProductsView")
     }
 
@@ -254,7 +262,7 @@ struct ProductsView: View {
                 Divider()
                 Group {
                     if let id = ipadSelectedProductId,
-                       let product = viewModel.products.first(where: { $0.id == id }) {
+                       let product = viewModel.productsById[id] {
                         ProductView(product: product)
                             .id(id)
                     } else {
@@ -278,7 +286,7 @@ struct MerchInfo: View {
     @Environment(InfoViewModel.self) private var viewModel
     
     var body: some View {
-        if showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documents.first(where: {$0.id == docId}) {
+        if showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documentsById[docId] {
             NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
                 HStack {
                     Button {

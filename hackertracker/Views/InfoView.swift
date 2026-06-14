@@ -25,6 +25,10 @@ struct InfoView: View {
     @State private var appStoreVersion: String?
     @State private var showOpenUrl = false
     @State private var path = NavigationPath()
+    /// QA-only flag flipped by the /404, /error, /debug/404 deep-link
+    /// routes. Presents _04View as a sheet so the QA path doesn't have
+    /// to fight NavigationStack races during cold launch.
+    @State private var debug404Visible: Bool = false
     @State private var sharedEvents:[Event] = []
     /// Combined-bookmarks-across-conferences store. Refreshed via .task(id:)
     /// whenever bookmarks or the conferences list changes.
@@ -36,6 +40,13 @@ struct InfoView: View {
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
     @State var rick: Int = 0
+    /// Easter-egg activation chain (7 taps on the version tag):
+    /// flip both AppStorage toggles, show a celebratory overlay for
+    /// 3s, then fire the rickroll. State is local so the overlay can
+    /// be triggered independently of the global enable flags.
+    @AppStorage("easterEgg") private var easterEgg: Bool = false
+    @State private var easterEggOverlayVisible: Bool = false
+    @Environment(\.colorScheme) private var easterEggOverlayColorScheme
     @State var schedule = UUID()
 
     var body: some View {
@@ -44,7 +55,7 @@ struct InfoView: View {
         // refresh when the active timezone shifts.
         let _ = DateFormatterUtility.shared.tzGeneration
         NavigationStack(path: $path) {
-            if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documents.first(where: {$0.id == emergId}) {
+            if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documentsById[emergId] {
                 NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
                     CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details" )
                         .frame(height: 40)
@@ -147,7 +158,7 @@ struct InfoView: View {
                             .font(.subheadline)
                         LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0 {
-                                if let doc = viewModel.documents.first(where: {$0.id == emergId}) {
+                                if let doc = viewModel.documentsById[emergId] {
                                     NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
                                         CardView(systemImage: "doc", text: doc.title, color: ThemeColors.red)
                                     }
@@ -387,6 +398,19 @@ struct InfoView: View {
                                     }
                                 }
 
+                            case "/404", "/error", "/debug/404":
+                                // QA-only route. Present _04View as a sheet
+                                // rather than push onto NavigationStack —
+                                // path mutations during deep-link launch
+                                // race with tab-switch teardown and get
+                                // silently dropped. Sheet state is
+                                // independent of the navigation path so it
+                                // always survives.
+                                Log.app.info("deep link: forced 404 debug route")
+                                if tabSelection != 1 { tabSelection = 1 }
+                                DispatchQueue.main.async {
+                                    debug404Visible = true
+                                }
                             default:
                                 Log.app.error("deep link: unknown path \(url.path, privacy: .public)")
                             }
@@ -396,12 +420,21 @@ struct InfoView: View {
                        
                 })
             }
+            .sheet(isPresented: $debug404Visible) {
+                _04View(message: "Debug 404 ghost")
+            }
+            .overlay {
+                if easterEggOverlayVisible {
+                    easterEggActivatedOverlay
+                        .transition(.opacity)
+                }
+            }
             .navigationDestination(for: String.self) { value in
                 switch value {
                 case "SharedEvents":
                     EventScrollView(events:
                         sharedEvents
-                            .filters(typeIds: filters.filters, bookmarks: bookmarks.map { $0.id }, tagTypes: viewModel.tagtypes)
+                            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
                             .search(text: searchText, speakers: viewModel.speakers)
                             .eventDayGroup(
                                 showLocaltime: showLocaltime, conference: viewModel.conference
@@ -450,8 +483,12 @@ struct InfoView: View {
                     let results = json["results"] as? [[String: Any]],
                     let latestAppStoreVersion = results.first?["version"] as? String {
                         if latestAppStoreVersion.compare(currentVersion, options: .numeric) == .orderedDescending {
-                            self.appStoreVersion = latestAppStoreVersion
-                            self.showUpdateButton = true
+                            // URLSession completion runs off the main actor;
+                            // hop back before mutating @State properties.
+                            Task { @MainActor in
+                                self.appStoreVersion = latestAppStoreVersion
+                                self.showUpdateButton = true
+                            }
                         }
                     }
             } catch {
@@ -479,13 +516,59 @@ struct InfoView: View {
 
     func tapped() {
         rick += 1
-        if rick >= 7 {
-            Log.ui.debug("easter egg: roll away")
+        guard rick >= 7 else { return }
+        Log.ui.debug("easter egg: enabling + rickroll")
+        rick = 0
+        // Flip the AppStorage toggles so the rest of the app picks up
+        // the new state. viewModel mirrors easterEgg so the watermark
+        // overlay in ContentView starts pulsing immediately.
+        easterEgg = true
+        colorMode = true
+        viewModel.easterEgg = true
+        // Show the celebratory overlay…
+        withAnimation(.easeInOut(duration: 0.25)) {
+            easterEggOverlayVisible = true
+        }
+        // …hold for 3s, then dismiss and fire the rickroll.
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            withAnimation(.easeInOut(duration: 0.25)) {
+                easterEggOverlayVisible = false
+            }
+            // Tiny pause so the overlay's fade-out animation reads
+            // before we hand off to Safari/YouTube.
+            try? await Task.sleep(nanoseconds: 250_000_000)
             if let url = URL(string: "https://www.youtube.com/watch?v=xMHJGd3wwZk") {
                 openURL(url)
             }
-            rick = 0
         }
+    }
+
+    /// Big, brief celebration when the 7-tap chord lands. Renders the
+    /// beezle image (light-mode safe via .beezleAdaptiveColor) on a
+    /// dimmed scrim so it stands out regardless of background.
+    @ViewBuilder private var easterEggActivatedOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.55)
+                .ignoresSafeArea()
+            VStack(spacing: 16) {
+                Image("beezle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 140, height: 140)
+                    .beezleAdaptiveColor(easterEggOverlayColorScheme)
+                Text("Easter Eggs Enabled")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.white)
+            }
+            .padding(28)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(.ultraThinMaterial)
+            )
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Easter Eggs Enabled")
     }
 }
 
@@ -509,7 +592,7 @@ struct MenuView: View {
             ForEach(menu.items.sorted(by: {$0.sortOrder < $1.sortOrder}), id: \.id) { item in
                 switch item.function {
                 case "document":
-                    if let doc = self.viewModel.documents.first(where: { $0.id == item.documentId }) {
+                    if let docId = item.documentId, let doc = self.viewModel.documentsById[docId] {
                         NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
                             CardView(systemImage: item.symbol ?? "doc", text: doc.title, color: colorMode ? ThemeColors.blue : Color(.systemGray6))
                             }

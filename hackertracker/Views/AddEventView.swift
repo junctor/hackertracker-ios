@@ -29,7 +29,7 @@ struct AddContent: UIViewControllerRepresentable {
     
     func makeUIViewController(context: Context) -> AddContentController {
         let acc = AddContentController()
-        acc.setContent(newEvent: content, newSession: session, newLocation: viewModel.locations.first(where: {$0.id == session.locationId}))
+        acc.setContent(newEvent: content, newSession: session, newLocation: viewModel.locationsById[session.locationId])
         return acc
     }
     
