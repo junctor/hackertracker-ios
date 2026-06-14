@@ -14,6 +14,33 @@ import Foundation
 import SwiftUI
 
 enum CustomEventUtility {
+    // MARK: - Notification helpers
+
+    /// Schedule or refresh a notification for the supplied event.
+    /// No-op when notificationsEnabled is false or when the event
+    /// is missing required fields. Uses the global "Before Event"
+    /// minutes setting (@AppStorage("notifyAt")), defaulting to 20
+    /// to match the rest of the app.
+    private static func scheduleNotificationIfNeeded(_ event: CustomEvent) {
+        guard event.notificationsEnabled,
+              let begin = event.beginTimestamp,
+              let title = event.title else { return }
+        let notifyAt = UserDefaults.standard.object(forKey: "notifyAt") as? Int ?? 20
+        let date = begin.addingTimeInterval(Double(-notifyAt) * 60)
+        let id = notificationID(for: event)
+        let location = event.location ?? ""
+        // Cancel any previous schedule under the same id, then re-add.
+        NotificationUtility.removeNotification(id: id)
+        NotificationUtility.scheduleNotification(date: date, id: id, title: title, location: location)
+    }
+
+    /// Remove any pending notification associated with the supplied
+    /// event. Safe to call regardless of notificationsEnabled — the
+    /// id is deterministic so we always know what to cancel.
+    private static func cancelNotification(_ event: CustomEvent) {
+        NotificationUtility.removeNotification(id: notificationID(for: event))
+    }
+
     // MARK: - Create
 
     /// Insert a new CustomEvent with the supplied fields. Returns the
@@ -47,7 +74,9 @@ enum CustomEventUtility {
         event.notificationsEnabled = notificationsEnabled
         event.createdAt = now
         event.updatedAt = now
-        return save(context: context, op: "create") ? event : nil
+        guard save(context: context, op: "create") else { return nil }
+        scheduleNotificationIfNeeded(event)
+        return event
     }
 
     // MARK: - Update
@@ -58,13 +87,22 @@ enum CustomEventUtility {
     @discardableResult
     static func touchAndSave(context: NSManagedObjectContext, event: CustomEvent) -> Bool {
         event.updatedAt = Date()
-        return save(context: context, op: "update")
+        let ok = save(context: context, op: "update")
+        if ok {
+            if event.notificationsEnabled {
+                scheduleNotificationIfNeeded(event)
+            } else {
+                cancelNotification(event)
+            }
+        }
+        return ok
     }
 
     // MARK: - Delete
 
     @discardableResult
     static func delete(context: NSManagedObjectContext, event: CustomEvent) -> Bool {
+        cancelNotification(event)
         context.delete(event)
         return save(context: context, op: "delete")
     }
@@ -75,7 +113,10 @@ enum CustomEventUtility {
         fr.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         do {
             if let rows = try context.fetch(fr) as? [NSManagedObject] {
-                for r in rows { context.delete(r) }
+                for r in rows {
+                    if let ce = r as? CustomEvent { cancelNotification(ce) }
+                    context.delete(r)
+                }
             }
         } catch {
             Log.coreData.error("CustomEvent delete by id fetch failed: \(error as NSError, privacy: .public)")

@@ -32,11 +32,17 @@ struct EventsView: View {
     /// button. Same state used by both the iPhone and iPad code paths.
     @State private var showingCustomEventForm: Bool = false
 
+    /// User toggle (defaulting on) for whether custom events appear in
+    /// the schedule at all. Lives next to the rest of the schedule
+    /// state so its value is read inline with the synthesizer.
+    @AppStorage("showCustomEvents") private var showCustomEventsInSchedule: Bool = true
+
     /// Firestore events + synthesized CustomEvents that target the
     /// currently-selected conference. Three Schedule call sites read
     /// this in place of viewModel.events so user-created rows flow
     /// through filters / search / eventDayGroup naturally.
     private var scheduleEvents: [Event] {
+        guard showCustomEventsInSchedule else { return viewModel.events }
         let code = selected.code
         let synthesized = customEvents.compactMap { Event.from(custom: $0, conferenceCode: code) }
         return viewModel.events + synthesized
