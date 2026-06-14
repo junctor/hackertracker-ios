@@ -51,6 +51,7 @@ struct SettingsView: View {
                         VStack(spacing: 12) {
                             VStack(spacing: 0) { StartScreenPickerView() }
                             VStack(spacing: 0) { NotificationSettingsView() }
+                            VStack(spacing: 0) { AISummarySettingsView() }
                             VStack(spacing: 0) { EasterEggSettingsView() }
                             Spacer(minLength: 0)
                         }
@@ -64,6 +65,7 @@ struct SettingsView: View {
                     ShowPastEventsSettingsView()
                     ShowNewsSettingsView()
                     NotificationSettingsView()
+                    AISummarySettingsView()
                     EasterEggSettingsView()
                 }
             }
@@ -436,5 +438,40 @@ struct ShowLocaltimeSettingsView: View {
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         SettingsView()
+    }
+}
+
+/// Toggle for the on-device Apple Intelligence summary feature.
+/// Visibility rules:
+///   - Hidden entirely on older iOS / unsupported builds
+///     (AISummaryAvailability.isPossiblyAvailable == false), so we
+///     don't tease a feature the user can't ever turn on.
+///   - Shown but disabled when the OS supports the framework but the
+///     model isn't currently available (e.g. still downloading,
+///     low-power mode). Caption explains why.
+///   - Fully interactive otherwise.
+struct AISummarySettingsView: View {
+    @AppStorage("aiSummaries") var aiSummaries: Bool = false
+
+    var body: some View {
+        if AISummaryAvailability.isPossiblyAvailable {
+            VStack(alignment: .leading, spacing: 4) {
+                Toggle("AI Summaries", isOn: $aiSummaries)
+                    .disabled(!AISummaryAvailability.isSupported)
+                    .onChange(of: aiSummaries) { _, value in
+                        Log.ui.debug("aiSummaries=\(value)")
+                    }
+                Text("Show one-sentence summaries of talk descriptions, generated on-device by Apple Intelligence. Summaries are cached and only generated for descriptions longer than 100 characters.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                if !AISummaryAvailability.isSupported {
+                    Text("Apple Intelligence isn\u{2019}t available on this device right now.")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .padding(5)
+            Divider()
+        }
     }
 }
