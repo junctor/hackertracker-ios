@@ -14,6 +14,16 @@ struct ContentCell: View {
     @Environment(InfoViewModel.self) private var viewModel
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
+    /// Step 3 of the AI summary spike: warm the on-device LLM
+    /// cache when this cell materializes IF the user has opted in.
+    /// TalkSummaryCache.warm is a no-op when the device can't run
+    /// FoundationModels, so this stays safe on iOS < 26.
+    @AppStorage("aiSummaries") private var aiSummaries: Bool = false
+    /// Whether to present the original description sheet in response
+    /// to a long-press. Only used when an AI summary is shown — long-
+    /// pressing a cell with no summary is a no-op so we don't compete
+    /// with the row's regular NavigationLink tap.
+    @State private var showingOriginalDescription: Bool = false
 
     func bookmarkAction() {
         for s in content.sessions {
@@ -65,6 +75,27 @@ struct ContentCell: View {
                                     .font(.subheadline)
                                     .multilineTextAlignment(.leading)
                             }
+                            // AI summary slot: only shown when the user
+                            // toggle is on AND the cache has a fresh
+                            // summary for this content. The sparkle icon
+                            // matches the system convention Mail/Messages
+                            // use to mark AI-generated text.
+                            if aiSummaries,
+                               let summary = TalkSummaryCache.shared.summary(for: content) {
+                                HStack(alignment: .top, spacing: 4) {
+                                    Image(systemName: "sparkles")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .padding(.top, 2)
+                                    Text(summary)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.leading)
+                                }
+                                .accessibilityElement(children: .combine)
+                                .accessibilityLabel("AI summary: \(summary)")
+                            }
                             ShowEventCellTags(tagIds: content.tagIds, minWidth: 150)
                         }
                     }
@@ -81,11 +112,36 @@ struct ContentCell: View {
                     .buttonStyle(PlainButtonStyle())
                 }
             }
-        }.swipeActions {
+        }
+        .swipeActions {
             Button(isBookmarked ? "Remove Bookmark" : "Bookmark") {
                 bookmarkAction()
             }.buttonStyle(DefaultButtonStyle())
                 .tint(isBookmarked ? .red : .yellow)
+        }
+        // LazyVStack inside ContentListView materializes cells as they
+        // scroll into view; this .task runs once per materialization.
+        // Cheap no-op when aiSummaries is off or the device can't run
+        // FoundationModels, and the cache itself dedups concurrent
+        // requests so there's no risk of spamming.
+        .task {
+            if aiSummaries {
+                TalkSummaryCache.shared.warm(content)
+            }
+        }
+        // Long-press to peek at the original description, but only
+        // when there's a summary on the row to compare against — a
+        // bare long-press on a non-AI cell would feel inconsistent.
+        .onLongPressGesture(minimumDuration: 0.5) {
+            if aiSummaries, TalkSummaryCache.shared.summary(for: content) != nil {
+                showingOriginalDescription = true
+            }
+        }
+        .sheet(isPresented: $showingOriginalDescription) {
+            ContentDescriptionPeekSheet(
+                title: content.title,
+                description: content.description
+            )
         }
     }
     
@@ -105,5 +161,42 @@ extension Sequence where Iterator.Element : Hashable {
     {
         let sequenceSet = Set(sequence)
         return self.contains(where: sequenceSet.contains)
+    }
+}
+
+/// Lightweight peek sheet shown via long-press on an AI-summarized
+/// row. Surfaces the full source description so the user can verify
+/// what the LLM compressed.
+struct ContentDescriptionPeekSheet: View {
+    let title: String
+    let description: String
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    Text(title)
+                        .font(.title2.weight(.semibold))
+                    Label("Original description", systemImage: "text.alignleft")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(description)
+                        .font(.body)
+                        .multilineTextAlignment(.leading)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+            .navigationBarTitleDisplayMode(.inline)
+        }
+        .presentationDetents([.medium, .large])
     }
 }

@@ -15,6 +15,10 @@ struct EventCell: View {
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
+    /// Mirror of ContentCellView's AI summary plumbing — Schedule
+    /// tab rows now opt into on-device summaries the same way.
+    @AppStorage("aiSummaries") private var aiSummaries: Bool = false
+    @State private var showingOriginalDescription: Bool = false
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     
 
@@ -70,6 +74,25 @@ struct EventCell: View {
                                 Text(l.name).font(.caption2)
                                     .multilineTextAlignment(.leading)
                             }
+                            // AI summary slot. Same gating and styling as
+                            // ContentCellView so Schedule + All Content
+                            // share the affordance.
+                            if aiSummaries,
+                               let summary = TalkSummaryCache.shared.summary(for: event) {
+                                HStack(alignment: .top, spacing: 4) {
+                                    Image(systemName: "sparkles")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .padding(.top, 2)
+                                    Text(summary)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.leading)
+                                }
+                                .accessibilityElement(children: .combine)
+                                .accessibilityLabel("AI summary: \(summary)")
+                            }
                             ShowEventCellTags(tagIds: event.tagIds)
                         }
                     }
@@ -87,11 +110,33 @@ struct EventCell: View {
                 }
             }
 
-        }.swipeActions {
+        }
+        .swipeActions {
             Button(bookmarkIds.contains(Int32(event.id)) ? "Remove Bookmark" : "Bookmark") {
                 bookmarkAction()
             }.buttonStyle(DefaultButtonStyle())
                 .tint(bookmarkIds.contains(Int32(event.id)) ? .red : .yellow)
+        }
+        // Opportunistic warm on cell materialization, mirroring
+        // ContentCellView. Gated on user toggle + cache's own
+        // capability + 100-char checks.
+        .task {
+            if aiSummaries {
+                TalkSummaryCache.shared.warm(event)
+            }
+        }
+        // Long-press peeks at the original description, but only
+        // when a summary is being displayed.
+        .onLongPressGesture(minimumDuration: 0.5) {
+            if aiSummaries, TalkSummaryCache.shared.summary(for: event) != nil {
+                showingOriginalDescription = true
+            }
+        }
+        .sheet(isPresented: $showingOriginalDescription) {
+            ContentDescriptionPeekSheet(
+                title: event.title,
+                description: event.description
+            )
         }
     }
     
