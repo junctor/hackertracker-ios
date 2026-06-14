@@ -106,14 +106,57 @@ struct SettingsView: View {
 struct EasterEggSettingsView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("easterEgg") var easterEgg: Bool = false
-    
+    @AppStorage("easterEggMaxOpacity") var easterEggMaxOpacity: Double = 0.20
+    @AppStorage("easterEggPeriod") var easterEggPeriod: Double = 12.0
+
     var body: some View {
-        VStack(alignment: .leading) {
-                Toggle("Easter Eggs", isOn: $easterEgg)
-                    .onChange(of: easterEgg) { _, value in 
-                        Log.ui.debug("easterEgg=\(value)")
-                        viewModel.easterEgg = value
+        VStack(alignment: .leading, spacing: 12) {
+            Toggle("Easter Eggs", isOn: $easterEgg)
+                .onChange(of: easterEgg) { _, value in
+                    Log.ui.debug("easterEgg=\(value)")
+                    viewModel.easterEgg = value
+                }
+            if easterEgg {
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Peak Opacity")
+                        Spacer()
+                        Text(String(format: "%.0f%%", easterEggMaxOpacity * 100))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
                     }
+                    // Floor at 0.05 so accidental drag to zero doesn't
+                    // make the feature look broken; ceiling at 1.0.
+                    Slider(value: $easterEggMaxOpacity, in: 0.05...1.0, step: 0.05)
+                    Text("How bright the background beezle gets at the peak of its pulse.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text("Pulse Period")
+                        Spacer()
+                        Text(easterEggPeriod <= 0
+                             ? "off"
+                             : String(format: "%.0fs", easterEggPeriod))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                    // 0 = hold peak; otherwise a full sine cycle every
+                    // N seconds. Cap at 60 because anything slower than
+                    // a minute reads as "off" anyway.
+                    Stepper("Period",
+                            value: $easterEggPeriod,
+                            in: 0.0...60.0,
+                            step: 1.0)
+                        .labelsHidden()
+                    Text("Seconds for a full fade in + out. 0 holds the ghost steady at the peak opacity.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
         .padding(5)
         Divider()

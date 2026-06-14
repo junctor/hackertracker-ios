@@ -224,20 +224,29 @@ struct ContentView_Previews: PreviewProvider {
 private struct BeezleEasterEggOverlay: View {
     @AppStorage("easterEgg") var easterEgg: Bool = false
     @AppStorage("colorMode") var colorMode: Bool = false
+    /// User-tunable peak opacity of the breathing watermark. Floor at
+    /// 0.05 so we never persist a fully-invisible setting that looks
+    /// like the feature is broken; ceiling at 1.0 if the user wants
+    /// the ghost solid-on at peak.
+    @AppStorage("easterEggMaxOpacity") var easterEggMaxOpacity: Double = 0.20
+    /// Period of the sine-wave pulse, in seconds. 0 turns the pulse
+    /// off entirely — the watermark stays held at peak opacity.
+    @AppStorage("easterEggPeriod") var easterEggPeriod: Double = 12.0
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         if easterEgg {
             TimelineView(.animation(minimumInterval: 1.0/30.0)) { context in
                 let t = context.date.timeIntervalSinceReferenceDate
-                // Sine wave for opacity, period ~12s, range 0.0..0.20.
-                // Floor at zero so the ghost disappears completely; peak
-                // capped at 0.20 so the watermark never gets visible
-                // enough to disrupt reading the UI underneath. The slow
-                // 12s period keeps the pulse subtle in the periphery —
-                // a faster cycle pulls the eye away from real content.
-                let phase = sin(t * (.pi * 2 / 12.0))
-                let opacity = (phase + 1) / 2 * 0.20
+                // Opacity. easterEggPeriod == 0 holds the ghost at
+                // peak; otherwise we draw a sine wave from 0 up to
+                // easterEggMaxOpacity with the user-chosen period.
+                let peak = max(0.05, min(easterEggMaxOpacity, 1.0))
+                let opacity: Double = {
+                    if easterEggPeriod <= 0 { return peak }
+                    let phase = sin(t * (.pi * 2 / easterEggPeriod))
+                    return (phase + 1) / 2 * peak
+                }()
                 // Hue cycle, period ~12s. Only consulted when colorMode
                 // is on; otherwise we fall back to system primary.
                 let hue = (t.truncatingRemainder(dividingBy: 12.0)) / 12.0
