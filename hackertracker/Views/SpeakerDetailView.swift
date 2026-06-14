@@ -255,13 +255,15 @@ struct SpeakerEventView: View {
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
         HStack {
-            // Speaker event chip stripe: fall back to .purple when the
-            // event has no tagIds. Same defensive shape as the cell
-            // helpers above; protects custom events from crashing the
-            // speaker schedule when they share a tag with a speaker.
-            Rectangle().fill(
-                event.tagIds.first.map { getEventTagColorBackground(id: $0) } ?? .purple
-            )
+            // Speaker event chip stripe. Custom events win with their
+            // user-chosen color; otherwise fall through to the
+            // first-tag color, and finally .purple if nothing's set.
+            Rectangle().fill({
+                if let hex = event.customColorHex, let ui = UIColor(hex: hex) {
+                    return Color(uiColor: ui)
+                }
+                return event.tagIds.first.map { getEventTagColorBackground(id: $0) } ?? .purple
+            }())
                 .frame(width: 6)
             VStack(alignment: .leading, spacing: 3) {
                 Text(event.title)

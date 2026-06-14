@@ -25,6 +25,11 @@ struct Event: Codable, Identifiable {
     /// rows from Firestore-decoded ones. NOT part of CodingKeys, so
     /// Firestore-decoded Events leave this nil automatically.
     var customEventID: UUID? = nil
+    /// Custom-event row stripe color, copied from CustomEvent.colorHex
+    /// by the synthesizer. Same NOT-in-CodingKeys treatment so Firestore
+    /// events stay nil and the cell helpers fall through to the existing
+    /// tag-color lookup.
+    var customColorHex: String? = nil
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -90,7 +95,8 @@ extension Event {
             people: [],
             tagIds: [],
             relatedIds: nil,
-            customEventID: id
+            customEventID: id,
+            customColorHex: custom.colorHex
         )
     }
 }

@@ -141,9 +141,17 @@ struct EventCell: View {
     }
     
     func getEventTagColorBackground() -> Color {
-        // First tag id can be missing entirely (custom events have an
-        // empty tagIds array). Guard with .first to avoid an index
-        // crash. Default is .purple, matching the original fallback.
+        // Custom events override the tag-derived color with whatever
+        // the user picked in the form. Falls back to the default if
+        // the stored hex is unparseable.
+        if let customHex = event.customColorHex,
+           let ui = UIColor(hex: customHex) {
+            return Color(uiColor: ui)
+        }
+        // Otherwise: first-tag color, guarded with .first so an empty
+        // tagIds array (custom event with no override, or any sparse
+        // Firestore data) can't crash. Default is .purple to match
+        // the historical fallback.
         guard let firstTagId = event.tagIds.first,
               let tag = viewModel.tagsById[firstTagId],
               let colorHex = tag.colorBackground,
