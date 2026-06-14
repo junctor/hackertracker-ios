@@ -18,6 +18,11 @@ struct ContentListView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var filters: Filters
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    @FetchRequest(
+        sortDescriptors: [],
+        predicate: NSPredicate(format: "targetKind == %@", NoteKind.content.rawValue)
+    )
+    var noteContentTargets: FetchedResults<Note>
 
     // Polish: manual search affordance mirroring the schedule. The search field
     // is hidden on initial load and toggled by a magnifying glass in the
@@ -234,6 +239,7 @@ struct ContentListView: View {
             try? await Task.sleep(nanoseconds: 200_000_000)
             if !Task.isCancelled { debouncedSearch = searchText }
         }
+        .environment(\.noteContentIDs, Set(noteContentTargets.map { $0.targetID }))
         .analyticsScreen(name: "ContentListView")
     }
 
@@ -268,6 +274,11 @@ struct ContentData: View {
     let content: [Content]
     @EnvironmentObject var theme: Theme
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    @FetchRequest(
+        sortDescriptors: [],
+        predicate: NSPredicate(format: "targetKind == %@", NoteKind.content.rawValue)
+    )
+    var noteContentTargets: FetchedResults<Note>
     /// iPad split-view: row taps update detail column instead of pushing.
     @Environment(\.iPadContentSelection) private var iPadContentSelection
 

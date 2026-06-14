@@ -20,14 +20,11 @@ struct EventCell: View {
     @AppStorage("aiSummaries") private var aiSummaries: Bool = false
     @State private var showingOriginalDescription: Bool = false
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
-    /// All notes scoped to the .event kind. We don't ask for a
-    /// per-cell FetchRequest because that creates one Core Data
-    /// subscription per visible row; one shared filter is cheap.
-    @FetchRequest(
-        sortDescriptors: [],
-        predicate: NSPredicate(format: "targetKind == %@", NoteKind.event.rawValue)
-    )
-    var notesForEvents: FetchedResults<Note>
+    /// Set of event ids that have a saved private Note. Published by
+    /// EventsView (which holds the single Note FetchRequest); defaults
+    /// to empty when this cell renders inside a screen that doesn't
+    /// publish the value (GlobalSearchView, SharedScheduleView, etc.).
+    @Environment(\.noteEventIDs) private var noteEventIDs
     
 
     func bookmarkAction() {

@@ -36,6 +36,14 @@ struct EventsView: View {
         predicate: NSPredicate(format: "targetKind == %@", NoteKind.event.rawValue)
     )
     var noteTargets: FetchedResults<Note>
+
+    /// Set of event ids that currently have a saved private Note.
+    /// Recomputed on every body invocation; cheap (one Set
+    /// allocation against ~tens of rows). Drives the noteEventIDs
+    /// env value AND the eventNoteIDs argument to [Event].filters.
+    private var noteEventIDsForScope: Set<Int32> {
+        Set(noteTargets.map { $0.targetID })
+    }
     /// Drives the Add Custom Event modal sheet from the toolbar +
     /// button. Same state used by both the iPhone and iPad code paths.
     @State private var showingCustomEventForm: Bool = false
@@ -121,7 +129,7 @@ struct EventsView: View {
           // Dates first (ascending; eventDayGroup already sorts that way),
           // then Top / Now / Next / Bottom.
           ForEach(
-              scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: Set(noteTargets.map { $0.targetID }))
+              scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope)
                   .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
           ) { day, _ in
               Button(day) {
@@ -195,7 +203,7 @@ struct EventsView: View {
         EventScrollView(
           events:
             scheduleEvents
-            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: Set(noteTargets.map { $0.targetID }))
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope)
             .search(text: debouncedSearch, speakers: viewModel.speakers)
             .eventDayGroup(
               showLocaltime: showLocaltime, conference: viewModel.conference
@@ -297,6 +305,7 @@ struct EventsView: View {
         try? await Task.sleep(nanoseconds: 250_000_000)
         if !Task.isCancelled { debouncedSearch = searchText }
       }
+      .environment(\.noteEventIDs, noteEventIDsForScope)
       .sheet(isPresented: $showingCustomEventForm) {
         CustomEventFormView(existing: nil)
           .environment(\.managedObjectContext, viewContext)
@@ -337,6 +346,7 @@ struct EventsView: View {
       }
       .environment(\.iPadContentSelection, $ipadSelectedContentId)
       .environment(\.iPadCustomEventSelection, $ipadSelectedCustomEventId)
+      .environment(\.noteEventIDs, noteEventIDsForScope)
       .sheet(isPresented: $showFilters) {
         EventFilters(
           tagtypes: viewModel.tagtypes.filter {
@@ -383,7 +393,7 @@ struct EventsView: View {
         EventScrollView(
           events:
             scheduleEvents
-            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: Set(noteTargets.map { $0.targetID }))
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope)
             .search(text: debouncedSearch, speakers: viewModel.speakers).eventDayGroup(
                 showLocaltime: showLocaltime, conference: viewModel.conference
             ),
@@ -435,7 +445,7 @@ struct EventsView: View {
                   }
                   Divider()
               ForEach(
-                scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: Set(noteTargets.map { $0.targetID }))
+                scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope)
                     .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
               ) { day, _ in
                 Button(day) {

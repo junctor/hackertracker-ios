@@ -134,3 +134,34 @@ extension EnvironmentValues {
         set { self[IPadCustomEventSelectionKey.self] = newValue }
     }
 }
+
+// MARK: - Notes badge plumbing
+//
+// EventCellView and ContentCellView each need to know "does this row
+// have a saved private Note?" Per-cell @FetchRequest worked in some
+// contexts but not others (LazyVStack reentrancy / SwiftUI macro
+// timing). The robust fix is the same parent-publishes-into-env
+// pattern we use for iPad selection bindings: the parent view holds
+// a single FetchedResults<Note> + computes a Set of targetIDs, then
+// publishes the set via .environment(\.noteEventIDs, ...) /
+// .environment(\.noteContentIDs, ...). Cells read the value directly.
+//
+// Defaults to empty so cells used in screens that don't publish (e.g.
+// GlobalSearchView) silently skip the pencil badge.
+private struct NoteEventIDsKey: EnvironmentKey {
+    static let defaultValue: Set<Int32> = []
+}
+private struct NoteContentIDsKey: EnvironmentKey {
+    static let defaultValue: Set<Int32> = []
+}
+
+extension EnvironmentValues {
+    var noteEventIDs: Set<Int32> {
+        get { self[NoteEventIDsKey.self] }
+        set { self[NoteEventIDsKey.self] = newValue }
+    }
+    var noteContentIDs: Set<Int32> {
+        get { self[NoteContentIDsKey.self] }
+        set { self[NoteContentIDsKey.self] = newValue }
+    }
+}
