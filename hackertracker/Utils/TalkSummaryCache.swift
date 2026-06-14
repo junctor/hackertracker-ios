@@ -22,6 +22,18 @@ import CryptoKit
 import FoundationModels
 #endif
 
+/// Common shape shared by anything we know how to summarize. Lets
+/// the cache key by stable Int id + accept either a `Content`
+/// (All Content / Talks tab) or an `Event` (Schedule tab) without
+/// duplicating method bodies.
+protocol SummarizableTalk {
+    var id: Int { get }
+    var description: String { get }
+}
+
+extension Content: SummarizableTalk {}
+extension Event: SummarizableTalk {}
+
 @Observable
 @MainActor
 final class TalkSummaryCache {
@@ -52,10 +64,10 @@ final class TalkSummaryCache {
 
     private var memory: [Int: Entry] = [:]
     @ObservationIgnored private var inflight: [Int: Task<Void, Never>] = [:]
-    /// FIFO queue of contents waiting for a slot. Stored as (id, content)
-    /// so we can pump it in order without depending on Dictionary's
-    /// unspecified iteration order.
-    @ObservationIgnored private var pending: [(id: Int, content: Content)] = []
+    /// FIFO queue of items waiting for a slot. We store id + the raw
+    /// description string rather than the SummarizableTalk itself so
+    /// the queue isn't tied to either model type's lifecycle.
+    @ObservationIgnored private var pending: [(id: Int, description: String)] = []
 
     private init() {
         load()
@@ -68,14 +80,14 @@ final class TalkSummaryCache {
     /// when there's no summary yet OR when the description has
     /// changed since we last summarized (the stale entry is dropped
     /// to force a re-warm).
-    func summary(for content: Content) -> String? {
-        guard let entry = memory[content.id] else { return nil }
-        let currentHash = Self.stableHash(content.description)
+    func summary(for item: any SummarizableTalk) -> String? {
+        guard let entry = memory[item.id] else { return nil }
+        let currentHash = Self.stableHash(item.description)
         if entry.descriptionHash == currentHash {
             return entry.summary
         }
         // Description changed -> stale. Drop and let the next warm refill.
-        memory.removeValue(forKey: content.id)
+        memory.removeValue(forKey: item.id)
         persist()
         return nil
     }
@@ -92,28 +104,28 @@ final class TalkSummaryCache {
     ///   - the description is missing or under `minDescriptionChars`,
     ///   - we already have an up-to-date summary, or
     ///   - there's already an inflight task for this id.
-    func warm(_ content: Content) {
+    func warm(_ item: any SummarizableTalk) {
         guard AISummaryAvailability.isSupported else { return }
-        let trimmed = content.description.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = item.description.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count >= minDescriptionChars else { return }
-        guard summary(for: content) == nil else { return }
-        guard inflight[content.id] == nil else { return }
+        guard summary(for: item) == nil else { return }
+        guard inflight[item.id] == nil else { return }
 
         if inflight.count >= maxConcurrent {
-            if !pending.contains(where: { $0.id == content.id }) {
-                pending.append((content.id, content))
+            if !pending.contains(where: { $0.id == item.id }) {
+                pending.append((item.id, item.description))
             }
             return
         }
-        spawn(for: content)
+        spawn(id: item.id, description: item.description)
     }
 
     // MARK: - Generation
 
-    private func spawn(for content: Content) {
+    private func spawn(id: Int, description: String) {
         #if canImport(FoundationModels)
         if #available(iOS 26.0, *) {
-            spawnReal(for: content)
+            spawnReal(id: id, description: description)
             return
         }
         #endif
@@ -124,9 +136,7 @@ final class TalkSummaryCache {
 
     #if canImport(FoundationModels)
     @available(iOS 26.0, *)
-    private func spawnReal(for content: Content) {
-        let id = content.id
-        let description = content.description
+    private func spawnReal(id: Int, description: String) {
         let prompt = Self.prompt(for: description)
 
         let task = Task { @MainActor [weak self] in
@@ -163,9 +173,13 @@ final class TalkSummaryCache {
     private func pump() {
         while inflight.count < maxConcurrent, !pending.isEmpty {
             let next = pending.removeFirst()
-            // Re-check we don't already have something for this id.
-            guard inflight[next.id] == nil, summary(for: next.content) == nil else { continue }
-            spawn(for: next.content)
+            // Re-check we don't already have a fresh entry by hashing.
+            // We can't call summary(for:) here without a SummarizableTalk,
+            // but checking the stored hash directly is equivalent.
+            let h = Self.stableHash(next.description)
+            if let e = memory[next.id], e.descriptionHash == h { continue }
+            guard inflight[next.id] == nil else { continue }
+            spawn(id: next.id, description: next.description)
         }
     }
 
