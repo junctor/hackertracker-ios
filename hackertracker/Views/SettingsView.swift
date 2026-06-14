@@ -52,6 +52,7 @@ struct SettingsView: View {
                             VStack(spacing: 0) { StartScreenPickerView() }
                             VStack(spacing: 0) { NotificationSettingsView() }
                             VStack(spacing: 0) { AISummarySettingsView() }
+                            VStack(spacing: 0) { ShowCustomEventsSettingsView() }
                             VStack(spacing: 0) { EasterEggSettingsView() }
                             Spacer(minLength: 0)
                         }
@@ -66,6 +67,7 @@ struct SettingsView: View {
                     ShowNewsSettingsView()
                     NotificationSettingsView()
                     AISummarySettingsView()
+                    ShowCustomEventsSettingsView()
                     EasterEggSettingsView()
                 }
             }
@@ -473,5 +475,24 @@ struct AISummarySettingsView: View {
             .padding(5)
             Divider()
         }
+    }
+}
+
+/// Settings row that lets the user hide custom events en masse.
+/// Hidden by EventsView.scheduleEvents — synthesizer skips when this
+/// is false. Defaults true: opting in to create custom events implies
+/// wanting them visible.
+struct ShowCustomEventsSettingsView: View {
+    @AppStorage("showCustomEvents") var showCustomEvents: Bool = true
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Toggle("Custom Events on Schedule", isOn: $showCustomEvents)
+            Text("Hide your custom events from the conference schedule. They\u{2019}re still stored locally and synced to your other devices.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(5)
+        Divider()
     }
 }

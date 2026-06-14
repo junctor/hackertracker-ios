@@ -29,6 +29,10 @@ struct InfoView: View {
     /// routes. Presents _04View as a sheet so the QA path doesn't have
     /// to fight NavigationStack races during cold launch.
     @State private var debug404Visible: Bool = false
+    /// Inbound CustomEventDraft decoded from a `hackertracker://import/customEvent`
+    /// deep link. When non-nil, the form sheet below presents in
+    /// create-mode pre-filled with this draft.
+    @State private var pendingCustomEventDraft: CustomEventDraft? = nil
     @State private var sharedEvents:[Event] = []
     /// Combined-bookmarks-across-conferences store. Refreshed via .task(id:)
     /// whenever bookmarks or the conferences list changes.
@@ -323,6 +327,18 @@ struct InfoView: View {
                 .analyticsScreen(name: "InfoView")
                 .environment(sharedSchedule)
                 .onOpenURL(perform: { url in
+                    // Custom-event import: bypasses the conference router
+                    // entirely. Decoded draft drives the create-mode form.
+                    if url.host == CustomEventShare.importHost,
+                       url.path == CustomEventShare.importPath {
+                        if let draft = CustomEventShare.draft(from: url) {
+                            Log.app.info("deep link: custom event import \(draft.title, privacy: .public)")
+                            pendingCustomEventDraft = draft
+                        } else {
+                            Log.app.error("deep link: invalid customEvent payload \(url, privacy: .public)")
+                        }
+                        return
+                    }
                     if let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false) {
                         let queryItems = urlComponents.queryItems
                         //let path = urlComponents.path
@@ -422,6 +438,10 @@ struct InfoView: View {
             }
             .sheet(isPresented: $debug404Visible) {
                 _04View(message: "Debug 404 ghost")
+            }
+            .sheet(item: $pendingCustomEventDraft) { draft in
+                CustomEventFormView(existing: nil, draft: draft)
+                    .environment(\.managedObjectContext, viewContext)
             }
             .overlay {
                 if easterEggOverlayVisible {

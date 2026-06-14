@@ -93,7 +93,11 @@ struct EventCell: View {
                                 .accessibilityElement(children: .combine)
                                 .accessibilityLabel("AI summary: \(summary)")
                             }
-                            ShowEventCellTags(tagIds: event.tagIds)
+                            ShowEventCellTags(
+                                tagIds: event.tagIds,
+                                customEvent: event.customEventID != nil,
+                                customColorHex: event.customColorHex
+                            )
                         }
                     }
                     
@@ -141,21 +145,55 @@ struct EventCell: View {
     }
     
     func getEventTagColorBackground() -> Color {
-        if let tag = viewModel.tagsById[event.tagIds[0]],
-           let colorHex = tag.colorBackground, let uicolor = UIColor(hex: colorHex) {
-            return Color(uiColor: uicolor)
+        // Custom events override the tag-derived color with whatever
+        // the user picked in the form. Falls back to the default if
+        // the stored hex is unparseable.
+        if let customHex = event.customColorHex,
+           let ui = UIColor(hex: customHex) {
+            return Color(uiColor: ui)
         }
-        return .purple
+        // Otherwise: first-tag color, guarded with .first so an empty
+        // tagIds array (custom event with no override, or any sparse
+        // Firestore data) can't crash. Default is .purple to match
+        // the historical fallback.
+        guard let firstTagId = event.tagIds.first,
+              let tag = viewModel.tagsById[firstTagId],
+              let colorHex = tag.colorBackground,
+              let uicolor = UIColor(hex: colorHex) else {
+            return .purple
+        }
+        return Color(uiColor: uicolor)
     }
 }
 
 struct ShowEventCellTags: View {
     var tagIds: [Int]
     var minWidth: CGFloat = 100
+    /// When true, prepend a synthetic "Custom Event" chip ahead of
+    /// the regular tag chips. Honors `customColorHex` when set so the
+    /// chip's dot matches the row stripe color the user picked.
+    var customEvent: Bool = false
+    var customColorHex: String? = nil
     @Environment(InfoViewModel.self) private var viewModel
+
+    private var customChipColor: Color {
+        if let hex = customColorHex, let ui = UIColor(hex: hex) {
+            return Color(uiColor: ui)
+        }
+        return .purple
+    }
 
     var body: some View {
         LazyVGrid(columns: [GridItem(.adaptive(minimum: minWidth))], alignment: .leading, spacing: 1) {
+            if customEvent {
+                HStack {
+                    Circle().foregroundColor(customChipColor)
+                        .frame(width: 8, height: 8, alignment: .center)
+                    Text("Custom Event").font(.caption)
+                        .multilineTextAlignment(.leading)
+                        .frame(alignment: .leading)
+                }
+            }
             ForEach(tagIds, id: \.self) { tagId in
                 if let tag = viewModel.tagsById[tagId] {
                     VStack {

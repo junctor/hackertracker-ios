@@ -21,7 +21,32 @@ struct EventsView: View {
     let dfu = DateFormatterUtility.shared
     var includeNav: Bool = true
     var navTitle: String = ""
+    @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    /// Locally-stored custom events. Merged into the Schedule pipeline
+    /// at query time via the `scheduleEvents` helper below — Firestore
+    /// events stay on viewModel.events untouched.
+    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \CustomEvent.beginTimestamp, ascending: true)])
+    var customEvents: FetchedResults<CustomEvent>
+    /// Drives the Add Custom Event modal sheet from the toolbar +
+    /// button. Same state used by both the iPhone and iPad code paths.
+    @State private var showingCustomEventForm: Bool = false
+
+    /// User toggle (defaulting on) for whether custom events appear in
+    /// the schedule at all. Lives next to the rest of the schedule
+    /// state so its value is read inline with the synthesizer.
+    @AppStorage("showCustomEvents") private var showCustomEventsInSchedule: Bool = true
+
+    /// Firestore events + synthesized CustomEvents that target the
+    /// currently-selected conference. Three Schedule call sites read
+    /// this in place of viewModel.events so user-created rows flow
+    /// through filters / search / eventDayGroup naturally.
+    private var scheduleEvents: [Event] {
+        guard showCustomEventsInSchedule else { return viewModel.events }
+        let code = selected.code
+        let synthesized = customEvents.compactMap { Event.from(custom: $0, conferenceCode: code) }
+        return viewModel.events + synthesized
+    }
     // @Binding var tappedScheduleTwice: Bool
     // @Binding var schedule: UUID
 
@@ -84,7 +109,7 @@ struct EventsView: View {
           // Dates first (ascending; eventDayGroup already sorts that way),
           // then Top / Now / Next / Bottom.
           ForEach(
-              viewModel.events.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+              scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
                   .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
           ) { day, _ in
               Button(day) {
@@ -157,7 +182,7 @@ struct EventsView: View {
         inlineSearchBar
         EventScrollView(
           events:
-            viewModel.events
+            scheduleEvents
             .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
             .search(text: debouncedSearch, speakers: viewModel.speakers)
             .eventDayGroup(
@@ -247,12 +272,22 @@ struct EventsView: View {
           }
         }
         ToolbarItemGroup(placement: .navigationBarTrailing) {
+          Button {
+            showingCustomEventForm = true
+          } label: {
+            Image(systemName: "plus")
+          }
+          .accessibilityLabel("Add custom event")
           searchToggleButton
         }
       }
       .task(id: searchText) {
         try? await Task.sleep(nanoseconds: 250_000_000)
         if !Task.isCancelled { debouncedSearch = searchText }
+      }
+      .sheet(isPresented: $showingCustomEventForm) {
+        CustomEventFormView(existing: nil)
+          .environment(\.managedObjectContext, viewContext)
       }
     }
   }
@@ -331,7 +366,7 @@ struct EventsView: View {
         inlineSearchBar
         EventScrollView(
           events:
-            viewModel.events
+            scheduleEvents
             .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
             .search(text: debouncedSearch, speakers: viewModel.speakers).eventDayGroup(
                 showLocaltime: showLocaltime, conference: viewModel.conference
@@ -384,7 +419,7 @@ struct EventsView: View {
                   }
                   Divider()
               ForEach(
-                viewModel.events.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+                scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
                     .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
               ) { day, _ in
                 Button(day) {
@@ -594,7 +629,16 @@ struct EventData: View {
           }, id: \.id
         ) { event in
           if showPastEvents || event.endTimestamp >= Date() {
-            if let sel = iPadContentSelection {
+            // Custom-event rows always route to their own detail screen;
+            // they have no parent Content document to push.
+            if let cid = event.customEventID {
+              NavigationLink(destination: CustomEventDetailView(eventID: cid)) {
+                EventCell(event: event, showDay: false)
+                  .id(event.id)
+                  .foregroundColor(.primary)
+                  .padding(1)
+              }
+            } else if let sel = iPadContentSelection {
               Button {
                 sel.wrappedValue = event.contentId
               } label: {

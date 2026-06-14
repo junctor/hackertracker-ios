@@ -95,13 +95,16 @@ extension [Event] {
                 }
             }
             
-            if typeIds.contains(1337) {
-                return filter {
-                    isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes)
-                    && bookmarks.contains(Int32($0.id))
-                }
-            } else {
-                return filter { isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes) }
+            // Custom-events pseudo-tag (1338). Same AND-with-tags
+            // semantics as Bookmarks: when active, narrow to
+            // events synthesized from CustomEvents (customEventID
+            // is non-nil). Stacked with 1337 means "bookmarked
+            // custom events".
+            return filter { event in
+                guard isFiltered(tagIds: event.tagIds, filterTypes: filterTypes) else { return false }
+                if typeIds.contains(1337) && !bookmarks.contains(Int32(event.id)) { return false }
+                if typeIds.contains(1338) && event.customEventID == nil { return false }
+                return true
             }
         }
     }
