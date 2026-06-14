@@ -26,6 +26,7 @@ struct CustomEventDetailView: View {
     @FetchRequest private var events: FetchedResults<CustomEvent>
     @State private var showingEditor: Bool = false
     @State private var showingDeleteConfirm: Bool = false
+    @State private var showingShareSheet: Bool = false
     let dfu = DateFormatterUtility.shared
 
     init(eventID: UUID) {
@@ -55,7 +56,13 @@ struct CustomEventDetailView: View {
         .navigationBarTitle(Text(""), displayMode: .inline)
         .toolbar {
             if events.first != nil {
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button {
+                        showingShareSheet = true
+                    } label: {
+                        Image(systemName: "qrcode")
+                    }
+                    .accessibilityLabel("Share via QR code")
                     Button {
                         showingEditor = true
                     } label: {
@@ -68,6 +75,11 @@ struct CustomEventDetailView: View {
         .sheet(isPresented: $showingEditor) {
             if let event = events.first {
                 CustomEventFormView(existing: event)
+            }
+        }
+        .sheet(isPresented: $showingShareSheet) {
+            if let event = events.first {
+                CustomEventShareSheet(event: event)
             }
         }
         .iPadReadableContent()

@@ -16,6 +16,10 @@ struct CustomEventFormView: View {
     /// otherwise. We snapshot the live values into local @State so
     /// edits can be cancelled cleanly without partial writes.
     let existing: CustomEvent?
+    /// Optional pre-fill values, used when the form is launched
+    /// from a deep-link import (QR code scan). Ignored when `existing`
+    /// is non-nil so edit mode keeps its existing semantics.
+    var draft: CustomEventDraft? = nil
 
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
@@ -184,8 +188,8 @@ struct CustomEventFormView: View {
         )
     }
 
-    /// Populate @State from `existing` on appear (edit mode) or pre-fill
-    /// the current conference (create mode).
+    /// Populate @State from `existing` (edit mode) > `draft` (inbound
+    /// QR import) > defaults (fresh create).
     private func hydrateFromExisting() {
         if let e = existing {
             title = e.title ?? ""
@@ -199,6 +203,24 @@ struct CustomEventFormView: View {
                 accentColor = Color(uiColor: ui)
             }
             selectedConferences = Set(CustomEventUtility.conferenceCodes(of: e))
+        } else if let d = draft {
+            // Pre-fill from a scanned QR. Notes are intentionally not
+            // shared so they stay empty.
+            title = d.title
+            eventDescription = d.eventDescription ?? ""
+            begin = d.begin
+            end = d.end
+            location = d.location ?? ""
+            notificationsEnabled = d.notificationsEnabled
+            if let hex = d.colorHex, let ui = UIColor(hex: hex) {
+                accentColor = Color(uiColor: ui)
+            }
+            // Default to the union of the scanned codes and the user's
+            // current conference, so a scanned event from a different
+            // conference can land on the user's active one too.
+            var codes = Set(d.conferenceCodes)
+            codes.insert(selected.code)
+            selectedConferences = codes
         } else {
             // Default to the currently-selected conference so the common
             // case ("add an event to THIS conference") is one tap.
