@@ -12,6 +12,11 @@ struct ContentCell: View {
     let showDay: Bool
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(InfoViewModel.self) private var viewModel
+    @FetchRequest(
+        sortDescriptors: [],
+        predicate: NSPredicate(format: "targetKind == %@", NoteKind.content.rawValue)
+    )
+    var notesForContent: FetchedResults<Note>
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
     /// Step 3 of the AI summary spike: warm the on-device LLM
@@ -100,7 +105,12 @@ struct ContentCell: View {
                         }
                     }
 
-                    HStack(alignment: .center) {
+                    HStack(alignment: .center, spacing: 8) {
+                        if notesForContent.contains(where: { $0.targetID == Int32(content.id) }) {
+                            Image(systemName: "square.and.pencil")
+                                .foregroundStyle(.secondary)
+                                .accessibilityLabel("Has a saved note")
+                        }
                         Button {
                             bookmarkAction()
                         } label: {

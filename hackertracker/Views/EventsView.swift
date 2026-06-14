@@ -28,6 +28,14 @@ struct EventsView: View {
     /// events stay on viewModel.events untouched.
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \CustomEvent.beginTimestamp, ascending: true)])
     var customEvents: FetchedResults<CustomEvent>
+    /// All event-scoped notes. Pulled once per render so the
+    /// schedule filter can intersect against the set of target ids
+    /// without touching Core Data inside the predicate closure.
+    @FetchRequest(
+        sortDescriptors: [],
+        predicate: NSPredicate(format: "targetKind == %@", NoteKind.event.rawValue)
+    )
+    var noteTargets: FetchedResults<Note>
     /// Drives the Add Custom Event modal sheet from the toolbar +
     /// button. Same state used by both the iPhone and iPad code paths.
     @State private var showingCustomEventForm: Bool = false
@@ -113,7 +121,7 @@ struct EventsView: View {
           // Dates first (ascending; eventDayGroup already sorts that way),
           // then Top / Now / Next / Bottom.
           ForEach(
-              scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+              scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: Set(noteTargets.map { $0.targetID }))
                   .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
           ) { day, _ in
               Button(day) {
@@ -187,7 +195,7 @@ struct EventsView: View {
         EventScrollView(
           events:
             scheduleEvents
-            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: Set(noteTargets.map { $0.targetID }))
             .search(text: debouncedSearch, speakers: viewModel.speakers)
             .eventDayGroup(
               showLocaltime: showLocaltime, conference: viewModel.conference
@@ -375,7 +383,7 @@ struct EventsView: View {
         EventScrollView(
           events:
             scheduleEvents
-            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: Set(noteTargets.map { $0.targetID }))
             .search(text: debouncedSearch, speakers: viewModel.speakers).eventDayGroup(
                 showLocaltime: showLocaltime, conference: viewModel.conference
             ),
@@ -427,7 +435,7 @@ struct EventsView: View {
                   }
                   Divider()
               ForEach(
-                scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+                scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: Set(noteTargets.map { $0.targetID }))
                     .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
               ) { day, _ in
                 Button(day) {

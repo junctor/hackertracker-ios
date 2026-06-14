@@ -24,6 +24,21 @@ enum NotesUtility {
 
     // MARK: - Fetch
 
+    /// Return the set of (kind-scoped) targetIDs that currently have
+    /// a note attached. Used by the schedule's "Has Notes" filter
+    /// and by row cells to decide whether to show the pencil badge.
+    static func targetIDs(context: NSManagedObjectContext, kind: NoteKind) -> Set<Int32> {
+        let fr = NSFetchRequest<Note>(entityName: "Note")
+        fr.predicate = NSPredicate(format: "targetKind == %@", kind.rawValue)
+        do {
+            return Set(try context.fetch(fr).map { $0.targetID })
+        } catch {
+            Log.coreData.error("Note targetIDs fetch failed: \(error as NSError, privacy: .public)")
+            return []
+        }
+    }
+
+
     /// Return the single Note (if any) attached to the supplied target.
     /// We treat Notes as one-per-target; if duplicates ever land (e.g.
     /// a CloudKit merge of two devices each creating their own row),

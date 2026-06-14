@@ -20,6 +20,14 @@ struct EventCell: View {
     @AppStorage("aiSummaries") private var aiSummaries: Bool = false
     @State private var showingOriginalDescription: Bool = false
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    /// All notes scoped to the .event kind. We don't ask for a
+    /// per-cell FetchRequest because that creates one Core Data
+    /// subscription per visible row; one shared filter is cheap.
+    @FetchRequest(
+        sortDescriptors: [],
+        predicate: NSPredicate(format: "targetKind == %@", NoteKind.event.rawValue)
+    )
+    var notesForEvents: FetchedResults<Note>
     
 
     func bookmarkAction() {

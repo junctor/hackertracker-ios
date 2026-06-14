@@ -51,6 +51,8 @@ struct NoteBlock: View {
             // the body being on screen. A small (\u{2022}) dot appears when
             // a note exists so users can tell at a glance whether the
             // collapsed row holds content.
+            // Header matches the Show / Hide pattern used by OrgView /
+            // SpeakerDetailView / ContentDetailView collapsible sections.
             Button {
                 withAnimation(.easeInOut(duration: 0.2)) { expanded.toggle() }
             } label: {
@@ -66,10 +68,19 @@ struct NoteBlock: View {
                             .accessibilityHidden(true)
                     }
                     Spacer()
-                    Image(systemName: "chevron.down")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .rotationEffect(.degrees(expanded ? 0 : -90))
+                    if expanded {
+                        Text("Hide")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "chevron.down")
+                            .foregroundColor(.secondary)
+                    } else {
+                        Text("Show")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(.secondary)
+                    }
                 }
                 .contentShape(Rectangle())
             }
