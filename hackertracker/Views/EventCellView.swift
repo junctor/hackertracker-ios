@@ -141,11 +141,16 @@ struct EventCell: View {
     }
     
     func getEventTagColorBackground() -> Color {
-        if let tag = viewModel.tagsById[event.tagIds[0]],
-           let colorHex = tag.colorBackground, let uicolor = UIColor(hex: colorHex) {
-            return Color(uiColor: uicolor)
+        // First tag id can be missing entirely (custom events have an
+        // empty tagIds array). Guard with .first to avoid an index
+        // crash. Default is .purple, matching the original fallback.
+        guard let firstTagId = event.tagIds.first,
+              let tag = viewModel.tagsById[firstTagId],
+              let colorHex = tag.colorBackground,
+              let uicolor = UIColor(hex: colorHex) else {
+            return .purple
         }
-        return .purple
+        return Color(uiColor: uicolor)
     }
 }
 

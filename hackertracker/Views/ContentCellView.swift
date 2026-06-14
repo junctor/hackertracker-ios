@@ -146,11 +146,15 @@ struct ContentCell: View {
     }
     
     func getEventTagColorBackground() -> Color {
-        if let tag = viewModel.tagsById[content.tagIds[0]],
-           let colorHex = tag.colorBackground, let uicolor = UIColor(hex: colorHex) {
-            return Color(uiColor: uicolor)
+        // Mirrors the EventCellView guard. Content with an empty
+        // tagIds array would otherwise crash on the [0] subscript.
+        guard let firstTagId = content.tagIds.first,
+              let tag = viewModel.tagsById[firstTagId],
+              let colorHex = tag.colorBackground,
+              let uicolor = UIColor(hex: colorHex) else {
+            return .purple
         }
-        return .purple
+        return Color(uiColor: uicolor)
     }
 }
 

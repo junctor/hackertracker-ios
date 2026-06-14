@@ -255,7 +255,13 @@ struct SpeakerEventView: View {
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
         HStack {
-            Rectangle().fill(getEventTagColorBackground(id: event.tagIds[0]))
+            // Speaker event chip stripe: fall back to .purple when the
+            // event has no tagIds. Same defensive shape as the cell
+            // helpers above; protects custom events from crashing the
+            // speaker schedule when they share a tag with a speaker.
+            Rectangle().fill(
+                event.tagIds.first.map { getEventTagColorBackground(id: $0) } ?? .purple
+            )
                 .frame(width: 6)
             VStack(alignment: .leading, spacing: 3) {
                 Text(event.title)
@@ -267,7 +273,8 @@ struct SpeakerEventView: View {
                     Text(l.name).font(.caption2)
                 }
                 // if let tagtype = viewModel.tagTypeByTagId[tagId], let tag = tagtype.tags.first(where: {$0.id == tagId})
-                if let tag = viewModel.tagsById[event.tagIds[0]] {
+                if let firstTagId = event.tagIds.first,
+                   let tag = viewModel.tagsById[firstTagId] {
                     VStack {
                         HStack {
                             Circle().foregroundColor(Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
