@@ -108,25 +108,26 @@ extension [Event] {
                     }
                 }
             }
-            // Pseudo-tag AND-composition. Each chip narrows the
-            // surviving set further. eventNoteIDs is precomputed by
-            // the caller (EventsView fetches Note rows once per
-            // render and passes the set in here) so we don't touch
-            // Core Data inside the predicate body.
+            // Pseudo-tag OR-composition. A row survives when ANY
+            // selected chip matches it — "Has Notes" + "Custom
+            // Events" returns the union, not the (usually-empty)
+            // intersection. Real-tag chips use a plain set
+            // intersection rather than the per-tag-type AND in
+            // isFiltered(), because OR semantics don't require
+            // hitting EVERY tag type — just any selected tag id.
+            let realTagIDs = Set(filterTypes.values.flatMap { $0 })
             return filter { event in
-                guard isFiltered(tagIds: event.tagIds, filterTypes: filterTypes) else { return false }
-                if typeIds.contains(PseudoTagID.bookmarks) && !bookmarks.contains(Int32(event.id)) { return false }
-                if typeIds.contains(PseudoTagID.customEvents) && event.customEventID == nil { return false }
-                if typeIds.contains(PseudoTagID.hasNotes) {
-                    // Match either the event's own id or its parent
-                    // content id — same cross-kind logic the pencil
-                    // badge uses so the filter never disagrees with
-                    // what the cell visibly shows.
-                    let directHit = eventNoteIDs.contains(Int32(event.id))
-                    let parentHit = contentNoteIDs.contains(Int32(event.contentId))
-                    if !(directHit || parentHit) { return false }
-                }
-                return true
+                let tagMatch = !realTagIDs.isEmpty
+                    && event.tagIds.contains(where: { realTagIDs.contains($0) })
+                let bookmarkMatch = typeIds.contains(PseudoTagID.bookmarks)
+                    && bookmarks.contains(Int32(event.id))
+                let customMatch = typeIds.contains(PseudoTagID.customEvents)
+                    && event.customEventID != nil
+                let hasNotesMatch = typeIds.contains(PseudoTagID.hasNotes) && (
+                    eventNoteIDs.contains(Int32(event.id))
+                    || contentNoteIDs.contains(Int32(event.contentId))
+                )
+                return tagMatch || bookmarkMatch || customMatch || hasNotesMatch
             }
         }
     }
