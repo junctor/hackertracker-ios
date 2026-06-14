@@ -106,7 +106,16 @@ struct EventCell: View {
                         }
                     }
                     
-                    HStack(alignment: .center) {
+                    HStack(alignment: .center, spacing: 8) {
+                        // Pencil badge appears when this row has a
+                        // saved private note. Tap-through to the row's
+                        // NavigationLink — the badge is purely
+                        // informational, not independently interactive.
+                        if noteEventIDs.contains(Int32(event.id)) {
+                            Image(systemName: "square.and.pencil")
+                                .foregroundStyle(.secondary)
+                                .accessibilityLabel("Has a saved note")
+                        }
                         Button {
                             bookmarkAction()
                         } label: {
