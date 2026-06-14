@@ -22,6 +22,7 @@ import CryptoKit
 import FoundationModels
 #endif
 
+@Observable
 @MainActor
 final class TalkSummaryCache {
     static let shared = TalkSummaryCache()
@@ -50,11 +51,11 @@ final class TalkSummaryCache {
     }
 
     private var memory: [Int: Entry] = [:]
-    private var inflight: [Int: Task<Void, Never>] = [:]
+    @ObservationIgnored private var inflight: [Int: Task<Void, Never>] = [:]
     /// FIFO queue of contents waiting for a slot. Stored as (id, content)
     /// so we can pump it in order without depending on Dictionary's
     /// unspecified iteration order.
-    private var pending: [(id: Int, content: Content)] = []
+    @ObservationIgnored private var pending: [(id: Int, content: Content)] = []
 
     private init() {
         load()
