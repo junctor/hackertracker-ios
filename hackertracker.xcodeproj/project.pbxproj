@@ -36,6 +36,7 @@
 		5DC0DE000000000000020002 /* SVGMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000020001 /* SVGMapView.swift */; };
 		5DC0DE000000000000030002 /* AISummaryAvailability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000030001 /* AISummaryAvailability.swift */; };
 		5DC0DE000000000000040002 /* TalkSummaryCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000040001 /* TalkSummaryCache.swift */; };
+		5DC0DE000000000000050002 /* CustomEventUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000050001 /* CustomEventUtility.swift */; };
 		5D642D252A438FB50064492D /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D242A438FB50064492D /* LocationView.swift */; };
 		5D642D272A43AEA00064492D /* Product.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D262A43AEA00064492D /* Product.swift */; };
 		5D642D292A44A1960064492D /* ProductsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D642D282A44A1960064492D /* ProductsView.swift */; };
@@ -161,6 +162,7 @@
 		5DC0DE000000000000020001 /* SVGMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SVGMapView.swift; sourceTree = "<group>"; };
 		5DC0DE000000000000030001 /* AISummaryAvailability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISummaryAvailability.swift; sourceTree = "<group>"; };
 		5DC0DE000000000000040001 /* TalkSummaryCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkSummaryCache.swift; sourceTree = "<group>"; };
+		5DC0DE000000000000050001 /* CustomEventUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomEventUtility.swift; sourceTree = "<group>"; };
 		5D642D242A438FB50064492D /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		5D642D262A43AEA00064492D /* Product.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Product.swift; sourceTree = "<group>"; };
 		5D642D282A44A1960064492D /* ProductsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProductsView.swift; sourceTree = "<group>"; };
@@ -456,6 +458,7 @@
 				5DC0DE000000000000020001 /* SVGMapView.swift */,
 				5DC0DE000000000000030001 /* AISummaryAvailability.swift */,
 				5DC0DE000000000000040001 /* TalkSummaryCache.swift */,
+				5DC0DE000000000000050001 /* CustomEventUtility.swift */,
 				3C0E05CE2A53E70200E7154F /* Searchable.swift */,
 				3C07C208285C6F7600CC9469 /* Theme.swift */,
 			);
@@ -710,6 +713,7 @@
 				5DC0DE000000000000020002 /* SVGMapView.swift in Sources */,
 				5DC0DE000000000000030002 /* AISummaryAvailability.swift in Sources */,
 				5DC0DE000000000000040002 /* TalkSummaryCache.swift in Sources */,
+				5DC0DE000000000000050002 /* CustomEventUtility.swift in Sources */,
 				5DF51ABC2851203F007BCB83 /* Document.swift in Sources */,
 				5DDF035E2C28B4F10087BA59 /* ContentDetailView.swift in Sources */,
 				5D9681162C5946E000D246B0 /* FeedbackUtility.swift in Sources */,
