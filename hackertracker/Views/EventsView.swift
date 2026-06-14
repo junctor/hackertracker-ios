@@ -4,6 +4,7 @@
 //  Created by Caleb Kinney on 3/27/23.
 //
 
+import CoreData
 import SwiftUI
 
 struct EventsView: View {
@@ -31,18 +32,35 @@ struct EventsView: View {
     /// All event-scoped notes. Pulled once per render so the
     /// schedule filter can intersect against the set of target ids
     /// without touching Core Data inside the predicate closure.
-    @FetchRequest(
-        sortDescriptors: [],
-        predicate: NSPredicate(format: "targetKind == %@", NoteKind.event.rawValue)
-    )
-    var noteTargets: FetchedResults<Note>
+    /// IDs of events / custom events that currently have a saved
+    /// private Note attached. We don't use @FetchRequest here because
+    /// SwiftUI's FetchRequest macro only reliably observes
+    /// NSManagedObjectContextDidSave — NOT NSPersistentStoreRemoteChange,
+    /// which is what fires when CloudKit imports Note rows from
+    /// another device. NoteBlock's FetchRequest happened to work
+    /// because it remounts on every detail screen push (fresh fetch);
+    /// the schedule's FetchRequest mounts once and missed remote
+    /// arrivals. Manual @State + dual-notification subscription is
+    /// the reliable shape.
+    @State private var noteEventIDsForScope: Set<Int32> = []
 
-    /// Set of event ids that currently have a saved private Note.
-    /// Recomputed on every body invocation; cheap (one Set
-    /// allocation against ~tens of rows). Drives the noteEventIDs
-    /// env value AND the eventNoteIDs argument to [Event].filters.
-    private var noteEventIDsForScope: Set<Int32> {
-        Set(noteTargets.map { $0.targetID })
+    private func refreshNoteEventIDs() {
+        let fr = NSFetchRequest<Note>(entityName: "Note")
+        // Schedule rows can be Firestore events OR locally-stored
+        // custom events. Include both kinds in the membership set so
+        // a note made from a custom-event detail screen also shows
+        // its pencil on the schedule.
+        fr.predicate = NSPredicate(
+            format: "targetKind == %@ OR targetKind == %@",
+            NoteKind.event.rawValue, NoteKind.customEvent.rawValue
+        )
+        do {
+            let rows = try viewContext.fetch(fr)
+            noteEventIDsForScope = Set(rows.map { $0.targetID })
+            Log.coreData.debug("EventsView noteEventIDsForScope count=\(noteEventIDsForScope.count, privacy: .public)")
+        } catch {
+            Log.coreData.error("EventsView note fetch failed: \(error as NSError, privacy: .public)")
+        }
     }
     /// Drives the Add Custom Event modal sheet from the toolbar +
     /// button. Same state used by both the iPhone and iPad code paths.
@@ -306,6 +324,13 @@ struct EventsView: View {
         if !Task.isCancelled { debouncedSearch = searchText }
       }
       .environment(\.noteEventIDs, noteEventIDsForScope)
+      .onAppear { refreshNoteEventIDs() }
+      .onReceive(NotificationCenter.default.publisher(
+          for: .NSManagedObjectContextDidSave
+      )) { _ in refreshNoteEventIDs() }
+      .onReceive(NotificationCenter.default.publisher(
+          for: .NSPersistentStoreRemoteChange
+      )) { _ in refreshNoteEventIDs() }
       .sheet(isPresented: $showingCustomEventForm) {
         CustomEventFormView(existing: nil)
           .environment(\.managedObjectContext, viewContext)
@@ -347,6 +372,13 @@ struct EventsView: View {
       .environment(\.iPadContentSelection, $ipadSelectedContentId)
       .environment(\.iPadCustomEventSelection, $ipadSelectedCustomEventId)
       .environment(\.noteEventIDs, noteEventIDsForScope)
+      .onAppear { refreshNoteEventIDs() }
+      .onReceive(NotificationCenter.default.publisher(
+          for: .NSManagedObjectContextDidSave
+      )) { _ in refreshNoteEventIDs() }
+      .onReceive(NotificationCenter.default.publisher(
+          for: .NSPersistentStoreRemoteChange
+      )) { _ in refreshNoteEventIDs() }
       .sheet(isPresented: $showFilters) {
         EventFilters(
           tagtypes: viewModel.tagtypes.filter {

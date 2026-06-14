@@ -5,6 +5,7 @@
 //  Created by Seth Law on 7/3/23.
 //
 
+import CoreData
 import SwiftUI
 
 struct ContentListView: View {
@@ -17,12 +18,24 @@ struct ContentListView: View {
     @State private var showFilters = false
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var filters: Filters
+    @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
-    @FetchRequest(
-        sortDescriptors: [],
-        predicate: NSPredicate(format: "targetKind == %@", NoteKind.content.rawValue)
-    )
-    var noteContentTargets: FetchedResults<Note>
+    /// Membership set of content ids that currently have a saved
+    /// Note. Manual @State + remote-change observers rather than
+    /// @FetchRequest so CloudKit-imported rows refresh the badge.
+    @State private var noteContentIDsForScope: Set<Int32> = []
+
+    private func refreshNoteContentIDs() {
+        let fr = NSFetchRequest<Note>(entityName: "Note")
+        fr.predicate = NSPredicate(format: "targetKind == %@", NoteKind.content.rawValue)
+        do {
+            let rows = try viewContext.fetch(fr)
+            noteContentIDsForScope = Set(rows.map { $0.targetID })
+            Log.coreData.debug("ContentListView noteContentIDsForScope count=\(noteContentIDsForScope.count, privacy: .public)")
+        } catch {
+            Log.coreData.error("ContentListView note fetch failed: \(error as NSError, privacy: .public)")
+        }
+    }
 
     // Polish: manual search affordance mirroring the schedule. The search field
     // is hidden on initial load and toggled by a magnifying glass in the
@@ -239,7 +252,14 @@ struct ContentListView: View {
             try? await Task.sleep(nanoseconds: 200_000_000)
             if !Task.isCancelled { debouncedSearch = searchText }
         }
-        .environment(\.noteContentIDs, Set(noteContentTargets.map { $0.targetID }))
+        .environment(\.noteContentIDs, noteContentIDsForScope)
+        .onAppear { refreshNoteContentIDs() }
+        .onReceive(NotificationCenter.default.publisher(
+            for: .NSManagedObjectContextDidSave
+        )) { _ in refreshNoteContentIDs() }
+        .onReceive(NotificationCenter.default.publisher(
+            for: .NSPersistentStoreRemoteChange
+        )) { _ in refreshNoteContentIDs() }
         .analyticsScreen(name: "ContentListView")
     }
 
@@ -273,12 +293,24 @@ struct ContentData: View {
     let char: String.Element
     let content: [Content]
     @EnvironmentObject var theme: Theme
+    @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
-    @FetchRequest(
-        sortDescriptors: [],
-        predicate: NSPredicate(format: "targetKind == %@", NoteKind.content.rawValue)
-    )
-    var noteContentTargets: FetchedResults<Note>
+    /// Membership set of content ids that currently have a saved
+    /// Note. Manual @State + remote-change observers rather than
+    /// @FetchRequest so CloudKit-imported rows refresh the badge.
+    @State private var noteContentIDsForScope: Set<Int32> = []
+
+    private func refreshNoteContentIDs() {
+        let fr = NSFetchRequest<Note>(entityName: "Note")
+        fr.predicate = NSPredicate(format: "targetKind == %@", NoteKind.content.rawValue)
+        do {
+            let rows = try viewContext.fetch(fr)
+            noteContentIDsForScope = Set(rows.map { $0.targetID })
+            Log.coreData.debug("ContentListView noteContentIDsForScope count=\(noteContentIDsForScope.count, privacy: .public)")
+        } catch {
+            Log.coreData.error("ContentListView note fetch failed: \(error as NSError, privacy: .public)")
+        }
+    }
     /// iPad split-view: row taps update detail column instead of pushing.
     @Environment(\.iPadContentSelection) private var iPadContentSelection
 
