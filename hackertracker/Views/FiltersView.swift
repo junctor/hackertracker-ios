@@ -13,6 +13,7 @@ struct EventFilters: View {
     @EnvironmentObject var filters: Filters
     @EnvironmentObject var toTop: ToTop
     var showBookmarks: Bool = true
+    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
 
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
@@ -25,6 +26,7 @@ struct EventFilters: View {
         // app's other modal forms.
         NavigationStack {
             ScrollView {
+                matchModePicker
                 if showBookmarks {
                     FilterRow(id: PseudoTagID.bookmarks, name: "Bookmarks", color: ThemeColors.blue)
                     FilterRow(id: PseudoTagID.customEvents, name: "Custom Events", color: .purple)
@@ -74,6 +76,35 @@ struct EventFilters: View {
                 }
             }
         }
+    }
+}
+
+/// `Match  [ Any | All ]` segmented control. Sits at the top of the
+/// filter list so users read the mode in the same place they see the
+/// chips they're modifying. Persists via @AppStorage so heavy filter
+/// users configure once and forget.
+private struct MatchModePicker: View {
+    @Binding var raw: String
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("Match")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Picker("Match", selection: $raw) {
+                Text("Any").tag(FilterMatchMode.any.rawValue)
+                Text("All").tag(FilterMatchMode.all.rawValue)
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 200)
+        }
+        .padding(.horizontal, 4)
+        .padding(.vertical, 6)
+    }
+}
+
+extension EventFilters {
+    fileprivate var matchModePicker: some View {
+        MatchModePicker(raw: $filterMatchModeRaw)
     }
 }
 
