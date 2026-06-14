@@ -22,6 +22,21 @@ struct EventsView: View {
     var includeNav: Bool = true
     var navTitle: String = ""
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    /// Locally-stored custom events. Merged into the Schedule pipeline
+    /// at query time via the `scheduleEvents` helper below — Firestore
+    /// events stay on viewModel.events untouched.
+    @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \CustomEvent.beginTimestamp, ascending: true)])
+    var customEvents: FetchedResults<CustomEvent>
+
+    /// Firestore events + synthesized CustomEvents that target the
+    /// currently-selected conference. Three Schedule call sites read
+    /// this in place of viewModel.events so user-created rows flow
+    /// through filters / search / eventDayGroup naturally.
+    private var scheduleEvents: [Event] {
+        let code = selected.code
+        let synthesized = customEvents.compactMap { Event.from(custom: $0, conferenceCode: code) }
+        return viewModel.events + synthesized
+    }
     // @Binding var tappedScheduleTwice: Bool
     // @Binding var schedule: UUID
 
@@ -84,7 +99,7 @@ struct EventsView: View {
           // Dates first (ascending; eventDayGroup already sorts that way),
           // then Top / Now / Next / Bottom.
           ForEach(
-              viewModel.events.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+              scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
                   .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
           ) { day, _ in
               Button(day) {
@@ -157,7 +172,7 @@ struct EventsView: View {
         inlineSearchBar
         EventScrollView(
           events:
-            viewModel.events
+            scheduleEvents
             .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
             .search(text: debouncedSearch, speakers: viewModel.speakers)
             .eventDayGroup(
@@ -331,7 +346,7 @@ struct EventsView: View {
         inlineSearchBar
         EventScrollView(
           events:
-            viewModel.events
+            scheduleEvents
             .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
             .search(text: debouncedSearch, speakers: viewModel.speakers).eventDayGroup(
                 showLocaltime: showLocaltime, conference: viewModel.conference
@@ -384,7 +399,7 @@ struct EventsView: View {
                   }
                   Divider()
               ForEach(
-                viewModel.events.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+                scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
                     .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
               ) { day, _ in
                 Button(day) {
