@@ -146,6 +146,13 @@ struct NoteEditorView: View {
 
     @State private var body_text: String = ""
     @State private var tab: Tab = .write
+    @State private var showingDeleteConfirm: Bool = false
+
+    /// Only true when there was a saved note to begin with; the new-
+    /// note path has no destructive action to surface.
+    private var hasExistingNote: Bool {
+        !initialBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
 
     private enum Tab: String, CaseIterable, Identifiable {
         case write = "Write"
@@ -188,12 +195,40 @@ struct NoteEditorView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
+                if hasExistingNote {
+                    // Destructive icon sits between Cancel and Save —
+                    // far enough from the confirmation action that an
+                    // accidental tap on the wrong corner can't delete.
+                    // Backed by a confirmation dialog regardless.
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(role: .destructive) {
+                            showingDeleteConfirm = true
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                        .tint(.red)
+                        .accessibilityLabel("Delete note")
+                    }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         NotesUtility.upsert(context: viewContext, targetID: targetID, kind: kind, body: body_text)
                         dismiss()
                     }
                 }
+            }
+            .confirmationDialog(
+                "Delete this note?",
+                isPresented: $showingDeleteConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Delete", role: .destructive) {
+                    NotesUtility.delete(context: viewContext, targetID: targetID, kind: kind)
+                    dismiss()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This will remove the note from this device and from your other iCloud devices.")
             }
             .onAppear {
                 body_text = initialBody
