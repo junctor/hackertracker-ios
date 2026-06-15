@@ -95,6 +95,16 @@ struct EventsView: View {
     /// currently-selected conference. Three Schedule call sites read
     /// this in place of viewModel.events so user-created rows flow
     /// through filters / search / eventDayGroup naturally.
+    /// Live count of events that survive the current filter +
+    /// search selection. Driven into both the Filters sheet's
+    /// tally label and any future toolbar-resident counter.
+    private var scheduleFilteredCount: Int {
+        scheduleEvents
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope, mode: filterMatchMode)
+            .search(text: debouncedSearch, speakers: viewModel.speakers)
+            .count
+    }
+
     private var scheduleEvents: [Event] {
         guard showCustomEventsInSchedule else { return viewModel.events }
         let code = selected.code
@@ -405,7 +415,10 @@ struct EventsView: View {
         EventFilters(
           tagtypes: viewModel.tagtypes.filter {
             $0.category == "content" && $0.isBrowsable == true
-          }, showFilters: $showFilters
+          },
+          showFilters: $showFilters,
+          matchedCount: scheduleFilteredCount,
+          unitLabel: "event"
         )
       }
       .alert("Schedule Conflicts", isPresented: $showConflictAlertPopup) {
@@ -424,7 +437,10 @@ struct EventsView: View {
         EventFilters(
           tagtypes: viewModel.tagtypes.filter {
             $0.category == "content" && $0.isBrowsable == true
-          }, showFilters: $showFilters
+          },
+          showFilters: $showFilters,
+          matchedCount: scheduleFilteredCount,
+          unitLabel: "event"
         )
       }
       .alert("Schedule Conflicts", isPresented: $showConflictAlertPopup) {
@@ -581,7 +597,10 @@ struct EventScrollView: View {
              EventFilters(
                tagtypes: viewModel.tagtypes.filter {
                  $0.category == "content" && $0.isBrowsable == true
-               }, showFilters: $showFilters
+               },
+               showFilters: $showFilters,
+               matchedCount: scheduleFilteredCount,
+               unitLabel: "event"
              )
            }
        }

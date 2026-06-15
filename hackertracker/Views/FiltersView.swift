@@ -13,6 +13,14 @@ struct EventFilters: View {
     @EnvironmentObject var filters: Filters
     @EnvironmentObject var toTop: ToTop
     var showBookmarks: Bool = true
+    /// Number of items that would survive the current filter selection.
+    /// Caller computes (uses the same .filters / .search pipeline the
+    /// list view will render with) and passes it in — keeps the sheet
+    /// agnostic about how counts are derived.
+    var matchedCount: Int = 0
+    /// Singular noun used in the live tally label ("event", "talk",
+    /// etc.). Plural is auto-derived with a trailing s.
+    var unitLabel: String = "event"
     @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
 
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
@@ -27,6 +35,7 @@ struct EventFilters: View {
         NavigationStack {
             ScrollView {
                 MatchModePickerRow(raw: $filterMatchModeRaw)
+                FilterMatchCountLabel(count: matchedCount, unit: unitLabel)
                 if showBookmarks {
                     FilterRow(id: PseudoTagID.bookmarks, name: "Bookmarks", color: ThemeColors.blue)
                     FilterRow(id: PseudoTagID.customEvents, name: "Custom Events", color: .purple)
@@ -137,5 +146,26 @@ struct FilterRow: View {
                     .stroke(filters.filters.contains(id) ? Color.clear : color, lineWidth: 2)
             )
         }
+    }
+}
+
+/// Small live tally label below the Match picker. Pluralizes the
+/// supplied noun with a trailing s and renders muted so it doesn't
+/// compete with the chips.
+struct FilterMatchCountLabel: View {
+    let count: Int
+    let unit: String
+    var body: some View {
+        let plural = count == 1 ? unit : unit + "s"
+        HStack(spacing: 4) {
+            Image(systemName: "line.3.horizontal.decrease.circle")
+                .font(.caption)
+            Text("\(count) \(plural) match")
+                .font(.caption)
+        }
+        .foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 2)
     }
 }

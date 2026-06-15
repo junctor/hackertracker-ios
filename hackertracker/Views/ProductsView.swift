@@ -261,7 +261,8 @@ struct ProductsView: View {
             MerchSizeFilter(
                 sizes: availableSizes,
                 selected: $selectedSizes,
-                showFilters: $showFilters
+                showFilters: $showFilters,
+                matchedCount: visibleProducts.count
             )
         }
         .task(id: searchText) {
@@ -392,6 +393,10 @@ struct MerchSizeFilter: View {
     let sizes: [String]
     @Binding var selected: Set<String>
     @Binding var showFilters: Bool
+    /// Number of products that would survive the current selection.
+    /// Same shape as FiltersView.matchedCount; caller computes from
+    /// the already-filtered list to keep the sheet stateless.
+    var matchedCount: Int = 0
 
     @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
@@ -403,6 +408,7 @@ struct MerchSizeFilter: View {
         NavigationStack {
             ScrollView {
                 MatchModePickerRow(raw: $filterMatchModeRaw)
+                FilterMatchCountLabel(count: matchedCount, unit: "product")
 
                 LazyVGrid(columns: columns, alignment: .center, spacing: 10) {
                     ForEach(sizes, id: \.self) { size in

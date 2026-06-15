@@ -77,6 +77,12 @@ struct ContentListView: View {
     /// iPad-only: identifies the content currently shown in the detail column.
     @State private var ipadSelectedContentId: Int?
 
+    /// Number of Content rows surviving the current filter +
+    /// search pipeline. Same shape as scheduleFilteredCount.
+    private var contentFilteredCount: Int {
+        contentGroup().values.reduce(0) { $0 + $1.count }
+    }
+
     func contentGroup() -> [String.Element: [Content]] {
         let bookmarkIds = Set(bookmarks.map(\.id))
         // Predicate composes search text + filter chips. The chips OR
@@ -266,7 +272,10 @@ struct ContentListView: View {
               EventFilters(
                 tagtypes: viewModel.tagtypes.filter {
                   $0.category == "content" && $0.isBrowsable == true
-                }, showFilters: $showFilters
+                },
+                showFilters: $showFilters,
+                matchedCount: contentFilteredCount,
+                unitLabel: "talk"
               )
             }
         }
