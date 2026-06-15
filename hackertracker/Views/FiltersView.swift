@@ -160,11 +160,11 @@ struct FilterMatchCountLabel: View {
         HStack(spacing: 4) {
             Image(systemName: "line.3.horizontal.decrease.circle")
                 .font(.caption)
-            Text("\(count) \(plural) match")
+            Text("\(count) \(plural)")
                 .font(.caption)
         }
         .foregroundStyle(.secondary)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, 4)
         .padding(.vertical, 2)
     }
