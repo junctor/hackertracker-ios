@@ -15,6 +15,12 @@ struct ContentListView: View {
     /// Perf C: debounced mirror of `searchText`. contentGroup() reads
     /// this so the group/filter pipeline runs once per typing pause.
     @State private var debouncedSearch = ""
+    /// Filter-chip composition mode. Mirrors EventsView so both
+    /// lists honor the same user choice from the Filters sheet.
+    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    private var filterMatchMode: FilterMatchMode {
+        FilterMatchMode(rawOrDefault: filterMatchModeRaw)
+    }
     @State private var showFilters = false
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var filters: Filters
@@ -71,25 +77,45 @@ struct ContentListView: View {
     /// iPad-only: identifies the content currently shown in the detail column.
     @State private var ipadSelectedContentId: Int?
 
+    /// Number of Content rows surviving the current filter +
+    /// search pipeline. Same shape as scheduleFilteredCount.
+    private var contentFilteredCount: Int {
+        contentGroup().values.reduce(0) { $0 + $1.count }
+    }
+
     func contentGroup() -> [String.Element: [Content]] {
         let bookmarkIds = Set(bookmarks.map(\.id))
         // Predicate composes search text + filter chips. The chips OR
         // with each other (matches any one keeps the row). Real tags
         // hit via tagIds.intersects; pseudo-tags 1337 (Bookmarks),
         // 1339 (Has Notes) hit via their dedicated membership sets.
+        // Each category contributes a Bool? — non-nil only when at
+        // least one chip from that category is selected. Compose by
+        // mode: .any → OR (current default), .all → AND. Categories
+        // without a chip selection don't constrain the result.
+        let realTagIDs = filters.filters.subtracting(PseudoTagID.all)
+        let useTags = !realTagIDs.isEmpty
+        let useBookmarks = filters.filters.contains(PseudoTagID.bookmarks)
+        let useHasNotes = filters.filters.contains(PseudoTagID.hasNotes)
+        let mode = filterMatchMode
         return Dictionary(
             grouping: content.search(text: debouncedSearch).filter { c in
                 if filters.filters.isEmpty { return true }
-                if c.tagIds.intersects(with: filters.filters) { return true }
-                if filters.filters.contains(PseudoTagID.bookmarks),
-                   c.sessions.contains(where: { bookmarkIds.contains(Int32($0.id)) }) {
-                    return true
+                let tagMatch: Bool? = useTags
+                    ? c.tagIds.contains(where: { realTagIDs.contains($0) })
+                    : nil
+                let bookmarkMatch: Bool? = useBookmarks
+                    ? c.sessions.contains(where: { bookmarkIds.contains(Int32($0.id)) })
+                    : nil
+                let hasNotesMatch: Bool? = useHasNotes
+                    ? noteContentIDsForScope.contains(Int32(c.id))
+                    : nil
+                let checks = [tagMatch, bookmarkMatch, hasNotesMatch].compactMap { $0 }
+                guard !checks.isEmpty else { return true }
+                switch mode {
+                case .any: return checks.contains(true)
+                case .all: return checks.allSatisfy { $0 }
                 }
-                if filters.filters.contains(PseudoTagID.hasNotes),
-                   noteContentIDsForScope.contains(Int32(c.id)) {
-                    return true
-                }
-                return false
             },
             by: { $0.title.lowercased().first ?? "-" }
         )
@@ -246,7 +272,10 @@ struct ContentListView: View {
               EventFilters(
                 tagtypes: viewModel.tagtypes.filter {
                   $0.category == "content" && $0.isBrowsable == true
-                }, showFilters: $showFilters
+                },
+                showFilters: $showFilters,
+                matchedCount: contentFilteredCount,
+                unitLabel: "talk"
               )
             }
         }

@@ -13,60 +13,105 @@ struct EventFilters: View {
     @EnvironmentObject var filters: Filters
     @EnvironmentObject var toTop: ToTop
     var showBookmarks: Bool = true
-    
+    /// Number of items that would survive the current filter selection.
+    /// Caller computes (uses the same .filters / .search pipeline the
+    /// list view will render with) and passes it in — keeps the sheet
+    /// agnostic about how counts are derived.
+    var matchedCount: Int = 0
+    /// Singular noun used in the live tally label ("event", "talk",
+    /// etc.). Plural is auto-derived with a trailing s.
+    var unitLabel: String = "event"
+    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
-        HStack(alignment: .center) {
-            Button {
-                filters.filters.removeAll()
-            } label: {
-                Image(systemName: "x.circle")
-                Text("Clear")
-            }
-            Spacer()
-            Text("Filters")
-            Spacer()
-            Button {
-                showFilters = false
-                toTop.val = true
-            } label: {
-                Text("Close")
-                Image(systemName: "checkmark.circle")
-            }
-        }
-        .padding(10)
-            Divider()
+        // Wrap in a NavigationStack so the sheet picks up the system's
+        // rounded top corners + native toolbar treatment. The previous
+        // custom HStack header sat flush against the sheet's sharp edge
+        // and the Clear/Close buttons rendered as raw blue Text +
+        // SF Symbol glyphs that didn't match Cancel/Save/Done in the
+        // app's other modal forms.
+        NavigationStack {
             ScrollView {
+                MatchModePickerRow(raw: $filterMatchModeRaw)
+                FilterMatchCountLabel(count: matchedCount, unit: unitLabel)
                 if showBookmarks {
-                    FilterRow(id: 1337, name: "Bookmarks", color: ThemeColors.blue)
-                    FilterRow(id: 1338, name: "Custom Events", color: .purple)
-                    // Has Notes pseudo-tag (id 1339). When active,
-                    // scheduleEvents narrows to rows with a saved
-                    // private note attached. Composes with the other
-                    // pseudo-tags + real tags via AND.
-                    FilterRow(id: 1339, name: "Has Notes", color: .orange)
+                    FilterRow(id: PseudoTagID.bookmarks, name: "Bookmarks", color: ThemeColors.blue)
+                    FilterRow(id: PseudoTagID.customEvents, name: "Custom Events", color: .purple)
+                    FilterRow(id: PseudoTagID.hasNotes, name: "Has Notes", color: .orange)
                 }
 
                 ForEach(tagtypes.sorted { $0.sortOrder < $1.sortOrder }) { tagtype in
-                    Section(header: Text(tagtype.label)) {
+                    Section { 
                         LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
                             ForEach(tagtype.tags.sorted { $0.sortOrder < $1.sortOrder }) { tag in
-                                FilterRow(id: tag.id, name: tag.label, color: Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
+                                FilterRow(
+                                    id: tag.id,
+                                    name: tag.label,
+                                    color: Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple)
+                                )
                             }
                         }
+                    } header: {
+                        Text(tagtype.label)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                }.headerProminence(.increased)
+                }
+                .headerProminence(.increased)
             }
-            .listStyle(.plain)
+            .padding(.horizontal, 10)
             .navigationTitle("Filters")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
+                    // Plain text button matching the Cancel/Save/Done pattern
+                    // used by NoteEditorView, CustomEventFormView, etc.
+                    // Disabled when there's nothing to clear so the user
+                    // doesn't tap a no-op.
+                    Button("Clear") {
+                        filters.filters.removeAll()
+                    }
+                    .disabled(filters.filters.isEmpty)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        showFilters = false
+                        toTop.val = true
+                    }
+                    .bold()
                 }
             }
-            .padding(5)
         }
-    //}
+    }
+}
+
+/// `Match  [ Any | All ]` segmented control. Sits at the top of the
+/// filter list so users read the mode in the same place they see the
+/// chips they're modifying. Persists via @AppStorage so heavy filter
+/// users configure once and forget.
+/// Shared `Match  [ Any | All ]` segmented control. Used by both
+/// FiltersView (Schedule / All Content) and MerchSizeFilter so the
+/// chrome stays identical across all filter sheets.
+struct MatchModePickerRow: View {
+    @Binding var raw: String
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("Match")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Picker("Match", selection: $raw) {
+                Text("Any").tag(FilterMatchMode.any.rawValue)
+                Text("All").tag(FilterMatchMode.all.rawValue)
+            }
+            .pickerStyle(.segmented)
+            .frame(maxWidth: 200)
+        }
+        .padding(.horizontal, 4)
+        .padding(.vertical, 6)
+    }
 }
 
 struct FilterRow: View {
@@ -76,7 +121,6 @@ struct FilterRow: View {
     @EnvironmentObject var filters: Filters
 
     var body: some View {
-        
         Button(action: {
             if filters.filters.contains(id) {
                 filters.filters.remove(id)
@@ -97,8 +141,31 @@ struct FilterRow: View {
             .padding(5)
             .background(filters.filters.contains(id) ? color : Color.clear)
             .cornerRadius(10)
-            .overlay(RoundedRectangle(cornerRadius: 10).stroke(filters.filters.contains(id) ? Color.clear : color, lineWidth: 2))
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(filters.filters.contains(id) ? Color.clear : color, lineWidth: 2)
+            )
         }
+    }
+}
 
+/// Small live tally label below the Match picker. Pluralizes the
+/// supplied noun with a trailing s and renders muted so it doesn't
+/// compete with the chips.
+struct FilterMatchCountLabel: View {
+    let count: Int
+    let unit: String
+    var body: some View {
+        let plural = count == 1 ? unit : unit + "s"
+        HStack(spacing: 4) {
+            Image(systemName: "line.3.horizontal.decrease.circle")
+                .font(.caption)
+            Text("\(count) \(plural)")
+                .font(.caption)
+        }
+        .foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.horizontal, 4)
+        .padding(.vertical, 2)
     }
 }

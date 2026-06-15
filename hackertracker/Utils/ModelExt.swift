@@ -79,6 +79,22 @@ enum PseudoTagID {
     static let bookmarks: Int = 1337
     static let customEvents: Int = 1338
     static let hasNotes: Int = 1339
+    /// Convenience set so callers can `filters.subtracting(PseudoTagID.all)`
+    /// to recover the real-tag ids.
+    static let all: Set<Int> = [bookmarks, customEvents, hasNotes]
+}
+
+/// Filter-chip composition mode. Read from @AppStorage("filterMatchMode")
+/// by FiltersView (writes) and the predicate consumers (reads). Storing
+/// the raw string lets us swap it cleanly via @AppStorage on multiple
+/// independent views without an envelope object.
+enum FilterMatchMode: String, CaseIterable {
+    case any = "any"
+    case all = "all"
+    static let defaultRaw: String = FilterMatchMode.any.rawValue
+    init(rawOrDefault raw: String) {
+        self = FilterMatchMode(rawValue: raw) ?? .any
+    }
 }
 
 extension [Event] {
@@ -93,7 +109,8 @@ extension [Event] {
         bookmarks: Set<Int32>,
         tagTypes: [TagType],
         eventNoteIDs: Set<Int32> = [],
-        contentNoteIDs: Set<Int32> = []
+        contentNoteIDs: Set<Int32> = [],
+        mode: FilterMatchMode = .any
     ) -> Self {
         if typeIds.isEmpty {
             return self
@@ -108,25 +125,37 @@ extension [Event] {
                     }
                 }
             }
-            // Pseudo-tag AND-composition. Each chip narrows the
-            // surviving set further. eventNoteIDs is precomputed by
-            // the caller (EventsView fetches Note rows once per
-            // render and passes the set in here) so we don't touch
-            // Core Data inside the predicate body.
+            // Each chip category contributes independently. In .any
+            // mode (OR) a row survives when ANY active category
+            // matches it. In .all mode (AND) a row must satisfy
+            // EVERY active category. "Active" = at least one chip
+            // from that category is selected; categories with no
+            // selection don't constrain the result either way.
+            let realTagIDs = Set(filterTypes.values.flatMap { $0 })
+            let useTags = !realTagIDs.isEmpty
+            let useBookmarks = typeIds.contains(PseudoTagID.bookmarks)
+            let useCustom = typeIds.contains(PseudoTagID.customEvents)
+            let useHasNotes = typeIds.contains(PseudoTagID.hasNotes)
             return filter { event in
-                guard isFiltered(tagIds: event.tagIds, filterTypes: filterTypes) else { return false }
-                if typeIds.contains(PseudoTagID.bookmarks) && !bookmarks.contains(Int32(event.id)) { return false }
-                if typeIds.contains(PseudoTagID.customEvents) && event.customEventID == nil { return false }
-                if typeIds.contains(PseudoTagID.hasNotes) {
-                    // Match either the event's own id or its parent
-                    // content id — same cross-kind logic the pencil
-                    // badge uses so the filter never disagrees with
-                    // what the cell visibly shows.
-                    let directHit = eventNoteIDs.contains(Int32(event.id))
-                    let parentHit = contentNoteIDs.contains(Int32(event.contentId))
-                    if !(directHit || parentHit) { return false }
+                let tagMatch: Bool? = useTags
+                    ? event.tagIds.contains(where: { realTagIDs.contains($0) })
+                    : nil
+                let bookmarkMatch: Bool? = useBookmarks
+                    ? bookmarks.contains(Int32(event.id))
+                    : nil
+                let customMatch: Bool? = useCustom
+                    ? (event.customEventID != nil)
+                    : nil
+                let hasNotesMatch: Bool? = useHasNotes
+                    ? (eventNoteIDs.contains(Int32(event.id))
+                       || contentNoteIDs.contains(Int32(event.contentId)))
+                    : nil
+                let checks = [tagMatch, bookmarkMatch, customMatch, hasNotesMatch].compactMap { $0 }
+                guard !checks.isEmpty else { return true }
+                switch mode {
+                case .any: return checks.contains(true)
+                case .all: return checks.allSatisfy { $0 }
                 }
-                return true
             }
         }
     }
