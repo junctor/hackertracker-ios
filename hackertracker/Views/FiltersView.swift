@@ -26,7 +26,7 @@ struct EventFilters: View {
         // app's other modal forms.
         NavigationStack {
             ScrollView {
-                matchModePicker
+                MatchModePickerRow(raw: $filterMatchModeRaw)
                 if showBookmarks {
                     FilterRow(id: PseudoTagID.bookmarks, name: "Bookmarks", color: ThemeColors.blue)
                     FilterRow(id: PseudoTagID.customEvents, name: "Custom Events", color: .purple)
@@ -83,7 +83,10 @@ struct EventFilters: View {
 /// filter list so users read the mode in the same place they see the
 /// chips they're modifying. Persists via @AppStorage so heavy filter
 /// users configure once and forget.
-private struct MatchModePicker: View {
+/// Shared `Match  [ Any | All ]` segmented control. Used by both
+/// FiltersView (Schedule / All Content) and MerchSizeFilter so the
+/// chrome stays identical across all filter sheets.
+struct MatchModePickerRow: View {
     @Binding var raw: String
     var body: some View {
         HStack(spacing: 8) {
@@ -99,12 +102,6 @@ private struct MatchModePicker: View {
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 6)
-    }
-}
-
-extension EventFilters {
-    fileprivate var matchModePicker: some View {
-        MatchModePicker(raw: $filterMatchModeRaw)
     }
 }
 

@@ -21,6 +21,10 @@ struct ProductsView: View {
     /// label (e.g. "XS"); kept here rather than in the shared Filters
     /// env object so it does not collide with the Schedule tag filters.
     @State private var selectedSizes: Set<String> = []
+    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    private var filterMatchMode: FilterMatchMode {
+        FilterMatchMode(rawOrDefault: filterMatchModeRaw)
+    }
     @EnvironmentObject var filters: Filters
 
     // Polish parity with schedule / All Content.
@@ -73,8 +77,21 @@ struct ProductsView: View {
                 // do not satisfy the filter so the grid only shows items
                 // the user could actually buy in that size.
                 guard !selectedSizes.isEmpty else { return true }
-                return product.variants.contains { variant in
-                    selectedSizes.contains(variant.title) && variant.stockStatus == "IN"
+                // In-stock variant titles available for this product.
+                let inStockTitles = Set(
+                    product.variants
+                        .filter { $0.stockStatus == "IN" }
+                        .map { $0.title }
+                )
+                switch filterMatchMode {
+                case .any:
+                    // Any of the selected sizes is available.
+                    return !inStockTitles.isDisjoint(with: selectedSizes)
+                case .all:
+                    // Every selected size is available — for users
+                    // who need a specific bundle of sizes (e.g. both
+                    // M and L for two recipients).
+                    return selectedSizes.isSubset(of: inStockTitles)
                 }
             }
     }
@@ -376,30 +393,17 @@ struct MerchSizeFilter: View {
     @Binding var selected: Set<String>
     @Binding var showFilters: Bool
 
+    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Button {
-                    selected.removeAll()
-                } label: {
-                    Image(systemName: "x.circle")
-                    Text("Clear")
-                }
-                Spacer()
-                Text("Filter by Size").font(.headline)
-                Spacer()
-                Button {
-                    showFilters = false
-                } label: {
-                    Text("Close")
-                    Image(systemName: "checkmark.circle")
-                }
-            }
-            .padding(10)
-            Divider()
+        // Matches the Schedule's FiltersView: NavigationStack-wrapped
+        // for rounded sheet corners + native toolbar buttons; Match
+        // Any/All segmented picker at the top.
+        NavigationStack {
             ScrollView {
+                MatchModePickerRow(raw: $filterMatchModeRaw)
+
                 LazyVGrid(columns: columns, alignment: .center, spacing: 10) {
                     ForEach(sizes, id: \.self) { size in
                         let isOn = selected.contains(size)
@@ -421,6 +425,22 @@ struct MerchSizeFilter: View {
                     }
                 }
                 .padding(10)
+            }
+            .navigationTitle("Filter by Size")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Clear") {
+                        selected.removeAll()
+                    }
+                    .disabled(selected.isEmpty)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { showFilters = false }
+                        .bold()
+                }
             }
         }
     }
