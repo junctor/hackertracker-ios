@@ -20,6 +20,14 @@ struct EventCell: View {
     @AppStorage("aiSummaries") private var aiSummaries: Bool = false
     @State private var showingOriginalDescription: Bool = false
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    /// Set of event ids that have a saved private Note. Published by
+    /// EventsView (which holds the single Note FetchRequest); defaults
+    /// to empty when this cell renders inside a screen that doesn't
+    /// publish the value (GlobalSearchView, SharedScheduleView, etc.).
+    @Environment(\.noteEventIDs) private var noteEventIDs
+    /// Mirror for content-kind notes — same talk may have been noted
+    /// from the All-Content side; the pencil should still appear here.
+    @Environment(\.noteContentIDs) private var noteContentIDs
     
 
     func bookmarkAction() {
@@ -101,7 +109,20 @@ struct EventCell: View {
                         }
                     }
                     
-                    HStack(alignment: .center) {
+                    HStack(alignment: .center, spacing: 8) {
+                        // Pencil badge appears when this row has a
+                        // saved private note. Tap-through to the row's
+                        // NavigationLink — the badge is purely
+                        // informational, not independently interactive.
+                        // Pencil lights up when the event id has a
+                        // note OR when the event's contentId has a
+                        // note authored from the All-Content side.
+                        if noteEventIDs.contains(Int32(event.id))
+                            || noteContentIDs.contains(Int32(event.contentId)) {
+                            Image(systemName: "square.and.pencil")
+                                .foregroundStyle(.secondary)
+                                .accessibilityLabel("Has a saved note")
+                        }
                         Button {
                             bookmarkAction()
                         } label: {

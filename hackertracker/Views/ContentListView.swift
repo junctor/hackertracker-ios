@@ -5,6 +5,7 @@
 //  Created by Seth Law on 7/3/23.
 //
 
+import CoreData
 import SwiftUI
 
 struct ContentListView: View {
@@ -17,7 +18,43 @@ struct ContentListView: View {
     @State private var showFilters = false
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var filters: Filters
+    @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    /// Membership set of content ids that currently have a saved
+    /// Note. Manual @State + remote-change observers rather than
+    /// @FetchRequest so CloudKit-imported rows refresh the badge.
+    @State private var noteContentIDsForScope: Set<Int32> = []
+
+    private func refreshNoteContentIDs() {
+        let fr = NSFetchRequest<Note>(entityName: "Note")
+        // Fetch BOTH .content notes (direct) and .event notes
+        // (indirect — reverse-map to the parent contentId so a note
+        // authored from EventDetailView also lights up the All-Content
+        // row). One fetch instead of two; partition by kind in code.
+        fr.predicate = NSPredicate(
+            format: "targetKind == %@ OR targetKind == %@",
+            NoteKind.content.rawValue, NoteKind.event.rawValue
+        )
+        do {
+            let rows = try viewContext.fetch(fr)
+            var combined: Set<Int32> = []
+            for r in rows {
+                guard let kind = r.targetKind else { continue }
+                if kind == NoteKind.content.rawValue {
+                    combined.insert(r.targetID)
+                } else if kind == NoteKind.event.rawValue {
+                    // Reverse-lookup: which content does this event belong to?
+                    if let event = viewModel.events.first(where: { Int32($0.id) == r.targetID }) {
+                        combined.insert(Int32(event.contentId))
+                    }
+                }
+            }
+            noteContentIDsForScope = combined
+            Log.coreData.debug("ContentListView noteContentIDsForScope count=\(noteContentIDsForScope.count, privacy: .public)")
+        } catch {
+            Log.coreData.error("ContentListView note fetch failed: \(error as NSError, privacy: .public)")
+        }
+    }
 
     // Polish: manual search affordance mirroring the schedule. The search field
     // is hidden on initial load and toggled by a magnifying glass in the
@@ -36,7 +73,26 @@ struct ContentListView: View {
 
     func contentGroup() -> [String.Element: [Content]] {
         let bookmarkIds = Set(bookmarks.map(\.id))
-        return Dictionary(grouping: content.search(text: debouncedSearch).filter { $0.tagIds.intersects(with: filters.filters) || filters.filters.isEmpty || (filters.filters.contains(1337) && $0.sessions.contains { bookmarkIds.contains(Int32($0.id)) })}, by: { $0.title.lowercased().first ?? "-" })
+        // Predicate composes search text + filter chips. The chips OR
+        // with each other (matches any one keeps the row). Real tags
+        // hit via tagIds.intersects; pseudo-tags 1337 (Bookmarks),
+        // 1339 (Has Notes) hit via their dedicated membership sets.
+        return Dictionary(
+            grouping: content.search(text: debouncedSearch).filter { c in
+                if filters.filters.isEmpty { return true }
+                if c.tagIds.intersects(with: filters.filters) { return true }
+                if filters.filters.contains(PseudoTagID.bookmarks),
+                   c.sessions.contains(where: { bookmarkIds.contains(Int32($0.id)) }) {
+                    return true
+                }
+                if filters.filters.contains(PseudoTagID.hasNotes),
+                   noteContentIDsForScope.contains(Int32(c.id)) {
+                    return true
+                }
+                return false
+            },
+            by: { $0.title.lowercased().first ?? "-" }
+        )
     }
 
     private var grouped: [(key: String.Element, value: [Content])] {
@@ -234,6 +290,14 @@ struct ContentListView: View {
             try? await Task.sleep(nanoseconds: 200_000_000)
             if !Task.isCancelled { debouncedSearch = searchText }
         }
+        .environment(\.noteContentIDs, noteContentIDsForScope)
+        .onAppear { refreshNoteContentIDs() }
+        .onReceive(NotificationCenter.default.publisher(
+            for: .NSManagedObjectContextDidSave
+        )) { _ in refreshNoteContentIDs() }
+        .onReceive(NotificationCenter.default.publisher(
+            for: .NSPersistentStoreRemoteChange
+        )) { _ in refreshNoteContentIDs() }
         .analyticsScreen(name: "ContentListView")
     }
 
@@ -267,6 +331,7 @@ struct ContentData: View {
     let char: String.Element
     let content: [Content]
     @EnvironmentObject var theme: Theme
+    @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     /// iPad split-view: row taps update detail column instead of pushing.
     @Environment(\.iPadContentSelection) private var iPadContentSelection

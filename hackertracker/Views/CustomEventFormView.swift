@@ -65,11 +65,11 @@ struct CustomEventFormView: View {
                         .frame(minHeight: 80)
                 } header: { Text("Description") }
 
-                Section {
-                    TextEditor(text: $notes)
-                        .frame(minHeight: 60)
-                } header: { Text("Notes (private)") }
-
+                // Notes moved to the shared NoteBlock on detail
+                // screens — every event, content item, and custom
+                // event now uses the same store. The form no longer
+                // shows a Notes field; legacy data is preserved on
+                // first read of the detail screen.
                 Section {
                     ColorPicker("Accent color", selection: $accentColor, supportsOpacity: false)
                 } header: { Text("Appearance") }

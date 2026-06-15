@@ -73,6 +73,14 @@ extension [Content] {
     }
 }
 
+// Sentinel pseudo-tag ids used by the filter sheet to compose with
+// real tags. Kept in sync with FilterRow row literals.
+enum PseudoTagID {
+    static let bookmarks: Int = 1337
+    static let customEvents: Int = 1338
+    static let hasNotes: Int = 1339
+}
+
 extension [Event] {
     /* func types() -> [Int: EventType] {
         return reduce(into: [:]) { tags, event in
@@ -80,7 +88,13 @@ extension [Event] {
         }
     } */
     
-    func filters(typeIds: Set<Int>, bookmarks: Set<Int32>, tagTypes: [TagType]) -> Self {
+    func filters(
+        typeIds: Set<Int>,
+        bookmarks: Set<Int32>,
+        tagTypes: [TagType],
+        eventNoteIDs: Set<Int32> = [],
+        contentNoteIDs: Set<Int32> = []
+    ) -> Self {
         if typeIds.isEmpty {
             return self
         } else {
@@ -94,16 +108,24 @@ extension [Event] {
                     }
                 }
             }
-            
-            // Custom-events pseudo-tag (1338). Same AND-with-tags
-            // semantics as Bookmarks: when active, narrow to
-            // events synthesized from CustomEvents (customEventID
-            // is non-nil). Stacked with 1337 means "bookmarked
-            // custom events".
+            // Pseudo-tag AND-composition. Each chip narrows the
+            // surviving set further. eventNoteIDs is precomputed by
+            // the caller (EventsView fetches Note rows once per
+            // render and passes the set in here) so we don't touch
+            // Core Data inside the predicate body.
             return filter { event in
                 guard isFiltered(tagIds: event.tagIds, filterTypes: filterTypes) else { return false }
-                if typeIds.contains(1337) && !bookmarks.contains(Int32(event.id)) { return false }
-                if typeIds.contains(1338) && event.customEventID == nil { return false }
+                if typeIds.contains(PseudoTagID.bookmarks) && !bookmarks.contains(Int32(event.id)) { return false }
+                if typeIds.contains(PseudoTagID.customEvents) && event.customEventID == nil { return false }
+                if typeIds.contains(PseudoTagID.hasNotes) {
+                    // Match either the event's own id or its parent
+                    // content id — same cross-kind logic the pencil
+                    // badge uses so the filter never disagrees with
+                    // what the cell visibly shows.
+                    let directHit = eventNoteIDs.contains(Int32(event.id))
+                    let parentHit = contentNoteIDs.contains(Int32(event.contentId))
+                    if !(directHit || parentHit) { return false }
+                }
                 return true
             }
         }

@@ -40,10 +40,12 @@ struct EventFilters: View {
             ScrollView {
                 if showBookmarks {
                     FilterRow(id: 1337, name: "Bookmarks", color: ThemeColors.blue)
-                    // Custom Events pseudo-tag (id 1338). Same AND-with-
-                    // tag-filters semantics as Bookmarks; when active,
-                    // scheduleEvents narrows to user-created rows only.
                     FilterRow(id: 1338, name: "Custom Events", color: .purple)
+                    // Has Notes pseudo-tag (id 1339). When active,
+                    // scheduleEvents narrows to rows with a saved
+                    // private note attached. Composes with the other
+                    // pseudo-tags + real tags via AND.
+                    FilterRow(id: 1339, name: "Has Notes", color: .orange)
                 }
 
                 ForEach(tagtypes.sorted { $0.sortOrder < $1.sortOrder }) { tagtype in

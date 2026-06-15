@@ -4,6 +4,7 @@
 //  Created by Caleb Kinney on 3/27/23.
 //
 
+import CoreData
 import SwiftUI
 
 struct EventsView: View {
@@ -28,6 +29,53 @@ struct EventsView: View {
     /// events stay on viewModel.events untouched.
     @FetchRequest(sortDescriptors: [NSSortDescriptor(keyPath: \CustomEvent.beginTimestamp, ascending: true)])
     var customEvents: FetchedResults<CustomEvent>
+    /// All event-scoped notes. Pulled once per render so the
+    /// schedule filter can intersect against the set of target ids
+    /// without touching Core Data inside the predicate closure.
+    /// IDs of events / custom events that currently have a saved
+    /// private Note attached. We don't use @FetchRequest here because
+    /// SwiftUI's FetchRequest macro only reliably observes
+    /// NSManagedObjectContextDidSave — NOT NSPersistentStoreRemoteChange,
+    /// which is what fires when CloudKit imports Note rows from
+    /// another device. NoteBlock's FetchRequest happened to work
+    /// because it remounts on every detail screen push (fresh fetch);
+    /// the schedule's FetchRequest mounts once and missed remote
+    /// arrivals. Manual @State + dual-notification subscription is
+    /// the reliable shape.
+    @State private var noteEventIDsForScope: Set<Int32> = []
+    /// Mirror for .content-kind notes. Schedule cells light up the
+    /// pencil when EITHER the event id has a note OR the event's
+    /// contentId has a note authored from the All-Content side.
+    @State private var noteContentIDsForScope: Set<Int32> = []
+
+    private func refreshNoteEventIDs() {
+        let fr = NSFetchRequest<Note>(entityName: "Note")
+        // One pass over all schedule-relevant kinds. Partition into
+        // event/customEvent vs content based on each row's kind so the
+        // cell can do an OR check on the env values it reads.
+        fr.predicate = NSPredicate(
+            format: "targetKind == %@ OR targetKind == %@ OR targetKind == %@",
+            NoteKind.event.rawValue, NoteKind.customEvent.rawValue, NoteKind.content.rawValue
+        )
+        do {
+            let rows = try viewContext.fetch(fr)
+            var events: Set<Int32> = []
+            var contents: Set<Int32> = []
+            for r in rows {
+                guard let kind = r.targetKind else { continue }
+                if kind == NoteKind.content.rawValue {
+                    contents.insert(r.targetID)
+                } else {
+                    events.insert(r.targetID)
+                }
+            }
+            noteEventIDsForScope = events
+            noteContentIDsForScope = contents
+            Log.coreData.debug("EventsView notes events=\(events.count, privacy: .public) contents=\(contents.count, privacy: .public)")
+        } catch {
+            Log.coreData.error("EventsView note fetch failed: \(error as NSError, privacy: .public)")
+        }
+    }
     /// Drives the Add Custom Event modal sheet from the toolbar +
     /// button. Same state used by both the iPhone and iPad code paths.
     @State private var showingCustomEventForm: Bool = false
@@ -72,6 +120,10 @@ struct EventsView: View {
   /// of the schedule's NavigationSplitView. Nil = placeholder. Has no effect
   /// on iPhone (NavigationSplitView is bypassed there).
   @State private var ipadSelectedContentId: Int?
+  /// iPad split: selected custom-event id for the right pane. Mutually
+  /// exclusive with ipadSelectedContentId — setting one clears the
+  /// other so the detail pane never shows stale state.
+  @State private var ipadSelectedCustomEventId: UUID? = nil
 
   /// Inline search bar shown only when `isSearching` is true.
   @ViewBuilder private var inlineSearchBar: some View {
@@ -109,7 +161,7 @@ struct EventsView: View {
           // Dates first (ascending; eventDayGroup already sorts that way),
           // then Top / Now / Next / Bottom.
           ForEach(
-              scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+              scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope)
                   .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
           ) { day, _ in
               Button(day) {
@@ -183,7 +235,7 @@ struct EventsView: View {
         EventScrollView(
           events:
             scheduleEvents
-            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope)
             .search(text: debouncedSearch, speakers: viewModel.speakers)
             .eventDayGroup(
               showLocaltime: showLocaltime, conference: viewModel.conference
@@ -285,6 +337,15 @@ struct EventsView: View {
         try? await Task.sleep(nanoseconds: 250_000_000)
         if !Task.isCancelled { debouncedSearch = searchText }
       }
+      .environment(\.noteEventIDs, noteEventIDsForScope)
+      .environment(\.noteContentIDs, noteContentIDsForScope)
+      .onAppear { refreshNoteEventIDs() }
+      .onReceive(NotificationCenter.default.publisher(
+          for: .NSManagedObjectContextDidSave
+      )) { _ in refreshNoteEventIDs() }
+      .onReceive(NotificationCenter.default.publisher(
+          for: .NSPersistentStoreRemoteChange
+      )) { _ in refreshNoteEventIDs() }
       .sheet(isPresented: $showingCustomEventForm) {
         CustomEventFormView(existing: nil)
           .environment(\.managedObjectContext, viewContext)
@@ -308,7 +369,10 @@ struct EventsView: View {
         .frame(width: 420)
         Divider()
         NavigationStack {
-          if let id = ipadSelectedContentId {
+          if let cid = ipadSelectedCustomEventId {
+            CustomEventDetailView(eventID: cid)
+              .id(cid)
+          } else if let id = ipadSelectedContentId {
             ContentDetailView(contentId: id)
               .id(id)
           } else {
@@ -321,6 +385,16 @@ struct EventsView: View {
         }
       }
       .environment(\.iPadContentSelection, $ipadSelectedContentId)
+      .environment(\.iPadCustomEventSelection, $ipadSelectedCustomEventId)
+      .environment(\.noteEventIDs, noteEventIDsForScope)
+      .environment(\.noteContentIDs, noteContentIDsForScope)
+      .onAppear { refreshNoteEventIDs() }
+      .onReceive(NotificationCenter.default.publisher(
+          for: .NSManagedObjectContextDidSave
+      )) { _ in refreshNoteEventIDs() }
+      .onReceive(NotificationCenter.default.publisher(
+          for: .NSPersistentStoreRemoteChange
+      )) { _ in refreshNoteEventIDs() }
       .sheet(isPresented: $showFilters) {
         EventFilters(
           tagtypes: viewModel.tagtypes.filter {
@@ -367,7 +441,7 @@ struct EventsView: View {
         EventScrollView(
           events:
             scheduleEvents
-            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope)
             .search(text: debouncedSearch, speakers: viewModel.speakers).eventDayGroup(
                 showLocaltime: showLocaltime, conference: viewModel.conference
             ),
@@ -419,7 +493,7 @@ struct EventsView: View {
                   }
                   Divider()
               ForEach(
-                scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+                scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope)
                     .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
               ) { day, _ in
                 Button(day) {
@@ -611,6 +685,7 @@ struct EventData: View {
   /// iPad split-view selection: when present, row taps set the binding
   /// instead of pushing a NavigationLink. iPhone passes no env value.
   @Environment(\.iPadContentSelection) private var iPadContentSelection
+  @Environment(\.iPadCustomEventSelection) private var iPadCustomEventSelection
 
   var body: some View {
       Section(header: Text(weekday.uppercased())
@@ -629,9 +704,43 @@ struct EventData: View {
           }, id: \.id
         ) { event in
           if showPastEvents || event.endTimestamp >= Date() {
-            // Custom-event rows always route to their own detail screen;
-            // they have no parent Content document to push.
-            if let cid = event.customEventID {
+            // Three row variants:
+            //   1. iPad split + custom event -> set the custom-event
+            //      selection (clears the content selection) so the
+            //      right pane swaps in CustomEventDetailView. Without
+            //      this branch we'd push onto the sidebar stack and
+            //      cover the list instead.
+            //   2. iPad split + Firestore event -> set the content
+            //      selection (existing behavior).
+            //   3. iPhone / non-split: NavigationLink as before, with
+            //      a separate branch for custom vs Firestore so we
+            //      route to the correct detail view.
+            if let custSel = iPadCustomEventSelection,
+               let contentSel = iPadContentSelection {
+              if let cid = event.customEventID {
+                Button {
+                  contentSel.wrappedValue = nil
+                  custSel.wrappedValue = cid
+                } label: {
+                  EventCell(event: event, showDay: false)
+                    .id(event.id)
+                    .foregroundColor(.primary)
+                    .padding(1)
+                }
+                .buttonStyle(.plain)
+              } else {
+                Button {
+                  custSel.wrappedValue = nil
+                  contentSel.wrappedValue = event.contentId
+                } label: {
+                  EventCell(event: event, showDay: false)
+                    .id(event.id)
+                    .foregroundColor(.primary)
+                    .padding(1)
+                }
+                .buttonStyle(.plain)
+              }
+            } else if let cid = event.customEventID {
               NavigationLink(destination: CustomEventDetailView(eventID: cid)) {
                 EventCell(event: event, showDay: false)
                   .id(event.id)
