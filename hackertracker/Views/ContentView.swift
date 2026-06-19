@@ -125,12 +125,6 @@ struct ContentView: View {
                 viewModel.showNews = showNews
                 viewModel.easterEgg = easterEgg
 
-                // Phase 5d: ATT prompt. Wait briefly so the system alert
-                // doesn't obscure first-frame UI on cold launch. ATT only
-                // shows the system prompt on first launch; later launches
-                // honor the cached decision without re-prompting.
-                try? await Task.sleep(nanoseconds: 1_500_000_000)
-                await TrackingPermission.requestIfNeeded()
 
                 // viewModel.fetchData(code: selected.code)
             }

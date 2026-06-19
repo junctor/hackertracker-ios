@@ -42,33 +42,26 @@ for delivering pushes. Stored in Firebase Cloud Messaging so we can send \
 conference-wide announcements you opted into via iOS Settings. Deleting the \
 app or revoking notification permission cuts this off immediately.
 
-**Anonymous usage events** (only with your permission) — which screens you \
-visit, how long the session was, the app version, the device model and OS \
-version. Stored in Firebase Analytics. **No name, no email, no IDFA unless \
-you grant ATT permission.** Used to tell us which parts of the app are \
-actually used so we can prioritize fixes and features.
+**Anonymous usage events** — which screens you visit, how long the \
+session was, the app version, the device model and OS version. Stored in \
+Firebase Analytics (the *no-IDFA* variant — we link the build of the SDK \
+that literally cannot read the advertising identifier). **No name, no \
+email, no IDFA, no cross-app tracking.** Used to tell us which parts of \
+the app are actually used so we can prioritize fixes and features.
 
 ## What we **don't** collect
 
 - Your name, email, account, or phone number. We don't have user accounts.
 - Your contact list, photos, microphone, camera, or precise location.
-- Browsing history, ad identifiers (unless you explicitly grant ATT \
-permission), or device fingerprints.
+- Browsing history, ad identifiers (IDFA), or device fingerprints. We \
+link the no-AdId build of Firebase Analytics; the IDFA-capable variant \
+is not present in the app bundle.
 - The contents of your bookmarks, custom events, or private notes — those \
 live in your iCloud private database, encrypted; we have no access to them.
-- Tracking across other apps or websites. The ATT prompt's *Allow* option \
-enables IDFA for in-app session analytics only; it does **not** opt you \
-into cross-app tracking, ad networks, or third-party data sharing.
+- Tracking across other apps or websites. There is no ATT prompt because \
+there is no IDFA to collect.
 
 ## Your choices
-
-**Decline tracking at the prompt.** Tap *Ask App Not to Track* the first \
-time the app asks. We still receive aggregate analytics (no IDFA) and \
-crashes; you receive nothing different on screen.
-
-**Disable analytics later.** *Settings → iPhone → Privacy & Security → \
-Tracking → toggle HackerTracker off.* The app stops receiving IDFA-linked \
-analytics immediately.
 
 **Disable notifications.** *Settings → Notifications → HackerTracker → off.* \
 We can no longer push you anything.
