@@ -382,7 +382,7 @@ struct EventsView: View {
         NavigationStack {
           scheduleSidebar
         }
-        .frame(width: 420)
+        .frame(width: IPadAdaptive.sidebarWidth)
         Divider()
         NavigationStack {
           if let cid = ipadSelectedCustomEventId {

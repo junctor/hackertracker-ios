@@ -158,7 +158,7 @@ struct OrgsView: View {
         if IPadAdaptive.isIPad {
             HStack(spacing: 0) {
                 orgSidebar
-                    .frame(width: 420)
+                    .frame(width: IPadAdaptive.sidebarWidth)
                 Divider()
                 Group {
                     if let id = ipadSelectedOrgId,

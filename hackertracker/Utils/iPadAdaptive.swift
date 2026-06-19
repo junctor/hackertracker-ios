@@ -41,6 +41,15 @@ extension View {
 }
 
 enum IPadAdaptive {
+    /// Single source of truth for the iPad split-view sidebar width.
+    /// Used by Schedule (EventsView), Speakers, All Content, Merch,
+    /// and Communities (OrgsView). Bumped from the per-view 380/420
+    /// hodgepodge to a single 500pt so the left list panel uses
+    /// roughly 42% of an 11" iPad's landscape width, matching the
+    /// visual density of the Communities grid and keeping the right
+    /// detail pane from looking sparse.
+    static let sidebarWidth: CGFloat = 500
+
     /// `true` when running on iPad. Use sparingly -- prefer the
     /// `iPadReadableContent` modifier when possible.
     ///
