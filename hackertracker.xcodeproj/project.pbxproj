@@ -107,6 +107,7 @@
 		5DC0DE000000000000070004 /* CustomEventShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000070003 /* CustomEventShareSheet.swift */; };
 		5DC0DE000000000000080002 /* NotesUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000080001 /* NotesUtility.swift */; };
 		5DC0DE000000000000080004 /* NoteBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000080003 /* NoteBlock.swift */; };
+		5DC0DE000000000000090002 /* PrivacyDoc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000090001 /* PrivacyDoc.swift */; };
 		5DDF035A2C2751670087BA59 /* ContentListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF03592C2751670087BA59 /* ContentListView.swift */; };
 		5DDF035C2C2767750087BA59 /* ContentCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF035B2C2767750087BA59 /* ContentCellView.swift */; };
 		5DDF035E2C28B4F10087BA59 /* ContentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */; };
@@ -237,6 +238,7 @@
 		5DC0DE000000000000070003 /* CustomEventShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomEventShareSheet.swift; sourceTree = "<group>"; };
 		5DC0DE000000000000080001 /* NotesUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesUtility.swift; sourceTree = "<group>"; };
 		5DC0DE000000000000080003 /* NoteBlock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteBlock.swift; sourceTree = "<group>"; };
+		5DC0DE000000000000090001 /* PrivacyDoc.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyDoc.swift; sourceTree = "<group>"; };
 		5DDF03592C2751670087BA59 /* ContentListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentListView.swift; sourceTree = "<group>"; };
 		5DDF035B2C2767750087BA59 /* ContentCellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentCellView.swift; sourceTree = "<group>"; };
 		5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentDetailView.swift; sourceTree = "<group>"; };
@@ -391,6 +393,7 @@
 				5DC0DE000000000000060003 /* CustomEventDetailView.swift */,
 				5DC0DE000000000000070003 /* CustomEventShareSheet.swift */,
 				5DC0DE000000000000080003 /* NoteBlock.swift */,
+				5DC0DE000000000000090001 /* PrivacyDoc.swift */,
 				5DDF035B2C2767750087BA59 /* ContentCellView.swift */,
 				5DDF035D2C28B4F10087BA59 /* ContentDetailView.swift */,
 				5DDF03592C2751670087BA59 /* ContentListView.swift */,
@@ -737,6 +740,7 @@
 				5DC0DE000000000000070002 /* CustomEventShare.swift in Sources */,
 				5DC0DE000000000000080002 /* NotesUtility.swift in Sources */,
 				5DC0DE000000000000080004 /* NoteBlock.swift in Sources */,
+				5DC0DE000000000000090002 /* PrivacyDoc.swift in Sources */,
 				5DC0DE000000000000070004 /* CustomEventShareSheet.swift in Sources */,
 				5DF51ABC2851203F007BCB83 /* Document.swift in Sources */,
 				5DDF035E2C28B4F10087BA59 /* ContentDetailView.swift in Sources */,
