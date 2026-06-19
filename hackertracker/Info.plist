@@ -18,7 +18,7 @@
 	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
 	<string>Add conference events to Calendar</string>
 	<key>NSUserTrackingUsageDescription</key>
-	<string>Permission to track helps us understand how the conference schedule and merch tools are used so we can improve them. We never sell your data or use it for ads.</string>
+	<string>Anonymous tracking helps us see which screens and tools you use so we can fix bugs and prioritize improvements. We don’t sell your data, don’t show ads, and you can decline.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

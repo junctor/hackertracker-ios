@@ -28,6 +28,7 @@ struct SettingsView: View {
                 // 2-column grid row.
                 VStack(spacing: 0) {
                     AboutSettingsView()
+                    PrivacySettingsView()
                     selectConferenceRow
                     Divider()
                 }
@@ -229,6 +230,44 @@ struct AboutSettingsView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
+        }
+        .foregroundColor(.primary)
+        .frame(maxWidth: .infinity)
+        .background(Color(.systemGray6))
+        .cornerRadius(5)
+        Divider()
+    }
+}
+
+/// Privacy + tracking disclosure entry. Lives directly under About
+/// (top of the Settings stack) so users encounter it the moment
+/// they go looking. Body text lives in PrivacyDoc so the same
+/// markdown is reusable as a source-of-truth reference for
+/// App Store Connect's privacy disclosures.
+struct PrivacySettingsView: View {
+    var body: some View {
+        HStack {
+            NavigationLink(destination: DocumentView(
+                title_text: PrivacyDoc.title,
+                body_text: PrivacyDoc.body,
+                color: nil,
+                systemImage: "hand.raised",
+                showInlineTitle: false
+            )) {
+                Image(systemName: "hand.raised")
+                    .padding(5)
+                VStack(alignment: .leading) {
+                    Text("Privacy & Tracking")
+                        .bold()
+                    Text("What this app does and doesn’t collect.")
+                        .font(.caption)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(5)
+                Image(systemName: "chevron.right")
+                    .padding(5)
+            }
+            .frame(maxWidth: .infinity)
         }
         .foregroundColor(.primary)
         .frame(maxWidth: .infinity)
