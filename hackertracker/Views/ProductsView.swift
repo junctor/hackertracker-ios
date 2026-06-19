@@ -276,7 +276,7 @@ struct ProductsView: View {
         if IPadAdaptive.isIPad {
             HStack(spacing: 0) {
                 productsSidebar
-                    .frame(width: 420)
+                    .frame(width: IPadAdaptive.sidebarWidth)
                 Divider()
                 Group {
                     if let id = ipadSelectedProductId,

@@ -17,8 +17,6 @@
 	</array>
 	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
 	<string>Add conference events to Calendar</string>
-	<key>NSUserTrackingUsageDescription</key>
-	<string>Anonymous tracking helps us see which screens and tools you use so we can fix bugs and prioritize improvements. We don’t sell your data, don’t show ads, and you can decline.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

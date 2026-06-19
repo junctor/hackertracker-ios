@@ -334,7 +334,7 @@ struct ContentListView: View {
         if IPadAdaptive.isIPad {
             HStack(spacing: 0) {
                 contentSidebar
-                    .frame(width: 420)
+                    .frame(width: IPadAdaptive.sidebarWidth)
                 Divider()
                 Group {
                     if let id = ipadSelectedContentId {

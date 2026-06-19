@@ -28,7 +28,6 @@
 		5D0A5A662A35293000BD5ECE /* MarkdownUI in Frameworks */ = {isa = PBXBuildFile; productRef = 5D0A5A652A35293000BD5ECE /* MarkdownUI */; };
 		5D1C77232FC901970042DABC /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5D1C77222FC901970042DABC /* FirebaseCrashlytics */; };
 		5D2FAD992BC095C90043A84C /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 5D2FAD982BC095C90043A84C /* FirebaseStorage */; };
-		5D2FAD9B2BC096150043A84C /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 5D2FAD9A2BC096150043A84C /* FirebaseAnalytics */; };
 		5D3E56CA2C27364B001CB419 /* Content.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D3E56C92C27364B001CB419 /* Content.swift */; };
 		5D4DC6FD2A783B7400264955 /* Menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4DC6FC2A783B7400264955 /* Menu.swift */; };
 		5D4F07B928598AC8006772A2 /* 404View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4F07B828598AC8006772A2 /* 404View.swift */; };
@@ -92,7 +91,6 @@
 		5DC0DE0000000000000000A1 /* Logger+HT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000A2 /* Logger+HT.swift */; };
 		5DC0DE0000000000000000B1 /* KFImage+HT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000B2 /* KFImage+HT.swift */; };
 		5DC0DE0000000000000000C1 /* ClockService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000C2 /* ClockService.swift */; };
-		5DC0DE0000000000000000D1 /* TrackingPermission.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000D2 /* TrackingPermission.swift */; };
 		5DC0DE0000000000000000E1 /* ScrollTitleHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000E2 /* ScrollTitleHandoff.swift */; };
 		5DC0DE0000000000000000F1 /* iPadAdaptive.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE0000000000000000F2 /* iPadAdaptive.swift */; };
 		5DC0DE000000000000010001 /* SharedScheduleStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC0DE000000000000010002 /* SharedScheduleStore.swift */; };
@@ -223,7 +221,6 @@
 		5DC0DE0000000000000000A2 /* Logger+HT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Logger+HT.swift"; sourceTree = "<group>"; };
 		5DC0DE0000000000000000B2 /* KFImage+HT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "KFImage+HT.swift"; sourceTree = "<group>"; };
 		5DC0DE0000000000000000C2 /* ClockService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClockService.swift; sourceTree = "<group>"; };
-		5DC0DE0000000000000000D2 /* TrackingPermission.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackingPermission.swift; sourceTree = "<group>"; };
 		5DC0DE0000000000000000E2 /* ScrollTitleHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollTitleHandoff.swift; sourceTree = "<group>"; };
 		5DC0DE0000000000000000F2 /* iPadAdaptive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadAdaptive.swift; sourceTree = "<group>"; };
 		5DC0DE000000000000010002 /* SharedScheduleStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedScheduleStore.swift; sourceTree = "<group>"; };
@@ -271,7 +268,6 @@
 				5D2FAD992BC095C90043A84C /* FirebaseStorage in Frameworks */,
 				5DAE3E9A2836A76000F9F845 /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				5DAE3E9E2836A76000F9F845 /* FirebaseFirestoreSwift in Frameworks */,
-				5D2FAD9B2BC096150043A84C /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -467,7 +463,6 @@
 				5DC0DE0000000000000000A2 /* Logger+HT.swift */,
 				5DC0DE0000000000000000B2 /* KFImage+HT.swift */,
 				5DC0DE0000000000000000C2 /* ClockService.swift */,
-				5DC0DE0000000000000000D2 /* TrackingPermission.swift */,
 				5DC0DE0000000000000000E2 /* ScrollTitleHandoff.swift */,
 				5DC0DE0000000000000000F2 /* iPadAdaptive.swift */,
 				3CD532E22A29ADF5009D17F3 /* ModelExt.swift */,
@@ -522,7 +517,6 @@
 				5D642D302A4F9F0E0064492D /* FirebaseMessaging */,
 				5D642D3D2A5725D80064492D /* Kingfisher */,
 				5D2FAD982BC095C90043A84C /* FirebaseStorage */,
-				5D2FAD9A2BC096150043A84C /* FirebaseAnalytics */,
 				5D9681172C5C380000D246B0 /* FirebaseInAppMessagingSwift-Beta */,
 				5D1C77222FC901970042DABC /* FirebaseCrashlytics */,
 			);
@@ -714,7 +708,6 @@
 				5DC0DE0000000000000000A1 /* Logger+HT.swift in Sources */,
 				5DC0DE0000000000000000B1 /* KFImage+HT.swift in Sources */,
 				5DC0DE0000000000000000C1 /* ClockService.swift in Sources */,
-				5DC0DE0000000000000000D1 /* TrackingPermission.swift in Sources */,
 				5DC0DE0000000000000000E1 /* ScrollTitleHandoff.swift in Sources */,
 				5DC0DE0000000000000000F1 /* iPadAdaptive.swift in Sources */,
 				5DC0DE000000000000010001 /* SharedScheduleStore.swift in Sources */,
@@ -915,14 +908,14 @@
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26061501;
+				CURRENT_PROJECT_VERSION = 26061901;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = hackertracker/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HackerTracker;
-				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = NSCalendarsWriteOnlyAccessUsageDescription;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -954,14 +947,14 @@
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26061501;
+				CURRENT_PROJECT_VERSION = 26061901;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = hackertracker/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HackerTracker;
-				INFOPLIST_KEY_LSApplicationCategoryType = "";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = NSCalendarsWriteOnlyAccessUsageDescription;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1135,10 +1128,6 @@
 		5D2FAD982BC095C90043A84C /* FirebaseStorage */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FirebaseStorage;
-		};
-		5D2FAD9A2BC096150043A84C /* FirebaseAnalytics */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = FirebaseAnalytics;
 		};
 		5D642D302A4F9F0E0064492D /* FirebaseMessaging */ = {
 			isa = XCSwiftPackageProductDependency;

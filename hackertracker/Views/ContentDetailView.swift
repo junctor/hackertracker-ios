@@ -95,7 +95,6 @@ struct ContentDetailView: View {
                 Divider()
                 NoteBlock(targetID: item.id, kind: .content)
             }
-            .iPadReadableContent()
             .analyticsScreen(name: "ContentDetailView")
             .fullScreenCover(isPresented: $showFeedback) {
                 if let form = viewModel.feedbackForms.first(where: {$0.id == item.feedbackFormId}) {

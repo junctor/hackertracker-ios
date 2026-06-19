@@ -175,7 +175,7 @@ struct SpeakersView: View {
         if IPadAdaptive.isIPad {
             HStack(spacing: 0) {
                 speakerSidebar
-                    .frame(width: 380)
+                    .frame(width: IPadAdaptive.sidebarWidth)
                 Divider()
                 Group {
                     if let id = ipadSelectedSpeakerId {

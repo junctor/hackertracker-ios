@@ -114,7 +114,6 @@ struct CustomEventDetailView: View {
                 CustomEventShareSheet(event: event)
             }
         }
-        .iPadReadableContent()
         .analyticsScreen(name: "CustomEventDetailView")
     }
 
