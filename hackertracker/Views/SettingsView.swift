@@ -87,26 +87,24 @@ struct SettingsView: View {
             // sees the same single-column flow either way.
             .analyticsScreen(name: "SettingsView")
         }
-        .sheet(item: $iPadSheet) { sheet in
+        .fullScreenCover(item: $iPadSheet) { sheet in
             NavigationStack {
-                switch sheet {
-                case .about:
-                    if let v1 = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
-                       let v2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-                        AboutView(marketingVersion: v1, buildVersion: v2)
-                            .toolbar {
-                                ToolbarItem(placement: .topBarTrailing) {
-                                    Button("Done") { iPadSheet = nil }
-                                }
-                            }
-                    }
-                case .conferences:
-                    ConferencesView()
-                        .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                Button("Done") { iPadSheet = nil }
-                            }
+                Group {
+                    switch sheet {
+                    case .about:
+                        if let v1 = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+                           let v2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+                            AboutView(marketingVersion: v1, buildVersion: v2)
                         }
+                    case .conferences:
+                        ConferencesView()
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { iPadSheet = nil }
+                    }
                 }
             }
         }
