@@ -8,12 +8,18 @@
 import MarkdownUI
 import SwiftUI
 
+enum SettingsIPadSheet: Identifiable {
+    case about, conferences
+    var id: Int { hashValue }
+}
+
 struct SettingsView: View {
     @EnvironmentObject var selected: SelectedConference
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @AppStorage("showNews") var showNews: Bool = true
-    
+    @State private var iPadSheet: SettingsIPadSheet?
+
     var body: some View {
         NavigationStack {
             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documentsById[emergId] {
@@ -28,7 +34,7 @@ struct SettingsView: View {
                 // — they read as headers and don't fit naturally into a
                 // 2-column grid row.
                 VStack(spacing: 0) {
-                    AboutSettingsView()
+                    AboutSettingsView(iPadAction: IPadAdaptive.isIPad ? { iPadSheet = .about } : nil)
                     selectConferenceRow
                     Divider()
                 }
@@ -81,29 +87,65 @@ struct SettingsView: View {
             // sees the same single-column flow either way.
             .analyticsScreen(name: "SettingsView")
         }
+        .sheet(item: $iPadSheet) { sheet in
+            NavigationStack {
+                switch sheet {
+                case .about:
+                    if let v1 = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+                       let v2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+                        AboutView(marketingVersion: v1, buildVersion: v2)
+                            .toolbar {
+                                ToolbarItem(placement: .topBarTrailing) {
+                                    Button("Done") { iPadSheet = nil }
+                                }
+                            }
+                    }
+                case .conferences:
+                    ConferencesView()
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button("Done") { iPadSheet = nil }
+                            }
+                        }
+                }
+            }
+        }
     }
     @ViewBuilder private var selectConferenceRow: some View {
         HStack {
-            NavigationLink(destination: ConferencesView()) {
-                Image(systemName: "list.bullet")
-                    .padding(5)
-                VStack(alignment: .leading) {
-                    Text("Select Conference")
-                        .bold()
-                    Text("(\(viewModel.conference?.name ?? selected.code))")
-                        .font(.caption)
+            if IPadAdaptive.isIPad {
+                Button {
+                    iPadSheet = .conferences
+                } label: {
+                    conferenceRowLabel
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(5)
-                Image(systemName: "chevron.right")
-                    .padding(5)
+                .frame(maxWidth: .infinity)
+            } else {
+                NavigationLink(destination: ConferencesView()) {
+                    conferenceRowLabel
+                }
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: .infinity)
         }
         .foregroundColor(.primary)
         .frame(maxWidth: .infinity)
         .background(Color(.systemGray6))
         .cornerRadius(5)
+    }
+
+    @ViewBuilder private var conferenceRowLabel: some View {
+        Image(systemName: "list.bullet")
+            .padding(5)
+        VStack(alignment: .leading) {
+            Text("Select Conference")
+                .bold()
+            Text("(\(viewModel.conference?.name ?? selected.code))")
+                .font(.caption)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(5)
+        Image(systemName: "chevron.right")
+            .padding(5)
     }
 
 }
@@ -210,25 +252,26 @@ struct NotificationSettingsView: View {
 }
 
 struct AboutSettingsView: View {
+    /// On iPad, the parent SettingsView passes a closure that presents
+    /// AboutView as a sheet instead of pushing it on the NavigationStack
+    /// (which would replace the whole settings screen). On iPhone this
+    /// is nil and the row falls back to the standard NavigationLink push.
+    var iPadAction: (() -> Void)? = nil
 
     var body: some View {
         HStack {
             if let v1 = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, let v2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-                NavigationLink(destination: AboutView(marketingVersion: v1, buildVersion: v2)) {
-                    Image(systemName: "info.circle")
-                        .padding(5)
-                    VStack(alignment: .leading) {
-                        Text("About")
-                            .bold()
-                        Text("\(v1) (\(v2))")
-                            .font(.caption)
+                if let iPadAction {
+                    Button(action: iPadAction) {
+                        aboutRowLabel(v1: v1, v2: v2)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(5)
-                    Image(systemName: "chevron.right")
-                        .padding(5)
+                    .frame(maxWidth: .infinity)
+                } else {
+                    NavigationLink(destination: AboutView(marketingVersion: v1, buildVersion: v2)) {
+                        aboutRowLabel(v1: v1, v2: v2)
+                    }
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
             }
         }
         .foregroundColor(.primary)
@@ -236,6 +279,21 @@ struct AboutSettingsView: View {
         .background(Color(.systemGray6))
         .cornerRadius(5)
         Divider()
+    }
+
+    @ViewBuilder private func aboutRowLabel(v1: String, v2: String) -> some View {
+        Image(systemName: "info.circle")
+            .padding(5)
+        VStack(alignment: .leading) {
+            Text("About")
+                .bold()
+            Text("\(v1) (\(v2))")
+                .font(.caption)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(5)
+        Image(systemName: "chevron.right")
+            .padding(5)
     }
 }
 
