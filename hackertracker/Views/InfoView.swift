@@ -352,7 +352,7 @@ struct InfoView: View {
                                 }
                             }
                     }
-                    .iPadPageSheetSizing()
+                    .iPadSheetSizing(.form)
                 }
                 .onOpenURL(perform: { url in
                     // Custom-event import: bypasses the conference router
