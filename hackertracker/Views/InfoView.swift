@@ -25,6 +25,10 @@ struct InfoView: View {
     @State private var appStoreVersion: String?
     @State private var showOpenUrl = false
     @State private var path = NavigationPath()
+    /// iPad: drives the page-sheet presentation of ConferencesView so
+    /// the home screen doesn't get replaced when the user taps the
+    /// conference name. iPhone keeps the NavigationLink push.
+    @State private var showingIPadConferences = false
     /// QA-only flag flipped by the /404, /error, /debug/404 deep-link
     /// routes. Presents _04View as a sheet so the QA path doesn't have
     /// to fight NavigationStack races during cold launch.
@@ -70,12 +74,25 @@ struct InfoView: View {
                 VStack(alignment: .center) {
                     VStack(alignment: .center) {
                         if let con = viewModel.conference {
-                            NavigationLink(destination: ConferencesView()) {
-                                Text(con.name)
-                                    .font(.largeTitle)
-                                    .bold()
-                                    .foregroundColor(.primary)
-                                Image(systemName: "chevron.right")
+                            if IPadAdaptive.isIPad {
+                                Button {
+                                    showingIPadConferences = true
+                                } label: {
+                                    Text(con.name)
+                                        .font(.largeTitle)
+                                        .bold()
+                                        .foregroundColor(.primary)
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.primary)
+                                }
+                            } else {
+                                NavigationLink(destination: ConferencesView()) {
+                                    Text(con.name)
+                                        .font(.largeTitle)
+                                        .bold()
+                                        .foregroundColor(.primary)
+                                    Image(systemName: "chevron.right")
+                                }
                             }
                             if con.startDate == con.endDate {
                                 Text(DateFormatterUtility.shared.monthDayYearFormatter.string(from: con.endTimestamp))
@@ -326,6 +343,17 @@ struct InfoView: View {
                 }
                 .analyticsScreen(name: "InfoView")
                 .environment(sharedSchedule)
+                .sheet(isPresented: $showingIPadConferences) {
+                    NavigationStack {
+                        ConferencesView()
+                            .toolbar {
+                                ToolbarItem(placement: .topBarTrailing) {
+                                    Button("Done") { showingIPadConferences = false }
+                                }
+                            }
+                    }
+                    .iPadPageSheetSizing()
+                }
                 .onOpenURL(perform: { url in
                     // Custom-event import: bypasses the conference router
                     // entirely. Decoded draft drives the create-mode form.
