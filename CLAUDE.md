@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-HackerTracker iOS — SwiftUI app for DEF CON / hacker conferences. Bundle id `org.beezle.hackertracker`, current `MARKETING_VERSION` 5.9, deployment target iOS 16.0, Swift 5.0. Targets: `hackertracker` (app), `hackertrackerTests`, `hackertrackerUITests`.
+HackerTracker iOS — SwiftUI app for DEF CON / hacker conferences. Bundle id `org.beezle.hackertracker`, current `MARKETING_VERSION` 6.1, deployment target iOS 18.0, Swift 6.0 (strict concurrency). Targets: `hackertracker` (app), `hackertrackerTests`, `hackertrackerUITests`.
 
 ## Build / test
 
