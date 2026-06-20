@@ -68,7 +68,10 @@ struct CustomEventDetailView: View {
         }
         .navigationBarTitle(Text(""), displayMode: .inline)
         .toolbar {
-            if let event = events.first {
+            // iPad detail pane is rendered without a NavigationStack
+            // ancestor (see EventsView's iPad split). The inline
+            // action bar in detail(for:) replaces these.
+            if !IPadAdaptive.isIPad, let event = events.first {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     // Bookmark toggle. Custom events live on the
                     // schedule unconditionally; bookmarking them is
@@ -119,6 +122,14 @@ struct CustomEventDetailView: View {
 
     @ViewBuilder private func detail(for event: CustomEvent) -> some View {
         ScrollView {
+            // iPad: the right pane has no NavigationStack, so the
+            // .toolbar block is a no-op. Render the same action
+            // buttons inline at the top so bookmark / bell / QR /
+            // pencil stay reachable.
+            if IPadAdaptive.isIPad {
+                inlineActionBar(event: event)
+            }
+
             // Header card: title + time + location + tag chips.
             // Mirrors the EventDetailView layout exactly so the two
             // detail screens read as the same component family.
@@ -188,6 +199,45 @@ struct CustomEventDetailView: View {
     }
 
     // MARK: - Header rows
+
+    /// Inline iPad action bar — mirrors the toolbar items but renders
+    /// in-body so it doesn't require a NavigationStack ancestor.
+    @ViewBuilder private func inlineActionBar(event: CustomEvent) -> some View {
+        HStack(spacing: 16) {
+            Spacer()
+            Button {
+                toggleBookmark(event)
+            } label: {
+                Image(systemName: isBookmarked(event) ? "bookmark.fill" : "bookmark")
+                    .font(.title3)
+            }
+            .accessibilityLabel(isBookmarked(event) ? "Remove bookmark" : "Add bookmark")
+            Button {
+                toggleNotifications(event)
+            } label: {
+                Image(systemName: event.notificationsEnabled ? "bell.fill" : "bell.slash")
+                    .font(.title3)
+            }
+            .accessibilityLabel(event.notificationsEnabled ? "Turn off notifications" : "Turn on notifications")
+            Button {
+                showingShareSheet = true
+            } label: {
+                Image(systemName: "qrcode")
+                    .font(.title3)
+            }
+            .accessibilityLabel("Share via QR code")
+            Button {
+                showingEditor = true
+            } label: {
+                Image(systemName: "pencil")
+                    .font(.title3)
+            }
+            .accessibilityLabel("Edit event")
+        }
+        .padding(.horizontal)
+        .padding(.top, 8)
+        .tint(.primary)
+    }
 
     @ViewBuilder private func whenRow(event: CustomEvent) -> some View {
         let begin = event.beginTimestamp ?? Date()

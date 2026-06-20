@@ -384,25 +384,26 @@ struct EventsView: View {
         }
         .frame(width: IPadAdaptive.sidebarWidth)
         Divider()
-        NavigationStack {
-          Group {
-            if let cid = ipadSelectedCustomEventId {
-              CustomEventDetailView(eventID: cid)
-                .id(cid)
-            } else if let id = ipadSelectedContentId {
-              ContentDetailView(contentId: id)
-                .id(id)
-            } else {
-              ContentUnavailableView(
-                "Select an Event",
-                systemImage: "calendar",
-                description: Text("Tap an event in the schedule to view details.")
-              )
-            }
+        // iPad: render the detail view directly with NO surrounding
+        // NavigationStack. A NavigationStack here reserves ~200pt of
+        // nav-bar space for a title we never set, creating a huge gap
+        // between the floating tab bar and the detail content. The
+        // detail views render full-bleed instead; CustomEventDetailView
+        // renders its action buttons inline on iPad.
+        Group {
+          if let cid = ipadSelectedCustomEventId {
+            CustomEventDetailView(eventID: cid)
+              .id(cid)
+          } else if let id = ipadSelectedContentId {
+            ContentDetailView(contentId: id)
+              .id(id)
+          } else {
+            ContentUnavailableView(
+              "Select an Event",
+              systemImage: "calendar",
+              description: Text("Tap an event in the schedule to view details.")
+            )
           }
-          .navigationBarTitleDisplayMode(.inline)
-          .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
-          .toolbarBackground(.visible, for: .navigationBar)
         }
       }
       .environment(\.iPadContentSelection, $ipadSelectedContentId)
