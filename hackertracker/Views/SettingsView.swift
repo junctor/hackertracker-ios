@@ -13,6 +13,29 @@ enum SettingsIPadSheet: Identifiable {
     var id: Int { hashValue }
 }
 
+extension View {
+    /// Page-sheet sizing for the iPad Settings .sheet presentation.
+    /// iOS 18+ uses the native `.presentationSizing(.page)`. iOS 17
+    /// falls back to an explicit large frame — iPad form sheets grow
+    /// to their content's intrinsic size, so a big idealWidth /
+    /// idealHeight produces visually the same page-sheet result.
+    ///
+    /// (View extension instead of `ViewModifier` because this module
+    /// has its own `Content` model that shadows the protocol's
+    /// `Content` associated type — same workaround used in
+    /// `iPadAdaptive.swift`.)
+    @ViewBuilder
+    func iPadPageSheetSizing() -> some View {
+        if #available(iOS 18, *) {
+            self.presentationSizing(.page)
+        } else {
+            self
+                .frame(idealWidth: 1100, idealHeight: 1300)
+                .frame(minWidth: 900, minHeight: 1100)
+        }
+    }
+}
+
 struct SettingsView: View {
     @EnvironmentObject var selected: SelectedConference
     @Environment(InfoViewModel.self) private var viewModel
@@ -108,9 +131,10 @@ struct SettingsView: View {
                 }
             }
             // Page-sheet style: large modal that doesn't quite reach
-            // the screen edges, with Settings dimmed-but-visible
-            // behind it. iOS 18+.
-            .presentationSizing(.page)
+            // the screen edges, with Settings dimmed-but-visible behind
+            // it. iOS 18+ gets the native API; iOS 17 falls back to a
+            // large explicit frame which the form sheet grows to fit.
+            .iPadPageSheetSizing()
         }
     }
     @ViewBuilder private var selectConferenceRow: some View {
