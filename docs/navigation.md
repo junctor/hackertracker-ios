@@ -2,13 +2,14 @@
 
 The HackerTracker tab bar has four tabs. Each tab is independent — switching tabs doesn't lose your place inside another tab.
 
+![Tab bar](images/tab-bar.png)
+
 ## Info (house icon)
 
 The home screen. Shows:
 - The conference banner, name, and tagline.
 - A **News** card with the most recent article (toggle off in Settings if you'd rather not see it).
 - A grid of feature cards: **Schedule**, **All Content** (talks list), **Speakers**, **Communities/Villages**, **Locations**, **FAQ**, **Merch**, **Shared Schedule**, **Emergency Info**, **About**, and conference-specific menus.
-- Beneath the grid, a version label at the bottom — tap it seven times for an [Easter Egg](easter-eggs.md).
 
 ## Schedule (calendar icon)
 

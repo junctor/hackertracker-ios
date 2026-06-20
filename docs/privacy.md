@@ -2,6 +2,10 @@
 
 Plain English version of what HackerTracker collects, doesn't collect, and how it handles your data. The in-app copy of this lives at **Settings → Privacy & Tracking** and stays in sync with this page.
 
+![Privacy & Tracking row in Settings](images/privacy-settings-row.png)
+
+![Privacy doc rendered in-app](images/privacy-doc.png)
+
 ## TL;DR
 
 - We don't sell or rent any data.

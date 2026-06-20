@@ -6,6 +6,8 @@ Conference venue floor plans. Available from the map icon in the tab bar.
 
 A horizontally-swipeable stack of maps. Page indicator dots at the bottom show your position. The title bar shows the current map's name.
 
+![Maps with zoom pill](images/maps-iphone.png)
+
 ## Controls
 
 **Floating zoom pill** — bottom-left of the map area. Three icons stacked horizontally:
@@ -33,11 +35,15 @@ The search is **case-insensitive** and matches `<text>`, `<tspan>`, and `<title>
 
 Search only works on SVG maps. PDF maps don't have selectable text in this dataset; the search button hides when only the PDF is available.
 
+![SVG map search](images/maps-search.png)
+
 ## Performance
 
 Maps are downloaded on conference load and cached locally at `<documents>/<conference_code>/<filename>`. Subsequent visits are instant.
 
 On the conference's first download, the **tab icon pulses** until all maps have arrived. The empty state shows a bobbing Beezle ghost + "Map downloading…" with a Refresh button.
+
+![Maps empty / loading state](images/maps-empty.png)
 
 **Pre-warming**: PDFs are parsed into a process-lifetime cache during conference load, so the first swipe between maps is instant rather than stalling on a per-page parse.
 

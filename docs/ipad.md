@@ -16,6 +16,8 @@ In all five, the **sidebar is 500pt wide** (set in [`IPadAdaptive.sidebarWidth`]
 
 Tap a row in the left list → the right pane updates instantly without pushing onto the navigation stack. Switching to another row replaces the right pane.
 
+![iPad split view — Schedule](images/schedule-ipad.png)
+
 This applies to **custom events** too — they route to the right pane just like Firestore events do, not over the sidebar.
 
 ## Two-column Settings
@@ -26,6 +28,8 @@ Settings on iPad uses an **explicit HStack of two VStack columns** rather than t
 **Right column**: Start Screen picker, Notifications, AI Summaries, Custom Events on Schedule, Easter Eggs.
 
 This is automatic — there's no manual layout selection.
+
+![iPad Settings two-column layout](images/settings-ipad.png)
 
 ## Maps on iPad
 
