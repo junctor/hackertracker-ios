@@ -289,6 +289,10 @@ HackerTracker is a conference scheduling application.
 
 ## Data Wrangler
  * aNullValue - [@aNullValue@defcon.social](https://defcon.social/@anullvalue)
+
+## License
+
+HackerTracker iOS is licensed under the [GNU General Public License v3.0](https://github.com/junctor/hackertracker-ios/blob/main/LICENSE). You are free to use, modify, and redistribute it under the terms of that license.
 """
 
     var body: some View {
