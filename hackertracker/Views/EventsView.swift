@@ -385,19 +385,24 @@ struct EventsView: View {
         .frame(width: IPadAdaptive.sidebarWidth)
         Divider()
         NavigationStack {
-          if let cid = ipadSelectedCustomEventId {
-            CustomEventDetailView(eventID: cid)
-              .id(cid)
-          } else if let id = ipadSelectedContentId {
-            ContentDetailView(contentId: id)
-              .id(id)
-          } else {
-            ContentUnavailableView(
-              "Select an Event",
-              systemImage: "calendar",
-              description: Text("Tap an event in the schedule to view details.")
-            )
+          Group {
+            if let cid = ipadSelectedCustomEventId {
+              CustomEventDetailView(eventID: cid)
+                .id(cid)
+            } else if let id = ipadSelectedContentId {
+              ContentDetailView(contentId: id)
+                .id(id)
+            } else {
+              ContentUnavailableView(
+                "Select an Event",
+                systemImage: "calendar",
+                description: Text("Tap an event in the schedule to view details.")
+              )
+            }
           }
+          .navigationBarTitleDisplayMode(.inline)
+          .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+          .toolbarBackground(.visible, for: .navigationBar)
         }
       }
       .environment(\.iPadContentSelection, $ipadSelectedContentId)
