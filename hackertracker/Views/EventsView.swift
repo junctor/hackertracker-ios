@@ -384,25 +384,32 @@ struct EventsView: View {
         }
         .frame(width: IPadAdaptive.sidebarWidth)
         Divider()
-        // iPad: render the detail view directly with NO surrounding
-        // NavigationStack. A NavigationStack here reserves ~200pt of
-        // nav-bar space for a title we never set, creating a huge gap
-        // between the floating tab bar and the detail content. The
-        // detail views render full-bleed instead; CustomEventDetailView
-        // renders its action buttons inline on iPad.
-        Group {
-          if let cid = ipadSelectedCustomEventId {
-            CustomEventDetailView(eventID: cid)
-              .id(cid)
-          } else if let id = ipadSelectedContentId {
-            ContentDetailView(contentId: id)
-              .id(id)
-          } else {
-            ContentUnavailableView(
-              "Select an Event",
-              systemImage: "calendar",
-              description: Text("Tap an event in the schedule to view details.")
-            )
+        // iPad: keep a NavigationStack on the right pane so the sibling
+        // pair preserves the layout symmetry iPadOS 18 uses to size the
+        // safe-area top inset under the floating tab bar (the left
+        // nav-title was disappearing otherwise). Hide *this* nav bar so
+        // the empty header doesn't take visible space, and pad the top
+        // so the event title isn't covered by the floating tab pill.
+        // CustomEventDetailView's action buttons render inline on iPad.
+        NavigationStack {
+          Group {
+            if let cid = ipadSelectedCustomEventId {
+              CustomEventDetailView(eventID: cid)
+                .id(cid)
+            } else if let id = ipadSelectedContentId {
+              ContentDetailView(contentId: id)
+                .id(id)
+            } else {
+              ContentUnavailableView(
+                "Select an Event",
+                systemImage: "calendar",
+                description: Text("Tap an event in the schedule to view details.")
+              )
+            }
+          }
+          .toolbar(.hidden, for: .navigationBar)
+          .safeAreaInset(edge: .top, spacing: 0) {
+            Color.clear.frame(height: 16)
           }
         }
       }
