@@ -107,12 +107,10 @@ struct SettingsView: View {
                     }
                 }
             }
-            // Force the iPad form sheet to grow to "page-sheet" size
-            // (~90% of the screen) so Settings remains visible behind a
-            // dimmed background, instead of the default narrow centered
-            // card.
-            .frame(idealWidth: 1100, idealHeight: 1300)
-            .frame(minWidth: 900, minHeight: 1100)
+            // Page-sheet style: large modal that doesn't quite reach
+            // the screen edges, with Settings dimmed-but-visible
+            // behind it. iOS 18+.
+            .presentationSizing(.page)
         }
     }
     @ViewBuilder private var selectConferenceRow: some View {
