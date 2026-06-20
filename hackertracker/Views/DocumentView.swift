@@ -35,7 +35,7 @@ struct DocumentView: View {
                     .foregroundColor(colorMode ? .white : .primary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(color ?? (colorMode ? theme.carousel() : Color(.systemGray6)))
+                    .background(color ?? (colorMode ? theme.carousel() : ThemeColors.cardSurface))
                     .cornerRadius(15)
                     Divider()
                 }

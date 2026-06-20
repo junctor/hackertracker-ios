@@ -92,7 +92,7 @@ struct CustomEventShareSheet: View {
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(10)
-                .background(Color(.systemGray6))
+                .background(ThemeColors.cardSurface)
                 .cornerRadius(8)
                 .textSelection(.enabled)
         }

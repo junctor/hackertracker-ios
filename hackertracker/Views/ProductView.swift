@@ -36,7 +36,7 @@ struct ProductView: View {
             .foregroundColor(.primary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(15)
-            .background(Color(.systemGray6))
+            .background(ThemeColors.cardSurface)
             .cornerRadius(15)
             
             VStack {
@@ -98,7 +98,7 @@ struct ProductView: View {
                                 .foregroundColor(.primary)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding(15)
-                                .background(Color(.systemGray6))
+                                .background(ThemeColors.cardSurface)
                                 .cornerRadius(15)
                             } else {
                                 Button {
@@ -129,7 +129,7 @@ struct ProductView: View {
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(15)
-                        .background(Color(.systemGray6))
+                        .background(ThemeColors.cardSurface)
                         .cornerRadius(15)
                 }
                 

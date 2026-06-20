@@ -371,7 +371,7 @@ struct ProductsRow: View {
                                 .foregroundColor(.primary)
                         }
                         .padding(5)
-                        .background(Color(.systemGray6))
+                        .background(ThemeColors.cardSurface)
                         .cornerRadius(5)
                         .frame(alignment: .center)
                     } else {
@@ -381,7 +381,7 @@ struct ProductsRow: View {
                                 .foregroundColor(.red)
                         }
                         .padding(5)
-                        .background(Color(.systemGray6))
+                        .background(ThemeColors.cardSurface)
                         .cornerRadius(5)
                         .frame(alignment: .center)
                     }

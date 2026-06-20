@@ -51,7 +51,7 @@ struct ConferenceRow: View {
         .padding(.vertical, 12)
         .padding(.horizontal, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.systemGray6))
+        .background(ThemeColors.cardSurface)
         .cornerRadius(12)
         .padding(.horizontal, 12)
         .padding(.vertical, 4)

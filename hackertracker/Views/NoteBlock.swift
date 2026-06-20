@@ -94,7 +94,7 @@ struct NoteBlock: View {
                         Markdown(text)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
-                            .background(Color(.systemGray6))
+                            .background(ThemeColors.cardSurface)
                             .cornerRadius(12)
                             .onTapGesture { showingEditor = true }
                             .accessibilityAddTraits(.isButton)
@@ -110,7 +110,7 @@ struct NoteBlock: View {
                             }
                             .padding(12)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.systemGray6))
+                            .background(ThemeColors.cardSurface)
                             .cornerRadius(12)
                             .foregroundStyle(.primary)
                         }

@@ -28,7 +28,7 @@ struct OrgView: View {
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(15)
-                .background(Color(.systemGray6))
+                .background(ThemeColors.cardSurface)
                 .cornerRadius(15)
                 Divider()
                 if org.media.count > 0 {
@@ -58,7 +58,7 @@ struct OrgView: View {
                             .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel() : Color(.systemGray6))
+                            .background(colorMode ? theme.carousel() : ThemeColors.cardSurface)
                             .cornerRadius(15)
                     }
                 }
@@ -120,7 +120,7 @@ struct showLinks: View {
                             .foregroundColor(.primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel() : Color(.systemGray6))
+                            .background(colorMode ? theme.carousel() : ThemeColors.cardSurface)
                             .cornerRadius(15)
                         }
                     }

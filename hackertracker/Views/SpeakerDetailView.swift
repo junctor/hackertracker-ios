@@ -42,7 +42,7 @@ struct SpeakerDetailView: View {
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(15)
-                    .background(Color(.systemGray6))
+                    .background(ThemeColors.cardSurface)
                     .cornerRadius(15)
                     if let media = speaker.media, media.count > 0 {
                         HStack {
@@ -150,7 +150,7 @@ struct showSpeakerLinks: View {
                             .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel(): Color(.systemGray6))
+                            .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
                             .cornerRadius(15)
                             
                         }

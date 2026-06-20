@@ -193,7 +193,7 @@ struct CartRow: View {
                     .foregroundColor(ThemeColors.red)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(Color(.systemGray6))
+                    .background(ThemeColors.cardSurface)
                     .cornerRadius(15)
                     .frame(alignment: .center)
                     .onAppear {

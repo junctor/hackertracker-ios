@@ -53,7 +53,7 @@ struct ContentDetailView: View {
                         }
                     }
                     .padding()
-                    .background(Color(.systemGray6))
+                    .background(ThemeColors.cardSurface)
                     .iPadFlatCorners(15)
                 }
                 VStack(alignment: .leading) {
@@ -157,7 +157,7 @@ struct showFeedbackButton: View {
             .foregroundColor(colorMode ? .white : .primary)
             .frame(maxWidth: .infinity)
             .padding(15)
-            .background(colorMode ? theme.carousel() : Color(.systemGray6))
+            .background(colorMode ? theme.carousel() : ThemeColors.cardSurface)
             .cornerRadius(15)
         }
     }
@@ -454,7 +454,7 @@ struct showPeople: View {
                                 .foregroundColor(.primary)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding(15)
-                                .background(colorMode ? theme.carousel(): Color(.systemGray6))
+                                .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
                                 .cornerRadius(15)
                             }
                         }
@@ -473,7 +473,7 @@ struct showPeople: View {
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(colorMode ? theme.carousel(): Color(.systemGray6))
+                    .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
                     .cornerRadius(15)
                 }
             }

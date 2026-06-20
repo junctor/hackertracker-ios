@@ -34,7 +34,7 @@ struct _04View: View {
                     .frame(maxHeight: .infinity)
                 
                     NavigationLink(destination: ConferencesView()) {
-                        CardView(systemImage: "list", text:"Choose Conference", color: Color(.systemGray6), subtitle: "Not loading? Choose a conference now.")
+                        CardView(systemImage: "list", text:"Choose Conference", color: ThemeColors.cardSurface, subtitle: "Not loading? Choose a conference now.")
                             .frame(maxWidth: .infinity, maxHeight: 35)
                             .padding(25)
                     }

@@ -170,7 +170,7 @@ struct SettingsView: View {
         }
         .foregroundColor(.primary)
         .frame(maxWidth: .infinity)
-        .background(Color(.systemGray6))
+        .background(ThemeColors.cardSurface)
         .cornerRadius(5)
     }
 
@@ -317,7 +317,7 @@ struct AboutSettingsView: View {
         }
         .foregroundColor(.primary)
         .frame(maxWidth: .infinity)
-        .background(Color(.systemGray6))
+        .background(ThemeColors.cardSurface)
         .cornerRadius(5)
         Divider()
     }
@@ -475,7 +475,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 row("Build date (UTC)", info.buildDate)
             }
             .padding()
-            .background(Color(.systemGray6))
+            .background(ThemeColors.cardSurface)
             .cornerRadius(8)
 
             if info.dirty {

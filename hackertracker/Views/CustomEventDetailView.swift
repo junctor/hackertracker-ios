@@ -151,7 +151,7 @@ struct CustomEventDetailView: View {
                     }
                 }
                 .padding()
-                .background(Color(.systemGray6))
+                .background(ThemeColors.cardSurface)
                 .iPadFlatCorners(15)
             }
 

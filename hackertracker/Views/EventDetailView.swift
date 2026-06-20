@@ -66,7 +66,7 @@ struct EventDetailView: View {
                         }
                     }
                     .padding()
-                    .background(Color(.systemGray6))
+                    .background(ThemeColors.cardSurface)
                     .iPadFlatCorners(15)
                 }
                 VStack(alignment: .leading) {

@@ -237,7 +237,7 @@ struct orgRow: View {
             }
             .padding(5)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(colorMode ? theme.carousel(): Color(.systemGray6))
+            .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
             .cornerRadius(15)
 
         } else {
@@ -245,7 +245,7 @@ struct orgRow: View {
                 .foregroundColor(colorMode ? .white : .primary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(15)
-                .background(colorMode ? theme.carousel(): Color(.systemGray6))
+                .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
                 .cornerRadius(15)
         }
     }

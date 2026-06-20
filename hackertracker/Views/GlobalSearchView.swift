@@ -111,6 +111,6 @@ struct GlobalSearchHeader: View {
           .font(.subheadline)
           .padding(3)
           .frame(maxWidth: .infinity)
-          .background(Color(.systemGray6))
+          .background(ThemeColors.cardSurface)
     }
 }

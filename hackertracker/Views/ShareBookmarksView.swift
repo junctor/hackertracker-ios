@@ -27,7 +27,7 @@ struct ShareBookmarksView: View {
                 .foregroundColor(colorMode ? .white : .primary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(15)
-                .background(colorMode ? theme.carousel(): Color(.systemGray6))
+                .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
                 .cornerRadius(15)
                 Divider()
                 if let conf = viewModel.conference, bookmarks.filter({viewModel.events.map{Int32($0.id)}.contains($0.id)}).count > 0 {

@@ -187,7 +187,7 @@ struct articleRow: View {
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity)
                     .padding(15)
-                    .background(Color(.systemGray6))
+                    .background(ThemeColors.cardSurface)
                     .cornerRadius(15)
                 } else {
                     Markdown(article.text).padding(.vertical)
