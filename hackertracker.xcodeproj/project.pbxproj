@@ -502,6 +502,7 @@
 				5DAE04AC2820948B00930A2D /* Sources */,
 				5DAE04AD2820948B00930A2D /* Frameworks */,
 				5DAE04AE2820948B00930A2D /* Resources */,
+				5DB01D1F0CAFE0000000B01D /* Stamp build info */,
 			);
 			buildRules = (
 			);
@@ -640,6 +641,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		5DB01D1F0CAFE0000000B01D /* Stamp build info */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Stamp build info";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cd \"$SRCROOT\"\nif ! git rev-parse --git-dir >/dev/null 2>&1; then\n  GC=unknown; GS=unknown; GB=unknown; GD=unknown\nelse\n  GC=$(git rev-parse HEAD 2>/dev/null || echo unknown)\n  GS=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)\n  GB=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)\n  if [ -z \"$(git status --porcelain 2>/dev/null)\" ]; then GD=false; else GD=true; fi\nfi\nBD=$(date -u +%Y-%m-%dT%H:%M:%SZ)\nP=\"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/BuildInfo.plist\"\nmkdir -p \"$(dirname \"$P\")\"\ncat > \"$P\" <<PLIST\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n<plist version=\"1.0\">\n<dict>\n    <key>GitCommit</key><string>${GC}</string>\n    <key>GitCommitShort</key><string>${GS}</string>\n    <key>GitBranch</key><string>${GB}</string>\n    <key>GitDirty</key><string>${GD}</string>\n    <key>BuildDate</key><string>${BD}</string>\n</dict>\n</plist>\nPLIST\nplutil -convert binary1 \"$P\"\necho \"[BuildInfo] $GS ($GB) dirty=$GD\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		5DAE04AC2820948B00930A2D /* Sources */ = {
@@ -912,6 +935,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = hackertracker/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HackerTracker;
@@ -951,6 +975,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = hackertracker/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = HackerTracker;

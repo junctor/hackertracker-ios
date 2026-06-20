@@ -28,6 +28,7 @@ struct SettingsView: View {
                 // 2-column grid row.
                 VStack(spacing: 0) {
                     AboutSettingsView()
+                    BuildInfoSettingsView()
                     PrivacySettingsView()
                     selectConferenceRow
                     Divider()
@@ -236,6 +237,154 @@ struct AboutSettingsView: View {
         .background(Color(.systemGray6))
         .cornerRadius(5)
         Divider()
+    }
+}
+
+/// Build provenance — git commit / branch / dirty / build date, stamped
+/// at build time by the "Stamp build info" Run Script phase. Lets a user
+/// confirm which public commit the installed build came from.
+struct BuildInfo {
+    let commit: String
+    let commitShort: String
+    let branch: String
+    let dirty: Bool
+    let buildDate: String
+
+    static let repoURL = "https://github.com/junctor/hackertracker-ios"
+
+    static let current: BuildInfo? = {
+        guard let url = Bundle.main.url(forResource: "BuildInfo", withExtension: "plist"),
+              let data = try? Data(contentsOf: url),
+              let plist = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: String]
+        else { return nil }
+        return BuildInfo(
+            commit: plist["GitCommit"] ?? "unknown",
+            commitShort: plist["GitCommitShort"] ?? "unknown",
+            branch: plist["GitBranch"] ?? "unknown",
+            dirty: (plist["GitDirty"] ?? "false") == "true",
+            buildDate: plist["BuildDate"] ?? "unknown"
+        )
+    }()
+
+    var commitURL: URL? {
+        guard commit != "unknown" else { return nil }
+        return URL(string: "\(BuildInfo.repoURL)/commit/\(commit)")
+    }
+}
+
+struct BuildInfoSettingsView: View {
+    var body: some View {
+        Group {
+            if let info = BuildInfo.current {
+                HStack {
+                    NavigationLink(destination: BuildInfoDetailView(info: info)) {
+                        Image(systemName: info.dirty ? "checkmark.seal.trianglebadge.exclamationmark" : "checkmark.seal")
+                            .padding(5)
+                            .foregroundStyle(info.dirty ? .orange : .primary)
+                        VStack(alignment: .leading) {
+                            Text("Build info")
+                                .bold()
+                            Text("\(info.commitShort)\(info.dirty ? " · dirty" : "") · \(info.branch)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(5)
+                        Image(systemName: "chevron.right")
+                            .padding(5)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                .foregroundColor(.primary)
+                .frame(maxWidth: .infinity)
+                .background(Color(.systemGray6))
+                .cornerRadius(5)
+                Divider()
+            }
+        }
+    }
+}
+
+struct BuildInfoDetailView: View {
+    let info: BuildInfo
+    @Environment(\.openURL) private var openURL
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Build info")
+                    .font(.title2).bold()
+
+                Text("Stamped at build time. Verify this build matches a specific public commit by tapping **View on GitHub** — if the page 404s, this build was not produced from a public commit on the official repo.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+
+                VStack(alignment: .leading, spacing: 12) {
+                    row("Commit", info.commit, mono: true)
+                    row("Short", info.commitShort, mono: true)
+                    row("Branch", info.branch)
+                    row("Working tree", info.dirty ? "dirty (uncommitted changes at build time)" : "clean")
+                    row("Build date (UTC)", info.buildDate)
+                }
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
+
+                if info.dirty {
+                    Label("This build was produced from a working copy with uncommitted changes. It does not correspond to a single public commit.", systemImage: "exclamationmark.triangle.fill")
+                        .font(.callout)
+                        .foregroundStyle(.orange)
+                        .padding()
+                        .background(Color.orange.opacity(0.1))
+                        .cornerRadius(8)
+                }
+
+                if let url = info.commitURL {
+                    Button {
+                        openURL(url)
+                    } label: {
+                        Label("View on GitHub", systemImage: "arrow.up.right.square")
+                            .frame(maxWidth: .infinity)
+                            .padding(10)
+                            .background(Color.accentColor.opacity(0.15))
+                            .cornerRadius(8)
+                    }
+                }
+
+                Button {
+                    UIPasteboard.general.string = """
+                    commit:     \(info.commit)
+                    short:      \(info.commitShort)
+                    branch:     \(info.branch)
+                    dirty:      \(info.dirty)
+                    buildDate:  \(info.buildDate)
+                    """
+                } label: {
+                    Label("Copy build info", systemImage: "doc.on.doc")
+                        .frame(maxWidth: .infinity)
+                        .padding(10)
+                        .background(Color(.systemGray5))
+                        .cornerRadius(8)
+                }
+            }
+            .padding()
+            .iPadReadableContent()
+        }
+        .navigationTitle("Build info")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    @ViewBuilder
+    private func row(_ label: String, _ value: String, mono: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(mono ? .system(.footnote, design: .monospaced) : .body)
+                .textSelection(.enabled)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
