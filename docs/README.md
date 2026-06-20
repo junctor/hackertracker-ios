@@ -30,9 +30,6 @@ If you're looking for the **5-minute version**, start with [Quick Start](quickst
 - [Easter eggs](easter-eggs.md) — there is one. See if you can find it.
 - [Troubleshooting](troubleshooting.md) — common problems and fixes
 
-### For developers
-- See [`CLAUDE.md`](../CLAUDE.md) at the repo root for build commands, architecture, and conventions.
-
 ---
 
 ## What's new in 6.0
