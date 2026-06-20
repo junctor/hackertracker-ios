@@ -153,6 +153,8 @@ struct articleRow: View {
     @FetchRequest(sortDescriptors: []) var readnews: FetchedResults<News>
     @Environment(\.managedObjectContext) private var viewContext
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility tz changes.
         let _ = DateFormatterUtility.shared.tzGeneration
@@ -187,7 +189,7 @@ struct articleRow: View {
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity)
                     .padding(15)
-                    .background(ThemeColors.cardSurface)
+                    .background(themeManager.cardSurface)
                     .cornerRadius(15)
                 } else {
                     Markdown(article.text).padding(.vertical)

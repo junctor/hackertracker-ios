@@ -23,6 +23,8 @@ struct ProductView: View {
         _selectedVariant = State(initialValue: product.variants[0].variantId)
     }
     
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading) {
@@ -36,7 +38,7 @@ struct ProductView: View {
             .foregroundColor(.primary)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(15)
-            .background(ThemeColors.cardSurface)
+            .background(themeManager.cardSurface)
             .cornerRadius(15)
             
             VStack {
@@ -98,7 +100,7 @@ struct ProductView: View {
                                 .foregroundColor(.primary)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding(15)
-                                .background(ThemeColors.cardSurface)
+                                .background(themeManager.cardSurface)
                                 .cornerRadius(15)
                             } else {
                                 Button {
@@ -129,7 +131,7 @@ struct ProductView: View {
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(15)
-                        .background(ThemeColors.cardSurface)
+                        .background(themeManager.cardSurface)
                         .cornerRadius(15)
                 }
                 

@@ -81,6 +81,19 @@ struct DualColor: Hashable {
     func resolve(_ scheme: ColorScheme) -> Color {
         scheme == .dark ? dark : light
     }
+
+    /// Self-resolving Color that picks the right variant based on the
+    /// active system appearance — no `@Environment(\.colorScheme)`
+    /// read needed at the call site. Useful when threading colorScheme
+    /// through every view would be noisier than the win.
+    var auto: Color {
+        Color(UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(self.dark)
+                : UIColor(self.light)
+        })
+    }
+
     static let cardSurface = DualColor(
         light: Color(red: 235/255, green: 235/255, blue: 240/255),
         dark:  Color(red: 38/255,  green: 38/255,  blue: 42/255)
@@ -191,6 +204,27 @@ final class ThemeManager {
         guard ThemeRegistry.all.contains(where: { $0.id == id }) else { return }
         storedID = id
     }
+
+    // MARK: - Convenience token accessors
+    //
+    // Returns auto-resolving Colors / Fonts so call sites stay terse.
+    // Example:
+    //   .background(themeManager.cardSurface)
+    //   .font(themeManager.headingFont)
+
+    var cardSurface: Color    { current.palette.cardSurface.auto }
+    var accent: Color         { current.palette.accent.auto }
+    var danger: Color         { current.palette.danger.auto }
+    var textPrimary: Color    { current.palette.textPrimary.auto }
+    var textSecondary: Color  { current.palette.textSecondary.auto }
+    var divider: Color        { current.palette.divider.auto }
+    var chipBackground: Color { current.palette.chipBackground.auto }
+
+    var largeTitleFont: Font { current.typography.largeTitle }
+    var headingFont: Font    { current.typography.heading }
+    var bodyFont: Font       { current.typography.body }
+    var captionFont: Font    { current.typography.caption }
+    var monospaceFont: Font  { current.typography.monospace }
 }
 
 import AVFoundation

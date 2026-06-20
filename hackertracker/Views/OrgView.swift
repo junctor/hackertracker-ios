@@ -18,6 +18,8 @@ struct OrgView: View {
     @AppStorage("colorMode") var colorMode: Bool = false
     @Binding var tabSelection: Int
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         ScrollView {
             VStack {
@@ -28,7 +30,7 @@ struct OrgView: View {
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(15)
-                .background(ThemeColors.cardSurface)
+                .background(themeManager.cardSurface)
                 .cornerRadius(15)
                 Divider()
                 if org.media.count > 0 {
@@ -58,7 +60,7 @@ struct OrgView: View {
                             .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel() : ThemeColors.cardSurface)
+                            .background(colorMode ? theme.carousel() : themeManager.cardSurface)
                             .cornerRadius(15)
                     }
                 }
@@ -80,6 +82,8 @@ struct showLinks: View {
     @State private var collapsed = false
     @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
+
+    @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -120,7 +124,7 @@ struct showLinks: View {
                             .foregroundColor(.primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel() : ThemeColors.cardSurface)
+                            .background(colorMode ? theme.carousel() : themeManager.cardSurface)
                             .cornerRadius(15)
                         }
                     }

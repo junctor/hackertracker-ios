@@ -59,6 +59,8 @@ struct SettingsView: View {
     @AppStorage("showNews") var showNews: Bool = true
     @State private var iPadSheet: SettingsIPadSheet?
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         NavigationStack {
             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documentsById[emergId] {
@@ -170,7 +172,7 @@ struct SettingsView: View {
         }
         .foregroundColor(.primary)
         .frame(maxWidth: .infinity)
-        .background(ThemeColors.cardSurface)
+        .background(themeManager.cardSurface)
         .cornerRadius(5)
     }
 
@@ -299,6 +301,8 @@ struct AboutSettingsView: View {
     /// is nil and the row falls back to the standard NavigationLink push.
     var iPadAction: (() -> Void)? = nil
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         HStack {
             if let v1 = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, let v2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
@@ -317,7 +321,7 @@ struct AboutSettingsView: View {
         }
         .foregroundColor(.primary)
         .frame(maxWidth: .infinity)
-        .background(ThemeColors.cardSurface)
+        .background(themeManager.cardSurface)
         .cornerRadius(5)
         Divider()
     }
@@ -392,6 +396,8 @@ HackerTracker is a conference scheduling application.
 
 HackerTracker iOS is licensed under the [GNU General Public License v3.0](https://github.com/junctor/hackertracker-ios/blob/main/LICENSE). You are free to use, modify, and redistribute it under the terms of that license.
 """
+
+    @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
         ScrollView {
@@ -475,7 +481,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 row("Build date (UTC)", info.buildDate)
             }
             .padding()
-            .background(ThemeColors.cardSurface)
+            .background(themeManager.cardSurface)
             .cornerRadius(8)
 
             if info.dirty {

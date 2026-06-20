@@ -13,6 +13,8 @@ struct ShareBookmarksView: View {
     @AppStorage("colorMode") var colorMode: Bool = false
     @State private var message = "Tap link to copy"
     
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         ScrollView {
             VStack {
@@ -27,7 +29,7 @@ struct ShareBookmarksView: View {
                 .foregroundColor(colorMode ? .white : .primary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(15)
-                .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
+                .background(colorMode ? theme.carousel(): themeManager.cardSurface)
                 .cornerRadius(15)
                 Divider()
                 if let conf = viewModel.conference, bookmarks.filter({viewModel.events.map{Int32($0.id)}.contains($0.id)}).count > 0 {

@@ -11,6 +11,8 @@ struct ConferenceRow: View {
     var conference: Conference
     var code: String
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 5, content: {
@@ -51,7 +53,7 @@ struct ConferenceRow: View {
         .padding(.vertical, 12)
         .padding(.horizontal, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(ThemeColors.cardSurface)
+        .background(themeManager.cardSurface)
         .cornerRadius(12)
         .padding(.horizontal, 12)
         .padding(.vertical, 4)

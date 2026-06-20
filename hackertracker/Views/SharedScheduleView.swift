@@ -144,6 +144,8 @@ struct SharedScheduleRow: View {
         return f.string(from: date)
     }
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         let _ = dfu.tzGeneration
         VStack(alignment: .leading, spacing: 6) {
@@ -170,7 +172,7 @@ struct SharedScheduleRow: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(ThemeColors.cardSurface)
+        .background(themeManager.cardSurface)
         .cornerRadius(12)
     }
 }

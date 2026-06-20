@@ -163,6 +163,8 @@ struct CartRow: View {
         _count = State(initialValue: Int(item.count))
     }
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
@@ -193,7 +195,7 @@ struct CartRow: View {
                     .foregroundColor(ThemeColors.red)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(ThemeColors.cardSurface)
+                    .background(themeManager.cardSurface)
                     .cornerRadius(15)
                     .frame(alignment: .center)
                     .onAppear {

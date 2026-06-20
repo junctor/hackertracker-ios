@@ -50,6 +50,8 @@ struct CustomEventDetailView: View {
         )
     }
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
@@ -151,7 +153,7 @@ struct CustomEventDetailView: View {
                     }
                 }
                 .padding()
-                .background(ThemeColors.cardSurface)
+                .background(themeManager.cardSurface)
                 .iPadFlatCorners(15)
             }
 

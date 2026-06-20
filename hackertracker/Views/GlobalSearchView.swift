@@ -106,11 +106,13 @@ struct GlobalSearchView: View {
 struct GlobalSearchHeader: View {
     var headerText: String
     
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         Text(headerText.uppercased())
           .font(.subheadline)
           .padding(3)
           .frame(maxWidth: .infinity)
-          .background(ThemeColors.cardSurface)
+          .background(themeManager.cardSurface)
     }
 }

@@ -44,6 +44,8 @@ struct NoteBlock: View {
         notes.first?.body.flatMap { $0.isEmpty ? nil : $0 }
     }
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Always-visible header. Tap anywhere to expand/collapse;
@@ -94,7 +96,7 @@ struct NoteBlock: View {
                         Markdown(text)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
-                            .background(ThemeColors.cardSurface)
+                            .background(themeManager.cardSurface)
                             .cornerRadius(12)
                             .onTapGesture { showingEditor = true }
                             .accessibilityAddTraits(.isButton)
@@ -110,7 +112,7 @@ struct NoteBlock: View {
                             }
                             .padding(12)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(ThemeColors.cardSurface)
+                            .background(themeManager.cardSurface)
                             .cornerRadius(12)
                             .foregroundStyle(.primary)
                         }

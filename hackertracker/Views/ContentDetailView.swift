@@ -31,6 +31,8 @@ struct ContentDetailView: View {
         GridItem(.flexible())
     ]
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
@@ -53,7 +55,7 @@ struct ContentDetailView: View {
                         }
                     }
                     .padding()
-                    .background(ThemeColors.cardSurface)
+                    .background(themeManager.cardSurface)
                     .iPadFlatCorners(15)
                 }
                 VStack(alignment: .leading) {
@@ -147,6 +149,8 @@ struct showFeedbackButton: View {
     @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         VStack {
             Button {
@@ -157,7 +161,7 @@ struct showFeedbackButton: View {
             .foregroundColor(colorMode ? .white : .primary)
             .frame(maxWidth: .infinity)
             .padding(15)
-            .background(colorMode ? theme.carousel() : ThemeColors.cardSurface)
+            .background(colorMode ? theme.carousel() : themeManager.cardSurface)
             .cornerRadius(15)
         }
     }
@@ -409,6 +413,8 @@ struct showPeople: View {
     @AppStorage("colorMode") var colorMode: Bool = false
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         Divider()
         VStack(alignment: .leading) {
@@ -454,7 +460,7 @@ struct showPeople: View {
                                 .foregroundColor(.primary)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding(15)
-                                .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
+                                .background(colorMode ? theme.carousel(): themeManager.cardSurface)
                                 .cornerRadius(15)
                             }
                         }
@@ -473,7 +479,7 @@ struct showPeople: View {
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
+                    .background(colorMode ? theme.carousel(): themeManager.cardSurface)
                     .cornerRadius(15)
                 }
             }

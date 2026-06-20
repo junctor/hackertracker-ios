@@ -334,6 +334,8 @@ struct ProductsRow: View {
     var product: Product
     @Environment(\.iPadProductSelection) private var iPadProductSelection
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         HStack {
             if let sel = iPadProductSelection {
@@ -371,7 +373,7 @@ struct ProductsRow: View {
                                 .foregroundColor(.primary)
                         }
                         .padding(5)
-                        .background(ThemeColors.cardSurface)
+                        .background(themeManager.cardSurface)
                         .cornerRadius(5)
                         .frame(alignment: .center)
                     } else {
@@ -381,7 +383,7 @@ struct ProductsRow: View {
                                 .foregroundColor(.red)
                         }
                         .padding(5)
-                        .background(ThemeColors.cardSurface)
+                        .background(themeManager.cardSurface)
                         .cornerRadius(5)
                         .frame(alignment: .center)
                     }

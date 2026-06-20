@@ -222,6 +222,8 @@ struct orgRow: View {
     var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         if let l = org.logo, let lurl = l.url, let logo_url = URL(string: lurl) {
             VStack {
@@ -237,7 +239,7 @@ struct orgRow: View {
             }
             .padding(5)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
+            .background(colorMode ? theme.carousel(): themeManager.cardSurface)
             .cornerRadius(15)
 
         } else {
@@ -245,7 +247,7 @@ struct orgRow: View {
                 .foregroundColor(colorMode ? .white : .primary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(15)
-                .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
+                .background(colorMode ? theme.carousel(): themeManager.cardSurface)
                 .cornerRadius(15)
         }
     }

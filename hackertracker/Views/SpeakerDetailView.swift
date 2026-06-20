@@ -22,6 +22,8 @@ struct SpeakerDetailView: View {
     /// scrolls past the nav bar.
     @State private var navTitleOpacity: CGFloat = 0
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         if let speaker = viewModel.speakersById[id] {
             ScrollView {
@@ -42,7 +44,7 @@ struct SpeakerDetailView: View {
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(15)
-                    .background(ThemeColors.cardSurface)
+                    .background(themeManager.cardSurface)
                     .cornerRadius(15)
                     if let media = speaker.media, media.count > 0 {
                         HStack {
@@ -111,6 +113,8 @@ struct showSpeakerLinks: View {
     @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         VStack(alignment: .leading) {
             Button(action: {
@@ -150,7 +154,7 @@ struct showSpeakerLinks: View {
                             .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel(): ThemeColors.cardSurface)
+                            .background(colorMode ? theme.carousel(): themeManager.cardSurface)
                             .cornerRadius(15)
                             
                         }

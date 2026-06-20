@@ -17,6 +17,8 @@ struct CustomEventShareSheet: View {
 
     private var shareURL: URL? { CustomEventShare.url(for: event) }
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -92,7 +94,7 @@ struct CustomEventShareSheet: View {
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(10)
-                .background(ThemeColors.cardSurface)
+                .background(themeManager.cardSurface)
                 .cornerRadius(8)
                 .textSelection(.enabled)
         }
