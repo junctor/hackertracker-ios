@@ -279,13 +279,26 @@ enum ThemeRegistry {
 }
 
 /// Observable holder for the active theme. Read by views via
-/// `@Environment(ThemeManager.self)` once PR 2 migrates call sites.
-/// Persistence is via `@AppStorage("themeID")` — survives launches,
-/// scoped to the install.
+/// `@Environment(ThemeManager.self)`.
+///
+/// Persistence is hand-rolled via UserDefaults rather than
+/// `@AppStorage` because `@AppStorage` is a SwiftUI-View property
+/// wrapper — embedding it in an `@Observable` class (even via
+/// `@ObservationIgnored`) means mutations don't fire the observable
+/// notifications views need to re-render. A plain stored String
+/// property does fire those notifications; we sync to UserDefaults
+/// explicitly in setTheme() so the choice survives launches.
 @Observable
 final class ThemeManager {
-    @ObservationIgnored
-    @AppStorage("themeID") private var storedID: String = AppTheme.default.id
+    private static let userDefaultsKey = "themeID"
+
+    /// Backing storage. @Observable tracks reads + writes of this.
+    private var storedID: String
+
+    init() {
+        self.storedID = UserDefaults.standard.string(forKey: ThemeManager.userDefaultsKey)
+            ?? AppTheme.default.id
+    }
 
     /// The currently active theme. Falls back to the default if the
     /// stored id no longer matches a registered theme (e.g. user
@@ -294,12 +307,13 @@ final class ThemeManager {
         ThemeRegistry.all.first(where: { $0.id == storedID }) ?? ThemeRegistry.fallback
     }
 
-    /// Switch themes. Updates @AppStorage so the choice survives
-    /// launches; @Observable triggers re-renders in any view reading
-    /// `current`.
+    /// Switch themes. Updates the observable state (triggers
+    /// re-renders) AND persists to UserDefaults so the choice
+    /// survives launches.
     func setTheme(_ id: String) {
         guard ThemeRegistry.all.contains(where: { $0.id == id }) else { return }
         storedID = id
+        UserDefaults.standard.set(id, forKey: ThemeManager.userDefaultsKey)
     }
 
     // MARK: - Convenience token accessors
