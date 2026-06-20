@@ -5,6 +5,7 @@
 //  Created by Seth W Law on 6/6/22.
 //
 
+import MarkdownUI
 import SwiftUI
 
 struct SettingsView: View {
@@ -210,11 +211,11 @@ struct NotificationSettingsView: View {
 }
 
 struct AboutSettingsView: View {
-    
+
     var body: some View {
         HStack {
             if let v1 = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, let v2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-                NavigationLink(destination: DocumentView(title_text: "About", body_text: "# HackerTracker (iOS)\n#### Version \(v1) Build \(v2)\nHackerTracker is a conference scheduling application \n\n## Developers\n * l4wke - [X (@sethlaw)](https://x.com/sethlaw) | [GitHub](https://github.com/sethlaw)\n * derail - [Github](https://github.com/cak)\n * advice - [X (@_advice_dog)](https://x.com/_advice_dog)\n\n## Data Wrangler\n * aNullValue - [@aNullValue@defcon.social](https://defcon.social/@anullvalue)\n", showInlineTitle: false)) {
+                NavigationLink(destination: AboutView(marketingVersion: v1, buildVersion: v2)) {
                     Image(systemName: "info.circle")
                         .padding(5)
                     VStack(alignment: .leading) {
@@ -236,6 +237,169 @@ struct AboutSettingsView: View {
         .background(Color(.systemGray6))
         .cornerRadius(5)
         Divider()
+    }
+}
+
+/// Build provenance — git commit / branch / dirty / build date, stamped
+/// at build time by the "Stamp build info" Run Script phase. Lets a user
+/// confirm which public commit the installed build came from.
+struct BuildInfo {
+    let commit: String
+    let commitShort: String
+    let branch: String
+    let dirty: Bool
+    let buildDate: String
+
+    static let repoURL = "https://github.com/junctor/hackertracker-ios"
+
+    static let current: BuildInfo? = {
+        guard let url = Bundle.main.url(forResource: "BuildInfo", withExtension: "plist"),
+              let data = try? Data(contentsOf: url),
+              let plist = try? PropertyListSerialization.propertyList(from: data, format: nil) as? [String: String]
+        else { return nil }
+        return BuildInfo(
+            commit: plist["GitCommit"] ?? "unknown",
+            commitShort: plist["GitCommitShort"] ?? "unknown",
+            branch: plist["GitBranch"] ?? "unknown",
+            dirty: (plist["GitDirty"] ?? "false") == "true",
+            buildDate: plist["BuildDate"] ?? "unknown"
+        )
+    }()
+
+    var commitURL: URL? {
+        guard commit != "unknown" else { return nil }
+        return URL(string: "\(BuildInfo.repoURL)/commit/\(commit)")
+    }
+}
+
+struct AboutView: View {
+    let marketingVersion: String
+    let buildVersion: String
+    @Environment(\.openURL) private var openURL
+
+    private static let aboutBody = """
+# HackerTracker (iOS)
+
+HackerTracker is a conference scheduling application.
+
+## Developers
+ * l4wke - [X (@sethlaw)](https://x.com/sethlaw) | [GitHub](https://github.com/sethlaw)
+ * derail - [Github](https://github.com/cak)
+ * advice - [X (@_advice_dog)](https://x.com/_advice_dog)
+
+## Data Wrangler
+ * aNullValue - [@aNullValue@defcon.social](https://defcon.social/@anullvalue)
+
+## License
+
+HackerTracker iOS is licensed under the [GNU General Public License v3.0](https://github.com/junctor/hackertracker-ios/blob/main/LICENSE). You are free to use, modify, and redistribute it under the terms of that license.
+"""
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                versionHeader
+
+                Markdown(AboutView.aboutBody)
+
+                if let info = BuildInfo.current {
+                    Divider()
+                    buildInfoSection(info)
+                }
+            }
+            .padding()
+            .iPadReadableContent()
+        }
+        .navigationTitle("About")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var versionHeader: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Version \(marketingVersion)")
+                .font(.title3).bold()
+            Text("Build \(buildVersion)")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    @ViewBuilder
+    private func buildInfoSection(_ info: BuildInfo) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: info.dirty ? "checkmark.seal.trianglebadge.exclamationmark" : "checkmark.seal")
+                    .foregroundStyle(info.dirty ? .orange : .primary)
+                Text("Build provenance")
+                    .font(.headline)
+            }
+
+            Text("Stamped at build time. Tap **View on GitHub** to confirm this build came from a specific public commit — if the page 404s, this build was not produced from a public commit on the official repo.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
+            VStack(alignment: .leading, spacing: 10) {
+                row("Commit", info.commit, mono: true)
+                row("Short", info.commitShort, mono: true)
+                row("Branch", info.branch)
+                row("Working tree", info.dirty ? "dirty (uncommitted changes at build time)" : "clean")
+                row("Build date (UTC)", info.buildDate)
+            }
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(8)
+
+            if info.dirty {
+                Label("This build was produced from a working copy with uncommitted changes. It does not correspond to a single public commit.", systemImage: "exclamationmark.triangle.fill")
+                    .font(.footnote)
+                    .foregroundStyle(.orange)
+                    .padding()
+                    .background(Color.orange.opacity(0.1))
+                    .cornerRadius(8)
+            }
+
+            if let url = info.commitURL {
+                Button {
+                    openURL(url)
+                } label: {
+                    Label("View on GitHub", systemImage: "arrow.up.right.square")
+                        .frame(maxWidth: .infinity)
+                        .padding(10)
+                        .background(Color.accentColor.opacity(0.15))
+                        .cornerRadius(8)
+                }
+            }
+
+            Button {
+                UIPasteboard.general.string = """
+                version:    \(marketingVersion) (\(buildVersion))
+                commit:     \(info.commit)
+                short:      \(info.commitShort)
+                branch:     \(info.branch)
+                dirty:      \(info.dirty)
+                buildDate:  \(info.buildDate)
+                """
+            } label: {
+                Label("Copy build info", systemImage: "doc.on.doc")
+                    .frame(maxWidth: .infinity)
+                    .padding(10)
+                    .background(Color(.systemGray5))
+                    .cornerRadius(8)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func row(_ label: String, _ value: String, mono: Bool = false) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(mono ? .system(.footnote, design: .monospaced) : .body)
+                .textSelection(.enabled)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
