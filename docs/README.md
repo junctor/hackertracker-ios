@@ -18,7 +18,6 @@ If you're looking for the **5-minute version**, start with [Quick Start](quickst
 
 ### Personal data
 - [Bookmarking events](bookmarks.md) — saving talks you want to attend
-- [Combined Bookmark Schedule](combined-schedule.md) — cross-conference timeline of just your saved events
 - [Private notes](notes.md) — Markdown notes on any event or talk
 - [Custom events](custom-events.md) — your own schedule entries, multi-conference, sharable via QR
 
@@ -29,7 +28,6 @@ If you're looking for the **5-minute version**, start with [Quick Start](quickst
 
 ### Other
 - [Privacy and tracking](privacy.md) — what we collect, what we don't
-- [Easter eggs](easter-eggs.md) — there is one. See if you can find it.
 - [Troubleshooting](troubleshooting.md) — common problems and fixes
 
 ---
@@ -42,7 +40,6 @@ Highlights from this release. The full changelog is below; for the in-app versio
 - **Custom events** — create your own schedule entries, sync via iCloud, share by QR code.
 - **Private notes** on any event, talk, or custom event. Markdown-formatted, iCloud-synced.
 - **On-device AI summaries** of talk descriptions (iOS 26+ with Apple Intelligence).
-- **Combined Bookmark Schedule** — cross-conference timeline when bookmarks overlap.
 - **Searchable SVG maps** when the conference publishes them.
 
 **iPad overhaul**
