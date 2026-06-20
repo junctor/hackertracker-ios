@@ -67,7 +67,7 @@ struct EventDetailView: View {
                     }
                     .padding()
                     .background(Color(.systemGray6))
-                    .cornerRadius(15)
+                    .iPadFlatCorners(15)
                 }
                 VStack(alignment: .leading) {
                     Markdown(event.description).padding()

@@ -54,7 +54,7 @@ struct ContentDetailView: View {
                     }
                     .padding()
                     .background(Color(.systemGray6))
-                    .cornerRadius(15)
+                    .iPadFlatCorners(15)
                 }
                 VStack(alignment: .leading) {
                     Markdown(item.description)

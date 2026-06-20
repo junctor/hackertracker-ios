@@ -38,6 +38,15 @@ extension View {
             self
         }
     }
+
+    /// Detail-screen rounded cards on iPad read as "floating" tiles below
+    /// a flat nav bar, which makes the right detail pane look misaligned
+    /// from the left list. On iPad this returns the given radius as 0
+    /// (flat); on iPhone it passes through unchanged.
+    @MainActor
+    func iPadFlatCorners(_ radius: CGFloat = 15) -> some View {
+        self.cornerRadius(UIDevice.current.userInterfaceIdiom == .pad ? 0 : radius)
+    }
 }
 
 enum IPadAdaptive {

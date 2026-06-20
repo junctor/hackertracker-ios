@@ -141,7 +141,7 @@ struct CustomEventDetailView: View {
                 }
                 .padding()
                 .background(Color(.systemGray6))
-                .cornerRadius(15)
+                .iPadFlatCorners(15)
             }
 
             // Description (Markdown-rendered, matches EventDetailView).
