@@ -173,11 +173,108 @@ extension AppTheme {
     )
 }
 
+extension AppTheme {
+    /// Terminal vibe: green-tinted surfaces, neon-green accent,
+    /// monospaced body text. Dark variant leans deep-forest; light
+    /// variant is a paler institutional green so the theme reads in
+    /// either appearance.
+    static let hackerGreen = AppTheme(
+        id: "hackerGreen",
+        displayName: "Hacker Green",
+        palette: ThemePalette(
+            cardSurface: DualColor(
+                light: Color(red: 232/255, green: 240/255, blue: 232/255), // #E8F0E8
+                dark:  Color(red: 15/255,  green: 32/255,  blue: 16/255)   // #0F2010
+            ),
+            accent: DualColor(
+                light: Color(red: 0/255,   green: 140/255, blue: 50/255),  // #008C32 (readable on white)
+                dark:  Color(red: 0/255,   green: 255/255, blue: 65/255)   // #00FF41 (matrix green)
+            ),
+            danger: DualColor(
+                light: ThemeColors.red,
+                dark:  ThemeColors.red
+            ),
+            textPrimary: DualColor(
+                light: .black,
+                dark:  Color(red: 200/255, green: 255/255, blue: 200/255)  // soft green-white
+            ),
+            textSecondary: DualColor(
+                light: Color(red: 60/255,  green: 90/255,  blue: 60/255),
+                dark:  Color(red: 120/255, green: 180/255, blue: 120/255)
+            ),
+            divider: DualColor(
+                light: Color(.separator),
+                dark:  Color(red: 40/255, green: 80/255, blue: 40/255)
+            ),
+            chipBackground: DualColor(
+                light: Color(red: 220/255, green: 235/255, blue: 220/255),
+                dark:  Color(red: 25/255,  green: 50/255,  blue: 28/255)
+            )
+        ),
+        typography: ThemeTypography(
+            // System monospaced. Available everywhere, no asset bundle
+            // weight cost. Headings stay proportional so they read at a
+            // glance; body + caption + monospace are all mono.
+            largeTitle: .largeTitle.bold(),
+            heading:    .headline,
+            body:       .system(.body,       design: .monospaced),
+            caption:    .system(.caption,    design: .monospaced),
+            monospace:  .system(.body,       design: .monospaced)
+        )
+    )
+
+    /// Synthwave: muted purple cards, neon-magenta accent, rounded
+    /// sans-serif typography. Reads as warm-dark in dark mode and
+    /// gentle lavender in light mode.
+    static let synthwave = AppTheme(
+        id: "synthwave",
+        displayName: "Synthwave",
+        palette: ThemePalette(
+            cardSurface: DualColor(
+                light: Color(red: 242/255, green: 232/255, blue: 245/255), // #F2E8F5
+                dark:  Color(red: 42/255,  green: 26/255,  blue: 64/255)   // #2A1A40
+            ),
+            accent: DualColor(
+                light: Color(red: 200/255, green: 0/255,   blue: 150/255), // deep magenta
+                dark:  Color(red: 255/255, green: 64/255,  blue: 200/255)  // neon magenta
+            ),
+            danger: DualColor(
+                light: ThemeColors.red,
+                dark:  ThemeColors.red
+            ),
+            textPrimary: DualColor(
+                light: .black,
+                dark:  Color(red: 250/255, green: 230/255, blue: 255/255)
+            ),
+            textSecondary: DualColor(
+                light: Color(red: 90/255,  green: 60/255,  blue: 100/255),
+                dark:  Color(red: 200/255, green: 170/255, blue: 220/255)
+            ),
+            divider: DualColor(
+                light: Color(.separator),
+                dark:  Color(red: 90/255, green: 60/255, blue: 130/255)
+            ),
+            chipBackground: DualColor(
+                light: Color(red: 230/255, green: 215/255, blue: 240/255),
+                dark:  Color(red: 60/255,  green: 38/255,  blue: 92/255)
+            )
+        ),
+        typography: ThemeTypography(
+            // System rounded. Friendlier curves than the default
+            // SF Pro Text — matches the "warm" feel of the palette.
+            largeTitle: .system(.largeTitle, design: .rounded).bold(),
+            heading:    .system(.headline,   design: .rounded),
+            body:       .system(.body,       design: .rounded),
+            caption:    .system(.caption,    design: .rounded),
+            monospace:  .system(.body,       design: .monospaced)
+        )
+    )
+}
+
 /// Registry of all available themes. Adding a new theme is a one-line
-/// append here once you've defined it in `AppTheme+<Name>.swift` (or
-/// inline below for small ones).
+/// append here once you've defined it as an `AppTheme` static.
 enum ThemeRegistry {
-    static let all: [AppTheme] = [.default]
+    static let all: [AppTheme] = [.default, .hackerGreen, .synthwave]
     static let fallback: AppTheme = .default
 }
 
