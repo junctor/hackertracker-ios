@@ -42,7 +42,7 @@ struct ContentDetailView: View {
                 // iPad: constrain content to a readable centered column.
                 VStack(alignment: .leading) {
                     VStack(alignment: .center) {
-                        Text(item.title).font(.largeTitle).bold()
+                        Text(item.title).font(themeManager.largeTitleFont).bold()
                             .trackTitleScrollOffset()
                         if !item.sessions.isEmpty {
                             showSessions(item: item)
@@ -122,7 +122,7 @@ struct ContentDetailView: View {
                 if !IPadAdaptive.isIPad {
                     ToolbarItem(placement: .principal) {
                         Text(item.title)
-                            .font(.headline)
+                            .font(themeManager.headingFont)
                             .lineLimit(1)
                             .opacity(navTitleOpacity)
                     }
@@ -352,6 +352,7 @@ struct showRelated: View {
     var eventIds: [Int]
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @State private var collapsed = true
     
     var body: some View {
@@ -362,7 +363,7 @@ struct showRelated: View {
             }, label: {
                 HStack {
                     Text("Related Content")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if collapsed {
                         Text("More")
@@ -423,7 +424,7 @@ struct showPeople: View {
             }, label: {
                 HStack {
                     Text("People")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if collapsed {
                         Text("Show")

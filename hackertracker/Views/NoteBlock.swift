@@ -62,7 +62,7 @@ struct NoteBlock: View {
                     Image(systemName: "note.text")
                         .foregroundStyle(.secondary)
                     Text("My Notes")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                     if body_text != nil {
                         Circle()
                             .fill(Color.accentColor)

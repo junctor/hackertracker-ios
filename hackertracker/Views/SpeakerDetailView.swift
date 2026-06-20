@@ -92,7 +92,7 @@ struct SpeakerDetailView: View {
                     ToolbarItem(placement: .principal) {
                         if let speaker = viewModel.speakersById[id] {
                             Text(speaker.name)
-                                .font(.headline)
+                                .font(themeManager.headingFont)
                                 .lineLimit(1)
                                 .opacity(navTitleOpacity)
                         }
@@ -122,7 +122,7 @@ struct showSpeakerLinks: View {
             }, label: {
                 HStack {
                     Text("Links")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if collapsed {
                         Text("Show")
@@ -171,6 +171,7 @@ struct showEvents: View {
     var title: String?
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @State private var collapsed = false
     @State private var myEvents: [Event] = []
     
@@ -181,7 +182,7 @@ struct showEvents: View {
             }, label: {
                 HStack {
                     Text(title ?? "Schedule")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if collapsed {
                         Text("Show")
@@ -251,6 +252,7 @@ struct SpeakerEventView: View {
     let dfu = DateFormatterUtility.shared
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("notifyAt") var notifyAt: Int = 20
 
     var body: some View {
@@ -270,7 +272,7 @@ struct SpeakerEventView: View {
                 .frame(width: 6)
             VStack(alignment: .leading, spacing: 3) {
                 Text(event.title)
-                    .font(.headline)
+                    .font(themeManager.headingFont)
                     .multilineTextAlignment(.leading)
                 Text(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.beginTimestamp))
                     .font(.subheadline)

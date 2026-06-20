@@ -138,7 +138,7 @@ struct CustomEventDetailView: View {
             VStack(alignment: .leading) {
                 VStack(alignment: .center) {
                     Text(event.title ?? "Untitled Event")
-                        .font(.largeTitle).bold()
+                        .font(themeManager.largeTitleFont).bold()
                     VStack(alignment: .leading) {
                         whenRow(event: event)
                         if let location = event.location, !location.isEmpty {

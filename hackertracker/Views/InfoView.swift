@@ -81,7 +81,7 @@ struct InfoView: View {
                                     showingIPadConferences = true
                                 } label: {
                                     Text(con.name)
-                                        .font(.largeTitle)
+                                        .font(themeManager.largeTitleFont)
                                         .bold()
                                         .foregroundColor(.primary)
                                     Image(systemName: "chevron.right")
@@ -90,7 +90,7 @@ struct InfoView: View {
                             } else {
                                 NavigationLink(destination: ConferencesView()) {
                                     Text(con.name)
-                                        .font(.largeTitle)
+                                        .font(themeManager.largeTitleFont)
                                         .bold()
                                         .foregroundColor(.primary)
                                     Image(systemName: "chevron.right")
@@ -98,12 +98,12 @@ struct InfoView: View {
                             }
                             if con.startDate == con.endDate {
                                 Text(DateFormatterUtility.shared.monthDayYearFormatter.string(from: con.endTimestamp))
-                                    .font(.headline)
+                                    .font(themeManager.headingFont)
                                     .bold()
                                     .padding(.trailing, 15)
                             } else {
                                 Text("\(DateFormatterUtility.shared.monthDayFormatter.string(from: con.startTimestamp)) - \(DateFormatterUtility.shared.monthDayYearFormatter.string(from: con.endTimestamp))")
-                                    .font(.headline)
+                                    .font(themeManager.headingFont)
                                     .bold()
                                     .padding(.trailing, 15)
                             }
@@ -148,7 +148,7 @@ struct InfoView: View {
                     if viewModel.showNews, let article = viewModel.news.first {
                         VStack {
                             Text("Latest News")
-                                .font(.headline)
+                                .font(themeManager.headingFont)
                             Divider()
                             HStack {
                                 articleRow(article: article)

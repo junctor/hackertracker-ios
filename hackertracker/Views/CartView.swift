@@ -11,6 +11,7 @@ struct CartView: View {
     @FetchRequest(sortDescriptors: []) var cart: FetchedResults<Cart>
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(ThemeManager.self) private var themeManager
     @State private var total = 0
     @State private var totalItems = 0
     @State private var showDeleteAlert = false
@@ -22,12 +23,12 @@ struct CartView: View {
             } else {
                 if viewModel.outOfStock {
                     Text("Out Of Stock Items Selected")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                     Text("Remove out of stock items from list")
                         .font(.subheadline)
                 } else if cart.count == 0 {
                     Text("No Items Selected")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                     NavigationLink(destination: ProductsView()) {
                         Text("Select items to view QR Code")
                             .font(.subheadline)
@@ -42,10 +43,10 @@ struct CartView: View {
             }
             HStack {
                 Text("Subtotal (\(totalItems) items)")
-                    .font(.headline)
+                    .font(themeManager.headingFont)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text("$\(total/100) USD")
-                    .font(.headline)
+                    .font(themeManager.headingFont)
                     .frame(alignment: .trailing)
             }
             Divider()
@@ -169,7 +170,7 @@ struct CartRow: View {
         HStack {
             VStack(alignment: .leading) {
                 Text("\(product.title) (\(variant.code))")
-                    .font(.headline)
+                    .font(themeManager.headingFont)
                     .bold()
                 HStack {
                     Text("\(count)")

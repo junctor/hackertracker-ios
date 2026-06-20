@@ -259,12 +259,13 @@ struct EasterEggSettingsView: View {
 
 struct NotificationSettingsView: View {
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("notifyAt") var notifyAt: Int = 20
     @State private var showingAlert = false
 
     var body: some View {
         Text("Notifications")
-            .font(.headline)
+            .font(themeManager.headingFont)
         VStack(alignment: .leading) {
             Stepper("Before Event: \(notifyAt)", value: $notifyAt, in: 0...60)
                 Text("Notification time in minutes")
@@ -440,7 +441,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             HStack(spacing: 8) {
                 Image(systemName: "hand.raised")
                 Text("Privacy & Tracking")
-                    .font(.headline)
+                    .font(themeManager.headingFont)
             }
 
             Text("What this app does and doesn’t collect. The full disclosure mirrors the docs/privacy.md page in the public repo.")
@@ -470,7 +471,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 Image(systemName: info.dirty ? "checkmark.seal.trianglebadge.exclamationmark" : "checkmark.seal")
                     .foregroundStyle(info.dirty ? .orange : .primary)
                 Text("Build provenance")
-                    .font(.headline)
+                    .font(themeManager.headingFont)
             }
 
             Text("Stamped at build time. Tap **View on GitHub** to confirm this build came from a specific public commit — if the page 404s, this build was not produced from a public commit on the official repo.")
