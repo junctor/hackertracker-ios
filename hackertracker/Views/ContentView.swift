@@ -40,6 +40,11 @@ struct ContentView: View {
     @State private var viewModel = InfoViewModel()
     @State private var consViewModel = ConferencesViewModel()
     @StateObject var theme = Theme()
+    /// Themes-PR1 plumbing: app-wide theme manager. Read by call
+    /// sites in subsequent PRs via `@Environment(ThemeManager.self)`.
+    /// Injected here so it has a single source of truth at the
+    /// ContentView level, same as the other long-lived stores.
+    @State private var themeManager = ThemeManager()
     @StateObject private var toTop = ToTop()
     @StateObject private var toBottom = ToBottom()
     @StateObject private var toCurrent = ToCurrent()
@@ -145,6 +150,7 @@ struct ContentView: View {
             .environmentObject(selected)
             .environment(viewModel)
             .environmentObject(theme)
+            .environment(themeManager)
             .environment(consViewModel)
             .environmentObject(toTop)
             .environmentObject(toBottom)
@@ -167,6 +173,7 @@ struct ContentView: View {
                     .environment(viewModel)
                     .environment(consViewModel)
                     .environmentObject(theme)
+                    .environment(themeManager)
                     .environmentObject(filters)
             } else {
                 _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
@@ -175,6 +182,7 @@ struct ContentView: View {
                     .environment(viewModel)
                     .environment(consViewModel)
                     .environmentObject(theme)
+                    .environment(themeManager)
                     .environmentObject(filters)
                     .task {
                         Log.app.debug("ContentView selected=\(selected.code, privacy: .public) stored=\(conferenceCode, privacy: .public)")

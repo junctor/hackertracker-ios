@@ -62,6 +62,137 @@ enum ThemeColors {
     })
 }
 
+// MARK: - AppTheme infrastructure
+//
+// Themes are value types. Each theme bundles a palette of semantic
+// color tokens (cardSurface, accent, danger, etc.) and a typography
+// set (heading, body, caption, monospace, largeTitle). Each token
+// carries both a light and dark variant; `DualColor.resolve(_:)` picks
+// the right one based on the current ColorScheme.
+//
+// Views read tokens via the injected `ThemeManager` — see PR 2 for
+// the call-site migration. PR 1 (this file) only adds plumbing; no
+// rendering changes.
+
+/// Pair of Color values, one for each system appearance.
+struct DualColor: Hashable {
+    let light: Color
+    let dark: Color
+    func resolve(_ scheme: ColorScheme) -> Color {
+        scheme == .dark ? dark : light
+    }
+    static let cardSurface = DualColor(
+        light: Color(red: 235/255, green: 235/255, blue: 240/255),
+        dark:  Color(red: 38/255,  green: 38/255,  blue: 42/255)
+    )
+}
+
+/// Semantic color tokens. Adding a token here is the single-source
+/// change to make a new themable surface — every concrete theme then
+/// supplies its own DualColor for that token.
+struct ThemePalette: Hashable {
+    let cardSurface: DualColor   // standout-button and detail-card fill
+    let accent: DualColor         // primary tinted action color
+    let danger: DualColor         // warnings, conflicts, destructive
+    let textPrimary: DualColor    // headings + body text
+    let textSecondary: DualColor  // metadata + captions
+    let divider: DualColor        // section + row separators
+    let chipBackground: DualColor // tag chips / pill backgrounds (when not theming per-tag color)
+}
+
+/// Font roles. Each theme supplies a Font for each role. The default
+/// theme uses the system fonts; alternate themes can swap in
+/// rounded / serif / monospaced / custom families.
+struct ThemeTypography: Hashable {
+    let largeTitle: Font
+    let heading: Font
+    let body: Font
+    let caption: Font
+    let monospace: Font
+}
+
+/// A complete theme: palette + typography + identity.
+struct AppTheme: Identifiable, Hashable {
+    let id: String          // stable persistence key, e.g. "default"
+    let displayName: String // shown in the Settings picker
+    let palette: ThemePalette
+    let typography: ThemeTypography
+}
+
+extension AppTheme {
+    /// The baseline theme — matches every existing color / font in
+    /// the app exactly so flipping to it from the registry produces
+    /// no visual change.
+    static let `default` = AppTheme(
+        id: "default",
+        displayName: "Default",
+        palette: ThemePalette(
+            cardSurface: .cardSurface,
+            accent: DualColor(
+                light: ThemeColors.blue,
+                dark:  ThemeColors.blue
+            ),
+            danger: DualColor(
+                light: ThemeColors.red,
+                dark:  ThemeColors.red
+            ),
+            textPrimary: DualColor(
+                light: .black,
+                dark:  .white
+            ),
+            textSecondary: DualColor(
+                light: Color(.secondaryLabel),
+                dark:  Color(.secondaryLabel)
+            ),
+            divider: DualColor(
+                light: Color(.separator),
+                dark:  Color(.separator)
+            ),
+            chipBackground: .cardSurface
+        ),
+        typography: ThemeTypography(
+            largeTitle: .largeTitle,
+            heading:    .headline,
+            body:       .body,
+            caption:    .caption,
+            monospace:  .system(.body, design: .monospaced)
+        )
+    )
+}
+
+/// Registry of all available themes. Adding a new theme is a one-line
+/// append here once you've defined it in `AppTheme+<Name>.swift` (or
+/// inline below for small ones).
+enum ThemeRegistry {
+    static let all: [AppTheme] = [.default]
+    static let fallback: AppTheme = .default
+}
+
+/// Observable holder for the active theme. Read by views via
+/// `@Environment(ThemeManager.self)` once PR 2 migrates call sites.
+/// Persistence is via `@AppStorage("themeID")` — survives launches,
+/// scoped to the install.
+@Observable
+final class ThemeManager {
+    @ObservationIgnored
+    @AppStorage("themeID") private var storedID: String = AppTheme.default.id
+
+    /// The currently active theme. Falls back to the default if the
+    /// stored id no longer matches a registered theme (e.g. user
+    /// downgraded after removing a custom theme from the registry).
+    var current: AppTheme {
+        ThemeRegistry.all.first(where: { $0.id == storedID }) ?? ThemeRegistry.fallback
+    }
+
+    /// Switch themes. Updates @AppStorage so the choice survives
+    /// launches; @Observable triggers re-renders in any view reading
+    /// `current`.
+    func setTheme(_ id: String) {
+        guard ThemeRegistry.all.contains(where: { $0.id == id }) else { return }
+        storedID = id
+    }
+}
+
 import AVFoundation
 
 /// Phase 3c: easter-egg audio player. Global mutable state pinned to MainActor
