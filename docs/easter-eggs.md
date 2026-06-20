@@ -11,6 +11,8 @@ A few delights hidden in the app.
 
 When **Easter Eggs AND Colorful Mode** are both on, Beezle cycles through the rainbow as it pulses.
 
+![Beezle watermark behind the UI](images/easter-egg-watermark.png)
+
 ## The home tab swap
 
 With Easter Eggs on, the Home tab icon in the tab bar swaps from the default SF Symbol house to a custom Beezle icon. Subtle, but rewarding once you notice.
@@ -22,6 +24,8 @@ On the **Info** tab (home screen), scroll to the bottom and find the small versi
 **Tap it seven times.** What follows is a small celebration and an iconic 1987 music video. You've been warned.
 
 The seven-tap chord also flips on both Easter Eggs and Colorful Mode for you.
+
+![Easter Eggs Enabled overlay](images/easter-eggs-enabled.png)
 
 ## How to find more
 

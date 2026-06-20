@@ -11,7 +11,11 @@ The **Combined Schedule** card appears on the **Info** tab (home screen) only wh
 
 The classic case: DEF CON, BSidesLV, and Black Hat all running the same week in Las Vegas. Bookmark talks in two or all three, and the card appears.
 
+![Combined Schedule card on home](images/combined-schedule-card.png)
+
 ## What you see
+
+![Combined timeline](images/combined-schedule-view.png)
 
 Tap the card to open a single day-grouped timeline showing every bookmarked event from all qualifying conferences. Each row carries a **conference badge** (tinted to that conference's accent color) so you can tell where each event lives.
 

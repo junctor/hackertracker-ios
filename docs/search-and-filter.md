@@ -14,6 +14,8 @@ The **magnifying glass** icon in the top-right of every list (Schedule, All Cont
 
 The **filter circle** in the bottom-left of list views opens the filter sheet.
 
+![Filter sheet](images/filter-sheet.png)
+
 Layout:
 ```
 [ Match   ( Any | All ) ]
@@ -57,6 +59,8 @@ At the very top of the sheet, a segmented control switches between two compositi
 - **All** — A row must satisfy **every** selected chip. Selecting "Bookmarks + Custom Events" returns the **intersection** (only custom events that are also bookmarked).
 
 Mode persists across launches.
+
+![Match Any/All picker + tally](images/filter-match-mode.png)
 
 ### Live tally
 

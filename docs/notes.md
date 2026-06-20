@@ -12,6 +12,8 @@ On any detail screen — an event, talk, or custom event — scroll to the botto
 
 Tap the row to expand. The accent dot appears when there's already a note saved; absent dot = empty.
 
+![Collapsed note block](images/note-collapsed.png)
+
 If empty:
 - An **Add a note** button appears.
 - Tap it to open the editor.
@@ -20,7 +22,11 @@ If a note exists:
 - Markdown render of your note is shown read-only.
 - Tap anywhere on the rendered text to open the editor.
 
+![Expanded note block](images/note-expanded.png)
+
 ## The editor
+
+![Note editor — Write tab](images/note-editor.png)
 
 The editor sheet has two tabs:
 

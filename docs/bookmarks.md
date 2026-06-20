@@ -10,6 +10,8 @@ On any list row (Schedule, All Content, Combined Schedule) the **bookmark icon**
 - **Filled** — bookmarked.
 - **Filled and red** — bookmarked AND in conflict with another bookmarked event.
 
+![Outline vs filled bookmark](images/bookmark-toggle.png)
+
 Tap the icon to toggle. The change persists immediately and syncs to your other devices via iCloud.
 
 You can also **swipe a row left** to toggle the bookmark — useful when scrolling quickly.
@@ -26,6 +28,8 @@ Two events overlap in time → both bookmarks turn **red**. The Schedule toolbar
 
 Tap the toolbar triangle to see a list of conflicting bookmarks and resolve them.
 
+![Conflict warning + red bookmark](images/bookmark-conflict.png)
+
 ## Bookmark conflict alert toggle
 
 Tired of seeing red? **Settings → Show Schedule Conflict Alert** off — the red triangle and conflict popup are suppressed. The red bookmark icons themselves stay (they're informational on the row).
@@ -39,6 +43,8 @@ Open the filter sheet (bottom-left circle on Schedule or All Content). Tap the *
 **Schedule toolbar → menu → Share Schedule** generates a QR code containing all your bookmark IDs. A friend scanning it gets a one-shot view of your selected events without permanently importing anything.
 
 The URL is `hackertracker://CONF_CODE/s?ids=1,2,3,…`.
+
+![Share Schedule QR sheet](images/share-schedule-qr.png)
 
 ## Cross-conference bookmarks
 

@@ -14,6 +14,8 @@ On devices that don't meet the requirements, the Settings toggle is hidden entir
 
 **Settings → AI Summaries** → toggle on.
 
+![AI Summaries toggle in Settings](images/ai-summary-toggle.png)
+
 The toggle has a footer explaining the feature:
 
 > Show one-sentence summaries of talk descriptions, generated on-device by Apple Intelligence. Summaries are cached and only generated for descriptions longer than 100 characters.
@@ -27,6 +29,8 @@ When enabled, each talk row gets a new line below the speaker names:
 ```
 
 The summary appears in `.foregroundStyle(.secondary)` so it reads as ambient metadata rather than primary content.
+
+![Row with AI summary line](images/ai-summary-row.png)
 
 ## Long-press peek
 

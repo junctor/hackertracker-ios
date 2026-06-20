@@ -16,6 +16,8 @@ If the wrong conference is loaded, tap **Settings → Select Conference** to pic
 
 ## 3. Browse the schedule
 
+![Schedule view](images/schedule-iphone.png)
+
 Tap the **calendar** icon in the tab bar to open the Schedule. You'll see every event grouped by day. Scroll or use the floating **Top / Bottom** circles at the bottom-right of the screen to jump.
 
 - Tap any event row to see its full description, speakers, location, and tags.

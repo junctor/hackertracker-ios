@@ -2,6 +2,8 @@
 
 The day-by-day agenda. Available from the calendar icon in the tab bar.
 
+![Schedule view](images/schedule-iphone.png)
+
 ## Layout
 
 Events are grouped by day. Inside each day, rows are sorted chronologically.
@@ -14,6 +16,8 @@ Each row shows:
   - **Pencil** (gray) — this event has a [saved private note](notes.md).
   - **Bookmark** — outline or filled. Filled = bookmarked. **Red** = bookmarked AND conflicting with another bookmark.
   - **Sparkle ✨ + summary line** — appears under the speaker line when [AI summaries](ai-summaries.md) are enabled and the model has generated one.
+
+![Schedule row close-up](images/schedule-row.png)
 
 ## Row actions
 
@@ -42,6 +46,8 @@ The Schedule's toolbar (top of the screen) carries:
 **Bottom-left circle** — Filter sheet. See [Search and filter](search-and-filter.md).
 
 **Bottom-right circle** — Top / Bottom / Current / Next jump menu.
+
+![Floating filter + jump controls](images/schedule-floating-controls.png)
 
 ## Custom events in the schedule
 

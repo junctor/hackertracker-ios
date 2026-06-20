@@ -2,6 +2,8 @@
 
 The HackerTracker tab bar has four tabs. Each tab is independent — switching tabs doesn't lose your place inside another tab.
 
+![Tab bar](images/tab-bar.png)
+
 ## Info (house icon)
 
 The home screen. Shows:

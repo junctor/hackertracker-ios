@@ -4,6 +4,8 @@ The official guide to using HackerTracker on iPhone and iPad. Covers everyday us
 
 If you're looking for the **5-minute version**, start with [Quick Start](quickstart.md).
 
+![HackerTracker home screen](images/home-iphone.png)
+
 ---
 
 ## Contents

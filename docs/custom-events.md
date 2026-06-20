@@ -16,6 +16,8 @@ Custom events are perfect for:
 
 Your event appears immediately in the Schedule, sorted into the right time slot.
 
+![Custom event form](images/custom-event-form.png)
+
 ## Form fields
 
 - **Title** — what to call it. Required.
@@ -34,6 +36,8 @@ A custom event row carries:
 - A **pencil** to its left if it also has a [private note](notes.md).
 - The same bookmark icon as normal events (though custom events show in your schedule unconditionally, regardless of bookmark state).
 
+![Custom event row in schedule](images/custom-event-row.png)
+
 ## Editing or deleting
 
 Tap a custom event row to open its detail view. The toolbar has:
@@ -47,6 +51,8 @@ Tap a custom event row to open its detail view. The toolbar has:
 
 Inside the form, edit mode adds a destructive **Delete event** row at the bottom with a confirmation dialog.
 
+![Custom event detail screen](images/custom-event-detail.png)
+
 ## Sharing a custom event via QR code
 
 Each custom event detail screen has a **QR code** icon in the toolbar.
@@ -56,6 +62,8 @@ Each custom event detail screen has a **QR code** icon in the toolbar.
 3. Recipient opens **iOS Camera** and points it at the QR code, OR you can tap **Share Link…** to AirDrop or copy the URL.
 4. The recipient's phone opens HackerTracker with the form **pre-filled**: title, time, location, description, color, conferences, notifications setting.
 5. They tap **Save** to add it to their own device.
+
+![Custom event QR share sheet](images/custom-event-qr.png)
 
 The URL format is `hackertracker://import/customEvent?t=…&b=…&e=…` — see [Tabs and navigation](navigation.md) for the full deep-link reference. **Notes are intentionally not shared** — they're a private journal field, not part of the event's public identity.
 
