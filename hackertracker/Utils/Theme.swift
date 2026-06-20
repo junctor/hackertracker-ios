@@ -104,6 +104,7 @@ struct DualColor: Hashable {
 /// change to make a new themable surface — every concrete theme then
 /// supplies its own DualColor for that token.
 struct ThemePalette: Hashable {
+    let background: DualColor    // base screen background — shows below cards
     let cardSurface: DualColor   // standout-button and detail-card fill
     let accent: DualColor         // primary tinted action color
     let danger: DualColor         // warnings, conflicts, destructive
@@ -140,6 +141,10 @@ extension AppTheme {
         id: "default",
         displayName: "Default",
         palette: ThemePalette(
+            background: DualColor(
+                light: Color(.systemBackground),
+                dark:  Color(.systemBackground)
+            ),
             cardSurface: .cardSurface,
             accent: DualColor(
                 light: ThemeColors.blue,
@@ -182,6 +187,10 @@ extension AppTheme {
         id: "hackerGreen",
         displayName: "Hacker Green",
         palette: ThemePalette(
+            background: DualColor(
+                light: Color(red: 240/255, green: 245/255, blue: 240/255), // #F0F5F0 — faint green-white
+                dark:  Color(red: 5/255,   green: 12/255,  blue: 6/255)    // #050C06 — near-black with green warmth
+            ),
             cardSurface: DualColor(
                 light: Color(red: 232/255, green: 240/255, blue: 232/255), // #E8F0E8
                 dark:  Color(red: 15/255,  green: 32/255,  blue: 16/255)   // #0F2010
@@ -230,6 +239,10 @@ extension AppTheme {
         id: "synthwave",
         displayName: "Synthwave",
         palette: ThemePalette(
+            background: DualColor(
+                light: Color(red: 245/255, green: 240/255, blue: 248/255), // #F5F0F8 — faint lavender-white
+                dark:  Color(red: 12/255,  green: 6/255,   blue: 22/255)   // #0C0616 — near-black warm purple
+            ),
             cardSurface: DualColor(
                 light: Color(red: 242/255, green: 232/255, blue: 245/255), // #F2E8F5
                 dark:  Color(red: 42/255,  green: 26/255,  blue: 64/255)   // #2A1A40
@@ -323,6 +336,7 @@ final class ThemeManager {
     //   .background(themeManager.cardSurface)
     //   .font(themeManager.headingFont)
 
+    var background: Color     { current.palette.background.auto }
     var cardSurface: Color    { current.palette.cardSurface.auto }
     var accent: Color         { current.palette.accent.auto }
     var danger: Color         { current.palette.danger.auto }

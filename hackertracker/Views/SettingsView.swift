@@ -127,6 +127,7 @@ struct SettingsView: View {
             // iPad no longer needs the readable-column cap on Settings —
             // the 2-column grid utilizes the full width directly. iPhone
             // sees the same single-column flow either way.
+            .themedBackground(themeManager)
             .analyticsScreen(name: "SettingsView")
         }
         .sheet(item: $iPadSheet) { sheet in

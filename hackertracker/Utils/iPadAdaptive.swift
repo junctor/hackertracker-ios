@@ -47,6 +47,20 @@ extension View {
     func iPadFlatCorners(_ radius: CGFloat = 15) -> some View {
         self.cornerRadius(UIDevice.current.userInterfaceIdiom == .pad ? 0 : radius)
     }
+
+    /// Replace the system base background with the active theme's
+    /// background color. Hides the default ScrollView background so
+    /// the themed color shows through; the result extends under the
+    /// nav bar (whose .ultraThinMaterial picks up the tint) and the
+    /// safe-area edges.
+    ///
+    /// Apply this at the root of each tab's body, e.g.:
+    /// `NavigationStack { ... }.themedBackground(themeManager)`
+    func themedBackground(_ themeManager: ThemeManager) -> some View {
+        self
+            .scrollContentBackground(.hidden)
+            .background(themeManager.background, ignoresSafeAreaEdges: .all)
+    }
 }
 
 enum IPadAdaptive {

@@ -343,6 +343,7 @@ struct InfoView: View {
                     if colorMode { theme.index = 0 }
                     checkAppUpdate()
                 }
+                .themedBackground(themeManager)
                 .analyticsScreen(name: "InfoView")
                 .environment(sharedSchedule)
                 .sheet(isPresented: $showingIPadConferences) {
