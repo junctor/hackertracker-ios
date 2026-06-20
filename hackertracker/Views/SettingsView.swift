@@ -9,7 +9,7 @@ import MarkdownUI
 import SwiftUI
 
 enum SettingsIPadSheet: Identifiable {
-    case about, conferences
+    case about, conferences, theme
     var id: Int { hashValue }
 }
 
@@ -77,6 +77,7 @@ struct SettingsView: View {
                 VStack(spacing: 0) {
                     AboutSettingsView(iPadAction: IPadAdaptive.isIPad ? { iPadSheet = .about } : nil)
                     selectConferenceRow
+                    ThemePickerSettingsView(iPadAction: IPadAdaptive.isIPad ? { iPadSheet = .theme } : nil)
                     Divider()
                 }
                 if IPadAdaptive.isIPad {
@@ -139,6 +140,8 @@ struct SettingsView: View {
                         }
                     case .conferences:
                         ConferencesView()
+                    case .theme:
+                        ThemePickerView()
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -795,5 +798,118 @@ struct ShowCustomEventsSettingsView: View {
         }
         .padding(5)
         Divider()
+    }
+}
+
+// MARK: - Theme picker
+
+struct ThemePickerSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
+    /// iPad shortcut: parent SettingsView presents ThemePickerView in
+    /// a form sheet instead of pushing.
+    var iPadAction: (() -> Void)? = nil
+
+    var body: some View {
+        HStack {
+            if let iPadAction {
+                Button(action: iPadAction) { themeRowLabel }
+                    .frame(maxWidth: .infinity)
+            } else {
+                NavigationLink(destination: ThemePickerView()) { themeRowLabel }
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .foregroundColor(.primary)
+        .frame(maxWidth: .infinity)
+        .background(themeManager.cardSurface)
+        .cornerRadius(5)
+        Divider()
+    }
+
+    @ViewBuilder private var themeRowLabel: some View {
+        Image(systemName: "paintbrush")
+            .padding(5)
+        VStack(alignment: .leading) {
+            Text("Theme")
+                .bold()
+            Text(themeManager.current.displayName)
+                .font(.caption)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(5)
+        Image(systemName: "chevron.right")
+            .padding(5)
+    }
+}
+
+struct ThemePickerView: View {
+    @Environment(ThemeManager.self) private var themeManager
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                ForEach(ThemeRegistry.all) { theme in
+                    Button {
+                        themeManager.setTheme(theme.id)
+                    } label: {
+                        themeRow(theme)
+                    }
+                    .buttonStyle(.plain)
+                }
+                Text("Themes change card backgrounds, accent colors, and typography across the app. Pick one and the rest of the UI updates immediately.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 4)
+                    .padding(.top, 8)
+            }
+            .padding()
+        }
+        .navigationTitle("Theme")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// One row per registered theme. Each row previews the theme's
+    /// OWN cardSurface + typography so the picker doubles as a
+    /// live look-book.
+    @ViewBuilder
+    private func themeRow(_ theme: AppTheme) -> some View {
+        let isActive = theme.id == themeManager.current.id
+        HStack(spacing: 12) {
+            HStack(spacing: 6) {
+                swatch(theme.palette.cardSurface.auto)
+                swatch(theme.palette.accent.auto)
+                swatch(theme.palette.danger.auto)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(theme.displayName)
+                    .font(theme.typography.heading)
+                    .foregroundStyle(theme.palette.textPrimary.auto)
+                Text(isActive ? "Active" : "Tap to apply")
+                    .font(.caption)
+                    .foregroundStyle(theme.palette.textSecondary.auto)
+            }
+            Spacer()
+            if isActive {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(.title3)
+            }
+        }
+        .padding()
+        .background(theme.palette.cardSurface.auto)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(isActive ? Color.green : Color.primary.opacity(0.08),
+                        lineWidth: isActive ? 2 : 0.5)
+        )
+        .cornerRadius(10)
+    }
+
+    private func swatch(_ color: Color) -> some View {
+        Circle()
+            .fill(color)
+            .frame(width: 22, height: 22)
+            .overlay(Circle().stroke(Color.primary.opacity(0.15), lineWidth: 0.5))
     }
 }
