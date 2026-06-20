@@ -48,6 +48,18 @@ enum ThemeColors {
     static let drkGreen = hexSwiftUIColor(hex: "#4b9560")
     static let red = hexSwiftUIColor(hex: "#c04c36")
     static let gray = hexSwiftUIColor(hex: "#2D2D2D")
+
+    /// Default fill for "standout" buttons and cards. A hair darker than
+    /// `.systemGray6` in light mode and a hair lighter in dark mode so
+    /// these surfaces pop a little more against the base background
+    /// without crossing into `.systemGray5` territory.
+    /// - light: ≈ #EBEBF0  (systemGray6 #F2F2F7 nudged darker)
+    /// - dark:  ≈ #26262A  (systemGray6 #1C1C1E nudged lighter)
+    static let cardSurface = Color(UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(red: 38/255,  green: 38/255,  blue: 42/255,  alpha: 1)
+            : UIColor(red: 235/255, green: 235/255, blue: 240/255, alpha: 1)
+    })
 }
 
 import AVFoundation

@@ -125,7 +125,7 @@ struct InfoView: View {
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity)
                     .padding(15)
-                    .background(Color(.systemGray6))
+                    .background(ThemeColors.cardSurface)
                     .cornerRadius(15)
                     if showUpdateButton {
                         if let url = URL(string: "itms-apps://itunes.apple.com/app/id1021141595") {
@@ -138,7 +138,7 @@ struct InfoView: View {
                             .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel() : Color(.systemGray6))
+                            .background(colorMode ? theme.carousel() : ThemeColors.cardSurface)
                             .cornerRadius(15)
                             Divider()
                         }
@@ -155,7 +155,7 @@ struct InfoView: View {
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity)
                         .padding(15)
-                        .background(Color(.systemGray6))
+                        .background(ThemeColors.cardSurface)
                         .cornerRadius(15)
                     }
                     if let con = self.viewModel.conference, let menu = self.viewModel.menus.first(where: { $0.id == con.homeMenuId}) {
@@ -169,7 +169,7 @@ struct InfoView: View {
                             LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                                 ForEach(self.viewModel.documents, id: \.id) { doc in
                                     NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
-                                        CardView(systemImage: "doc", text: doc.title, color: colorMode ? ThemeColors.blue : Color(.systemGray6))
+                                        CardView(systemImage: "doc", text: doc.title, color: colorMode ? ThemeColors.blue : ThemeColors.cardSurface)
                                     }
                                 }
                             }
@@ -186,41 +186,41 @@ struct InfoView: View {
                                 }
                             }
                             NavigationLink(destination: GlobalSearchView()) {
-                                CardView(systemImage: "magnifyingglass", text: "Search", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                                CardView(systemImage: "magnifyingglass", text: "Search", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                             }
                             Button {
                                 tabSelection = 2
                             } label: {
-                                CardView(systemImage: "calendar", text: "Schedule", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                                CardView(systemImage: "calendar", text: "Schedule", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                             }
                             Button {
                                 tabSelection = 3
                             } label: {
-                                CardView(systemImage: "map", text: "Maps", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                                CardView(systemImage: "map", text: "Maps", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                             }
                             // Combined-schedule entry-point: only when SharedScheduleStore
                             // has resolved >=2 overlapping conferences with bookmarks in each.
                             if sharedSchedule.isAvailable {
                                 NavigationLink(destination: SharedScheduleView()) {
-                                    CardView(systemImage: "calendar.badge.plus", text: "Combined Schedule", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                                    CardView(systemImage: "calendar.badge.plus", text: "Combined Schedule", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                                 }
                             }
                             NavigationLink(destination: SpeakersView(speakers: viewModel.speakers)) {
-                                CardView(systemImage: "person.crop.rectangle", text: "Speakers", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                                CardView(systemImage: "person.crop.rectangle", text: "Speakers", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                             }
                             if self.viewModel.locations.count > 0 {
                                 NavigationLink(destination: LocationView(locations: self.viewModel.locations)) {
-                                    CardView(systemImage: "mappin.and.ellipse", text: "Locations", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                                    CardView(systemImage: "mappin.and.ellipse", text: "Locations", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                                 }
                             }
                             if viewModel.faqs.count > 0 {
                                 NavigationLink(destination: FAQListView()) {
-                                    CardView(systemImage: "questionmark.app", text: "FAQ", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                                    CardView(systemImage: "questionmark.app", text: "FAQ", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                                 }
                             }
                             if viewModel.news.count > 0 {
                                 NavigationLink(destination: NewsListView()) {
-                                    CardView(systemImage: "newspaper", text: "News", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                                    CardView(systemImage: "newspaper", text: "News", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                                 }
                             }
                             if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga" }) {
@@ -228,7 +228,7 @@ struct InfoView: View {
                                 ForEach(sortedTags, id: \.id) { tag in
                                     if viewModel.orgs.first(where: {$0.tag_ids.contains(tag.id)}) != nil {
                                         NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id, tabSelection: $tabSelection)) {
-                                            CardView(systemImage: "bag", text: tag.label, color: colorMode ? theme.carousel() : Color(.systemGray6))
+                                            CardView(systemImage: "bag", text: tag.label, color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                                         }
                                     }
                                 }
@@ -243,7 +243,7 @@ struct InfoView: View {
                                     tabSelection = 2
                                 } label: {
                                     // NavigationLink(destination: ScheduleView(tagIds: [1337], includeNav: false, navTitle: item.title)) {
-                                    CardView(systemImage: "figure.and.child.holdinghands", text: "Kids Content", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                                    CardView(systemImage: "figure.and.child.holdinghands", text: "Kids Content", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                                     // }
                                 }
                             }
@@ -253,7 +253,7 @@ struct InfoView: View {
                             Text("Merch")
                                 .font(.subheadline)
                             NavigationLink(destination: ProductsView()) {
-                                CardView(systemImage: "dollarsign", text: "Merch", color: colorMode ? ThemeColors.drkGreen : Color(.systemGray6))
+                                CardView(systemImage: "dollarsign", text: "Merch", color: colorMode ? ThemeColors.drkGreen : ThemeColors.cardSurface)
                             }
                         }
                     }
@@ -269,7 +269,7 @@ struct InfoView: View {
                         .foregroundColor(.primary)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(15)
-                        .background(Color(.systemGray6))
+                        .background(ThemeColors.cardSurface)
                         .cornerRadius(15)
                     }
                     HStack {
@@ -642,19 +642,19 @@ struct MenuView: View {
                 case "document":
                     if let docId = item.documentId, let doc = self.viewModel.documentsById[docId] {
                         NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
-                            CardView(systemImage: item.symbol ?? "doc", text: doc.title, color: colorMode ? ThemeColors.blue : Color(.systemGray6))
+                            CardView(systemImage: item.symbol ?? "doc", text: doc.title, color: colorMode ? ThemeColors.blue : ThemeColors.cardSurface)
                             }
                     }
                 
                 case "locations":
                     NavigationLink(destination: LocationView(locations: self.viewModel.locations)) {
-                        CardView(systemImage: item.symbol ?? "mappin.and.ellipse", text: "Locations", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                        CardView(systemImage: item.symbol ?? "mappin.and.ellipse", text: "Locations", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                     }
                 case "maps":
                     Button {
                         tabSelection = 3
                     } label: {
-                        CardView(systemImage: item.symbol ?? "map", text: "Maps", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                        CardView(systemImage: item.symbol ?? "map", text: "Maps", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                     }
                 case "menu":
                     if let menuId = item.menuId, let m = viewModel.menus.first(where: {$0.id == menuId}) {
@@ -663,53 +663,53 @@ struct MenuView: View {
                         }
                             .padding(15)
                         ) {
-                            CardView(systemImage: item.symbol ?? "menucard", text: item.title, color: colorMode ? theme.carousel() : Color(.systemGray6))
+                            CardView(systemImage: item.symbol ?? "menucard", text: item.title, color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                         }
                     }
                 case "news":
                     NavigationLink(destination: NewsListView()) {
-                        CardView(systemImage: item.symbol ?? "newspaper", text: "News", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                        CardView(systemImage: item.symbol ?? "newspaper", text: "News", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                     }
                 case "content":
                     NavigationLink(destination: ContentListView(content: viewModel.content)) {
-                        CardView(systemImage: item.symbol ?? "list.dash", text: item.title, color: colorMode ? theme.carousel() : Color(.systemGray6))
+                        CardView(systemImage: item.symbol ?? "list.dash", text: item.title, color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                     }
                 case "organizations":
                     if viewModel.orgs.first(where: {$0.tag_ids.contains(item.appliedTagIds[0])}) != nil {
                         NavigationLink(destination: OrgsView(title: item.title, tagId: item.appliedTagIds[0], tabSelection: $tabSelection)) {
-                            CardView(systemImage: item.symbol ?? "figure.walk", text: item.title, color: colorMode ? theme.carousel() : Color(.systemGray6))
+                            CardView(systemImage: item.symbol ?? "figure.walk", text: item.title, color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                         }
                     }
                 case "people":
                     NavigationLink(destination: SpeakersView(speakers: viewModel.speakers)) {
-                        CardView(systemImage: item.symbol ?? "person.3", text: "Speakers", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                        CardView(systemImage: item.symbol ?? "person.3", text: "Speakers", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                     }
                 case "products":
                     if let c = self.viewModel.conference, c.enableMerch {
                         NavigationLink(destination: ProductsView()) {
-                            CardView(systemImage: item.symbol ?? "tshirt", text: "Merch", color: colorMode ? ThemeColors.drkGreen : Color(.systemGray6))
+                            CardView(systemImage: item.symbol ?? "tshirt", text: "Merch", color: colorMode ? ThemeColors.drkGreen : ThemeColors.cardSurface)
                         }
                     }
                 case "faq":
                     NavigationLink(destination: FAQListView()) {
-                        CardView(systemImage: item.symbol ?? "questionmark.app", text: "FAQ", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                        CardView(systemImage: item.symbol ?? "questionmark.app", text: "FAQ", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                     }
                 case "schedule":
                         Button {
                             tabSelection = 2
                         } label: {
-                            CardView(systemImage: item.symbol ?? "calendar", text: "Schedule", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                            CardView(systemImage: item.symbol ?? "calendar", text: "Schedule", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                         }
                 case "schedule_bookmark":
                     Button {
                         filters.filters = [1337]
                         tabSelection = 2
                     } label: {
-                        CardView(systemImage: item.symbol ?? "calendar", text: item.title, color: colorMode ? theme.carousel() : Color(.systemGray6))
+                        CardView(systemImage: item.symbol ?? "calendar", text: item.title, color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                     }
                 case "search":
                      NavigationLink(destination: GlobalSearchView()) {
-                         CardView(systemImage: item.symbol ?? "magnifyingglass", text: "Search", color: colorMode ? theme.carousel() : Color(.systemGray6))
+                         CardView(systemImage: item.symbol ?? "magnifyingglass", text: "Search", color: colorMode ? theme.carousel() : ThemeColors.cardSurface)
                      }
                 default:
                     EmptyView()
