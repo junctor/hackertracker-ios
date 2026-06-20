@@ -29,7 +29,6 @@ struct SettingsView: View {
                 // 2-column grid row.
                 VStack(spacing: 0) {
                     AboutSettingsView()
-                    PrivacySettingsView()
                     selectConferenceRow
                     Divider()
                 }
@@ -302,6 +301,9 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
 
                 Markdown(AboutView.aboutBody)
 
+                Divider()
+                privacySection
+
                 if let info = BuildInfo.current {
                     Divider()
                     buildInfoSection(info)
@@ -321,6 +323,34 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             Text("Build \(buildVersion)")
                 .font(.callout)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    private var privacySection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "hand.raised")
+                Text("Privacy & Tracking")
+                    .font(.headline)
+            }
+
+            Text("What this app does and doesn’t collect. The full disclosure mirrors the docs/privacy.md page in the public repo.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+
+            NavigationLink(destination: DocumentView(
+                title_text: PrivacyDoc.title,
+                body_text: PrivacyDoc.body,
+                color: nil,
+                systemImage: "hand.raised",
+                showInlineTitle: false
+            )) {
+                Label("Read the full disclosure", systemImage: "doc.text")
+                    .frame(maxWidth: .infinity)
+                    .padding(10)
+                    .background(Color.accentColor.opacity(0.15))
+                    .cornerRadius(8)
+            }
         }
     }
 
@@ -403,43 +433,6 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
     }
 }
 
-/// Privacy + tracking disclosure entry. Lives directly under About
-/// (top of the Settings stack) so users encounter it the moment
-/// they go looking. Body text lives in PrivacyDoc so the same
-/// markdown is reusable as a source-of-truth reference for
-/// App Store Connect's privacy disclosures.
-struct PrivacySettingsView: View {
-    var body: some View {
-        HStack {
-            NavigationLink(destination: DocumentView(
-                title_text: PrivacyDoc.title,
-                body_text: PrivacyDoc.body,
-                color: nil,
-                systemImage: "hand.raised",
-                showInlineTitle: false
-            )) {
-                Image(systemName: "hand.raised")
-                    .padding(5)
-                VStack(alignment: .leading) {
-                    Text("Privacy & Tracking")
-                        .bold()
-                    Text("What this app does and doesn’t collect.")
-                        .font(.caption)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(5)
-                Image(systemName: "chevron.right")
-                    .padding(5)
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .foregroundColor(.primary)
-        .frame(maxWidth: .infinity)
-        .background(Color(.systemGray6))
-        .cornerRadius(5)
-        Divider()
-    }
-}
 
 struct ShowNewsSettingsView: View {
     @Environment(InfoViewModel.self) private var viewModel
