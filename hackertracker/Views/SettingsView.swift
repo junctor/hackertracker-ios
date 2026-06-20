@@ -87,7 +87,7 @@ struct SettingsView: View {
             // sees the same single-column flow either way.
             .analyticsScreen(name: "SettingsView")
         }
-        .fullScreenCover(item: $iPadSheet) { sheet in
+        .sheet(item: $iPadSheet) { sheet in
             NavigationStack {
                 Group {
                     switch sheet {
@@ -107,6 +107,12 @@ struct SettingsView: View {
                     }
                 }
             }
+            // Force the iPad form sheet to grow to "page-sheet" size
+            // (~90% of the screen) so Settings remains visible behind a
+            // dimmed background, instead of the default narrow centered
+            // card.
+            .frame(idealWidth: 1100, idealHeight: 1300)
+            .frame(minWidth: 900, minHeight: 1100)
         }
     }
     @ViewBuilder private var selectConferenceRow: some View {
