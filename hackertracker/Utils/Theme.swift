@@ -480,6 +480,7 @@ enum ThemeRegistry {
 /// property does fire those notifications; we sync to UserDefaults
 /// explicitly in setTheme() so the choice survives launches.
 @Observable
+@MainActor
 final class ThemeManager {
     private static let userDefaultsKey = "themeID"
 
@@ -510,7 +511,9 @@ final class ThemeManager {
     }
 
     /// Instance-level call site; just delegates to the static version
-    /// using the currently-stored theme id.
+    /// using the currently-stored theme id. `@MainActor` because the
+    /// static delegate touches UIKit appearance proxies.
+    @MainActor
     private func applyNavBarAppearance() {
         ThemeManager.applyNavBarAppearance(for: storedID)
     }
@@ -526,6 +529,11 @@ final class ThemeManager {
     /// app's initial UINavigationBars get instantiated against the
     /// default appearance and only refresh on push/pop. Reads the
     /// persisted theme id directly from UserDefaults.
+    ///
+    /// `@MainActor` because every UIKit appearance API touched here is
+    /// main-actor-isolated under Swift 6. The two call sites (init,
+    /// `hackertrackerApp.init()`) already run on the main actor.
+    @MainActor
     static func applyNavBarAppearance(for themeID: String? = nil) {
         let resolvedID = themeID
             ?? UserDefaults.standard.string(forKey: ThemeManager.userDefaultsKey)

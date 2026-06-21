@@ -6,7 +6,11 @@
 //
 
 import Foundation
-import UserNotifications
+// Swift 6 strict concurrency: UNNotificationRequest isn't yet annotated
+// Sendable in UserNotifications. Treat the framework's Sendable
+// diagnostics as warnings so the existing call sites (notably the
+// addNotification closure capture below) keep compiling clean.
+@preconcurrency import UserNotifications
 
 enum NotificationUtility {
     /// Phase 1 fix: previously a DispatchSemaphore-blocking accessor that could deadlock
