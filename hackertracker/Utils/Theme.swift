@@ -327,6 +327,7 @@ final class ThemeManager {
     init() {
         self.storedID = UserDefaults.standard.string(forKey: ThemeManager.userDefaultsKey)
             ?? AppTheme.default.id
+        applyNavBarAppearance()
     }
 
     /// The currently active theme. Falls back to the default if the
@@ -343,6 +344,39 @@ final class ThemeManager {
         guard ThemeRegistry.all.contains(where: { $0.id == id }) else { return }
         storedID = id
         UserDefaults.standard.set(id, forKey: ThemeManager.userDefaultsKey)
+        applyNavBarAppearance()
+    }
+
+    /// SwiftUI's `.navigationTitle` text is rendered by UINavigationBar
+    /// under the hood, which doesn't pick up SwiftUI's `.font(_:)` env
+    /// default. Push the active theme's heading + largeTitle face into
+    /// `UINavigationBarAppearance` so nav-bar titles match the rest of
+    /// the app. Invoked from init() and setTheme() so the appearance
+    /// flips immediately on theme change.
+    private func applyNavBarAppearance() {
+        let design: UIFontDescriptor.SystemDesign
+        switch current.id {
+        case "hackerGreen": design = .monospaced
+        case "synthwave":   design = .rounded
+        default:            design = .default
+        }
+        func font(for style: UIFont.TextStyle) -> UIFont {
+            let baseDesc = UIFont.preferredFont(forTextStyle: style).fontDescriptor
+            if design == .default {
+                return UIFont.preferredFont(forTextStyle: style)
+            }
+            if let desc = baseDesc.withDesign(design) {
+                return UIFont(descriptor: desc, size: 0)
+            }
+            return UIFont.preferredFont(forTextStyle: style)
+        }
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithDefaultBackground()
+        appearance.titleTextAttributes = [.font: font(for: .headline)]
+        appearance.largeTitleTextAttributes = [.font: font(for: .largeTitle)]
+        UINavigationBar.appearance().standardAppearance   = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+        UINavigationBar.appearance().compactAppearance    = appearance
     }
 
     // MARK: - Convenience token accessors
