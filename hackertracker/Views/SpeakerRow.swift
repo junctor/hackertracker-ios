@@ -103,12 +103,12 @@ struct SpeakerRow: View {
                     Text(title)
                         .font(themeManager.subheadlineFont)
                         .multilineTextAlignment(.leading)
-                        .foregroundColor(.gray)
+                        .foregroundColor(ThemeColors.muted)
                 } else if !trimmedBio.isEmpty, trimmedBio.count < Self.inlineBioMaxChars {
                     Text(trimmedBio)
                         .font(themeManager.subheadlineFont)
                         .multilineTextAlignment(.leading)
-                        .foregroundColor(.gray)
+                        .foregroundColor(ThemeColors.muted)
                 } else if aiBiosEnabled,
                           let summary = TalkSummaryCache.shared.summary(for: speaker) {
                     // AI summary slot — same styling as the talk-cell
@@ -118,11 +118,11 @@ struct SpeakerRow: View {
                     HStack(alignment: .top, spacing: 4) {
                         Image(systemName: "sparkles")
                             .font(themeManager.captionFont)
-                            .foregroundColor(.gray)
+                            .foregroundColor(ThemeColors.muted)
                             .padding(.top, 2)
                         Text(summary)
                             .font(themeManager.captionFont)
-                            .foregroundColor(.gray)
+                            .foregroundColor(ThemeColors.muted)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
                     }
@@ -138,11 +138,11 @@ struct SpeakerRow: View {
                     HStack(alignment: .top, spacing: 4) {
                         Image(systemName: "calendar")
                             .font(themeManager.captionFont)
-                            .foregroundColor(.gray)
+                            .foregroundColor(ThemeColors.muted)
                             .padding(.top, 2)
                         Text(eventNamesLine)
                             .font(themeManager.captionFont)
-                            .foregroundColor(.gray)
+                            .foregroundColor(ThemeColors.muted)
                             .lineLimit(2)
                             .multilineTextAlignment(.leading)
                     }

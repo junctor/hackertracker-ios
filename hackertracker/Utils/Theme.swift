@@ -60,6 +60,12 @@ enum ThemeColors {
             ? UIColor(red: 38/255,  green: 38/255,  blue: 42/255,  alpha: 1)
             : UIColor(red: 235/255, green: 235/255, blue: 240/255, alpha: 1)
     })
+
+    /// Mid-tone text color used by row "secondary" content — speaker
+    /// subtitle, AI summary line, event-titles line, chip labels.
+    /// Brighter than `.gray` (~50%) but still clearly subordinate to
+    /// the row title. Built off `.primary` so it adapts to theme.
+    static let muted = Color.primary.opacity(0.75)
 }
 
 // MARK: - AppTheme infrastructure
