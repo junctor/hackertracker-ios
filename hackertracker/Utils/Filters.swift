@@ -7,11 +7,36 @@
 
 import Foundation
 
+/// Shared persistence helpers used by every filter store below.
+private enum FilterStorePersistence {
+    static func loadIntSet(forKey key: String) -> Set<Int>? {
+        guard let data = UserDefaults.standard.data(forKey: key) else { return nil }
+        return try? JSONDecoder().decode(Set<Int>.self, from: data)
+    }
+
+    static func loadStringSet(forKey key: String) -> Set<String>? {
+        guard let data = UserDefaults.standard.data(forKey: key) else { return nil }
+        return try? JSONDecoder().decode(Set<String>.self, from: data)
+    }
+
+    static func save<T: Encodable>(_ value: T, forKey key: String) {
+        if let data = try? JSONEncoder().encode(value) {
+            UserDefaults.standard.set(data, forKey: key)
+        }
+    }
+}
+
 class Filters: ObservableObject {
-    @Published var filters: Set<Int>
+    private static let userDefaultsKey = "filtersStore.schedule.v1"
+    @Published var filters: Set<Int> {
+        didSet { FilterStorePersistence.save(filters, forKey: Self.userDefaultsKey) }
+    }
 
     init(filters: Set<Int>) {
-        self.filters = filters
+        // Persisted value (if any) wins over the caller's default.
+        // Survives cold launch so users don't have to re-pick chips
+        // every time they relaunch the app.
+        self.filters = FilterStorePersistence.loadIntSet(forKey: Self.userDefaultsKey) ?? filters
     }
 }
 
@@ -21,10 +46,28 @@ class Filters: ObservableObject {
 /// while `SpeakerFiltersStore` is read only by SpeakersView and the
 /// speaker filter sheet.
 final class SpeakerFiltersStore: ObservableObject {
-    @Published var filters: Set<Int>
+    private static let userDefaultsKey = "filtersStore.speakers.v1"
+    @Published var filters: Set<Int> {
+        didSet { FilterStorePersistence.save(filters, forKey: Self.userDefaultsKey) }
+    }
 
     init(filters: Set<Int> = []) {
-        self.filters = filters
+        self.filters = FilterStorePersistence.loadIntSet(forKey: Self.userDefaultsKey) ?? filters
+    }
+}
+
+/// Independent filter set for the Merch (Products) list. Holds the
+/// selected size labels rather than tag ids; otherwise identical to
+/// the other stores. Hoisted out of ProductsView's @State so the
+/// selection survives tab switches in addition to cold launches.
+final class MerchFiltersStore: ObservableObject {
+    private static let userDefaultsKey = "filtersStore.merch.v1"
+    @Published var sizes: Set<String> {
+        didSet { FilterStorePersistence.save(sizes, forKey: Self.userDefaultsKey) }
+    }
+
+    init(sizes: Set<String> = []) {
+        self.sizes = FilterStorePersistence.loadStringSet(forKey: Self.userDefaultsKey) ?? sizes
     }
 }
 

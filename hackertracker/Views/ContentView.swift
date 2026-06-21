@@ -53,6 +53,10 @@ struct ContentView: View {
     /// Independent filter set for the Speakers list — selections here
     /// don't bleed into Schedule / All Content.
     @StateObject var speakerFilters = SpeakerFiltersStore()
+    /// Independent filter set for the Merch list. Holds the user's
+    /// selected sizes. Hoisted from ProductsView's @State so the
+    /// selection survives tab switches (and now cold launches too).
+    @StateObject var merchFilters = MerchFiltersStore()
     @State private var tabSelection = 1
     // @State private var tappedMainTwice = false
     // @State private var tappedScheduleTwice = false
@@ -161,6 +165,7 @@ struct ContentView: View {
             .environmentObject(toNext)
             .environmentObject(filters)
             .environmentObject(speakerFilters)
+            .environmentObject(merchFilters)
             // Themes: set the default body font for the entire tab
             // tree. Any Text() that doesn't explicitly call .font()
             // inherits this — so card labels, schedule rows, settings
@@ -187,6 +192,7 @@ struct ContentView: View {
                     .environment(themeManager)
                     .environmentObject(filters)
                     .environmentObject(speakerFilters)
+                    .environmentObject(merchFilters)
             } else {
                 _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
                     .preferredColorScheme(theme.colorScheme)
@@ -197,6 +203,7 @@ struct ContentView: View {
                     .environment(themeManager)
                     .environmentObject(filters)
                     .environmentObject(speakerFilters)
+                    .environmentObject(merchFilters)
                     .task {
                         Log.app.debug("ContentView selected=\(selected.code, privacy: .public) stored=\(conferenceCode, privacy: .public)")
                         if selected.code != conferenceCode {

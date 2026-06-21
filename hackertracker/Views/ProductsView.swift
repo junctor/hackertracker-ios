@@ -18,11 +18,12 @@ struct ProductsView: View {
     /// than on every keystroke.
     @State private var debouncedSearch = ""
     @State private var showFilters = false
-    /// Local merch-size filter state. Variant titles carry the size
-    /// label (e.g. "XS"); kept here rather than in the shared Filters
-    /// env object so it does not collide with the Schedule tag filters.
-    @State private var selectedSizes: Set<String> = []
-    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    /// Merch-size selection lives in `MerchFiltersStore` (injected via
+    /// environment from ContentView). Hoisting out of @State lets the
+    /// selection survive tab switches; the store also persists it
+    /// across cold launches via UserDefaults.
+    @EnvironmentObject private var merchFilters: MerchFiltersStore
+    @AppStorage("filterMatchModeMerch") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     private var filterMatchMode: FilterMatchMode {
         FilterMatchMode(rawOrDefault: filterMatchModeRaw)
     }
@@ -77,7 +78,7 @@ struct ProductsView: View {
                 // whose title matches a selected size. Out-of-stock SKUs
                 // do not satisfy the filter so the grid only shows items
                 // the user could actually buy in that size.
-                guard !selectedSizes.isEmpty else { return true }
+                guard !merchFilters.sizes.isEmpty else { return true }
                 // In-stock variant titles available for this product.
                 let inStockTitles = Set(
                     product.variants
@@ -87,12 +88,12 @@ struct ProductsView: View {
                 switch filterMatchMode {
                 case .any:
                     // Any of the selected sizes is available.
-                    return !inStockTitles.isDisjoint(with: selectedSizes)
+                    return !inStockTitles.isDisjoint(with: merchFilters.sizes)
                 case .all:
                     // Every selected size is available — for users
                     // who need a specific bundle of sizes (e.g. both
                     // M and L for two recipients).
-                    return selectedSizes.isSubset(of: inStockTitles)
+                    return merchFilters.sizes.isSubset(of: inStockTitles)
                 }
             }
     }
@@ -214,7 +215,7 @@ struct ProductsView: View {
                     Button {
                         showFilters.toggle()
                     } label: {
-                        Image(systemName: selectedSizes.isEmpty
+                        Image(systemName: merchFilters.sizes.isEmpty
                               ? "line.3.horizontal.decrease.circle"
                               : "line.3.horizontal.decrease.circle.fill")
                             .font(themeManager.title2Font)
@@ -222,7 +223,7 @@ struct ProductsView: View {
                             .background(.regularMaterial, in: Circle())
                     }
                     .tint(.primary)
-                    .accessibilityLabel(selectedSizes.isEmpty ? "Filters" : "Filters active")
+                    .accessibilityLabel(merchFilters.sizes.isEmpty ? "Filters" : "Filters active")
                 }
 
                 Spacer()
@@ -262,7 +263,7 @@ struct ProductsView: View {
         .sheet(isPresented: $showFilters) {
             MerchSizeFilter(
                 sizes: availableSizes,
-                selected: $selectedSizes,
+                selected: $merchFilters.sizes,
                 showFilters: $showFilters,
                 matchedCount: visibleProducts.count
             )
@@ -404,7 +405,7 @@ struct MerchSizeFilter: View {
     /// the already-filtered list to keep the sheet stateless.
     var matchedCount: Int = 0
 
-    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    @AppStorage("filterMatchModeMerch") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {
