@@ -45,6 +45,20 @@ struct SpeakerRow: View {
     /// threshold for "long enough that we should summarize instead".
     private static let inlineBioMaxChars = 100
 
+    /// Distinct event titles for this speaker, in `eventIds` order,
+    /// comma-joined. Two sessions with the same title get one mention
+    /// (a speaker doing two slots of "Hands-on Workshop" shouldn't
+    /// list it twice).
+    private var eventNamesLine: String {
+        var seen = Set<String>()
+        let names = speaker.eventIds
+            .compactMap { viewModel.eventsById[$0]?.title }
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .filter { seen.insert($0).inserted }
+        return names.joined(separator: ", ")
+    }
+
     /// Unique tag IDs rolled up across every event this speaker is
     /// associated with, intersected with the same eligibility set
     /// the filter sheet uses (browsable, content-category, not in
@@ -114,6 +128,25 @@ struct SpeakerRow: View {
                     }
                     .accessibilityElement(children: .combine)
                     .accessibilityLabel("AI summary: \(summary)")
+                }
+                // Event titles this speaker is presenting. Calendar
+                // glyph + comma-joined unique titles. Sits between
+                // the subtitle fallback chain and the chip strip so
+                // the row reads top-down: who → what they do →
+                // what they're presenting → categorical chips.
+                if !eventNamesLine.isEmpty {
+                    HStack(alignment: .top, spacing: 4) {
+                        Image(systemName: "calendar")
+                            .font(themeManager.captionFont)
+                            .foregroundColor(.gray)
+                            .padding(.top, 2)
+                        Text(eventNamesLine)
+                            .font(themeManager.captionFont)
+                            .foregroundColor(.gray)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .padding(.top, 2)
                 }
                 // Tag chip strip — Event Category / Organizer / etc.
                 // rolled up across the speaker's events. Reuses the
