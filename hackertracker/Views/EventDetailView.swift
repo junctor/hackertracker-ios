@@ -70,7 +70,7 @@ struct EventDetailView: View {
                     .iPadFlatCorners(15)
                 }
                 VStack(alignment: .leading) {
-                    Markdown(event.description).padding()
+                    Markdown(event.description).themedMarkdown(themeManager).padding()
                 }
                 if event.people.count > 0 {
                     showSpeakers(event: event)

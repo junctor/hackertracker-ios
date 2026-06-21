@@ -19,6 +19,7 @@
 //  extensions instead.
 //
 
+import MarkdownUI
 import SwiftUI
 
 extension View {
@@ -60,6 +61,17 @@ extension View {
         self
             .scrollContentBackground(.hidden)
             .background(themeManager.background, ignoresSafeAreaEdges: .all)
+    }
+
+    /// Apply the active theme's font design (system / monospaced /
+    /// rounded) to MarkdownUI body text. MarkdownUI doesn't pick up
+    /// SwiftUI's `.font(_:)` environment default, so each `Markdown(_:)`
+    /// call site needs an explicit text-style override to match the
+    /// rest of the themed UI.
+    func themedMarkdown(_ themeManager: ThemeManager) -> some View {
+        self.markdownTextStyle(\.text) {
+            FontFamily(.system(themeManager.fontDesign))
+        }
     }
 }
 

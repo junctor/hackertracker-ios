@@ -41,7 +41,7 @@ struct DocumentView: View {
                     .cornerRadius(15)
                     Divider()
                 }
-                Markdown(body_text)
+                Markdown(body_text).themedMarkdown(themeManager)
                     .textSelection(.enabled)
                 Divider()
             }

@@ -59,7 +59,7 @@ struct ContentDetailView: View {
                     .iPadFlatCorners(15)
                 }
                 VStack(alignment: .leading) {
-                    Markdown(item.description)
+                    Markdown(item.description).themedMarkdown(themeManager)
                         .textSelection(.enabled)
                         .padding()
                 }

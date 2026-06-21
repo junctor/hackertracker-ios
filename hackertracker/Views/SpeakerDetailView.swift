@@ -61,7 +61,7 @@ struct SpeakerDetailView: View {
                         }
                     }
                     
-                    Markdown(speaker.description)
+                    Markdown(speaker.description).themedMarkdown(themeManager)
                     
                     if speaker.eventIds.count > 0 {
                         Divider()

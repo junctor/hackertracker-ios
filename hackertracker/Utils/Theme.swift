@@ -347,15 +347,29 @@ final class ThemeManager {
         applyNavBarAppearance()
     }
 
+    /// Instance-level call site; just delegates to the static version
+    /// using the currently-stored theme id.
+    private func applyNavBarAppearance() {
+        ThemeManager.applyNavBarAppearance(for: storedID)
+    }
+
     /// SwiftUI's `.navigationTitle` text is rendered by UINavigationBar
     /// under the hood, which doesn't pick up SwiftUI's `.font(_:)` env
     /// default. Push the active theme's heading + largeTitle face into
     /// `UINavigationBarAppearance` so nav-bar titles match the rest of
-    /// the app. Invoked from init() and setTheme() so the appearance
-    /// flips immediately on theme change.
-    private func applyNavBarAppearance() {
+    /// the app.
+    ///
+    /// Static because it has to be callable from `hackertrackerApp.init()`
+    /// BEFORE any `ThemeManager` instance is constructed — otherwise the
+    /// app's initial UINavigationBars get instantiated against the
+    /// default appearance and only refresh on push/pop. Reads the
+    /// persisted theme id directly from UserDefaults.
+    static func applyNavBarAppearance(for themeID: String? = nil) {
+        let resolvedID = themeID
+            ?? UserDefaults.standard.string(forKey: ThemeManager.userDefaultsKey)
+            ?? AppTheme.default.id
         let design: UIFontDescriptor.SystemDesign
-        switch current.id {
+        switch resolvedID {
         case "hackerGreen": design = .monospaced
         case "synthwave":   design = .rounded
         default:            design = .default
@@ -394,6 +408,17 @@ final class ThemeManager {
     var textSecondary: Color  { current.palette.textSecondary.auto }
     var divider: Color        { current.palette.divider.auto }
     var chipBackground: Color { current.palette.chipBackground.auto }
+
+    /// SwiftUI `Font.Design` matching the active theme. Used by call
+    /// sites that need the raw design value (e.g. MarkdownUI's
+    /// `FontFamily(.system(_:))`, UIKit appearance proxies).
+    var fontDesign: Font.Design {
+        switch current.id {
+        case "hackerGreen": return .monospaced
+        case "synthwave":   return .rounded
+        default:            return .default
+        }
+    }
 
     var largeTitleFont: Font  { current.typography.largeTitle }
     var titleFont: Font       { current.typography.title }

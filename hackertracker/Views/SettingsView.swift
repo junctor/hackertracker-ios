@@ -410,7 +410,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             VStack(alignment: .leading, spacing: 16) {
                 versionHeader
 
-                Markdown(AboutView.aboutBody)
+                Markdown(AboutView.aboutBody).themedMarkdown(themeManager)
 
                 Divider()
                 privacySection

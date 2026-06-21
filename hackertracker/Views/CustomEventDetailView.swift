@@ -160,7 +160,7 @@ struct CustomEventDetailView: View {
             // Description (Markdown-rendered, matches EventDetailView).
             if let desc = event.eventDescription, !desc.isEmpty {
                 VStack(alignment: .leading) {
-                    Markdown(desc)
+                    Markdown(desc).themedMarkdown(themeManager)
                         .padding()
                 }
             }

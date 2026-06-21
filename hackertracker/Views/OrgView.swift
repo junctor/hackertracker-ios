@@ -48,7 +48,7 @@ struct OrgView: View {
                         }
                     }
                 }
-                Markdown(org.description)
+                Markdown(org.description).themedMarkdown(themeManager)
                 if let org_tag_id = org.tag_id_as_organizer, viewModel.events.first(where: { $0.tagIds.contains(org_tag_id)}) != nil {
                     Button {
                         if filters.filters != [org_tag_id] {

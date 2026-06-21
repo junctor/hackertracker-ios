@@ -163,7 +163,7 @@ struct faqRow: View {
             }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
 
             if showAnswer {
-                Markdown(faq.answer).padding(.vertical)
+                Markdown(faq.answer).themedMarkdown(themeManager).padding(.vertical)
             }
         }
     }

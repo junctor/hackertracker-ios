@@ -93,7 +93,7 @@ struct NoteBlock: View {
             if expanded {
                 Group {
                     if let text = body_text {
-                        Markdown(text)
+                        Markdown(text).themedMarkdown(themeManager)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
                             .background(themeManager.cardSurface)
@@ -145,6 +145,7 @@ struct NoteEditorView: View {
 
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(ThemeManager.self) private var themeManager
 
     @State private var body_text: String = ""
     @State private var tab: Tab = .write
@@ -184,7 +185,7 @@ struct NoteEditorView: View {
                                 .foregroundStyle(.secondary)
                                 .padding()
                         } else {
-                            Markdown(body_text)
+                            Markdown(body_text).themedMarkdown(themeManager)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding()
                         }

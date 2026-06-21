@@ -185,7 +185,7 @@ struct articleRow: View {
             if showText {
                 if pad {
                     VStack(alignment: .leading) {
-                        Markdown(article.text).padding(.vertical)
+                        Markdown(article.text).themedMarkdown(themeManager).padding(.vertical)
                     }
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity)
@@ -193,7 +193,7 @@ struct articleRow: View {
                     .background(themeManager.cardSurface)
                     .cornerRadius(15)
                 } else {
-                    Markdown(article.text).padding(.vertical)
+                    Markdown(article.text).themedMarkdown(themeManager).padding(.vertical)
                 }
             }
         }

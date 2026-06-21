@@ -137,6 +137,8 @@ struct EventCell: View {
             }
 
         }
+        .padding(.vertical, 10)
+        .padding(.trailing, 12)
         .background(themeManager.cardSurface)
         .cornerRadius(10)
         .padding(.horizontal, 8)

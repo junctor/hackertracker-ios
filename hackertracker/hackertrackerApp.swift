@@ -54,6 +54,14 @@ struct hackertrackerApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     let persistenceController = PersistenceController.shared
 
+    init() {
+        // Push the active theme's font into UINavigationBarAppearance
+        // before any SwiftUI view (and its hosted UINavigationBars) is
+        // instantiated. Otherwise the initial nav bars are built
+        // against the system default and only refresh on push/pop.
+        ThemeManager.applyNavBarAppearance()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
