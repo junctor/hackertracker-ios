@@ -157,6 +157,13 @@ struct ContentView: View {
             .environmentObject(toCurrent)
             .environmentObject(toNext)
             .environmentObject(filters)
+            // Themes: set the default body font for the entire tab
+            // tree. Any Text() that doesn't explicitly call .font()
+            // inherits this — so card labels, schedule rows, settings
+            // labels, product detail text, etc. all pick up the
+            // theme's body font (system / monospaced / rounded)
+            // automatically.
+            .font(themeManager.bodyFont)
             .analyticsScreen(name: "ContentView")
         } else {
             if conferenceCode == "INIT" {
