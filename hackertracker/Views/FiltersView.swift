@@ -12,6 +12,7 @@ struct EventFilters: View {
     @Binding var showFilters: Bool
     @EnvironmentObject var filters: Filters
     @EnvironmentObject var toTop: ToTop
+    @Environment(ThemeManager.self) private var themeManager
     var showBookmarks: Bool = true
     /// Number of items that would survive the current filter selection.
     /// Caller computes (uses the same .filters / .search pipeline the
@@ -62,6 +63,7 @@ struct EventFilters: View {
             }
             .padding(.horizontal, 10)
             .navigationTitle("Filters")
+            .themedNavTitle("Filters", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)

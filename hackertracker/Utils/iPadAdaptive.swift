@@ -73,6 +73,25 @@ extension View {
             FontFamily(.system(themeManager.fontDesign))
         }
     }
+
+    /// Replace the default nav-bar title slot with a `Text` styled
+    /// by the active theme's heading font. UIKit's
+    /// `UINavigationBarAppearance` proxy gets reset by the per-view
+    /// `.toolbarBackground(.ultraThinMaterial, for: .navigationBar)`
+    /// calls scattered through the codebase, so a global appearance
+    /// alone never sticks. A principal ToolbarItem renders inside the
+    /// SwiftUI toolbar slot and is unaffected by background tweaks.
+    ///
+    /// Still pairs with `.navigationTitle(_:)` (kept by the caller)
+    /// so back-button labels, large-title fallbacks, and accessibility
+    /// have a string to fall back to.
+    func themedNavTitle(_ title: String, _ themeManager: ThemeManager) -> some View {
+        self.toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(title).font(themeManager.headingFont)
+            }
+        }
+    }
 }
 
 enum IPadAdaptive {

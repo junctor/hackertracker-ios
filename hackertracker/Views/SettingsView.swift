@@ -121,6 +121,7 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .themedNavTitle("Settings", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -424,6 +425,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .navigationTitle("About")
+        .themedNavTitle("About", themeManager)
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -876,6 +878,7 @@ struct ThemePickerView: View {
             .padding()
         }
         .navigationTitle("Theme")
+        .themedNavTitle("Theme", themeManager)
         .navigationBarTitleDisplayMode(.inline)
     }
 

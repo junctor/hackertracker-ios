@@ -91,6 +91,7 @@ struct CartView: View {
         }
         .analyticsScreen(name: "CartView")
         .navigationTitle("Merch")
+        .themedNavTitle("Merch", themeManager)
         .padding(15)
     }
     

@@ -193,6 +193,7 @@ struct NoteEditorView: View {
                 }
             }
             .navigationTitle("Note")
+            .themedNavTitle("Note", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

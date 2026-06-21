@@ -47,6 +47,7 @@ struct DocumentView: View {
             }
         }
         .navigationTitle(title_text)
+        .themedNavTitle(title_text, themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)

@@ -51,6 +51,7 @@ struct MapView: View {
                 .padding(10)
                 .background(Color(.systemBackground))
                 .navigationTitle(currentMapTitle ?? "Maps")
+                .themedNavTitle(currentMapTitle ?? "Maps", themeManager)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
                 .toolbarBackground(.visible, for: .navigationBar)

@@ -11,6 +11,7 @@ struct GlobalSearchView: View {
     @State private var searchText = ""
     @EnvironmentObject var theme: Theme
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("colorMode") var colorMode: Bool = false
     
     var body: some View {
@@ -99,6 +100,7 @@ struct GlobalSearchView: View {
             }
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
             .navigationTitle("Global Search")
+            .themedNavTitle("Global Search", themeManager)
         }
     }
 }

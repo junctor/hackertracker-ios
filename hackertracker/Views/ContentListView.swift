@@ -308,6 +308,7 @@ struct ContentListView: View {
             .padding(.bottom, 12)
         }
         .navigationTitle(title ?? "All Content")
+        .themedNavTitle(title ?? "All Content", themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)

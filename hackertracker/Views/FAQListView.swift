@@ -133,6 +133,7 @@ struct FAQListView: View {
             .padding(.bottom, 12)
         }
         .navigationTitle("FAQs")
+        .themedNavTitle("FAQs", themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)

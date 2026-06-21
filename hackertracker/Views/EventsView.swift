@@ -290,6 +290,7 @@ struct EventsView: View {
         .padding(.bottom, 12)
       }
       .navigationTitle(viewModel.conference?.name ?? "Schedule")
+      .themedNavTitle(viewModel.conference?.name ?? "Schedule", themeManager)
       .navigationBarTitleDisplayMode(.inline)
       .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
       .toolbarBackground(.visible, for: .navigationBar)
@@ -488,6 +489,7 @@ struct EventsView: View {
         )
       }
         .navigationTitle(navTitle)
+        .themedNavTitle(navTitle, themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)

@@ -23,6 +23,7 @@ struct CustomEventFormView: View {
 
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(ThemeManager.self) private var themeManager
     @EnvironmentObject private var selected: SelectedConference
     @Environment(ConferencesViewModel.self) private var consViewModel
 
@@ -104,6 +105,7 @@ struct CustomEventFormView: View {
                 }
             }
             .navigationTitle(existing == nil ? "New Event" : "Edit Event")
+            .themedNavTitle(existing == nil ? "New Event" : "Edit Event", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

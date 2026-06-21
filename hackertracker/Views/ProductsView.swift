@@ -238,6 +238,7 @@ struct ProductsView: View {
             .padding(.bottom, 12)
         }
         .navigationTitle("Merch")
+        .themedNavTitle("Merch", themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
@@ -438,6 +439,7 @@ struct MerchSizeFilter: View {
                 .padding(10)
             }
             .navigationTitle("Filter by Size")
+            .themedNavTitle("Filter by Size", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)

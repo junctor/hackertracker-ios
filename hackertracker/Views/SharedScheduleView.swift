@@ -110,6 +110,7 @@ struct SharedScheduleView: View {
             }
         }
         .navigationTitle("Combined Schedule")
+        .themedNavTitle("Combined Schedule", themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)

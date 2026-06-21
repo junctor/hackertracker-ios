@@ -150,6 +150,7 @@ struct ConferencesView: View {
                 .padding(.bottom, 12)
             }
             .navigationTitle("Select Conference")
+            .themedNavTitle("Select Conference", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
