@@ -48,6 +48,12 @@ SwiftUI app with a Firestore-backed live-data layer and CoreData+CloudKit local 
 - `Kingfisher` — image loading
 - `swift-markdown-ui` (MarkdownUI) — markdown rendering for content/news
 
+### Bundled fonts (`hackertracker/Resources/Fonts/`)
+
+- `JetBrainsMono-Regular.ttf` + `JetBrainsMono-Bold.ttf` — used by the Hacker Green theme. Licensed under the SIL Open Font License 1.1 (see `JetBrainsMono-OFL.txt`; the upstream repo calls it `OFL.txt` despite the project's Apache-2.0-ish docs).
+- `MajorMonoDisplay-Regular.ttf` — used by the Synthwave theme. Licensed under the SIL Open Font License 1.1 (see `MajorMonoDisplay-OFL.txt`).
+- Both OFL licenses require attribution and ship as resources in the app bundle. Registered for runtime use via `UIAppFonts` in `hackertracker/Info.plist`; referenced from `Utils/Theme.swift` by their PostScript names (`JetBrainsMono-Regular`, `JetBrainsMono-Bold`, `MajorMonoDisplay-Regular`).
+
 ## Conventions
 
 - Recent commit history shows a deliberate removal of SwiftUI `List` containers (commit `5bfbe92`: "remove of all List to prevent data crashes"). Prefer `ScrollView` + `LazyVStack` patterns when adding new collection UIs in this codebase.
