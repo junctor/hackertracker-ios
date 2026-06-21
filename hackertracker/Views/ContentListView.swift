@@ -401,6 +401,7 @@ struct ContentData: View {
 struct ContentRow: View {
     let item: Content
     let themeColor: Color
+    @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
         HStack {
@@ -409,7 +410,7 @@ struct ContentRow: View {
                 .frame(maxHeight: .infinity)
             VStack(alignment: .leading) {
                 Text(item.title)
-                    .font(.headline)
+                    .font(themeManager.headingFont)
                     .foregroundColor(.primary)
             }
         }

@@ -137,7 +137,7 @@ struct ProductView: View {
                 
                 Text(message.uppercased())
                     .foregroundColor(.gray)
-                    .font(.caption)
+                    .font(themeManager.captionFont)
             }
         }
         .padding(15)

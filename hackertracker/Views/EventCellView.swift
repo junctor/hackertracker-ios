@@ -67,12 +67,12 @@ struct EventCell: View {
                                 .font(themeManager.subheadlineFont)
                             if event.beginTimestamp != event.endTimestamp {
                                 Text(show24hourtime ? dfu.hourMinuteTimeFormatter.string(from: event.endTimestamp) : dfu.hourMinute12TimeFormatter.string(from: event.endTimestamp))
-                                    .font(.caption2)
+                                    .font(themeManager.captionFont)
                             }
                         }
                         VStack(alignment: .leading, spacing: 3) {
                             Text(event.title)
-                                .font(.headline)
+                                .font(themeManager.headingFont)
                                 .multilineTextAlignment(.leading)
                             if !event.people.isEmpty {
                                 Text(event.people.map { p in viewModel.speakersById[p.id]?.name ?? "" }.joined(separator: ", "))
@@ -80,7 +80,7 @@ struct EventCell: View {
                                     .multilineTextAlignment(.leading)
                             }
                             if let l = viewModel.locationsById[event.locationId] {
-                                Text(l.name).font(.caption2)
+                                Text(l.name).font(themeManager.captionFont)
                                     .multilineTextAlignment(.leading)
                             }
                             // AI summary slot. Same gating and styling as
@@ -90,11 +90,11 @@ struct EventCell: View {
                                let summary = TalkSummaryCache.shared.summary(for: event) {
                                 HStack(alignment: .top, spacing: 4) {
                                     Image(systemName: "sparkles")
-                                        .font(.caption2)
+                                        .font(themeManager.captionFont)
                                         .foregroundStyle(.secondary)
                                         .padding(.top, 2)
                                     Text(summary)
-                                        .font(.caption)
+                                        .font(themeManager.captionFont)
                                         .foregroundStyle(.secondary)
                                         .lineLimit(2)
                                         .multilineTextAlignment(.leading)
@@ -191,6 +191,7 @@ struct EventCell: View {
 struct ShowEventCellTags: View {
     var tagIds: [Int]
     var minWidth: CGFloat = 100
+    @Environment(ThemeManager.self) private var themeManager
     /// When true, prepend a synthetic "Custom Event" chip ahead of
     /// the regular tag chips. Honors `customColorHex` when set so the
     /// chip's dot matches the row stripe color the user picked.
@@ -211,7 +212,7 @@ struct ShowEventCellTags: View {
                 HStack {
                     Circle().foregroundColor(customChipColor)
                         .frame(width: 8, height: 8, alignment: .center)
-                    Text("Custom Event").font(.caption)
+                    Text("Custom Event").font(themeManager.captionFont)
                         .multilineTextAlignment(.leading)
                         .frame(alignment: .leading)
                 }
@@ -222,7 +223,7 @@ struct ShowEventCellTags: View {
                         HStack {
                             Circle().foregroundColor(Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
                                 .frame(width: 8, height: 8, alignment: .center)
-                            Text(tag.label).font(.caption)
+                            Text(tag.label).font(themeManager.captionFont)
                                 .multilineTextAlignment(.leading)
                                 .frame(alignment: .leading)
                         }

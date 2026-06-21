@@ -160,11 +160,11 @@ struct SharedScheduleRow: View {
                     .cornerRadius(6)
                 Spacer()
                 Text("\(timeString(entry.event.beginTimestamp)) – \(timeString(entry.event.endTimestamp))")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
             }
             Text(entry.event.title)
-                .font(.headline)
+                .font(themeManager.headingFont)
                 .multilineTextAlignment(.leading)
             // Note: Event.people is [Person] (id+sortOrder+tagId only). Rendering
             // speaker names here would require a cross-conference speaker lookup

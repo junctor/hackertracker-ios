@@ -70,7 +70,7 @@ struct ContentCell: View {
                     HStack(alignment: .center) {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(content.title)
-                                .font(.headline)
+                                .font(themeManager.headingFont)
                                 .multilineTextAlignment(.leading)
                             if !content.people.isEmpty {
                                 Text(content.people.map { p in viewModel.speakersById[p.id]?.name ?? "" }.joined(separator: ", "))
@@ -86,11 +86,11 @@ struct ContentCell: View {
                                let summary = TalkSummaryCache.shared.summary(for: content) {
                                 HStack(alignment: .top, spacing: 4) {
                                     Image(systemName: "sparkles")
-                                        .font(.caption2)
+                                        .font(themeManager.captionFont)
                                         .foregroundStyle(.secondary)
                                         .padding(.top, 2)
                                     Text(summary)
-                                        .font(.caption)
+                                        .font(themeManager.captionFont)
                                         .foregroundStyle(.secondary)
                                         .lineLimit(2)
                                         .multilineTextAlignment(.leading)
@@ -182,6 +182,7 @@ struct ContentDescriptionPeekSheet: View {
     let title: String
     let description: String
     @Environment(\.dismiss) private var dismiss
+    @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
         NavigationStack {
@@ -190,7 +191,7 @@ struct ContentDescriptionPeekSheet: View {
                     Text(title)
                         .font(.title2.weight(.semibold))
                     Label("Original description", systemImage: "text.alignleft")
-                        .font(.caption)
+                        .font(themeManager.captionFont)
                         .foregroundStyle(.secondary)
                     Text(description)
                         .font(.body)

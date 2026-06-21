@@ -229,7 +229,7 @@ struct orgRow: View {
         if let l = org.logo, let lurl = l.url, let logo_url = URL(string: lurl) {
             VStack {
                 Text(org.name)
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundColor(colorMode ? .white : .primary)
                 KFImage(logo_url)
                     .htDownsampled(side: 200)

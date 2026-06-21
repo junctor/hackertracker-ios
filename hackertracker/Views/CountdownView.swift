@@ -18,16 +18,16 @@ struct CountdownView: View {
         VStack(alignment: .center) {
             HStack {
                 Text("\(countdownTimer?.days ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.pink)
-                Text("days").font(.caption).foregroundColor(.primary)
+                Text("days").font(themeManager.captionFont).foregroundColor(.primary)
 
                 Text("\(countdownTimer?.hours ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.blue)
-                Text("hours").font(.caption).foregroundColor(.primary)
+                Text("hours").font(themeManager.captionFont).foregroundColor(.primary)
 
                 Text("\(countdownTimer?.minutes ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.green)
-                Text("min").font(.caption).foregroundColor(.primary)
+                Text("min").font(themeManager.captionFont).foregroundColor(.primary)
 
                 Text("\(countdownTimer?.seconds ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.red)
-                Text("sec").font(.caption).foregroundColor(.primary)
+                Text("sec").font(themeManager.captionFont).foregroundColor(.primary)
             }
         }.frame(maxWidth: .infinity)
             .accentColor(.primary)

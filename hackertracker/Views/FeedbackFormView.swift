@@ -42,7 +42,7 @@ struct FeedbackFormView: View {
         Divider()
         VStack(alignment: .center) {
             Text("A minimum of one answer is required for submission.")
-                .font(.caption)
+                .font(themeManager.captionFont)
             HStack {
                 Button(action: {
                     showFeedback = false
@@ -152,7 +152,7 @@ struct FeedbackRow: View {
     
     var body: some View {
         if item.type == "select_one" {
-            Picker(selection: $answer, label: Text(item.captionText).font(.headline), content: {
+            Picker(selection: $answer, label: Text(item.captionText).font(themeManager.headingFont), content: {
                 ForEach(item.options) {
                     Text($0.captionText).tag($0.captionText)
                 }

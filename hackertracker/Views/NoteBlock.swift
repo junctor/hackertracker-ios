@@ -119,7 +119,7 @@ struct NoteBlock: View {
                         .buttonStyle(.plain)
                     }
                     Text("Notes are stored privately on your device and synced via iCloud.")
-                        .font(.caption2)
+                        .font(themeManager.captionFont)
                         .foregroundStyle(.tertiary)
                 }
                 .transition(.opacity.combined(with: .move(edge: .top)))

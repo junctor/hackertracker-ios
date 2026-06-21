@@ -86,7 +86,7 @@ struct CustomEventShareSheet: View {
     @ViewBuilder private func urlPreview(url: URL) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Link")
-                .font(.caption)
+                .font(themeManager.captionFont)
                 .foregroundStyle(.secondary)
             Text(url.absoluteString)
                 .font(.footnote.monospaced())

@@ -280,7 +280,7 @@ struct InfoView: View {
                                 tapped()
                             } label: {
                                 Text("#hackertracker iOS v\(v)")
-                                    .font(.caption2)
+                                    .font(themeManager.captionFont)
                                     .frame(maxWidth: .infinity)
                                     .foregroundColor(.secondary)
                             }
@@ -289,7 +289,7 @@ struct InfoView: View {
                                 tapped()
                             } label: {
                                 Text("#hackertracker iOS")
-                                    .font(.caption2)
+                                    .font(themeManager.captionFont)
                                     .frame(maxWidth: .infinity)
                                     .foregroundColor(.secondary)
                             }
@@ -732,6 +732,7 @@ struct CardView: View {
     var subtitle: String?
     var foregroundColor: Color?
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("colorMode") var colorMode: Bool = false
 
     var body: some View {
@@ -742,7 +743,7 @@ struct CardView: View {
                     VStack {
                         Text(text)
                         Text(sub)
-                            .font(.caption)
+                            .font(themeManager.captionFont)
                     }
                     .frame(maxWidth: .infinity)
                 } else {
@@ -761,7 +762,7 @@ struct CardView: View {
                     VStack {
                         Text(text)
                         Text(sub)
-                            .font(.caption)
+                            .font(themeManager.captionFont)
                     }
                     .frame(maxWidth: .infinity)
                 } else {

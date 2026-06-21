@@ -34,7 +34,7 @@ struct SpeakerDetailView: View {
                             .trackTitleScrollOffset()
                         if let pronouns = speaker.pronouns {
                             Text("(\(pronouns))")
-                                .font(.caption)
+                                .font(themeManager.captionFont)
                                 .foregroundColor(.gray)
                         }
                         if let affiliations = speaker.affiliations, affiliations.count > 0 {
@@ -278,7 +278,7 @@ struct SpeakerEventView: View {
                 Text(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.beginTimestamp))
                     .font(themeManager.subheadlineFont)
                 if let l = viewModel.locationsById[event.locationId] {
-                    Text(l.name).font(.caption2)
+                    Text(l.name).font(themeManager.captionFont)
                 }
                 // if let tagtype = viewModel.tagTypeByTagId[tagId], let tag = tagtype.tags.first(where: {$0.id == tagId})
                 if let firstTagId = event.tagIds.first,
@@ -288,7 +288,7 @@ struct SpeakerEventView: View {
                             Circle().foregroundColor(Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
                                 .frame(width: 8, height: 8, alignment: .center)
                             
-                            Text(tag.label).font(.caption)
+                            Text(tag.label).font(themeManager.captionFont)
                             Spacer()
                         }
                     }

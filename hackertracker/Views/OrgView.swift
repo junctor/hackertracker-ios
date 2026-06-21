@@ -92,7 +92,7 @@ struct showLinks: View {
             }, label: {
                 HStack {
                     Text("Links")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if collapsed {
                         Text("Show")

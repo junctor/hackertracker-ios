@@ -157,7 +157,7 @@ struct showSpeakers: View {
             }, label: {
                 HStack {
                     Text("People")
-                        .font(.headline).padding(.top)
+                        .font(themeManager.headingFont).padding(.top)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
                 }
@@ -173,7 +173,7 @@ struct showSpeakers: View {
                                         VStack {
                                             Text(speaker.name)
                                             if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == person.tagId}) {
-                                                Text(tag.label).font(.caption)
+                                                Text(tag.label).font(themeManager.captionFont)
                                             }
                                         }
                                     }
@@ -192,7 +192,7 @@ struct showSpeakers: View {
                             VStack {
                                 Text(event.speakers[0].name)
                                 if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == people[0].tagId}) {
-                                    Text(tag.label).font(.caption)
+                                    Text(tag.label).font(themeManager.captionFont)
                                 }
                             }
                         }

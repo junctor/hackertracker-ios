@@ -286,14 +286,14 @@ struct CustomEventDetailView: View {
         let codes = CustomEventUtility.conferenceCodes(of: event)
         if codes.isEmpty {
             Label("Applies to every conference", systemImage: "globe")
-                .font(.caption)
+                .font(themeManager.captionFont)
                 .foregroundStyle(.secondary)
         } else {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Image(systemName: "checkmark.circle")
                     .foregroundStyle(.secondary)
                 Text(codes.joined(separator: ", "))
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
             }
         }
@@ -304,7 +304,7 @@ struct CustomEventDetailView: View {
             event.notificationsEnabled ? "Notifications on" : "Notifications off",
             systemImage: event.notificationsEnabled ? "bell.fill" : "bell.slash"
         )
-        .font(.caption)
+        .font(themeManager.captionFont)
         .foregroundStyle(.secondary)
     }
 

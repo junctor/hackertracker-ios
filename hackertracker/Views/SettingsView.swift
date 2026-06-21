@@ -187,7 +187,7 @@ struct SettingsView: View {
             Text("Select Conference")
                 .bold()
             Text("(\(viewModel.conference?.name ?? selected.code))")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(5)
@@ -198,6 +198,7 @@ struct SettingsView: View {
 }
 
 struct EasterEggSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("easterEgg") var easterEgg: Bool = false
     @AppStorage("easterEggMaxOpacity") var easterEggMaxOpacity: Double = 0.20
@@ -216,7 +217,7 @@ struct EasterEggSettingsView: View {
                         Text("Peak Opacity")
                         Spacer()
                         Text(String(format: "%.0f%%", easterEggMaxOpacity * 100))
-                            .font(.caption)
+                            .font(themeManager.captionFont)
                             .foregroundStyle(.secondary)
                             .monospacedDigit()
                     }
@@ -224,7 +225,7 @@ struct EasterEggSettingsView: View {
                     // make the feature look broken; ceiling at 1.0.
                     Slider(value: $easterEggMaxOpacity, in: 0.05...1.0, step: 0.05)
                     Text("How bright the background beezle gets at the peak of its pulse.")
-                        .font(.caption)
+                        .font(themeManager.captionFont)
                         .foregroundStyle(.secondary)
                 }
                 VStack(alignment: .leading, spacing: 4) {
@@ -234,7 +235,7 @@ struct EasterEggSettingsView: View {
                         Text(easterEggPeriod <= 0
                              ? "off"
                              : String(format: "%.0fs", easterEggPeriod))
-                            .font(.caption)
+                            .font(themeManager.captionFont)
                             .foregroundStyle(.secondary)
                             .monospacedDigit()
                     }
@@ -247,7 +248,7 @@ struct EasterEggSettingsView: View {
                             step: 1.0)
                         .labelsHidden()
                     Text("Seconds for a full fade in + out. 0 holds the ghost steady at the peak opacity.")
-                        .font(.caption)
+                        .font(themeManager.captionFont)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -269,7 +270,7 @@ struct NotificationSettingsView: View {
         VStack(alignment: .leading) {
             Stepper("Before Event: \(notifyAt)", value: $notifyAt, in: 0...60)
                 Text("Notification time in minutes")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
         }
         .padding(5)
         HStack {
@@ -338,7 +339,7 @@ struct AboutSettingsView: View {
             Text("About")
                 .bold()
             Text("\(v1) (\(v2))")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(5)
@@ -533,7 +534,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
     private func row(_ label: String, _ value: String, mono: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label)
-                .font(.caption)
+                .font(themeManager.captionFont)
                 .foregroundStyle(.secondary)
             Text(value)
                 .font(mono ? .system(.footnote, design: .monospaced) : .body)
@@ -545,6 +546,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
 
 
 struct ShowNewsSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showNews") var showNews: Bool = true
     
@@ -556,7 +558,7 @@ struct ShowNewsSettingsView: View {
                         viewModel.showNews = value
                     }
                 Text("Show the most recent news article on the home screen")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -564,6 +566,7 @@ struct ShowNewsSettingsView: View {
 }
 
 struct ShowMerchInfoSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
     
     var body: some View {
@@ -573,7 +576,7 @@ struct ShowMerchInfoSettingsView: View {
                         Log.ui.debug("showMerchInfo=\(value)")
                     }
                 Text("Show the merchandise information link on the merch list")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -581,6 +584,7 @@ struct ShowMerchInfoSettingsView: View {
 }
 
 struct ShowPastEventsSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
     
@@ -592,7 +596,7 @@ struct ShowPastEventsSettingsView: View {
                     viewModel.showPastEvents = value
                 }
             Text("Show or hide past events in the conference schedule")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -600,6 +604,7 @@ struct ShowPastEventsSettingsView: View {
 }
 
 struct ShowConflictAlertView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
     
@@ -610,7 +615,7 @@ struct ShowConflictAlertView: View {
                     Log.ui.debug("showConflictAlert=\(value)")
                 }
             Text("Show the conflict alert icon on the schedule")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -680,6 +685,7 @@ struct StartScreenPickerView: View {
 }
 
 struct ShowLocaltimeSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
@@ -720,13 +726,13 @@ struct ShowLocaltimeSettingsView: View {
                 Image(systemName: "clock")
                 Text(currentTimezoneDisplay)
             }
-            .font(.caption)
+            .font(themeManager.captionFont)
             .foregroundStyle(.secondary)
             // Polish: same vertical breathing room above the description as
             // the description has from the Toggle above the clock row.
             .padding(.bottom, 6)
             Text("Show event times in current localtime instead of conference time")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -736,7 +742,7 @@ struct ShowLocaltimeSettingsView: View {
                     Log.ui.debug("show24hourtime=\(value)")
                 }
             Text("Show event times in 24 hour time (13:00) instead of 12 hour time (1:00 PM)")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -759,6 +765,7 @@ struct SettingsView_Previews: PreviewProvider {
 ///     low-power mode). Caption explains why.
 ///   - Fully interactive otherwise.
 struct AISummarySettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("aiSummaries") var aiSummaries: Bool = false
 
     var body: some View {
@@ -770,11 +777,11 @@ struct AISummarySettingsView: View {
                         Log.ui.debug("aiSummaries=\(value)")
                     }
                 Text("Show one-sentence summaries of talk descriptions, generated on-device by Apple Intelligence. Summaries are cached and only generated for descriptions longer than 100 characters.")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
                 if !AISummaryAvailability.isSupported {
                     Text("Apple Intelligence isn\u{2019}t available on this device right now.")
-                        .font(.caption2)
+                        .font(themeManager.captionFont)
                         .foregroundStyle(.tertiary)
                 }
             }
@@ -789,13 +796,14 @@ struct AISummarySettingsView: View {
 /// is false. Defaults true: opting in to create custom events implies
 /// wanting them visible.
 struct ShowCustomEventsSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("showCustomEvents") var showCustomEvents: Bool = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Toggle("Custom Events on Schedule", isOn: $showCustomEvents)
             Text("Hide your custom events from the conference schedule. They\u{2019}re still stored locally and synced to your other devices.")
-                .font(.caption)
+                .font(themeManager.captionFont)
                 .foregroundStyle(.secondary)
         }
         .padding(5)
@@ -835,7 +843,7 @@ struct ThemePickerSettingsView: View {
             Text("Theme")
                 .bold()
             Text(themeManager.current.displayName)
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(5)
@@ -859,7 +867,7 @@ struct ThemePickerView: View {
                     .buttonStyle(.plain)
                 }
                 Text("Themes change card backgrounds, accent colors, and typography across the app. Pick one and the rest of the UI updates immediately.")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 4)
@@ -888,7 +896,7 @@ struct ThemePickerView: View {
                     .font(theme.typography.heading)
                     .foregroundStyle(theme.palette.textPrimary.auto)
                 Text(isActive ? "Active" : "Tap to apply")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundStyle(theme.palette.textSecondary.auto)
             }
             Spacer()

@@ -171,7 +171,7 @@ struct articleRow: View {
                         Text(article.name).font(themeManager.subheadlineFont).fontWeight(.bold).multilineTextAlignment(.leading)
 
                         Text(DateFormatterUtility.shared.monthDayTimeFormatter.string(from: article.updatedAt))
-                            .font(.caption2)
+                            .font(themeManager.captionFont)
                     }
                     
 

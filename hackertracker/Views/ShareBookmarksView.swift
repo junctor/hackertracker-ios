@@ -43,7 +43,7 @@ struct ShareBookmarksView: View {
                         Label("hackertracker://\(conf.code)/s?...", systemImage: "doc.on.doc")
                     }
                     Text(message)
-                        .font(.caption)
+                        .font(themeManager.captionFont)
                         .frame(maxWidth: .infinity)
                     Divider()
                     showEvents(eventIds: bookmarks.filter({viewModel.events.map{Int32($0.id)}.contains($0.id)}).map{Int($0.id)}, title: "Share \(bookmarks.filter({viewModel.events.map{Int32($0.id)}.contains($0.id)}).count) Events")

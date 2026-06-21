@@ -32,7 +32,7 @@ struct ConferenceRow: View {
                         Image(systemName: "clock")
                         Text(tz)
                     }
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
                 }
             })

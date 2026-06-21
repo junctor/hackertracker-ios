@@ -306,7 +306,7 @@ struct showSessionRow: View {
                 }
                 HStack {
                     Image(systemName: "map")
-                    Text(viewModel.locationsById[s.locationId]?.name ?? "unkown").font(.caption)
+                    Text(viewModel.locationsById[s.locationId]?.name ?? "unkown").font(themeManager.captionFont)
                 }
             }
             .padding(.leading, 5)
@@ -455,7 +455,7 @@ struct showPeople: View {
                                         VStack {
                                             Text(speaker.name)
                                             if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == person.tagId}) {
-                                                Text(tag.label).font(.caption)
+                                                Text(tag.label).font(themeManager.captionFont)
                                             }
                                         }
                                     }
@@ -474,7 +474,7 @@ struct showPeople: View {
                             VStack {
                                 Text(speaker.name)
                                 if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == content.people[0].tagId}) {
-                                    Text(tag.label).font(.caption)
+                                    Text(tag.label).font(themeManager.captionFont)
                                 }
                             }
                         }

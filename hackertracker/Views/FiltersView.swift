@@ -157,13 +157,14 @@ struct FilterRow: View {
 struct FilterMatchCountLabel: View {
     let count: Int
     let unit: String
+    @Environment(ThemeManager.self) private var themeManager
     var body: some View {
         let plural = count == 1 ? unit : unit + "s"
         HStack(spacing: 4) {
             Image(systemName: "line.3.horizontal.decrease.circle")
-                .font(.caption)
+                .font(themeManager.captionFont)
             Text("\(count) \(plural)")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .foregroundStyle(.secondary)
         .frame(maxWidth: .infinity, alignment: .center)

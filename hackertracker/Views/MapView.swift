@@ -242,7 +242,7 @@ struct MapView: View {
                 }
             if !searchText.isEmpty {
                 Text(searchMatches == 0 ? "no match" : "\(searchMatches) hit\(searchMatches == 1 ? "" : "s")")
-                    .font(.caption2)
+                    .font(themeManager.captionFont)
                     .foregroundColor(.secondary)
                 Button {
                     searchText = ""
@@ -491,7 +491,7 @@ private struct MapPage: View {
             }
             if let desc = map.description {
                 Text(desc)
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
