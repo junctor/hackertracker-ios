@@ -241,8 +241,8 @@ struct EventsView: View {
   private var scheduleSidebar: some View {
     Group {
       if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documentsById[emergId] {
-        NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
-          CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details")
+        NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: themeManager.danger, systemImage: "exclamationmark.triangle.fill")) {
+          CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: themeManager.danger, subtitle: "Tap for more details")
             .frame(height: 40)
             .cornerRadius(0)
         }
@@ -289,6 +289,7 @@ struct EventsView: View {
         .padding(.horizontal, 20)
         .padding(.bottom, 12)
       }
+      .themedBackground(themeManager)
       .navigationTitle(viewModel.conference?.name ?? "Schedule")
       .themedNavTitle(viewModel.conference?.name ?? "Schedule", themeManager)
       .navigationBarTitleDisplayMode(.inline)
@@ -335,7 +336,7 @@ struct EventsView: View {
               showConflictAlertPopup = true
             } label: {
               Image(systemName: "exclamationmark.triangle")
-                .foregroundColor(ThemeColors.red)
+                .foregroundColor(themeManager.danger)
             }
             .accessibilityLabel("Bookmark schedule conflict")
             .accessibilityHint("Shows conflicting bookmarked events")

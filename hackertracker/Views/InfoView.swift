@@ -66,8 +66,8 @@ struct InfoView: View {
         let _ = DateFormatterUtility.shared.tzGeneration
         NavigationStack(path: $path) {
             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documentsById[emergId] {
-                NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
-                    CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details" )
+                NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: themeManager.danger, systemImage: "exclamationmark.triangle.fill")) {
+                    CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: themeManager.danger, subtitle: "Tap for more details" )
                         .frame(height: 40)
                         .cornerRadius(0)
                 }
@@ -183,7 +183,7 @@ struct InfoView: View {
                             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0 {
                                 if let doc = viewModel.documentsById[emergId] {
                                     NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
-                                        CardView(systemImage: "doc", text: doc.title, color: ThemeColors.red)
+                                        CardView(systemImage: "doc", text: doc.title, color: themeManager.danger)
                                     }
                                 }
                             }

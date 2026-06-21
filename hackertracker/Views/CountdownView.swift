@@ -20,13 +20,13 @@ struct CountdownView: View {
                 Text("\(countdownTimer?.days ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.pink)
                 Text("days").font(themeManager.captionFont).foregroundColor(.primary)
 
-                Text("\(countdownTimer?.hours ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.blue)
+                Text("\(countdownTimer?.hours ?? 0)").font(themeManager.titleFont).foregroundColor(themeManager.accent)
                 Text("hours").font(themeManager.captionFont).foregroundColor(.primary)
 
                 Text("\(countdownTimer?.minutes ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.green)
                 Text("min").font(themeManager.captionFont).foregroundColor(.primary)
 
-                Text("\(countdownTimer?.seconds ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.red)
+                Text("\(countdownTimer?.seconds ?? 0)").font(themeManager.titleFont).foregroundColor(themeManager.danger)
                 Text("sec").font(themeManager.captionFont).foregroundColor(.primary)
             }
         }.frame(maxWidth: .infinity)

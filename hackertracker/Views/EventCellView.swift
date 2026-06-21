@@ -128,7 +128,7 @@ struct EventCell: View {
                             bookmarkAction()
                         } label: {
                             Image(systemName: bookmarkIds.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
-                                .foregroundColor((bookmarkIds.contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkIntsForConflict)) ? ThemeColors.red : .primary)
+                                .foregroundColor((bookmarkIds.contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkIntsForConflict)) ? themeManager.danger : .primary)
                         }
                         .accessibilityLabel(bookmarkIds.contains(Int32(event.id)) ? "Remove bookmark" : "Add bookmark")
                     }

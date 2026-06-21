@@ -130,6 +130,7 @@ struct CartView: View {
 
 struct DeleteAllView: View {
     @Binding var showDeleteAlert: Bool
+    @Environment(ThemeManager.self) private var themeManager
     var body: some View {
         HStack {
             Button {
@@ -141,7 +142,7 @@ struct DeleteAllView: View {
         .foregroundColor(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(15)
-        .background(ThemeColors.red)
+        .background(themeManager.danger)
         .cornerRadius(15)
     }
 }
@@ -194,7 +195,7 @@ struct CartRow: View {
                                 .font(.callout)
                         }
                     }
-                    .foregroundColor(ThemeColors.red)
+                    .foregroundColor(themeManager.danger)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
                     .background(themeManager.cardSurface)

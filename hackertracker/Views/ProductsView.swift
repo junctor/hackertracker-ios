@@ -325,7 +325,7 @@ struct MerchInfo: View {
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity)
                 .padding(10)
-                .background(ThemeColors.red)
+                .background(themeManager.danger)
                 .cornerRadius(15)
             }
             Divider()

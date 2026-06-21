@@ -329,6 +329,7 @@ struct ContentListView: View {
         .onReceive(NotificationCenter.default.publisher(
             for: .NSPersistentStoreRemoteChange
         )) { _ in refreshNoteContentIDs() }
+        .themedBackground(themeManager)
         .analyticsScreen(name: "ContentListView")
     }
 

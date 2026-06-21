@@ -117,7 +117,7 @@ struct ProductView: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding(15)
-                                .background(ThemeColors.blue)
+                                .background(themeManager.accent)
                                 .cornerRadius(15)
                                 .alert("Quantity must be 1 or more", isPresented: $showAlert) {
                                     Button("Ok") { }

@@ -60,6 +60,7 @@ struct MapView: View {
                     MapShareSheet(items: [url])
                 }
         }
+        .themedBackground(themeManager)
         .analyticsScreen(name: "MapView")
     }
 
@@ -143,13 +144,13 @@ struct MapView: View {
             NavigationLink(destination: DocumentView(
                 title_text: doc.title,
                 body_text: doc.body,
-                color: ThemeColors.red,
+                color: themeManager.danger,
                 systemImage: "exclamationmark.triangle.fill"
             )) {
                 CardView(
                     systemImage: "exclamationmark.triangle.fill",
                     text: doc.title,
-                    color: ThemeColors.red,
+                    color: themeManager.danger,
                     subtitle: "Tap for more details"
                 )
                 .frame(height: 40)
@@ -602,9 +603,10 @@ struct MapView_Previews: PreviewProvider {
 }
 
 struct SpinnerView: View {
+    @Environment(ThemeManager.self) private var themeManager
     var body: some View {
         ProgressView()
-            .progressViewStyle(CircularProgressViewStyle(tint: ThemeColors.blue))
+            .progressViewStyle(CircularProgressViewStyle(tint: themeManager.accent))
             .scaleEffect(2.0, anchor: .center)
     }
 }
