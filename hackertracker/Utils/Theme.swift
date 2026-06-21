@@ -229,18 +229,19 @@ extension AppTheme {
             )
         ),
         typography: ThemeTypography(
-            // Full terminal aesthetic: every text role is monospaced
-            // so the theme reads as one unbroken voice from largeTitle
-            // to caption.
-            largeTitle:  .system(.largeTitle,  design: .monospaced).bold(),
-            title:       .system(.title,       design: .monospaced).bold(),
-            title2:      .system(.title2,      design: .monospaced).bold(),
-            title3:      .system(.title3,      design: .monospaced).bold(),
-            heading:     .system(.headline,    design: .monospaced),
-            subheadline: .system(.subheadline, design: .monospaced),
-            body:        .system(.body,        design: .monospaced),
-            caption:     .system(.caption,     design: .monospaced),
-            monospace:   .system(.body,        design: .monospaced)
+            // Full terminal aesthetic: every text role uses bundled
+            // JetBrains Mono so the theme reads as one unbroken voice
+            // from largeTitle to caption. `relativeTo:` keeps Dynamic
+            // Type scaling intact.
+            largeTitle:  Font.custom("JetBrainsMono-Bold",    size: 34, relativeTo: .largeTitle),
+            title:       Font.custom("JetBrainsMono-Bold",    size: 28, relativeTo: .title),
+            title2:      Font.custom("JetBrainsMono-Bold",    size: 22, relativeTo: .title2),
+            title3:      Font.custom("JetBrainsMono-Bold",    size: 20, relativeTo: .title3),
+            heading:     Font.custom("JetBrainsMono-Regular", size: 17, relativeTo: .headline),
+            subheadline: Font.custom("JetBrainsMono-Regular", size: 15, relativeTo: .subheadline),
+            body:        Font.custom("JetBrainsMono-Regular", size: 17, relativeTo: .body),
+            caption:     Font.custom("JetBrainsMono-Regular", size: 12, relativeTo: .caption),
+            monospace:   Font.custom("JetBrainsMono-Regular", size: 17, relativeTo: .body)
         )
     )
 
@@ -285,17 +286,18 @@ extension AppTheme {
             )
         ),
         typography: ThemeTypography(
-            // Fully rounded — every text role gets SF Rounded so the
-            // theme feels uniform from largeTitle down to caption.
-            largeTitle:  .system(.largeTitle,  design: .rounded).bold(),
-            title:       .system(.title,       design: .rounded).bold(),
-            title2:      .system(.title2,      design: .rounded),
-            title3:      .system(.title3,      design: .rounded),
-            heading:     .system(.headline,    design: .rounded),
-            subheadline: .system(.subheadline, design: .rounded),
-            body:        .system(.body,        design: .rounded),
-            caption:     .system(.caption,     design: .rounded),
-            monospace:   .system(.body,        design: .monospaced)
+            // Major Mono Display ships Regular only — its display feel
+            // carries every text role; the previous `.bold()` chains
+            // were no-ops on a single-weight family, so they're dropped.
+            largeTitle:  Font.custom("MajorMonoDisplay-Regular", size: 34, relativeTo: .largeTitle),
+            title:       Font.custom("MajorMonoDisplay-Regular", size: 28, relativeTo: .title),
+            title2:      Font.custom("MajorMonoDisplay-Regular", size: 22, relativeTo: .title2),
+            title3:      Font.custom("MajorMonoDisplay-Regular", size: 20, relativeTo: .title3),
+            heading:     Font.custom("MajorMonoDisplay-Regular", size: 17, relativeTo: .headline),
+            subheadline: Font.custom("MajorMonoDisplay-Regular", size: 15, relativeTo: .subheadline),
+            body:        Font.custom("MajorMonoDisplay-Regular", size: 17, relativeTo: .body),
+            caption:     Font.custom("MajorMonoDisplay-Regular", size: 12, relativeTo: .caption),
+            monospace:   .system(.body, design: .monospaced)
         )
     )
 

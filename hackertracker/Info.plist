@@ -17,6 +17,12 @@
 	</array>
 	<key>NSCalendarsWriteOnlyAccessUsageDescription</key>
 	<string>Add conference events to Calendar</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>JetBrainsMono-Regular.ttf</string>
+		<string>JetBrainsMono-Bold.ttf</string>
+		<string>MajorMonoDisplay-Regular.ttf</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
