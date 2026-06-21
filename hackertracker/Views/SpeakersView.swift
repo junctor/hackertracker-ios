@@ -85,13 +85,24 @@ struct SpeakersView: View {
     /// Subset of conference tagtypes that actually appear in this
     /// speakers list. Smaller pool than the schedule's filter because
     /// speakers are bounded by their participation — we only show
-    /// chips for tags at least one speaker is connected to. Reads
-    /// from the precomputed map so this is O(speakers) instead of
-    /// O(speakers × events).
+    /// chips for tags at least one speaker is connected to.
+    ///
+    /// Computed directly from raw data (using `viewModel.eventsById`
+    /// for O(1) lookups) rather than reading the precomputed
+    /// `speakerTagIdsMap`, because the map is rebuilt asynchronously
+    /// via `.task(id:)` and could be empty the first time the user
+    /// presents the filter sheet — which produced an empty chip
+    /// pool and a blank sheet. This computation only runs when the
+    /// sheet actually opens, so the O(speakers × avgEvents) cost is
+    /// one-shot, not per-render.
     private var availableTagTypes: [TagType] {
-        let speakerTagPool: Set<Int> = speakerTagIdsMap.values.reduce(into: Set<Int>()) {
-            $0.formUnion($1)
-        }
+        let eventsById = viewModel.eventsById
+        let speakerTagPool: Set<Int> = Set(
+            speakers
+                .flatMap { $0.eventIds }
+                .compactMap { eventsById[$0]?.tagIds }
+                .flatMap { $0 }
+        )
         return viewModel.tagtypes
             .filter { $0.category == "content" && $0.isBrowsable }
             .filter { !SpeakerListConfig.excludedTagTypeLabels.contains($0.label) }
@@ -339,6 +350,12 @@ struct SpeakerData: View {
                     NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
                         SpeakerRow(speaker: speaker, themeColor: theme.carousel())
                     }
+                    // Without .plain, NavigationLink tints every
+                    // child view with the system accent color (system
+                    // blue), which paints the row's tag-chip dots
+                    // blue regardless of each tag's colorBackground.
+                    // Matches the EventCell / ContentCell wrappers.
+                    .buttonStyle(.plain)
                 }
             }
         }
