@@ -38,5 +38,7 @@ enum SpeakerListConfig {
     /// speaker isn't "Beginner" or "Hybrid", their *talk* is. Drop
     /// them from both the chip rollup and the filter sheet so users
     /// see only the categorical/organizational signals.
-    static let excludedTagTypeLabels: Set<String> = ["Skill Level", "Modality"]
+    /// "Tool" is included on the same logic: events tagged "Tool" are
+    /// tooling releases / demos, but the speaker isn't a tool.
+    static let excludedTagTypeLabels: Set<String> = ["Skill Level", "Modality", "Tool"]
 }

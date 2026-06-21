@@ -23,41 +23,58 @@ struct SpeakersView: View {
     @State private var showFilters: Bool = false
     /// iPad-only: identifies the speaker currently shown in the detail column.
     @State private var ipadSelectedSpeakerId: Int?
+    /// Precomputed `speaker.id → Set<Tag.id>` mapping. Rebuilt only
+    /// when the underlying speakers / events / tagtypes lists change
+    /// (see the `.task(id:)` modifier below). The filter pipeline and
+    /// chip-pool computation both read from this dict so every render
+    /// is O(speakers) instead of O(speakers × events).
+    @State private var speakerTagIdsMap: [Int: Set<Int>] = [:]
 
     private var filterMatchMode: FilterMatchMode {
         FilterMatchMode(rawOrDefault: filterMatchModeRaw)
     }
 
-    /// Tag IDs from tagtypes intentionally hidden from the speakers
-    /// list (`SpeakerListConfig.excludedTagTypeLabels`). Cached as a
-    /// computed property so the filter pipeline and the chip-pool
-    /// computation both pull from the same exclusion set.
-    private var excludedTagIds: Set<Int> {
+    /// Set of tag IDs that *are* eligible to be surfaced as speaker
+    /// chips / filter chips — browsable, category=="content", and
+    /// not in the excluded-tagtype-labels set. The intersection
+    /// guards against rogue tag IDs (events tagged with something
+    /// from a non-displayed or filtered-out tagtype, e.g. "Tool")
+    /// leaking into the speakers list.
+    private var eligibleTagIds: Set<Int> {
         Set(
             viewModel.tagtypes
-                .filter { SpeakerListConfig.excludedTagTypeLabels.contains($0.label) }
+                .filter { $0.category == "content" && $0.isBrowsable }
+                .filter { !SpeakerListConfig.excludedTagTypeLabels.contains($0.label) }
                 .flatMap { $0.tags.map(\.id) }
         )
     }
 
-    /// Rolls a speaker's events up into their unique tag IDs minus
-    /// the excluded tagtypes. Same logic as SpeakerRow's chip strip
-    /// — keep them aligned so the filter selects on exactly what the
-    /// chips display.
-    private func tagIds(for speaker: Speaker) -> Set<Int> {
-        let mine = viewModel.events.filter { speaker.eventIds.contains($0.id) }
-        return Set(mine.flatMap(\.tagIds)).subtracting(excludedTagIds)
+    /// Rebuild the speaker→tagIds map. Only runs when the underlying
+    /// data changes (events / speakers / tagtypes count), not on every
+    /// keystroke or chip tap. O(speakers × avg-eventsPerSpeaker) once,
+    /// then O(1) lookups everywhere downstream.
+    private func rebuildSpeakerTagIdsMap() {
+        let eligible = eligibleTagIds
+        let eventsById = viewModel.eventsById
+        var map: [Int: Set<Int>] = [:]
+        for speaker in speakers {
+            let tags = speaker.eventIds
+                .compactMap { eventsById[$0]?.tagIds }
+                .flatMap { $0 }
+            map[speaker.id] = Set(tags).intersection(eligible)
+        }
+        speakerTagIdsMap = map
     }
 
-    /// Apply search + the speakerFilters chip selection. Same Any/All
-    /// semantics as the schedule's filter pipeline so behavior reads
-    /// the same way to a user toggling between tabs.
+    /// Apply search + the speakerFilters chip selection using the
+    /// precomputed per-speaker tag-id map. O(speakers) per render
+    /// instead of O(speakers × events).
     private var filteredSpeakers: [Speaker] {
         let searched = speakers.search(text: searchText)
         let selected = speakerFilters.filters
         guard !selected.isEmpty else { return searched }
         return searched.filter { speaker in
-            let st = tagIds(for: speaker)
+            let st = speakerTagIdsMap[speaker.id] ?? []
             switch filterMatchMode {
             case .any: return !st.isDisjoint(with: selected)
             case .all: return selected.isSubset(of: st)
@@ -68,14 +85,13 @@ struct SpeakersView: View {
     /// Subset of conference tagtypes that actually appear in this
     /// speakers list. Smaller pool than the schedule's filter because
     /// speakers are bounded by their participation — we only show
-    /// chips for tags at least one speaker is connected to.
+    /// chips for tags at least one speaker is connected to. Reads
+    /// from the precomputed map so this is O(speakers) instead of
+    /// O(speakers × events).
     private var availableTagTypes: [TagType] {
-        let speakerTagPool: Set<Int> = Set(
-            speakers
-                .flatMap { $0.eventIds }
-                .compactMap { id in viewModel.events.first(where: { $0.id == id })?.tagIds }
-                .flatMap { $0 }
-        )
+        let speakerTagPool: Set<Int> = speakerTagIdsMap.values.reduce(into: Set<Int>()) {
+            $0.formUnion($1)
+        }
         return viewModel.tagtypes
             .filter { $0.category == "content" && $0.isBrowsable }
             .filter { !SpeakerListConfig.excludedTagTypeLabels.contains($0.label) }
@@ -247,6 +263,14 @@ struct SpeakersView: View {
                 showFilters: $showFilters,
                 matchedCount: filteredSpeakers.count
             )
+        }
+        // Rebuild the speaker→tagIds map only when one of the
+        // underlying lists actually changes. Keystrokes + chip taps
+        // run filteredSpeakers against the cached map (O(speakers))
+        // rather than re-scanning viewModel.events for every speaker
+        // on every render (O(speakers × events)).
+        .task(id: "\(speakers.count)-\(viewModel.events.count)-\(viewModel.tagtypes.count)") {
+            rebuildSpeakerTagIdsMap()
         }
         .navigationTitle("Speakers")
         .themedNavTitle("Speakers", themeManager)

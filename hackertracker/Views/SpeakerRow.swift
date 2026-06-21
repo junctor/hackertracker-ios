@@ -46,20 +46,26 @@ struct SpeakerRow: View {
     private static let inlineBioMaxChars = 100
 
     /// Unique tag IDs rolled up across every event this speaker is
-    /// associated with, minus tagtypes that are intentionally hidden
-    /// from the speakers list (see `SpeakerListConfig`). Drives the
-    /// chip strip — gives the user a glanceable signal of what kind
-    /// of work this speaker does (Event Category, Organizer, etc.)
-    /// without having to tap into the detail screen.
+    /// associated with, intersected with the same eligibility set
+    /// the filter sheet uses (browsable, content-category, not in
+    /// `SpeakerListConfig.excludedTagTypeLabels`). Mirroring the
+    /// allow-list keeps chips and filter aligned — and drops rogue
+    /// tags coming from tagtypes that don't belong on speakers
+    /// (e.g. "Tool" demo categories).
+    ///
+    /// Uses viewModel.eventsById for O(speaker.eventIds) lookup
+    /// instead of O(speaker.eventIds × all events).
     private var speakerTagIds: [Int] {
-        let mine = viewModel.events.filter { speaker.eventIds.contains($0.id) }
-        let all = Set(mine.flatMap(\.tagIds))
-        let excluded: Set<Int> = Set(
+        let eligible: Set<Int> = Set(
             viewModel.tagtypes
-                .filter { SpeakerListConfig.excludedTagTypeLabels.contains($0.label) }
+                .filter { $0.category == "content" && $0.isBrowsable }
+                .filter { !SpeakerListConfig.excludedTagTypeLabels.contains($0.label) }
                 .flatMap { $0.tags.map(\.id) }
         )
-        return Array(all.subtracting(excluded))
+        let mineTagIds = speaker.eventIds
+            .compactMap { viewModel.eventsById[$0]?.tagIds }
+            .flatMap { $0 }
+        return Array(Set(mineTagIds).intersection(eligible))
     }
 
     var body: some View {
