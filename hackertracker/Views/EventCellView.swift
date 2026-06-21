@@ -137,6 +137,10 @@ struct EventCell: View {
             }
 
         }
+        .background(themeManager.cardSurface)
+        .cornerRadius(10)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
         .swipeActions {
             Button(bookmarkIds.contains(Int32(event.id)) ? "Remove Bookmark" : "Bookmark") {
                 bookmarkAction()

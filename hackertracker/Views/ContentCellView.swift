@@ -120,6 +120,10 @@ struct ContentCell: View {
                 }
             }
         }
+        .background(themeManager.cardSurface)
+        .cornerRadius(10)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
         .swipeActions {
             Button(isBookmarked ? "Remove Bookmark" : "Bookmark") {
                 bookmarkAction()
