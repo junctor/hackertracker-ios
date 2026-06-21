@@ -23,7 +23,7 @@ struct ShareBookmarksView: View {
                         .frame(alignment: .leading)
                         .padding(5)
                     Text("Share Schedule")
-                        .font(.title)
+                        .font(themeManager.titleFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .foregroundColor(colorMode ? .white : .primary)

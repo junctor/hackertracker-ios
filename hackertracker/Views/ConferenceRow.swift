@@ -17,7 +17,7 @@ struct ConferenceRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 5, content: {
                 Text(conference.name)
-                    .font(.title3)
+                    .font(themeManager.title3Font)
                 if conference.startDate == conference.endDate {
                     Text(conference.endDate)
                         .font(.body)

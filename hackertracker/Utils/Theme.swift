@@ -119,7 +119,11 @@ struct ThemePalette: Hashable {
 /// rounded / serif / monospaced / custom families.
 struct ThemeTypography: Hashable {
     let largeTitle: Font
-    let heading: Font
+    let title: Font        // .title — section headers, prominent body text
+    let title2: Font       // .title2 — sub-section headers
+    let title3: Font       // .title3 — tertiary headers
+    let heading: Font      // .headline — list cell titles, settings labels
+    let subheadline: Font  // .subheadline — secondary metadata under a heading
     let body: Font
     let caption: Font
     let monospace: Font
@@ -169,11 +173,15 @@ extension AppTheme {
             chipBackground: .cardSurface
         ),
         typography: ThemeTypography(
-            largeTitle: .largeTitle,
-            heading:    .headline,
-            body:       .body,
-            caption:    .caption,
-            monospace:  .system(.body, design: .monospaced)
+            largeTitle:  .largeTitle,
+            title:       .title,
+            title2:      .title2,
+            title3:      .title3,
+            heading:     .headline,
+            subheadline: .subheadline,
+            body:        .body,
+            caption:     .caption,
+            monospace:   .system(.body, design: .monospaced)
         )
     )
 }
@@ -221,14 +229,18 @@ extension AppTheme {
             )
         ),
         typography: ThemeTypography(
-            // System monospaced. Available everywhere, no asset bundle
-            // weight cost. Headings stay proportional so they read at a
-            // glance; body + caption + monospace are all mono.
-            largeTitle: .largeTitle.bold(),
-            heading:    .headline,
-            body:       .system(.body,       design: .monospaced),
-            caption:    .system(.caption,    design: .monospaced),
-            monospace:  .system(.body,       design: .monospaced)
+            // Full terminal aesthetic: every text role is monospaced
+            // so the theme reads as one unbroken voice from largeTitle
+            // to caption.
+            largeTitle:  .system(.largeTitle,  design: .monospaced).bold(),
+            title:       .system(.title,       design: .monospaced).bold(),
+            title2:      .system(.title2,      design: .monospaced).bold(),
+            title3:      .system(.title3,      design: .monospaced).bold(),
+            heading:     .system(.headline,    design: .monospaced),
+            subheadline: .system(.subheadline, design: .monospaced),
+            body:        .system(.body,        design: .monospaced),
+            caption:     .system(.caption,     design: .monospaced),
+            monospace:   .system(.body,        design: .monospaced)
         )
     )
 
@@ -273,13 +285,17 @@ extension AppTheme {
             )
         ),
         typography: ThemeTypography(
-            // System rounded. Friendlier curves than the default
-            // SF Pro Text — matches the "warm" feel of the palette.
-            largeTitle: .system(.largeTitle, design: .rounded).bold(),
-            heading:    .system(.headline,   design: .rounded),
-            body:       .system(.body,       design: .rounded),
-            caption:    .system(.caption,    design: .rounded),
-            monospace:  .system(.body,       design: .monospaced)
+            // Fully rounded — every text role gets SF Rounded so the
+            // theme feels uniform from largeTitle down to caption.
+            largeTitle:  .system(.largeTitle,  design: .rounded).bold(),
+            title:       .system(.title,       design: .rounded).bold(),
+            title2:      .system(.title2,      design: .rounded),
+            title3:      .system(.title3,      design: .rounded),
+            heading:     .system(.headline,    design: .rounded),
+            subheadline: .system(.subheadline, design: .rounded),
+            body:        .system(.body,        design: .rounded),
+            caption:     .system(.caption,     design: .rounded),
+            monospace:   .system(.body,        design: .monospaced)
         )
     )
 }
@@ -345,11 +361,15 @@ final class ThemeManager {
     var divider: Color        { current.palette.divider.auto }
     var chipBackground: Color { current.palette.chipBackground.auto }
 
-    var largeTitleFont: Font { current.typography.largeTitle }
-    var headingFont: Font    { current.typography.heading }
-    var bodyFont: Font       { current.typography.body }
-    var captionFont: Font    { current.typography.caption }
-    var monospaceFont: Font  { current.typography.monospace }
+    var largeTitleFont: Font  { current.typography.largeTitle }
+    var titleFont: Font       { current.typography.title }
+    var title2Font: Font      { current.typography.title2 }
+    var title3Font: Font      { current.typography.title3 }
+    var headingFont: Font     { current.typography.heading }
+    var subheadlineFont: Font { current.typography.subheadline }
+    var bodyFont: Font        { current.typography.body }
+    var captionFont: Font     { current.typography.caption }
+    var monospaceFont: Font   { current.typography.monospace }
 }
 
 import AVFoundation

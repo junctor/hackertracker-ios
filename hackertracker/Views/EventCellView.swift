@@ -12,6 +12,7 @@ struct EventCell: View {
     let showDay: Bool
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
@@ -59,11 +60,11 @@ struct EventCell: View {
                         VStack(spacing: 0) {
                             if showDay {
                                 Text(dfu.monthDayFormatter.string(from: event.beginTimestamp))
-                                    .font(.subheadline)
+                                    .font(themeManager.subheadlineFont)
                                     .padding(.bottom, 3)
                             }
                             Text(show24hourtime ? dfu.hourMinuteTimeFormatter.string(from: event.beginTimestamp) : dfu.hourMinute12TimeFormatter.string(from: event.beginTimestamp))
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                             if event.beginTimestamp != event.endTimestamp {
                                 Text(show24hourtime ? dfu.hourMinuteTimeFormatter.string(from: event.endTimestamp) : dfu.hourMinute12TimeFormatter.string(from: event.endTimestamp))
                                     .font(.caption2)
@@ -75,7 +76,7 @@ struct EventCell: View {
                                 .multilineTextAlignment(.leading)
                             if !event.people.isEmpty {
                                 Text(event.people.map { p in viewModel.speakersById[p.id]?.name ?? "" }.joined(separator: ", "))
-                                    .font(.subheadline)
+                                    .font(themeManager.subheadlineFont)
                                     .multilineTextAlignment(.leading)
                             }
                             if let l = viewModel.locationsById[event.locationId] {

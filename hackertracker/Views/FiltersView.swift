@@ -97,10 +97,11 @@ struct EventFilters: View {
 /// chrome stays identical across all filter sheets.
 struct MatchModePickerRow: View {
     @Binding var raw: String
+    @Environment(ThemeManager.self) private var themeManager
     var body: some View {
         HStack(spacing: 8) {
             Text("Match")
-                .font(.subheadline)
+                .font(themeManager.subheadlineFont)
                 .foregroundStyle(.secondary)
             Picker("Match", selection: $raw) {
                 Text("Any").tag(FilterMatchMode.any.rawValue)
@@ -119,6 +120,7 @@ struct FilterRow: View {
     let name: String
     let color: Color
     @EnvironmentObject var filters: Filters
+    @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
         Button(action: {
@@ -132,7 +134,7 @@ struct FilterRow: View {
             VStack(alignment: .leading) {
                 HStack {
                     Text(name)
-                        .font(.subheadline)
+                        .font(themeManager.subheadlineFont)
                         .padding(5)
                 }
             }

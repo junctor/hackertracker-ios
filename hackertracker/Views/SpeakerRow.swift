@@ -10,6 +10,7 @@ import SwiftUI
 struct SpeakerRow: View {
     var speaker: Speaker
     var themeColor: Color
+    @Environment(ThemeManager.self) private var themeManager
     var body: some View {
         HStack {
             Rectangle().fill(themeColor)
@@ -21,7 +22,7 @@ struct SpeakerRow: View {
                     .foregroundColor(.primary)
                 if let title = speaker.title {
                     Text(title)
-                        .font(.subheadline)
+                        .font(themeManager.subheadlineFont)
                         .multilineTextAlignment(.leading)
                         .foregroundColor(.gray)
                 }

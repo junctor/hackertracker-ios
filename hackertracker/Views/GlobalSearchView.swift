@@ -110,7 +110,7 @@ struct GlobalSearchHeader: View {
 
     var body: some View {
         Text(headerText.uppercased())
-          .font(.subheadline)
+          .font(themeManager.subheadlineFont)
           .padding(3)
           .frame(maxWidth: .infinity)
           .background(themeManager.cardSurface)

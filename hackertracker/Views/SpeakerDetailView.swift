@@ -30,7 +30,7 @@ struct SpeakerDetailView: View {
                 VStack(alignment: .leading) {
                     VStack(alignment: .leading) {
                         Text(speaker.name)
-                            .font(.title)
+                            .font(themeManager.titleFont)
                             .trackTitleScrollOffset()
                         if let pronouns = speaker.pronouns {
                             Text("(\(pronouns))")
@@ -127,13 +127,13 @@ struct showSpeakerLinks: View {
                     if collapsed {
                         Text("Show")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Hide")
                             .foregroundStyle(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     }                }
@@ -187,13 +187,13 @@ struct showEvents: View {
                     if collapsed {
                         Text("Show")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Hide")
                             .foregroundStyle(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     }                }
@@ -229,6 +229,7 @@ struct showEvents: View {
 
 struct showAffiliations: View {
     let affiliations: [SpeakerAffiliation]
+    @Environment(ThemeManager.self) private var themeManager
     @State private var collapsed = true
 
     var body: some View {
@@ -238,7 +239,7 @@ struct showAffiliations: View {
                 /*@START_MENU_TOKEN@*/Text(affiliation.organization)/*@END_MENU_TOKEN@*/
                 if affiliation.title != "" {
                     Text(affiliation.title)
-                        .font(.subheadline)
+                        .font(themeManager.subheadlineFont)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -275,7 +276,7 @@ struct SpeakerEventView: View {
                     .font(themeManager.headingFont)
                     .multilineTextAlignment(.leading)
                 Text(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.beginTimestamp))
-                    .font(.subheadline)
+                    .font(themeManager.subheadlineFont)
                 if let l = viewModel.locationsById[event.locationId] {
                     Text(l.name).font(.caption2)
                 }

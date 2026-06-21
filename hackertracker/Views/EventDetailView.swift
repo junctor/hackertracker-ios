@@ -40,7 +40,7 @@ struct EventDetailView: View {
                             HStack {
                                 Image(systemName: "clock")
                                 Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.beginTimestamp)) - \(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.endTimestamp))")
-                                   .font(.subheadline).bold()
+                                   .font(themeManager.subheadlineFont).bold()
                             }
                             .padding(.leading, 10)
                             .padding(.trailing, 5)
@@ -51,7 +51,7 @@ struct EventDetailView: View {
                             .padding(.bottom, 5)
                             HStack {
                                 Image(systemName: "map")
-                                Text(event.location.name).font(.subheadline).bold()
+                                Text(event.location.name).font(themeManager.subheadlineFont).bold()
                             }
                             .padding(.leading, 10)
                             .padding(.trailing, 5)
@@ -214,6 +214,7 @@ struct showSpeakers: View {
 struct showTags: View {
     var tagIds: [Int]
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @State private var collapsed = false
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
@@ -225,7 +226,7 @@ struct showTags: View {
                 }, label: {
                     HStack {
                         Text("Tags")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
                     }
@@ -239,7 +240,7 @@ struct showTags: View {
                                 VStack {
                                     HStack {
                                         Text(tag.label)
-                                            .font(.subheadline)
+                                            .font(themeManager.subheadlineFont)
                                             .foregroundColor(.white)
                                     }
                                 }

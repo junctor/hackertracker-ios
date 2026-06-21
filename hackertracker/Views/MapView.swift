@@ -14,6 +14,7 @@ struct MapView: View {
     @EnvironmentObject var selected: SelectedConference
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
+    @Environment(ThemeManager.self) private var themeManager
 
     @State private var currentIndex: Int = 0
     @AppStorage("lastMapIndex") private var storedIndexBlob: String = ""
@@ -97,7 +98,7 @@ struct MapView: View {
     private func zoomIcon(systemName: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.title3)
+                .font(themeManager.title3Font)
                 .foregroundStyle(.primary)
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
@@ -455,6 +456,7 @@ private struct MapPage: View {
     let isFocused: Bool
     let controller: MapController?
 
+    @Environment(ThemeManager.self) private var themeManager
     @State private var pdfExists: Bool = false
     @State private var svgExists: Bool = false
 
@@ -533,7 +535,7 @@ private struct MapPage: View {
             VStack(spacing: 6) {
                 ProgressView()
                 Text("Map downloading…")
-                    .font(.subheadline)
+                    .font(themeManager.subheadlineFont)
                     .foregroundStyle(.secondary)
             }
         }

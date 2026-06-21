@@ -14,6 +14,7 @@ struct EventsView: View {
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
     @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @EnvironmentObject var toTop: ToTop
     @EnvironmentObject var toBottom: ToBottom
     @EnvironmentObject var toCurrent: ToCurrent
@@ -269,7 +270,7 @@ struct EventsView: View {
             Image(systemName: filters.filters.isEmpty
                   ? "line.3.horizontal.decrease.circle"
                   : "line.3.horizontal.decrease.circle.fill")
-              .font(.title2)
+              .font(themeManager.title2Font)
               .frame(width: 48, height: 48)
               .background(.regularMaterial, in: Circle())
           }
@@ -279,7 +280,7 @@ struct EventsView: View {
           Spacer()
 
           jumpToDayMenu
-            .font(.title2)
+            .font(themeManager.title2Font)
             .foregroundStyle(.primary)
             .frame(width: 48, height: 48)
             .background(.regularMaterial, in: Circle())
@@ -720,6 +721,7 @@ struct EventData: View {
   let events: [Event]
   // let bookmarks: [Int32]
   let showPastEvents: Bool
+  @Environment(ThemeManager.self) private var themeManager
   /// iPad split-view selection: when present, row taps set the binding
   /// instead of pushing a NavigationLink. iPhone passes no env value.
   @Environment(\.iPadContentSelection) private var iPadContentSelection
@@ -727,7 +729,7 @@ struct EventData: View {
 
   var body: some View {
       Section(header: Text(weekday.uppercased())
-        .font(.subheadline)
+        .font(themeManager.subheadlineFont)
         .padding(3)
         .frame(maxWidth: .infinity)
         // Phase 6 polish: match the toolbar's frosted material so the pinned

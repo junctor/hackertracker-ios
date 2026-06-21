@@ -15,6 +15,7 @@ struct OrgsView: View {
     @Binding var tabSelection: Int
     @EnvironmentObject var theme: Theme
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @EnvironmentObject var selected: SelectedConference
     @State private var searchText = ""
 
@@ -133,7 +134,7 @@ struct OrgsView: View {
             HStack {
                 Spacer()
                 jumpMenu
-                    .font(.title2)
+                    .font(themeManager.title2Font)
                     .foregroundStyle(.primary)
                     .frame(width: 48, height: 48)
                     .background(.regularMaterial, in: Circle())

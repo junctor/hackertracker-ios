@@ -195,6 +195,7 @@ struct showMedia: View {
 
 struct showSessions: View {
     var item: Content
+    @Environment(ThemeManager.self) private var themeManager
     @State var showAddContentModal = false
     @State private var collapsed = false
     // @State var showingAlert: Bool = false
@@ -209,18 +210,18 @@ struct showSessions: View {
                 }, label: {
                     HStack {
                         Text("Sessions")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         if collapsed {
                             Text("Show")
                                 .foregroundColor(.secondary)
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.secondary)
                         } else {
                             Text("Hide")
                                 .foregroundStyle(.secondary)
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                             Image(systemName: "chevron.down")
                                 .foregroundColor(.secondary)
                         }
@@ -240,6 +241,7 @@ struct showSessionRow: View {
     var item: Content
     var s: Session
     @Binding var showAddContentModal: Bool
+    @Environment(ThemeManager.self) private var themeManager
     let dfu = DateFormatterUtility.shared
     
     @State var notExists: Bool = false
@@ -284,18 +286,18 @@ struct showSessionRow: View {
                     if show24hourtime {
                         if s.beginTimestamp != s.endTimestamp {
                             Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinuteTimeFormatter.string(from: s.endTimestamp))")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                         } else {
                             Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                         }
                     } else {
                         if s.beginTimestamp != s.endTimestamp {
                             Text("\(dfu.shortDayMonthDay12HourOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinute12TimeFormatter.string(from: s.endTimestamp))")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                         } else {
                             Text("\(dfu.shortDayMonthDay12HourOfWeekFormatter.string(from: s.beginTimestamp))")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                         }
                     }
                 }
@@ -368,13 +370,13 @@ struct showRelated: View {
                     if collapsed {
                         Text("More")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Less")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     }
@@ -429,13 +431,13 @@ struct showPeople: View {
                     if collapsed {
                         Text("Show")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Hide")
                             .foregroundStyle(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     }

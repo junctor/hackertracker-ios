@@ -110,7 +110,7 @@ struct InfoView: View {
                             if let tagline = con.tagline {
                                 Divider()
                                 Text(tagline)
-                                    .font(.subheadline)
+                                    .font(themeManager.subheadlineFont)
                             }
                             if let con = viewModel.conference, Date() <= con.kickoffTimestamp {
                                 Divider()
@@ -167,7 +167,7 @@ struct InfoView: View {
                         
                         if self.viewModel.documents.count > 0 {
                             Text("Documents")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                             LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                                 ForEach(self.viewModel.documents, id: \.id) { doc in
                                     NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
@@ -178,7 +178,7 @@ struct InfoView: View {
                             Divider()
                         }
                         Text("Searchable")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0 {
                                 if let doc = viewModel.documentsById[emergId] {
@@ -253,7 +253,7 @@ struct InfoView: View {
                         Divider()
                         if self.viewModel.conference?.enableMerch ?? false {
                             Text("Merch")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                             NavigationLink(destination: ProductsView()) {
                                 CardView(systemImage: "dollarsign", text: "Merch", color: colorMode ? ThemeColors.drkGreen : themeManager.cardSurface)
                             }
@@ -640,7 +640,7 @@ struct MenuView: View {
 
     var body: some View {
         Text(menu.title)
-            .font(.title3)
+            .font(themeManager.title3Font)
         LazyVGrid(columns: useGrid ? gridItemLayout : [GridItem(.flexible())], alignment: .center, spacing: 20) {
             ForEach(menu.items.sorted(by: {$0.sortOrder < $1.sortOrder}), id: \.id) { item in
                 switch item.function {

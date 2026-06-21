@@ -429,7 +429,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
     private var versionHeader: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Version \(marketingVersion)")
-                .font(.title3).bold()
+                .font(themeManager.title3Font).bold()
             Text("Build \(buildVersion)")
                 .font(.callout)
                 .foregroundStyle(.secondary)
@@ -895,7 +895,7 @@ struct ThemePickerView: View {
             if isActive {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(.green)
-                    .font(.title3)
+                    .font(themeManager.title3Font)
             }
         }
         .padding()

@@ -25,7 +25,7 @@ struct _04View: View {
                         .frame(width: 512)
                 }
                 Text(message)
-                    .font(.title)
+                    .font(themeManager.titleFont)
                     .multilineTextAlignment(.center)
                 
                 Image("beezle")

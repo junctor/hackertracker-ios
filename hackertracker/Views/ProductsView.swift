@@ -10,6 +10,7 @@ import Kingfisher
 
 struct ProductsView: View {
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
     @State private var searchText = ""
     /// Perf C: debounced mirror of `searchText`. Updated on a 200ms
@@ -160,7 +161,7 @@ struct ProductsView: View {
                 MerchInfo()
             }
             Text(viewModel.conference?.merchMandatoryAck ?? "Tax Included. All Sales Final")
-                .font(.subheadline)
+                .font(themeManager.subheadlineFont)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
             Divider()
@@ -216,7 +217,7 @@ struct ProductsView: View {
                         Image(systemName: selectedSizes.isEmpty
                               ? "line.3.horizontal.decrease.circle"
                               : "line.3.horizontal.decrease.circle.fill")
-                            .font(.title2)
+                            .font(themeManager.title2Font)
                             .frame(width: 48, height: 48)
                             .background(.regularMaterial, in: Circle())
                     }
@@ -227,7 +228,7 @@ struct ProductsView: View {
                 Spacer()
 
                 jumpMenu
-                    .font(.title2)
+                    .font(themeManager.title2Font)
                     .foregroundStyle(.primary)
                     .frame(width: 48, height: 48)
                     .background(.regularMaterial, in: Circle())
@@ -302,6 +303,7 @@ struct ProductsView: View {
 struct MerchInfo: View {
     @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     
     var body: some View {
         if showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documentsById[docId] {
@@ -314,7 +316,7 @@ struct MerchInfo: View {
                     }
                     .accessibilityLabel("Hide merch info")
                     VStack(alignment: .leading) {
-                        Text(doc.title).font(.subheadline).fontWeight(.bold)
+                        Text(doc.title).font(themeManager.subheadlineFont).fontWeight(.bold)
                     }
                     Spacer()
                     Image(systemName: "chevron.right")
@@ -369,7 +371,7 @@ struct ProductsRow: View {
                     if product.variants.filter({$0.stockStatus == "IN"}).count > 0 {
                         HStack {
                             Text(product.priceMin < product.priceMax ? "$\(product.priceMin / 100)+" : "$\(product.priceMin/100)")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                                 .foregroundColor(.primary)
                         }
                         .padding(5)
@@ -379,7 +381,7 @@ struct ProductsRow: View {
                     } else {
                         HStack {
                             Text("Out of Stock")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                                 .foregroundColor(.red)
                         }
                         .padding(5)
@@ -395,6 +397,7 @@ struct MerchSizeFilter: View {
     let sizes: [String]
     @Binding var selected: Set<String>
     @Binding var showFilters: Bool
+    @Environment(ThemeManager.self) private var themeManager
     /// Number of products that would survive the current selection.
     /// Same shape as FiltersView.matchedCount; caller computes from
     /// the already-filtered list to keep the sheet stateless.
@@ -419,7 +422,7 @@ struct MerchSizeFilter: View {
                             if isOn { selected.remove(size) } else { selected.insert(size) }
                         } label: {
                             Text(size)
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                                 .padding(8)
                                 .frame(maxWidth: .infinity)
                                 .foregroundColor(isOn ? .white : .primary)

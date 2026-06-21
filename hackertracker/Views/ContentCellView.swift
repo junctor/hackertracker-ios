@@ -13,6 +13,7 @@ struct ContentCell: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.noteContentIDs) private var noteContentIDs
+    @Environment(ThemeManager.self) private var themeManager
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
     /// Step 3 of the AI summary spike: warm the on-device LLM
@@ -73,7 +74,7 @@ struct ContentCell: View {
                                 .multilineTextAlignment(.leading)
                             if !content.people.isEmpty {
                                 Text(content.people.map { p in viewModel.speakersById[p.id]?.name ?? "" }.joined(separator: ", "))
-                                    .font(.subheadline)
+                                    .font(themeManager.subheadlineFont)
                                     .multilineTextAlignment(.leading)
                             }
                             // AI summary slot: only shown when the user

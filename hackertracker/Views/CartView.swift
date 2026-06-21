@@ -25,13 +25,13 @@ struct CartView: View {
                     Text("Out Of Stock Items Selected")
                         .font(themeManager.headingFont)
                     Text("Remove out of stock items from list")
-                        .font(.subheadline)
+                        .font(themeManager.subheadlineFont)
                 } else if cart.count == 0 {
                     Text("No Items Selected")
                         .font(themeManager.headingFont)
                     NavigationLink(destination: ProductsView()) {
                         Text("Select items to view QR Code")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                     }
                 }
             }
@@ -51,7 +51,7 @@ struct CartView: View {
             }
             Divider()
             Text(viewModel.conference?.merchTaxStatement ?? "Tax Included")
-                .font(.subheadline)
+                .font(themeManager.subheadlineFont)
                 .multilineTextAlignment(.center)
             Divider()
             
@@ -179,7 +179,7 @@ struct CartRow: View {
                         .fixedSize()
                     VStack {
                         Text("$\((variant.price*Int(item.count))/100) USD")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                     }
                     .frame(maxWidth: .infinity, alignment: .trailing)
                 }

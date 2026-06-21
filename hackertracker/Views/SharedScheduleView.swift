@@ -14,6 +14,7 @@ import SwiftUI
 
 struct SharedScheduleView: View {
     @Environment(SharedScheduleStore.self) private var sharedSchedule
+    @Environment(ThemeManager.self) private var themeManager
     let dfu = DateFormatterUtility.shared
 
     // Polish parity with the schedule.
@@ -98,7 +99,7 @@ struct SharedScheduleView: View {
                 HStack {
                     Spacer()
                     jumpMenu
-                        .font(.title2)
+                        .font(themeManager.title2Font)
                         .foregroundStyle(.primary)
                         .frame(width: 48, height: 48)
                         .background(.regularMaterial, in: Circle())
@@ -118,7 +119,7 @@ struct SharedScheduleView: View {
     @ViewBuilder
     private func dayHeader(_ day: String) -> some View {
         Text(day.uppercased())
-            .font(.subheadline)
+            .font(themeManager.subheadlineFont)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .frame(maxWidth: .infinity, alignment: .leading)

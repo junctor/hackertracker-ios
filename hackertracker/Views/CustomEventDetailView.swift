@@ -211,28 +211,28 @@ struct CustomEventDetailView: View {
                 toggleBookmark(event)
             } label: {
                 Image(systemName: isBookmarked(event) ? "bookmark.fill" : "bookmark")
-                    .font(.title3)
+                    .font(themeManager.title3Font)
             }
             .accessibilityLabel(isBookmarked(event) ? "Remove bookmark" : "Add bookmark")
             Button {
                 toggleNotifications(event)
             } label: {
                 Image(systemName: event.notificationsEnabled ? "bell.fill" : "bell.slash")
-                    .font(.title3)
+                    .font(themeManager.title3Font)
             }
             .accessibilityLabel(event.notificationsEnabled ? "Turn off notifications" : "Turn on notifications")
             Button {
                 showingShareSheet = true
             } label: {
                 Image(systemName: "qrcode")
-                    .font(.title3)
+                    .font(themeManager.title3Font)
             }
             .accessibilityLabel("Share via QR code")
             Button {
                 showingEditor = true
             } label: {
                 Image(systemName: "pencil")
-                    .font(.title3)
+                    .font(themeManager.title3Font)
             }
             .accessibilityLabel("Edit event")
         }
@@ -247,7 +247,7 @@ struct CustomEventDetailView: View {
         HStack {
             Image(systemName: "clock")
             Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: begin)) - \(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: end))")
-                .font(.subheadline).bold()
+                .font(themeManager.subheadlineFont).bold()
         }
         .padding(.leading, 10)
         .padding(.trailing, 5)
@@ -261,7 +261,7 @@ struct CustomEventDetailView: View {
     @ViewBuilder private func locationRow(text: String) -> some View {
         HStack {
             Image(systemName: "map")
-            Text(text).font(.subheadline).bold()
+            Text(text).font(themeManager.subheadlineFont).bold()
         }
         .padding(.leading, 10)
         .padding(.trailing, 5)

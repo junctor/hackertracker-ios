@@ -31,7 +31,7 @@ struct DocumentView: View {
                             .frame(alignment: .leading)
                             .padding(5)
                         Text(title_text)
-                            .font(.title)
+                            .font(themeManager.titleFont)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .foregroundColor(colorMode ? .white : .primary)

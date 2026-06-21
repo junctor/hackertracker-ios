@@ -25,7 +25,7 @@ struct OrgView: View {
             VStack {
                 HStack {
                     Text(org.name)
-                        .font(.title)
+                        .font(themeManager.titleFont)
                 }
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -97,13 +97,13 @@ struct showLinks: View {
                     if collapsed {
                         Text("Show")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Hide")
                             .foregroundStyle(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     }                }

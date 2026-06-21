@@ -11,6 +11,7 @@ import FirebaseAnalytics
 
 struct NewsListView: View {
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
 
     @State private var searchText = ""
 
@@ -124,7 +125,7 @@ struct NewsListView: View {
             HStack {
                 Spacer()
                 jumpMenu
-                    .font(.title2)
+                    .font(themeManager.title2Font)
                     .foregroundStyle(.primary)
                     .frame(width: 48, height: 48)
                     .background(.regularMaterial, in: Circle())
@@ -167,7 +168,7 @@ struct articleRow: View {
                         .frame(width: 6)
                         .padding(.top, 5)
                     VStack(alignment: .leading) {
-                        Text(article.name).font(.subheadline).fontWeight(.bold).multilineTextAlignment(.leading)
+                        Text(article.name).font(themeManager.subheadlineFont).fontWeight(.bold).multilineTextAlignment(.leading)
 
                         Text(DateFormatterUtility.shared.monthDayTimeFormatter.string(from: article.updatedAt))
                             .font(.caption2)

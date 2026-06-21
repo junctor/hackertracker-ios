@@ -29,7 +29,7 @@ struct ProductView: View {
         ScrollView {
             VStack(alignment: .leading) {
                 Text(product.title)
-                    .font(.title)
+                    .font(themeManager.titleFont)
                 if product.description != "" {
                     Divider()
                     Text(product.description)
@@ -83,7 +83,7 @@ struct ProductView: View {
                 }
                 Divider()
                 Text(viewModel.conference?.merchTaxStatement ?? "Tax Included")
-                    .font(.subheadline)
+                    .font(themeManager.subheadlineFont)
                     .multilineTextAlignment(.center)
                 Divider()
                 // Polish: honor Conference.enableMerchCart. When the cart is

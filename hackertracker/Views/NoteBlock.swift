@@ -72,13 +72,13 @@ struct NoteBlock: View {
                     Spacer()
                     if expanded {
                         Text("Hide")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                             .foregroundStyle(.secondary)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Show")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                             .foregroundStyle(.secondary)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
