@@ -20,6 +20,8 @@ struct DocumentView: View {
     @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         ScrollView {
             VStack {
@@ -29,22 +31,23 @@ struct DocumentView: View {
                             .frame(alignment: .leading)
                             .padding(5)
                         Text(title_text)
-                            .font(.title)
+                            .font(themeManager.titleFont)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .foregroundColor(colorMode ? .white : .primary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(color ?? (colorMode ? theme.carousel() : Color(.systemGray6)))
+                    .background(color ?? (colorMode ? theme.carousel() : themeManager.cardSurface))
                     .cornerRadius(15)
                     Divider()
                 }
-                Markdown(body_text)
+                Markdown(body_text).themedMarkdown(themeManager)
                     .textSelection(.enabled)
                 Divider()
             }
         }
         .navigationTitle(title_text)
+        .themedNavTitle(title_text, themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)

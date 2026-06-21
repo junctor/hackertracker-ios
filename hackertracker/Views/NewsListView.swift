@@ -11,6 +11,7 @@ import FirebaseAnalytics
 
 struct NewsListView: View {
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
 
     @State private var searchText = ""
 
@@ -124,7 +125,7 @@ struct NewsListView: View {
             HStack {
                 Spacer()
                 jumpMenu
-                    .font(.title2)
+                    .font(themeManager.title2Font)
                     .foregroundStyle(.primary)
                     .frame(width: 48, height: 48)
                     .background(.regularMaterial, in: Circle())
@@ -134,6 +135,7 @@ struct NewsListView: View {
             .padding(.bottom, 12)
         }
         .navigationTitle("News")
+        .themedNavTitle("News", themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
@@ -153,6 +155,8 @@ struct articleRow: View {
     @FetchRequest(sortDescriptors: []) var readnews: FetchedResults<News>
     @Environment(\.managedObjectContext) private var viewContext
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility tz changes.
         let _ = DateFormatterUtility.shared.tzGeneration
@@ -165,10 +169,10 @@ struct articleRow: View {
                         .frame(width: 6)
                         .padding(.top, 5)
                     VStack(alignment: .leading) {
-                        Text(article.name).font(.subheadline).fontWeight(.bold).multilineTextAlignment(.leading)
+                        Text(article.name).font(themeManager.subheadlineFont).fontWeight(.bold).multilineTextAlignment(.leading)
 
                         Text(DateFormatterUtility.shared.monthDayTimeFormatter.string(from: article.updatedAt))
-                            .font(.caption2)
+                            .font(themeManager.captionFont)
                     }
                     
 
@@ -182,15 +186,15 @@ struct articleRow: View {
             if showText {
                 if pad {
                     VStack(alignment: .leading) {
-                        Markdown(article.text).padding(.vertical)
+                        Markdown(article.text).themedMarkdown(themeManager).padding(.vertical)
                     }
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity)
                     .padding(15)
-                    .background(Color(.systemGray6))
+                    .background(themeManager.cardSurface)
                     .cornerRadius(15)
                 } else {
-                    Markdown(article.text).padding(.vertical)
+                    Markdown(article.text).themedMarkdown(themeManager).padding(.vertical)
                 }
             }
         }

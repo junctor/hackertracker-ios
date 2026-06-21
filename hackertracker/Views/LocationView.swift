@@ -10,7 +10,8 @@ import SwiftUI
 struct LocationView: View {
     var locations: [Location]
     var childLocations: [Int: [Location]]
-    
+    @Environment(ThemeManager.self) private var themeManager
+
     @State private var searchText = ""
 
     var body: some View {
@@ -26,6 +27,7 @@ struct LocationView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .accentColor(.primary)
             .navigationTitle("Locations")
+            .themedNavTitle("Locations", themeManager)
             .searchable(text: $searchText)
             .analyticsScreen(name: "LocationView")
         }

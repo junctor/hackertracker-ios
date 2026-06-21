@@ -31,6 +31,8 @@ struct ContentDetailView: View {
         GridItem(.flexible())
     ]
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
@@ -40,7 +42,7 @@ struct ContentDetailView: View {
                 // iPad: constrain content to a readable centered column.
                 VStack(alignment: .leading) {
                     VStack(alignment: .center) {
-                        Text(item.title).font(.largeTitle).bold()
+                        Text(item.title).font(themeManager.largeTitleFont).bold()
                             .trackTitleScrollOffset()
                         if !item.sessions.isEmpty {
                             showSessions(item: item)
@@ -53,11 +55,11 @@ struct ContentDetailView: View {
                         }
                     }
                     .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(15)
+                    .background(themeManager.cardSurface)
+                    .iPadFlatCorners(15)
                 }
                 VStack(alignment: .leading) {
-                    Markdown(item.description)
+                    Markdown(item.description).themedMarkdown(themeManager)
                         .textSelection(.enabled)
                         .padding()
                 }
@@ -120,7 +122,7 @@ struct ContentDetailView: View {
                 if !IPadAdaptive.isIPad {
                     ToolbarItem(placement: .principal) {
                         Text(item.title)
-                            .font(.headline)
+                            .font(themeManager.headingFont)
                             .lineLimit(1)
                             .opacity(navTitleOpacity)
                     }
@@ -147,6 +149,8 @@ struct showFeedbackButton: View {
     @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         VStack {
             Button {
@@ -157,7 +161,7 @@ struct showFeedbackButton: View {
             .foregroundColor(colorMode ? .white : .primary)
             .frame(maxWidth: .infinity)
             .padding(15)
-            .background(colorMode ? theme.carousel() : Color(.systemGray6))
+            .background(colorMode ? theme.carousel() : themeManager.cardSurface)
             .cornerRadius(15)
         }
     }
@@ -191,6 +195,7 @@ struct showMedia: View {
 
 struct showSessions: View {
     var item: Content
+    @Environment(ThemeManager.self) private var themeManager
     @State var showAddContentModal = false
     @State private var collapsed = false
     // @State var showingAlert: Bool = false
@@ -205,18 +210,18 @@ struct showSessions: View {
                 }, label: {
                     HStack {
                         Text("Sessions")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         if collapsed {
                             Text("Show")
                                 .foregroundColor(.secondary)
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                             Image(systemName: "chevron.right")
                                 .foregroundColor(.secondary)
                         } else {
                             Text("Hide")
                                 .foregroundStyle(.secondary)
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                             Image(systemName: "chevron.down")
                                 .foregroundColor(.secondary)
                         }
@@ -236,6 +241,7 @@ struct showSessionRow: View {
     var item: Content
     var s: Session
     @Binding var showAddContentModal: Bool
+    @Environment(ThemeManager.self) private var themeManager
     let dfu = DateFormatterUtility.shared
     
     @State var notExists: Bool = false
@@ -280,18 +286,18 @@ struct showSessionRow: View {
                     if show24hourtime {
                         if s.beginTimestamp != s.endTimestamp {
                             Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinuteTimeFormatter.string(from: s.endTimestamp))")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                         } else {
                             Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                         }
                     } else {
                         if s.beginTimestamp != s.endTimestamp {
                             Text("\(dfu.shortDayMonthDay12HourOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinute12TimeFormatter.string(from: s.endTimestamp))")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                         } else {
                             Text("\(dfu.shortDayMonthDay12HourOfWeekFormatter.string(from: s.beginTimestamp))")
-                                .font(.subheadline)
+                                .font(themeManager.subheadlineFont)
                         }
                     }
                 }
@@ -300,7 +306,7 @@ struct showSessionRow: View {
                 }
                 HStack {
                     Image(systemName: "map")
-                    Text(viewModel.locationsById[s.locationId]?.name ?? "unkown").font(.caption)
+                    Text(viewModel.locationsById[s.locationId]?.name ?? "unkown").font(themeManager.captionFont)
                 }
             }
             .padding(.leading, 5)
@@ -313,9 +319,15 @@ struct showSessionRow: View {
                         bookmarkAction(id: s.id)
                     } label: {
                         Image(systemName: bookmarkIds.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
-                            .foregroundColor((bookmarkIds.contains(Int32(s.id)) && viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
+                            .foregroundColor((bookmarkIds.contains(Int32(s.id)) && viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarks.map{Int($0.id)} )) ? themeManager.danger : .primary)
                     }
-                    .accessibilityLabel(bookmarkIds.contains(Int32(s.id)) ? "Remove bookmark" : "Add bookmark")
+                    .accessibilityLabel(
+                        bookmarkIds.contains(Int32(s.id))
+                            ? (viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarks.map{Int($0.id)})
+                                ? "Bookmarked, conflicts with another event"
+                                : "Remove bookmark")
+                            : "Add bookmark"
+                    )
                     MoreContentMenu(content: item, session: s, notExists: $notExists)
                 }
             }
@@ -348,6 +360,7 @@ struct showRelated: View {
     var eventIds: [Int]
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @State private var collapsed = true
     
     var body: some View {
@@ -358,18 +371,18 @@ struct showRelated: View {
             }, label: {
                 HStack {
                     Text("Related Content")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if collapsed {
                         Text("More")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Less")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     }
@@ -409,6 +422,8 @@ struct showPeople: View {
     @AppStorage("colorMode") var colorMode: Bool = false
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         Divider()
         VStack(alignment: .leading) {
@@ -417,18 +432,18 @@ struct showPeople: View {
             }, label: {
                 HStack {
                     Text("People")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if collapsed {
                         Text("Show")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Hide")
                             .foregroundStyle(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     }
@@ -446,7 +461,7 @@ struct showPeople: View {
                                         VStack {
                                             Text(speaker.name)
                                             if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == person.tagId}) {
-                                                Text(tag.label).font(.caption)
+                                                Text(tag.label).font(themeManager.captionFont)
                                             }
                                         }
                                     }
@@ -454,7 +469,7 @@ struct showPeople: View {
                                 .foregroundColor(.primary)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding(15)
-                                .background(colorMode ? theme.carousel(): Color(.systemGray6))
+                                .background(colorMode ? theme.carousel(): themeManager.cardSurface)
                                 .cornerRadius(15)
                             }
                         }
@@ -465,7 +480,7 @@ struct showPeople: View {
                             VStack {
                                 Text(speaker.name)
                                 if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == content.people[0].tagId}) {
-                                    Text(tag.label).font(.caption)
+                                    Text(tag.label).font(themeManager.captionFont)
                                 }
                             }
                         }
@@ -473,7 +488,7 @@ struct showPeople: View {
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(colorMode ? theme.carousel(): Color(.systemGray6))
+                    .background(colorMode ? theme.carousel(): themeManager.cardSurface)
                     .cornerRadius(15)
                 }
             }

@@ -10,6 +10,7 @@ import SwiftUI
 
 struct FAQListView: View {
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
 
     @State private var searchText = ""
 
@@ -122,7 +123,7 @@ struct FAQListView: View {
             HStack {
                 Spacer()
                 jumpMenu
-                    .font(.title2)
+                    .font(themeManager.title2Font)
                     .foregroundStyle(.primary)
                     .frame(width: 48, height: 48)
                     .background(.regularMaterial, in: Circle())
@@ -132,6 +133,7 @@ struct FAQListView: View {
             .padding(.bottom, 12)
         }
         .navigationTitle("FAQs")
+        .themedNavTitle("FAQs", themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
@@ -146,6 +148,7 @@ struct FAQListView: View {
 
 struct faqRow: View {
     let faq: FAQ
+    @Environment(ThemeManager.self) private var themeManager
     @State private var showAnswer = false
 
     var body: some View {
@@ -154,14 +157,14 @@ struct faqRow: View {
                 showAnswer.toggle()
             }, label: {
                 HStack {
-                    Text(faq.question).font(.subheadline).fontWeight(.bold).multilineTextAlignment(.leading)
+                    Text(faq.question).font(themeManager.subheadlineFont).fontWeight(.bold).multilineTextAlignment(.leading)
                     Spacer()
                     showAnswer ? Image(systemName: "chevron.down") : Image(systemName: "chevron.right")
                 }
             }).buttonStyle(BorderlessButtonStyle()).foregroundColor(.primary)
 
             if showAnswer {
-                Markdown(faq.answer).padding(.vertical)
+                Markdown(faq.answer).themedMarkdown(themeManager).padding(.vertical)
             }
         }
     }

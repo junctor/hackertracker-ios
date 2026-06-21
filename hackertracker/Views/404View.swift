@@ -15,6 +15,8 @@ struct _04View: View {
     @State private var viewModel = InfoViewModel()
     @Environment(\.colorScheme) private var beezleColorScheme
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -23,7 +25,7 @@ struct _04View: View {
                         .frame(width: 512)
                 }
                 Text(message)
-                    .font(.title)
+                    .font(themeManager.titleFont)
                     .multilineTextAlignment(.center)
                 
                 Image("beezle")
@@ -34,7 +36,7 @@ struct _04View: View {
                     .frame(maxHeight: .infinity)
                 
                     NavigationLink(destination: ConferencesView()) {
-                        CardView(systemImage: "list", text:"Choose Conference", color: Color(.systemGray6), subtitle: "Not loading? Choose a conference now.")
+                        CardView(systemImage: "list", text:"Choose Conference", color: themeManager.cardSurface, subtitle: "Not loading? Choose a conference now.")
                             .frame(maxWidth: .infinity, maxHeight: 35)
                             .padding(25)
                     }

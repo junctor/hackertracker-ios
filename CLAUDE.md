@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-HackerTracker iOS — SwiftUI app for DEF CON / hacker conferences. Bundle id `org.beezle.hackertracker`, current `MARKETING_VERSION` 5.9, deployment target iOS 16.0, Swift 5.0. Targets: `hackertracker` (app), `hackertrackerTests`, `hackertrackerUITests`.
+HackerTracker iOS — SwiftUI app for DEF CON / hacker conferences. Bundle id `org.beezle.hackertracker`, current `MARKETING_VERSION` 6.1, deployment target iOS 17.0, Swift 6.0 (strict concurrency). Targets: `hackertracker` (app), `hackertrackerTests`, `hackertrackerUITests`.
 
 ## Build / test
 
@@ -47,6 +47,12 @@ SwiftUI app with a Firestore-backed live-data layer and CoreData+CloudKit local 
 - `firebase-ios-sdk` — Firestore, Storage, Analytics, Messaging (FCM/APNs), InAppMessaging
 - `Kingfisher` — image loading
 - `swift-markdown-ui` (MarkdownUI) — markdown rendering for content/news
+
+### Bundled fonts (`hackertracker/Resources/Fonts/`)
+
+- `JetBrainsMono-Regular.ttf` + `JetBrainsMono-Bold.ttf` — used by the Hacker Green theme. Licensed under the SIL Open Font License 1.1 (see `JetBrainsMono-OFL.txt`; the upstream repo calls it `OFL.txt` despite the project's Apache-2.0-ish docs).
+- `MajorMonoDisplay-Regular.ttf` — used by the Synthwave theme. Licensed under the SIL Open Font License 1.1 (see `MajorMonoDisplay-OFL.txt`).
+- Both OFL licenses require attribution and ship as resources in the app bundle. Registered for runtime use via `UIAppFonts` in `hackertracker/Info.plist`; referenced from `Utils/Theme.swift` by their PostScript names (`JetBrainsMono-Regular`, `JetBrainsMono-Bold`, `MajorMonoDisplay-Regular`).
 
 ## Conventions
 

@@ -50,6 +50,8 @@ struct CustomEventDetailView: View {
         )
     }
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
@@ -68,7 +70,10 @@ struct CustomEventDetailView: View {
         }
         .navigationBarTitle(Text(""), displayMode: .inline)
         .toolbar {
-            if let event = events.first {
+            // iPad detail pane is rendered without a NavigationStack
+            // ancestor (see EventsView's iPad split). The inline
+            // action bar in detail(for:) replaces these.
+            if !IPadAdaptive.isIPad, let event = events.first {
                 ToolbarItemGroup(placement: .topBarTrailing) {
                     // Bookmark toggle. Custom events live on the
                     // schedule unconditionally; bookmarking them is
@@ -119,13 +124,21 @@ struct CustomEventDetailView: View {
 
     @ViewBuilder private func detail(for event: CustomEvent) -> some View {
         ScrollView {
+            // iPad: the right pane has no NavigationStack, so the
+            // .toolbar block is a no-op. Render the same action
+            // buttons inline at the top so bookmark / bell / QR /
+            // pencil stay reachable.
+            if IPadAdaptive.isIPad {
+                inlineActionBar(event: event)
+            }
+
             // Header card: title + time + location + tag chips.
             // Mirrors the EventDetailView layout exactly so the two
             // detail screens read as the same component family.
             VStack(alignment: .leading) {
                 VStack(alignment: .center) {
                     Text(event.title ?? "Untitled Event")
-                        .font(.largeTitle).bold()
+                        .font(themeManager.largeTitleFont).bold()
                     VStack(alignment: .leading) {
                         whenRow(event: event)
                         if let location = event.location, !location.isEmpty {
@@ -140,14 +153,14 @@ struct CustomEventDetailView: View {
                     }
                 }
                 .padding()
-                .background(Color(.systemGray6))
-                .cornerRadius(15)
+                .background(themeManager.cardSurface)
+                .iPadFlatCorners(15)
             }
 
             // Description (Markdown-rendered, matches EventDetailView).
             if let desc = event.eventDescription, !desc.isEmpty {
                 VStack(alignment: .leading) {
-                    Markdown(desc)
+                    Markdown(desc).themedMarkdown(themeManager)
                         .padding()
                 }
             }
@@ -189,13 +202,52 @@ struct CustomEventDetailView: View {
 
     // MARK: - Header rows
 
+    /// Inline iPad action bar — mirrors the toolbar items but renders
+    /// in-body so it doesn't require a NavigationStack ancestor.
+    @ViewBuilder private func inlineActionBar(event: CustomEvent) -> some View {
+        HStack(spacing: 16) {
+            Spacer()
+            Button {
+                toggleBookmark(event)
+            } label: {
+                Image(systemName: isBookmarked(event) ? "bookmark.fill" : "bookmark")
+                    .font(themeManager.title3Font)
+            }
+            .accessibilityLabel(isBookmarked(event) ? "Remove bookmark" : "Add bookmark")
+            Button {
+                toggleNotifications(event)
+            } label: {
+                Image(systemName: event.notificationsEnabled ? "bell.fill" : "bell.slash")
+                    .font(themeManager.title3Font)
+            }
+            .accessibilityLabel(event.notificationsEnabled ? "Turn off notifications" : "Turn on notifications")
+            Button {
+                showingShareSheet = true
+            } label: {
+                Image(systemName: "qrcode")
+                    .font(themeManager.title3Font)
+            }
+            .accessibilityLabel("Share via QR code")
+            Button {
+                showingEditor = true
+            } label: {
+                Image(systemName: "pencil")
+                    .font(themeManager.title3Font)
+            }
+            .accessibilityLabel("Edit event")
+        }
+        .padding(.horizontal)
+        .padding(.top, 8)
+        .tint(.primary)
+    }
+
     @ViewBuilder private func whenRow(event: CustomEvent) -> some View {
         let begin = event.beginTimestamp ?? Date()
         let end = event.endTimestamp ?? begin
         HStack {
             Image(systemName: "clock")
             Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: begin)) - \(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: end))")
-                .font(.subheadline).bold()
+                .font(themeManager.subheadlineFont).bold()
         }
         .padding(.leading, 10)
         .padding(.trailing, 5)
@@ -209,7 +261,7 @@ struct CustomEventDetailView: View {
     @ViewBuilder private func locationRow(text: String) -> some View {
         HStack {
             Image(systemName: "map")
-            Text(text).font(.subheadline).bold()
+            Text(text).font(themeManager.subheadlineFont).bold()
         }
         .padding(.leading, 10)
         .padding(.trailing, 5)
@@ -234,14 +286,14 @@ struct CustomEventDetailView: View {
         let codes = CustomEventUtility.conferenceCodes(of: event)
         if codes.isEmpty {
             Label("Applies to every conference", systemImage: "globe")
-                .font(.caption)
+                .font(themeManager.captionFont)
                 .foregroundStyle(.secondary)
         } else {
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Image(systemName: "checkmark.circle")
                     .foregroundStyle(.secondary)
                 Text(codes.joined(separator: ", "))
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
             }
         }
@@ -252,7 +304,7 @@ struct CustomEventDetailView: View {
             event.notificationsEnabled ? "Notifications on" : "Notifications off",
             systemImage: event.notificationsEnabled ? "bell.fill" : "bell.slash"
         )
-        .font(.caption)
+        .font(themeManager.captionFont)
         .foregroundStyle(.secondary)
     }
 

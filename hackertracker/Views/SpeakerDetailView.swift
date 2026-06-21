@@ -22,17 +22,19 @@ struct SpeakerDetailView: View {
     /// scrolls past the nav bar.
     @State private var navTitleOpacity: CGFloat = 0
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         if let speaker = viewModel.speakersById[id] {
             ScrollView {
                 VStack(alignment: .leading) {
                     VStack(alignment: .leading) {
                         Text(speaker.name)
-                            .font(.title)
+                            .font(themeManager.titleFont)
                             .trackTitleScrollOffset()
                         if let pronouns = speaker.pronouns {
                             Text("(\(pronouns))")
-                                .font(.caption)
+                                .font(themeManager.captionFont)
                                 .foregroundColor(.gray)
                         }
                         if let affiliations = speaker.affiliations, affiliations.count > 0 {
@@ -42,7 +44,7 @@ struct SpeakerDetailView: View {
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(15)
-                    .background(Color(.systemGray6))
+                    .background(themeManager.cardSurface)
                     .cornerRadius(15)
                     if let media = speaker.media, media.count > 0 {
                         HStack {
@@ -59,7 +61,7 @@ struct SpeakerDetailView: View {
                         }
                     }
                     
-                    Markdown(speaker.description)
+                    Markdown(speaker.description).themedMarkdown(themeManager)
                     
                     if speaker.eventIds.count > 0 {
                         Divider()
@@ -90,7 +92,7 @@ struct SpeakerDetailView: View {
                     ToolbarItem(placement: .principal) {
                         if let speaker = viewModel.speakersById[id] {
                             Text(speaker.name)
-                                .font(.headline)
+                                .font(themeManager.headingFont)
                                 .lineLimit(1)
                                 .opacity(navTitleOpacity)
                         }
@@ -111,6 +113,8 @@ struct showSpeakerLinks: View {
     @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         VStack(alignment: .leading) {
             Button(action: {
@@ -118,18 +122,18 @@ struct showSpeakerLinks: View {
             }, label: {
                 HStack {
                     Text("Links")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if collapsed {
                         Text("Show")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Hide")
                             .foregroundStyle(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     }                }
@@ -150,7 +154,7 @@ struct showSpeakerLinks: View {
                             .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel(): Color(.systemGray6))
+                            .background(colorMode ? theme.carousel(): themeManager.cardSurface)
                             .cornerRadius(15)
                             
                         }
@@ -167,6 +171,7 @@ struct showEvents: View {
     var title: String?
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @State private var collapsed = false
     @State private var myEvents: [Event] = []
     
@@ -177,18 +182,18 @@ struct showEvents: View {
             }, label: {
                 HStack {
                     Text(title ?? "Schedule")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if collapsed {
                         Text("Show")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Hide")
                             .foregroundStyle(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     }                }
@@ -224,6 +229,7 @@ struct showEvents: View {
 
 struct showAffiliations: View {
     let affiliations: [SpeakerAffiliation]
+    @Environment(ThemeManager.self) private var themeManager
     @State private var collapsed = true
 
     var body: some View {
@@ -233,7 +239,7 @@ struct showAffiliations: View {
                 /*@START_MENU_TOKEN@*/Text(affiliation.organization)/*@END_MENU_TOKEN@*/
                 if affiliation.title != "" {
                     Text(affiliation.title)
-                        .font(.subheadline)
+                        .font(themeManager.subheadlineFont)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -247,6 +253,7 @@ struct SpeakerEventView: View {
     let dfu = DateFormatterUtility.shared
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("notifyAt") var notifyAt: Int = 20
 
     var body: some View {
@@ -266,12 +273,12 @@ struct SpeakerEventView: View {
                 .frame(width: 6)
             VStack(alignment: .leading, spacing: 3) {
                 Text(event.title)
-                    .font(.headline)
+                    .font(themeManager.headingFont)
                     .multilineTextAlignment(.leading)
                 Text(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.beginTimestamp))
-                    .font(.subheadline)
+                    .font(themeManager.subheadlineFont)
                 if let l = viewModel.locationsById[event.locationId] {
-                    Text(l.name).font(.caption2)
+                    Text(l.name).font(themeManager.captionFont)
                 }
                 // if let tagtype = viewModel.tagTypeByTagId[tagId], let tag = tagtype.tags.first(where: {$0.id == tagId})
                 if let firstTagId = event.tagIds.first,
@@ -281,7 +288,7 @@ struct SpeakerEventView: View {
                             Circle().foregroundColor(Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
                                 .frame(width: 8, height: 8, alignment: .center)
                             
-                            Text(tag.label).font(.caption)
+                            Text(tag.label).font(themeManager.captionFont)
                             Spacer()
                         }
                     }
@@ -295,9 +302,15 @@ struct SpeakerEventView: View {
                     bookmarkAction()
                 } label: {
                     Image(systemName: bookmarks.map({$0.id}).contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
-                        .foregroundColor((bookmarks.map({$0.id}).contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarks.map{Int($0.id)} )) ? ThemeColors.red : .primary)
+                        .foregroundColor((bookmarks.map({$0.id}).contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarks.map{Int($0.id)} )) ? themeManager.danger : .primary)
                 }
-                .accessibilityLabel(bookmarks.map({$0.id}).contains(Int32(event.id)) ? "Remove bookmark" : "Add bookmark")
+                .accessibilityLabel(
+                    bookmarks.map({$0.id}).contains(Int32(event.id))
+                        ? (viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarks.map{Int($0.id)})
+                            ? "Bookmarked, conflicts with another event"
+                            : "Remove bookmark")
+                        : "Add bookmark"
+                )
             }
             .buttonStyle(PlainButtonStyle())
         }

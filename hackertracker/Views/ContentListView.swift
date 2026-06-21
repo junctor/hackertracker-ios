@@ -11,6 +11,7 @@ import SwiftUI
 struct ContentListView: View {
     var content: [Content]
     var title: String?
+    @Environment(ThemeManager.self) private var themeManager
     @State private var searchText = ""
     /// Perf C: debounced mirror of `searchText`. contentGroup() reads
     /// this so the group/filter pipeline runs once per typing pause.
@@ -287,7 +288,7 @@ struct ContentListView: View {
                     Image(systemName: filters.filters.isEmpty
                           ? "line.3.horizontal.decrease.circle"
                           : "line.3.horizontal.decrease.circle.fill")
-                        .font(.title2)
+                        .font(themeManager.title2Font)
                         .frame(width: 48, height: 48)
                         .background(.regularMaterial, in: Circle())
                 }
@@ -297,7 +298,7 @@ struct ContentListView: View {
                 Spacer()
 
                 jumpToGroupMenu
-                    .font(.title2)
+                    .font(themeManager.title2Font)
                     .foregroundStyle(.primary)
                     .frame(width: 48, height: 48)
                     .background(.regularMaterial, in: Circle())
@@ -307,6 +308,7 @@ struct ContentListView: View {
             .padding(.bottom, 12)
         }
         .navigationTitle(title ?? "All Content")
+        .themedNavTitle(title ?? "All Content", themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
@@ -327,6 +329,7 @@ struct ContentListView: View {
         .onReceive(NotificationCenter.default.publisher(
             for: .NSPersistentStoreRemoteChange
         )) { _ in refreshNoteContentIDs() }
+        .themedBackground(themeManager)
         .analyticsScreen(name: "ContentListView")
     }
 
@@ -360,6 +363,7 @@ struct ContentData: View {
     let char: String.Element
     let content: [Content]
     @EnvironmentObject var theme: Theme
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     /// iPad split-view: row taps update detail column instead of pushing.
@@ -368,7 +372,7 @@ struct ContentData: View {
     var body: some View {
         let contentRowBookmarks = bookmarks.map { $0.id }
         Section(header: Text(String(char.uppercased()))
-            .font(.subheadline)
+            .font(themeManager.subheadlineFont)
             .padding(3)
             .frame(maxWidth: .infinity)
             // Phase 6 polish: match the toolbar's frosted material.
@@ -399,6 +403,7 @@ struct ContentData: View {
 struct ContentRow: View {
     let item: Content
     let themeColor: Color
+    @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
         HStack {
@@ -407,7 +412,7 @@ struct ContentRow: View {
                 .frame(maxHeight: .infinity)
             VStack(alignment: .leading) {
                 Text(item.title)
-                    .font(.headline)
+                    .font(themeManager.headingFont)
                     .foregroundColor(.primary)
             }
         }

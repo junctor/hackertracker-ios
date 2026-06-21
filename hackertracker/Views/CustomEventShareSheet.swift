@@ -17,6 +17,8 @@ struct CustomEventShareSheet: View {
 
     private var shareURL: URL? { CustomEventShare.url(for: event) }
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -32,6 +34,7 @@ struct CustomEventShareSheet: View {
                 }
             }
             .navigationTitle("Share Event")
+            .themedNavTitle("Share Event", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -84,7 +87,7 @@ struct CustomEventShareSheet: View {
     @ViewBuilder private func urlPreview(url: URL) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Link")
-                .font(.caption)
+                .font(themeManager.captionFont)
                 .foregroundStyle(.secondary)
             Text(url.absoluteString)
                 .font(.footnote.monospaced())
@@ -92,7 +95,7 @@ struct CustomEventShareSheet: View {
                 .multilineTextAlignment(.leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(10)
-                .background(Color(.systemGray6))
+                .background(themeManager.cardSurface)
                 .cornerRadius(8)
                 .textSelection(.enabled)
         }

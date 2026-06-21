@@ -44,6 +44,8 @@ struct NoteBlock: View {
         notes.first?.body.flatMap { $0.isEmpty ? nil : $0 }
     }
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Always-visible header. Tap anywhere to expand/collapse;
@@ -60,7 +62,7 @@ struct NoteBlock: View {
                     Image(systemName: "note.text")
                         .foregroundStyle(.secondary)
                     Text("My Notes")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                     if body_text != nil {
                         Circle()
                             .fill(Color.accentColor)
@@ -70,13 +72,13 @@ struct NoteBlock: View {
                     Spacer()
                     if expanded {
                         Text("Hide")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                             .foregroundStyle(.secondary)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Show")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                             .foregroundStyle(.secondary)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
@@ -91,10 +93,10 @@ struct NoteBlock: View {
             if expanded {
                 Group {
                     if let text = body_text {
-                        Markdown(text)
+                        Markdown(text).themedMarkdown(themeManager)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
-                            .background(Color(.systemGray6))
+                            .background(themeManager.cardSurface)
                             .cornerRadius(12)
                             .onTapGesture { showingEditor = true }
                             .accessibilityAddTraits(.isButton)
@@ -110,14 +112,14 @@ struct NoteBlock: View {
                             }
                             .padding(12)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(Color(.systemGray6))
+                            .background(themeManager.cardSurface)
                             .cornerRadius(12)
                             .foregroundStyle(.primary)
                         }
                         .buttonStyle(.plain)
                     }
                     Text("Notes are stored privately on your device and synced via iCloud.")
-                        .font(.caption2)
+                        .font(themeManager.captionFont)
                         .foregroundStyle(.tertiary)
                 }
                 .transition(.opacity.combined(with: .move(edge: .top)))
@@ -143,6 +145,7 @@ struct NoteEditorView: View {
 
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(ThemeManager.self) private var themeManager
 
     @State private var body_text: String = ""
     @State private var tab: Tab = .write
@@ -182,7 +185,7 @@ struct NoteEditorView: View {
                                 .foregroundStyle(.secondary)
                                 .padding()
                         } else {
-                            Markdown(body_text)
+                            Markdown(body_text).themedMarkdown(themeManager)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding()
                         }
@@ -190,6 +193,7 @@ struct NoteEditorView: View {
                 }
             }
             .navigationTitle("Note")
+            .themedNavTitle("Note", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

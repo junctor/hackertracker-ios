@@ -14,6 +14,7 @@ import SwiftUI
 
 struct SharedScheduleView: View {
     @Environment(SharedScheduleStore.self) private var sharedSchedule
+    @Environment(ThemeManager.self) private var themeManager
     let dfu = DateFormatterUtility.shared
 
     // Polish parity with the schedule.
@@ -98,7 +99,7 @@ struct SharedScheduleView: View {
                 HStack {
                     Spacer()
                     jumpMenu
-                        .font(.title2)
+                        .font(themeManager.title2Font)
                         .foregroundStyle(.primary)
                         .frame(width: 48, height: 48)
                         .background(.regularMaterial, in: Circle())
@@ -109,6 +110,7 @@ struct SharedScheduleView: View {
             }
         }
         .navigationTitle("Combined Schedule")
+        .themedNavTitle("Combined Schedule", themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
@@ -118,7 +120,7 @@ struct SharedScheduleView: View {
     @ViewBuilder
     private func dayHeader(_ day: String) -> some View {
         Text(day.uppercased())
-            .font(.subheadline)
+            .font(themeManager.subheadlineFont)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -144,6 +146,8 @@ struct SharedScheduleRow: View {
         return f.string(from: date)
     }
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         let _ = dfu.tzGeneration
         VStack(alignment: .leading, spacing: 6) {
@@ -157,11 +161,11 @@ struct SharedScheduleRow: View {
                     .cornerRadius(6)
                 Spacer()
                 Text("\(timeString(entry.event.beginTimestamp)) – \(timeString(entry.event.endTimestamp))")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
             }
             Text(entry.event.title)
-                .font(.headline)
+                .font(themeManager.headingFont)
                 .multilineTextAlignment(.leading)
             // Note: Event.people is [Person] (id+sortOrder+tagId only). Rendering
             // speaker names here would require a cross-conference speaker lookup
@@ -170,7 +174,7 @@ struct SharedScheduleRow: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.systemGray6))
+        .background(themeManager.cardSurface)
         .cornerRadius(12)
     }
 }

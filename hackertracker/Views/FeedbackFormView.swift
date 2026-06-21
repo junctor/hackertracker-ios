@@ -12,6 +12,7 @@ struct FeedbackFormView: View {
     var item: Content
     var form: FeedbackForm
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @State var test: String = ""
     @State var answers: [Int: AnyObject] = [:]
     let dfu = DateFormatterUtility.shared
@@ -26,10 +27,10 @@ struct FeedbackFormView: View {
         let _ = dfu.tzGeneration
         VStack {
             Text(form.name)
-                .font(.title)
+                .font(themeManager.titleFont)
             Divider()
             Text(item.title)
-                .font(.title3)
+                .font(themeManager.title3Font)
         }
         .padding(15)
         Divider()
@@ -41,7 +42,7 @@ struct FeedbackFormView: View {
         Divider()
         VStack(alignment: .center) {
             Text("A minimum of one answer is required for submission.")
-                .font(.caption)
+                .font(themeManager.captionFont)
             HStack {
                 Button(action: {
                     showFeedback = false
@@ -146,11 +147,12 @@ extension FeedbackFormView {
 struct FeedbackRow: View {
     var item: FeedbackItem
     @Binding var answers: [Int: AnyObject]
+    @Environment(ThemeManager.self) private var themeManager
     @State var answer: String = ""
     
     var body: some View {
         if item.type == "select_one" {
-            Picker(selection: $answer, label: Text(item.captionText).font(.headline), content: {
+            Picker(selection: $answer, label: Text(item.captionText).font(themeManager.headingFont), content: {
                 ForEach(item.options) {
                     Text($0.captionText).tag($0.captionText)
                 }
@@ -162,7 +164,7 @@ struct FeedbackRow: View {
                 }
             }
         } else if item.type == "text" {
-            Text(item.captionText).textCase(.uppercase).font(.subheadline).bold()
+            Text(item.captionText).textCase(.uppercase).font(themeManager.subheadlineFont).bold()
             TextField("Optional", text: $answer, axis: .vertical)
                 .lineLimit(5...5)
                 .onReceive(answer.publisher.collect()) {

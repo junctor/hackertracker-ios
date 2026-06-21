@@ -11,6 +11,7 @@ struct CartView: View {
     @FetchRequest(sortDescriptors: []) var cart: FetchedResults<Cart>
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.managedObjectContext) private var viewContext
+    @Environment(ThemeManager.self) private var themeManager
     @State private var total = 0
     @State private var totalItems = 0
     @State private var showDeleteAlert = false
@@ -22,15 +23,15 @@ struct CartView: View {
             } else {
                 if viewModel.outOfStock {
                     Text("Out Of Stock Items Selected")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                     Text("Remove out of stock items from list")
-                        .font(.subheadline)
+                        .font(themeManager.subheadlineFont)
                 } else if cart.count == 0 {
                     Text("No Items Selected")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                     NavigationLink(destination: ProductsView()) {
                         Text("Select items to view QR Code")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                     }
                 }
             }
@@ -42,15 +43,15 @@ struct CartView: View {
             }
             HStack {
                 Text("Subtotal (\(totalItems) items)")
-                    .font(.headline)
+                    .font(themeManager.headingFont)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text("$\(total/100) USD")
-                    .font(.headline)
+                    .font(themeManager.headingFont)
                     .frame(alignment: .trailing)
             }
             Divider()
             Text(viewModel.conference?.merchTaxStatement ?? "Tax Included")
-                .font(.subheadline)
+                .font(themeManager.subheadlineFont)
                 .multilineTextAlignment(.center)
             Divider()
             
@@ -90,6 +91,7 @@ struct CartView: View {
         }
         .analyticsScreen(name: "CartView")
         .navigationTitle("Merch")
+        .themedNavTitle("Merch", themeManager)
         .padding(15)
     }
     
@@ -128,6 +130,7 @@ struct CartView: View {
 
 struct DeleteAllView: View {
     @Binding var showDeleteAlert: Bool
+    @Environment(ThemeManager.self) private var themeManager
     var body: some View {
         HStack {
             Button {
@@ -139,7 +142,7 @@ struct DeleteAllView: View {
         .foregroundColor(.white)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(15)
-        .background(ThemeColors.red)
+        .background(themeManager.danger)
         .cornerRadius(15)
     }
 }
@@ -163,11 +166,13 @@ struct CartRow: View {
         _count = State(initialValue: Int(item.count))
     }
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
                 Text("\(product.title) (\(variant.code))")
-                    .font(.headline)
+                    .font(themeManager.headingFont)
                     .bold()
                 HStack {
                     Text("\(count)")
@@ -176,7 +181,7 @@ struct CartRow: View {
                         .fixedSize()
                     VStack {
                         Text("$\((variant.price*Int(item.count))/100) USD")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                     }
                     .frame(maxWidth: .infinity, alignment: .trailing)
                 }
@@ -190,10 +195,10 @@ struct CartRow: View {
                                 .font(.callout)
                         }
                     }
-                    .foregroundColor(ThemeColors.red)
+                    .foregroundColor(themeManager.danger)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(Color(.systemGray6))
+                    .background(themeManager.cardSurface)
                     .cornerRadius(15)
                     .frame(alignment: .center)
                     .onAppear {

@@ -14,6 +14,7 @@ struct MapView: View {
     @EnvironmentObject var selected: SelectedConference
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
+    @Environment(ThemeManager.self) private var themeManager
 
     @State private var currentIndex: Int = 0
     @AppStorage("lastMapIndex") private var storedIndexBlob: String = ""
@@ -50,6 +51,7 @@ struct MapView: View {
                 .padding(10)
                 .background(Color(.systemBackground))
                 .navigationTitle(currentMapTitle ?? "Maps")
+                .themedNavTitle(currentMapTitle ?? "Maps", themeManager)
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
                 .toolbarBackground(.visible, for: .navigationBar)
@@ -58,6 +60,7 @@ struct MapView: View {
                     MapShareSheet(items: [url])
                 }
         }
+        .themedBackground(themeManager)
         .analyticsScreen(name: "MapView")
     }
 
@@ -97,7 +100,7 @@ struct MapView: View {
     private func zoomIcon(systemName: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.title3)
+                .font(themeManager.title3Font)
                 .foregroundStyle(.primary)
                 .frame(width: 44, height: 44)
                 .contentShape(Rectangle())
@@ -141,13 +144,13 @@ struct MapView: View {
             NavigationLink(destination: DocumentView(
                 title_text: doc.title,
                 body_text: doc.body,
-                color: ThemeColors.red,
+                color: themeManager.danger,
                 systemImage: "exclamationmark.triangle.fill"
             )) {
                 CardView(
                     systemImage: "exclamationmark.triangle.fill",
                     text: doc.title,
-                    color: ThemeColors.red,
+                    color: themeManager.danger,
                     subtitle: "Tap for more details"
                 )
                 .frame(height: 40)
@@ -241,7 +244,7 @@ struct MapView: View {
                 }
             if !searchText.isEmpty {
                 Text(searchMatches == 0 ? "no match" : "\(searchMatches) hit\(searchMatches == 1 ? "" : "s")")
-                    .font(.caption2)
+                    .font(themeManager.captionFont)
                     .foregroundColor(.secondary)
                 Button {
                     searchText = ""
@@ -455,6 +458,7 @@ private struct MapPage: View {
     let isFocused: Bool
     let controller: MapController?
 
+    @Environment(ThemeManager.self) private var themeManager
     @State private var pdfExists: Bool = false
     @State private var svgExists: Bool = false
 
@@ -489,7 +493,7 @@ private struct MapPage: View {
             }
             if let desc = map.description {
                 Text(desc)
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -533,7 +537,7 @@ private struct MapPage: View {
             VStack(spacing: 6) {
                 ProgressView()
                 Text("Map downloading…")
-                    .font(.subheadline)
+                    .font(themeManager.subheadlineFont)
                     .foregroundStyle(.secondary)
             }
         }
@@ -599,9 +603,10 @@ struct MapView_Previews: PreviewProvider {
 }
 
 struct SpinnerView: View {
+    @Environment(ThemeManager.self) private var themeManager
     var body: some View {
         ProgressView()
-            .progressViewStyle(CircularProgressViewStyle(tint: ThemeColors.blue))
+            .progressViewStyle(CircularProgressViewStyle(tint: themeManager.accent))
             .scaleEffect(2.0, anchor: .center)
     }
 }

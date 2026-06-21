@@ -12,6 +12,7 @@ struct EventFilters: View {
     @Binding var showFilters: Bool
     @EnvironmentObject var filters: Filters
     @EnvironmentObject var toTop: ToTop
+    @Environment(ThemeManager.self) private var themeManager
     var showBookmarks: Bool = true
     /// Number of items that would survive the current filter selection.
     /// Caller computes (uses the same .filters / .search pipeline the
@@ -62,6 +63,7 @@ struct EventFilters: View {
             }
             .padding(.horizontal, 10)
             .navigationTitle("Filters")
+            .themedNavTitle("Filters", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
@@ -97,10 +99,11 @@ struct EventFilters: View {
 /// chrome stays identical across all filter sheets.
 struct MatchModePickerRow: View {
     @Binding var raw: String
+    @Environment(ThemeManager.self) private var themeManager
     var body: some View {
         HStack(spacing: 8) {
             Text("Match")
-                .font(.subheadline)
+                .font(themeManager.subheadlineFont)
                 .foregroundStyle(.secondary)
             Picker("Match", selection: $raw) {
                 Text("Any").tag(FilterMatchMode.any.rawValue)
@@ -119,6 +122,7 @@ struct FilterRow: View {
     let name: String
     let color: Color
     @EnvironmentObject var filters: Filters
+    @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
         Button(action: {
@@ -132,7 +136,7 @@ struct FilterRow: View {
             VStack(alignment: .leading) {
                 HStack {
                     Text(name)
-                        .font(.subheadline)
+                        .font(themeManager.subheadlineFont)
                         .padding(5)
                 }
             }
@@ -155,13 +159,14 @@ struct FilterRow: View {
 struct FilterMatchCountLabel: View {
     let count: Int
     let unit: String
+    @Environment(ThemeManager.self) private var themeManager
     var body: some View {
         let plural = count == 1 ? unit : unit + "s"
         HStack(spacing: 4) {
             Image(systemName: "line.3.horizontal.decrease.circle")
-                .font(.caption)
+                .font(themeManager.captionFont)
             Text("\(count) \(plural)")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .foregroundStyle(.secondary)
         .frame(maxWidth: .infinity, alignment: .center)

@@ -10,6 +10,7 @@ import SwiftUI
 struct SpeakerRow: View {
     var speaker: Speaker
     var themeColor: Color
+    @Environment(ThemeManager.self) private var themeManager
     var body: some View {
         HStack {
             Rectangle().fill(themeColor)
@@ -17,17 +18,27 @@ struct SpeakerRow: View {
                 .frame(maxHeight: .infinity)
             VStack(alignment: .leading) {
                 Text(speaker.name)
-                    .font(.headline)
+                    .font(themeManager.headingFont)
                     .foregroundColor(.primary)
                 if let title = speaker.title {
                     Text(title)
-                        .font(.subheadline)
+                        .font(themeManager.subheadlineFont)
                         .multilineTextAlignment(.leading)
                         .foregroundColor(.gray)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 10)
+            .padding(.trailing, 12)
         }
+        // Card treatment parity with EventCell + ContentCell so the
+        // speakers list reads as the same design family. Padding lives
+        // on the inner content VStack only so the leading color stripe
+        // stretches edge-to-edge of the card.
+        .background(themeManager.cardSurface)
+        .cornerRadius(10)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
     }
 }
 

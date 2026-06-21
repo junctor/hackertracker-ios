@@ -13,6 +13,8 @@ struct ShareBookmarksView: View {
     @AppStorage("colorMode") var colorMode: Bool = false
     @State private var message = "Tap link to copy"
     
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         ScrollView {
             VStack {
@@ -21,13 +23,13 @@ struct ShareBookmarksView: View {
                         .frame(alignment: .leading)
                         .padding(5)
                     Text("Share Schedule")
-                        .font(.title)
+                        .font(themeManager.titleFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .foregroundColor(colorMode ? .white : .primary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(15)
-                .background(colorMode ? theme.carousel(): Color(.systemGray6))
+                .background(colorMode ? theme.carousel(): themeManager.cardSurface)
                 .cornerRadius(15)
                 Divider()
                 if let conf = viewModel.conference, bookmarks.filter({viewModel.events.map{Int32($0.id)}.contains($0.id)}).count > 0 {
@@ -41,7 +43,7 @@ struct ShareBookmarksView: View {
                         Label("hackertracker://\(conf.code)/s?...", systemImage: "doc.on.doc")
                     }
                     Text(message)
-                        .font(.caption)
+                        .font(themeManager.captionFont)
                         .frame(maxWidth: .infinity)
                     Divider()
                     showEvents(eventIds: bookmarks.filter({viewModel.events.map{Int32($0.id)}.contains($0.id)}).map{Int($0.id)}, title: "Share \(bookmarks.filter({viewModel.events.map{Int32($0.id)}.contains($0.id)}).count) Events")

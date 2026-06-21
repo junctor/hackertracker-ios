@@ -13,6 +13,7 @@ struct ContentCell: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.noteContentIDs) private var noteContentIDs
+    @Environment(ThemeManager.self) private var themeManager
     let dfu = DateFormatterUtility.shared
     @AppStorage("notifyAt") var notifyAt: Int = 20
     /// Step 3 of the AI summary spike: warm the on-device LLM
@@ -69,11 +70,11 @@ struct ContentCell: View {
                     HStack(alignment: .center) {
                         VStack(alignment: .leading, spacing: 3) {
                             Text(content.title)
-                                .font(.headline)
+                                .font(themeManager.headingFont)
                                 .multilineTextAlignment(.leading)
                             if !content.people.isEmpty {
                                 Text(content.people.map { p in viewModel.speakersById[p.id]?.name ?? "" }.joined(separator: ", "))
-                                    .font(.subheadline)
+                                    .font(themeManager.subheadlineFont)
                                     .multilineTextAlignment(.leading)
                             }
                             // AI summary slot: only shown when the user
@@ -85,11 +86,11 @@ struct ContentCell: View {
                                let summary = TalkSummaryCache.shared.summary(for: content) {
                                 HStack(alignment: .top, spacing: 4) {
                                     Image(systemName: "sparkles")
-                                        .font(.caption2)
+                                        .font(themeManager.captionFont)
                                         .foregroundStyle(.secondary)
                                         .padding(.top, 2)
                                     Text(summary)
-                                        .font(.caption)
+                                        .font(themeManager.captionFont)
                                         .foregroundStyle(.secondary)
                                         .lineLimit(2)
                                         .multilineTextAlignment(.leading)
@@ -111,14 +112,26 @@ struct ContentCell: View {
                             bookmarkAction()
                         } label: {
                             Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
-                                .foregroundColor(hasBookmarkConflict ? ThemeColors.red : .primary)
+                                .foregroundColor(hasBookmarkConflict ? themeManager.danger : .primary)
                         }
-                        .accessibilityLabel(isBookmarked ? "Remove bookmark" : "Add bookmark")
+                        .accessibilityLabel(
+                            isBookmarked
+                                ? (hasBookmarkConflict
+                                    ? "Bookmarked, conflicts with another event"
+                                    : "Remove bookmark")
+                                : "Add bookmark"
+                        )
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
+                .padding(.vertical, 10)
+                .padding(.trailing, 12)
             }
         }
+        .background(themeManager.cardSurface)
+        .cornerRadius(10)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
         .swipeActions {
             Button(isBookmarked ? "Remove Bookmark" : "Bookmark") {
                 bookmarkAction()
@@ -181,6 +194,7 @@ struct ContentDescriptionPeekSheet: View {
     let title: String
     let description: String
     @Environment(\.dismiss) private var dismiss
+    @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
         NavigationStack {
@@ -189,7 +203,7 @@ struct ContentDescriptionPeekSheet: View {
                     Text(title)
                         .font(.title2.weight(.semibold))
                     Label("Original description", systemImage: "text.alignleft")
-                        .font(.caption)
+                        .font(themeManager.captionFont)
                         .foregroundStyle(.secondary)
                     Text(description)
                         .font(.body)

@@ -17,6 +17,7 @@ struct ConferencesView: View {
     @Environment(ConferencesViewModel.self) private var consViewModel
     @EnvironmentObject var filters: Filters
     @Environment(\.presentationMode) var presentationMode
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
     @AppStorage("showHidden") var showHidden: Bool = false
@@ -139,7 +140,7 @@ struct ConferencesView: View {
                 HStack {
                     Spacer()
                     jumpMenu
-                        .font(.title2)
+                        .font(themeManager.title2Font)
                         .foregroundStyle(.primary)
                         .frame(width: 48, height: 48)
                         .background(.regularMaterial, in: Circle())
@@ -149,6 +150,7 @@ struct ConferencesView: View {
                 .padding(.bottom, 12)
             }
             .navigationTitle("Select Conference")
+            .themedNavTitle("Select Conference", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)

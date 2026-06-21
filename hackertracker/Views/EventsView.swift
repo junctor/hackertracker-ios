@@ -14,6 +14,7 @@ struct EventsView: View {
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
     @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @EnvironmentObject var toTop: ToTop
     @EnvironmentObject var toBottom: ToBottom
     @EnvironmentObject var toCurrent: ToCurrent
@@ -240,8 +241,8 @@ struct EventsView: View {
   private var scheduleSidebar: some View {
     Group {
       if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documentsById[emergId] {
-        NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
-          CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details")
+        NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: themeManager.danger, systemImage: "exclamationmark.triangle.fill")) {
+          CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: themeManager.danger, subtitle: "Tap for more details")
             .frame(height: 40)
             .cornerRadius(0)
         }
@@ -269,7 +270,7 @@ struct EventsView: View {
             Image(systemName: filters.filters.isEmpty
                   ? "line.3.horizontal.decrease.circle"
                   : "line.3.horizontal.decrease.circle.fill")
-              .font(.title2)
+              .font(themeManager.title2Font)
               .frame(width: 48, height: 48)
               .background(.regularMaterial, in: Circle())
           }
@@ -279,7 +280,7 @@ struct EventsView: View {
           Spacer()
 
           jumpToDayMenu
-            .font(.title2)
+            .font(themeManager.title2Font)
             .foregroundStyle(.primary)
             .frame(width: 48, height: 48)
             .background(.regularMaterial, in: Circle())
@@ -288,7 +289,9 @@ struct EventsView: View {
         .padding(.horizontal, 20)
         .padding(.bottom, 12)
       }
+      .themedBackground(themeManager)
       .navigationTitle(viewModel.conference?.name ?? "Schedule")
+      .themedNavTitle(viewModel.conference?.name ?? "Schedule", themeManager)
       .navigationBarTitleDisplayMode(.inline)
       .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
       .toolbarBackground(.visible, for: .navigationBar)
@@ -333,7 +336,7 @@ struct EventsView: View {
               showConflictAlertPopup = true
             } label: {
               Image(systemName: "exclamationmark.triangle")
-                .foregroundColor(ThemeColors.red)
+                .foregroundColor(themeManager.danger)
             }
             .accessibilityLabel("Bookmark schedule conflict")
             .accessibilityHint("Shows conflicting bookmarked events")
@@ -384,19 +387,32 @@ struct EventsView: View {
         }
         .frame(width: IPadAdaptive.sidebarWidth)
         Divider()
+        // iPad: keep a NavigationStack on the right pane so the sibling
+        // pair preserves the layout symmetry iPadOS 18 uses to size the
+        // safe-area top inset under the floating tab bar (the left
+        // nav-title was disappearing otherwise). Hide *this* nav bar so
+        // the empty header doesn't take visible space, and pad the top
+        // so the event title isn't covered by the floating tab pill.
+        // CustomEventDetailView's action buttons render inline on iPad.
         NavigationStack {
-          if let cid = ipadSelectedCustomEventId {
-            CustomEventDetailView(eventID: cid)
-              .id(cid)
-          } else if let id = ipadSelectedContentId {
-            ContentDetailView(contentId: id)
-              .id(id)
-          } else {
-            ContentUnavailableView(
-              "Select an Event",
-              systemImage: "calendar",
-              description: Text("Tap an event in the schedule to view details.")
-            )
+          Group {
+            if let cid = ipadSelectedCustomEventId {
+              CustomEventDetailView(eventID: cid)
+                .id(cid)
+            } else if let id = ipadSelectedContentId {
+              ContentDetailView(contentId: id)
+                .id(id)
+            } else {
+              ContentUnavailableView(
+                "Select an Event",
+                systemImage: "calendar",
+                description: Text("Tap an event in the schedule to view details.")
+              )
+            }
+          }
+          .toolbar(.hidden, for: .navigationBar)
+          .safeAreaInset(edge: .top, spacing: 0) {
+            Color.clear.frame(height: 16)
           }
         }
       }
@@ -474,6 +490,7 @@ struct EventsView: View {
         )
       }
         .navigationTitle(navTitle)
+        .themedNavTitle(navTitle, themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
@@ -707,6 +724,7 @@ struct EventData: View {
   let events: [Event]
   // let bookmarks: [Int32]
   let showPastEvents: Bool
+  @Environment(ThemeManager.self) private var themeManager
   /// iPad split-view selection: when present, row taps set the binding
   /// instead of pushing a NavigationLink. iPhone passes no env value.
   @Environment(\.iPadContentSelection) private var iPadContentSelection
@@ -714,7 +732,7 @@ struct EventData: View {
 
   var body: some View {
       Section(header: Text(weekday.uppercased())
-        .font(.subheadline)
+        .font(themeManager.subheadlineFont)
         .padding(3)
         .frame(maxWidth: .infinity)
         // Phase 6 polish: match the toolbar's frosted material so the pinned

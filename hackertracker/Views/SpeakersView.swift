@@ -10,6 +10,7 @@ import SwiftUI
 struct SpeakersView: View {
     var speakers: [Speaker]
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @State private var searchText = ""
 
     // Polish parity with schedule / All Content.
@@ -150,7 +151,7 @@ struct SpeakersView: View {
             HStack {
                 Spacer()
                 jumpToGroupMenu
-                    .font(.title2)
+                    .font(themeManager.title2Font)
                     .foregroundStyle(.primary)
                     .frame(width: 48, height: 48)
                     .background(.regularMaterial, in: Circle())
@@ -160,6 +161,7 @@ struct SpeakersView: View {
             .padding(.bottom, 12)
         }
         .navigationTitle("Speakers")
+        .themedNavTitle("Speakers", themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
@@ -201,12 +203,13 @@ struct SpeakerData: View {
     let char: String.Element
     let speakers: [Speaker]
     @EnvironmentObject var theme: Theme
+    @Environment(ThemeManager.self) private var themeManager
     /// iPad split-view: row taps update detail column instead of pushing.
     @Environment(\.iPadSpeakerSelection) private var iPadSpeakerSelection
 
     var body: some View {
         Section(header: Text(String(char.uppercased()))
-            .font(.subheadline)
+            .font(themeManager.subheadlineFont)
             .padding(1)
             .frame(maxWidth: .infinity)
             // Phase 6 polish: match the toolbar's frosted material.

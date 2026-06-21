@@ -8,17 +8,64 @@
 import MarkdownUI
 import SwiftUI
 
+enum SettingsIPadSheet: Identifiable {
+    case about, conferences, theme
+    var id: Int { hashValue }
+}
+
+enum IPadSheetSize {
+    /// Large modal that doesn't quite reach the screen edges.
+    case page
+    /// Default small centered form sheet.
+    case form
+}
+
+extension View {
+    /// Sheet sizing for iPad presentations. iOS 18+ uses the native
+    /// `.presentationSizing(...)`. iOS 17 falls back to an explicit
+    /// large frame for `.page` (iPad form sheets grow to fit their
+    /// content's intrinsic size). `.form` is the iPad default — no
+    /// modifier needed pre-iOS 18.
+    ///
+    /// (View extension instead of `ViewModifier` because this module
+    /// has its own `Content` model that shadows the protocol's
+    /// `Content` associated type — same workaround used in
+    /// `iPadAdaptive.swift`.)
+    @ViewBuilder
+    func iPadSheetSizing(_ size: IPadSheetSize) -> some View {
+        switch size {
+        case .page:
+            if #available(iOS 18, *) {
+                self.presentationSizing(.page)
+            } else {
+                self
+                    .frame(idealWidth: 1100, idealHeight: 1300)
+                    .frame(minWidth: 900, minHeight: 1100)
+            }
+        case .form:
+            if #available(iOS 18, *) {
+                self.presentationSizing(.form)
+            } else {
+                self
+            }
+        }
+    }
+}
+
 struct SettingsView: View {
     @EnvironmentObject var selected: SelectedConference
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var theme: Theme
     @AppStorage("showNews") var showNews: Bool = true
-    
+    @State private var iPadSheet: SettingsIPadSheet?
+
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         NavigationStack {
             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0, let doc = viewModel.documentsById[emergId] {
-                NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: ThemeColors.red, systemImage: "exclamationmark.triangle.fill")) {
-                    CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: ThemeColors.red, subtitle: "Tap for more details")
+                NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, color: themeManager.danger, systemImage: "exclamationmark.triangle.fill")) {
+                    CardView(systemImage: "exclamationmark.triangle.fill", text: doc.title, color: themeManager.danger, subtitle: "Tap for more details")
                         .frame(height: 40)
                         .cornerRadius(0)
                 }
@@ -28,8 +75,9 @@ struct SettingsView: View {
                 // — they read as headers and don't fit naturally into a
                 // 2-column grid row.
                 VStack(spacing: 0) {
-                    AboutSettingsView()
+                    AboutSettingsView(iPadAction: IPadAdaptive.isIPad ? { iPadSheet = .about } : nil)
                     selectConferenceRow
+                    ThemePickerSettingsView(iPadAction: IPadAdaptive.isIPad ? { iPadSheet = .theme } : nil)
                     Divider()
                 }
                 if IPadAdaptive.isIPad {
@@ -73,42 +121,85 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .themedNavTitle("Settings", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             // iPad no longer needs the readable-column cap on Settings —
             // the 2-column grid utilizes the full width directly. iPhone
             // sees the same single-column flow either way.
+            .themedBackground(themeManager)
             .analyticsScreen(name: "SettingsView")
+        }
+        .sheet(item: $iPadSheet) { sheet in
+            NavigationStack {
+                Group {
+                    switch sheet {
+                    case .about:
+                        if let v1 = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+                           let v2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+                            AboutView(marketingVersion: v1, buildVersion: v2)
+                        }
+                    case .conferences:
+                        ConferencesView()
+                    case .theme:
+                        ThemePickerView()
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Done") { iPadSheet = nil }
+                    }
+                }
+            }
+            // About wants the big page-sheet (lots of content). The
+            // conference picker reads better at the default form-sheet
+            // size — short list, no need to fill the screen.
+            .iPadSheetSizing(sheet == .about ? .page : .form)
         }
     }
     @ViewBuilder private var selectConferenceRow: some View {
         HStack {
-            NavigationLink(destination: ConferencesView()) {
-                Image(systemName: "list.bullet")
-                    .padding(5)
-                VStack(alignment: .leading) {
-                    Text("Select Conference")
-                        .bold()
-                    Text("(\(viewModel.conference?.name ?? selected.code))")
-                        .font(.caption)
+            if IPadAdaptive.isIPad {
+                Button {
+                    iPadSheet = .conferences
+                } label: {
+                    conferenceRowLabel
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(5)
-                Image(systemName: "chevron.right")
-                    .padding(5)
+                .frame(maxWidth: .infinity)
+            } else {
+                NavigationLink(destination: ConferencesView()) {
+                    conferenceRowLabel
+                }
+                .frame(maxWidth: .infinity)
             }
-            .frame(maxWidth: .infinity)
         }
         .foregroundColor(.primary)
         .frame(maxWidth: .infinity)
-        .background(Color(.systemGray6))
+        .background(themeManager.cardSurface)
         .cornerRadius(5)
+    }
+
+    @ViewBuilder private var conferenceRowLabel: some View {
+        Image(systemName: "list.bullet")
+            .padding(5)
+        VStack(alignment: .leading) {
+            Text("Select Conference")
+                .bold()
+            Text("(\(viewModel.conference?.name ?? selected.code))")
+                .font(themeManager.captionFont)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(5)
+        Image(systemName: "chevron.right")
+            .padding(5)
     }
 
 }
 
 struct EasterEggSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("easterEgg") var easterEgg: Bool = false
     @AppStorage("easterEggMaxOpacity") var easterEggMaxOpacity: Double = 0.20
@@ -127,7 +218,7 @@ struct EasterEggSettingsView: View {
                         Text("Peak Opacity")
                         Spacer()
                         Text(String(format: "%.0f%%", easterEggMaxOpacity * 100))
-                            .font(.caption)
+                            .font(themeManager.captionFont)
                             .foregroundStyle(.secondary)
                             .monospacedDigit()
                     }
@@ -135,7 +226,7 @@ struct EasterEggSettingsView: View {
                     // make the feature look broken; ceiling at 1.0.
                     Slider(value: $easterEggMaxOpacity, in: 0.05...1.0, step: 0.05)
                     Text("How bright the background beezle gets at the peak of its pulse.")
-                        .font(.caption)
+                        .font(themeManager.captionFont)
                         .foregroundStyle(.secondary)
                 }
                 VStack(alignment: .leading, spacing: 4) {
@@ -145,7 +236,7 @@ struct EasterEggSettingsView: View {
                         Text(easterEggPeriod <= 0
                              ? "off"
                              : String(format: "%.0fs", easterEggPeriod))
-                            .font(.caption)
+                            .font(themeManager.captionFont)
                             .foregroundStyle(.secondary)
                             .monospacedDigit()
                     }
@@ -158,7 +249,7 @@ struct EasterEggSettingsView: View {
                             step: 1.0)
                         .labelsHidden()
                     Text("Seconds for a full fade in + out. 0 holds the ghost steady at the peak opacity.")
-                        .font(.caption)
+                        .font(themeManager.captionFont)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -170,16 +261,17 @@ struct EasterEggSettingsView: View {
 
 struct NotificationSettingsView: View {
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("notifyAt") var notifyAt: Int = 20
     @State private var showingAlert = false
 
     var body: some View {
         Text("Notifications")
-            .font(.headline)
+            .font(themeManager.headingFont)
         VStack(alignment: .leading) {
             Stepper("Before Event: \(notifyAt)", value: $notifyAt, in: 0...60)
                 Text("Notification time in minutes")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
         }
         .padding(5)
         HStack {
@@ -199,7 +291,7 @@ struct NotificationSettingsView: View {
         .foregroundColor(.white)
         .frame(maxWidth: .infinity)
         .padding(5)
-        .background(ThemeColors.red)
+        .background(themeManager.danger)
         .cornerRadius(5)
         Divider()
         ShowConflictAlertView()
@@ -210,32 +302,50 @@ struct NotificationSettingsView: View {
 }
 
 struct AboutSettingsView: View {
+    /// On iPad, the parent SettingsView passes a closure that presents
+    /// AboutView as a sheet instead of pushing it on the NavigationStack
+    /// (which would replace the whole settings screen). On iPhone this
+    /// is nil and the row falls back to the standard NavigationLink push.
+    var iPadAction: (() -> Void)? = nil
+
+    @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
         HStack {
             if let v1 = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, let v2 = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-                NavigationLink(destination: AboutView(marketingVersion: v1, buildVersion: v2)) {
-                    Image(systemName: "info.circle")
-                        .padding(5)
-                    VStack(alignment: .leading) {
-                        Text("About")
-                            .bold()
-                        Text("\(v1) (\(v2))")
-                            .font(.caption)
+                if let iPadAction {
+                    Button(action: iPadAction) {
+                        aboutRowLabel(v1: v1, v2: v2)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(5)
-                    Image(systemName: "chevron.right")
-                        .padding(5)
+                    .frame(maxWidth: .infinity)
+                } else {
+                    NavigationLink(destination: AboutView(marketingVersion: v1, buildVersion: v2)) {
+                        aboutRowLabel(v1: v1, v2: v2)
+                    }
+                    .frame(maxWidth: .infinity)
                 }
-                .frame(maxWidth: .infinity)
             }
         }
         .foregroundColor(.primary)
         .frame(maxWidth: .infinity)
-        .background(Color(.systemGray6))
+        .background(themeManager.cardSurface)
         .cornerRadius(5)
         Divider()
+    }
+
+    @ViewBuilder private func aboutRowLabel(v1: String, v2: String) -> some View {
+        Image(systemName: "info.circle")
+            .padding(5)
+        VStack(alignment: .leading) {
+            Text("About")
+                .bold()
+            Text("\(v1) (\(v2))")
+                .font(themeManager.captionFont)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(5)
+        Image(systemName: "chevron.right")
+            .padding(5)
     }
 }
 
@@ -294,12 +404,14 @@ HackerTracker is a conference scheduling application.
 HackerTracker iOS is licensed under the [GNU General Public License v3.0](https://github.com/junctor/hackertracker-ios/blob/main/LICENSE). You are free to use, modify, and redistribute it under the terms of that license.
 """
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 versionHeader
 
-                Markdown(AboutView.aboutBody)
+                Markdown(AboutView.aboutBody).themedMarkdown(themeManager)
 
                 Divider()
                 privacySection
@@ -310,16 +422,17 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 }
             }
             .padding()
-            .iPadReadableContent()
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .navigationTitle("About")
+        .themedNavTitle("About", themeManager)
         .navigationBarTitleDisplayMode(.inline)
     }
 
     private var versionHeader: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("Version \(marketingVersion)")
-                .font(.title3).bold()
+                .font(themeManager.title3Font).bold()
             Text("Build \(buildVersion)")
                 .font(.callout)
                 .foregroundStyle(.secondary)
@@ -331,7 +444,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             HStack(spacing: 8) {
                 Image(systemName: "hand.raised")
                 Text("Privacy & Tracking")
-                    .font(.headline)
+                    .font(themeManager.headingFont)
             }
 
             Text("What this app does and doesn’t collect. The full disclosure mirrors the docs/privacy.md page in the public repo.")
@@ -361,7 +474,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 Image(systemName: info.dirty ? "checkmark.seal.trianglebadge.exclamationmark" : "checkmark.seal")
                     .foregroundStyle(info.dirty ? .orange : .primary)
                 Text("Build provenance")
-                    .font(.headline)
+                    .font(themeManager.headingFont)
             }
 
             Text("Stamped at build time. Tap **View on GitHub** to confirm this build came from a specific public commit — if the page 404s, this build was not produced from a public commit on the official repo.")
@@ -376,7 +489,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 row("Build date (UTC)", info.buildDate)
             }
             .padding()
-            .background(Color(.systemGray6))
+            .background(themeManager.cardSurface)
             .cornerRadius(8)
 
             if info.dirty {
@@ -423,7 +536,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
     private func row(_ label: String, _ value: String, mono: Bool = false) -> some View {
         VStack(alignment: .leading, spacing: 2) {
             Text(label)
-                .font(.caption)
+                .font(themeManager.captionFont)
                 .foregroundStyle(.secondary)
             Text(value)
                 .font(mono ? .system(.footnote, design: .monospaced) : .body)
@@ -435,6 +548,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
 
 
 struct ShowNewsSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showNews") var showNews: Bool = true
     
@@ -446,7 +560,7 @@ struct ShowNewsSettingsView: View {
                         viewModel.showNews = value
                     }
                 Text("Show the most recent news article on the home screen")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -454,6 +568,7 @@ struct ShowNewsSettingsView: View {
 }
 
 struct ShowMerchInfoSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
     
     var body: some View {
@@ -463,7 +578,7 @@ struct ShowMerchInfoSettingsView: View {
                         Log.ui.debug("showMerchInfo=\(value)")
                     }
                 Text("Show the merchandise information link on the merch list")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -471,6 +586,7 @@ struct ShowMerchInfoSettingsView: View {
 }
 
 struct ShowPastEventsSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showPastEvents") var showPastEvents: Bool = true
     
@@ -482,7 +598,7 @@ struct ShowPastEventsSettingsView: View {
                     viewModel.showPastEvents = value
                 }
             Text("Show or hide past events in the conference schedule")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -490,6 +606,7 @@ struct ShowPastEventsSettingsView: View {
 }
 
 struct ShowConflictAlertView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
     
@@ -500,7 +617,7 @@ struct ShowConflictAlertView: View {
                     Log.ui.debug("showConflictAlert=\(value)")
                 }
             Text("Show the conflict alert icon on the schedule")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -570,6 +687,7 @@ struct StartScreenPickerView: View {
 }
 
 struct ShowLocaltimeSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("show24hourtime") var show24hourtime: Bool = true
@@ -610,13 +728,13 @@ struct ShowLocaltimeSettingsView: View {
                 Image(systemName: "clock")
                 Text(currentTimezoneDisplay)
             }
-            .font(.caption)
+            .font(themeManager.captionFont)
             .foregroundStyle(.secondary)
             // Polish: same vertical breathing room above the description as
             // the description has from the Toggle above the clock row.
             .padding(.bottom, 6)
             Text("Show event times in current localtime instead of conference time")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -626,7 +744,7 @@ struct ShowLocaltimeSettingsView: View {
                     Log.ui.debug("show24hourtime=\(value)")
                 }
             Text("Show event times in 24 hour time (13:00) instead of 12 hour time (1:00 PM)")
-                .font(.caption)
+                .font(themeManager.captionFont)
         }
         .padding(5)
         Divider()
@@ -649,6 +767,7 @@ struct SettingsView_Previews: PreviewProvider {
 ///     low-power mode). Caption explains why.
 ///   - Fully interactive otherwise.
 struct AISummarySettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("aiSummaries") var aiSummaries: Bool = false
 
     var body: some View {
@@ -660,11 +779,11 @@ struct AISummarySettingsView: View {
                         Log.ui.debug("aiSummaries=\(value)")
                     }
                 Text("Show one-sentence summaries of talk descriptions, generated on-device by Apple Intelligence. Summaries are cached and only generated for descriptions longer than 100 characters.")
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
                 if !AISummaryAvailability.isSupported {
                     Text("Apple Intelligence isn\u{2019}t available on this device right now.")
-                        .font(.caption2)
+                        .font(themeManager.captionFont)
                         .foregroundStyle(.tertiary)
                 }
             }
@@ -679,16 +798,131 @@ struct AISummarySettingsView: View {
 /// is false. Defaults true: opting in to create custom events implies
 /// wanting them visible.
 struct ShowCustomEventsSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("showCustomEvents") var showCustomEvents: Bool = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Toggle("Custom Events on Schedule", isOn: $showCustomEvents)
             Text("Hide your custom events from the conference schedule. They\u{2019}re still stored locally and synced to your other devices.")
-                .font(.caption)
+                .font(themeManager.captionFont)
                 .foregroundStyle(.secondary)
         }
         .padding(5)
         Divider()
+    }
+}
+
+// MARK: - Theme picker
+
+struct ThemePickerSettingsView: View {
+    @Environment(ThemeManager.self) private var themeManager
+    /// iPad shortcut: parent SettingsView presents ThemePickerView in
+    /// a form sheet instead of pushing.
+    var iPadAction: (() -> Void)? = nil
+
+    var body: some View {
+        HStack {
+            if let iPadAction {
+                Button(action: iPadAction) { themeRowLabel }
+                    .frame(maxWidth: .infinity)
+            } else {
+                NavigationLink(destination: ThemePickerView()) { themeRowLabel }
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .foregroundColor(.primary)
+        .frame(maxWidth: .infinity)
+        .background(themeManager.cardSurface)
+        .cornerRadius(5)
+        Divider()
+    }
+
+    @ViewBuilder private var themeRowLabel: some View {
+        Image(systemName: "paintbrush")
+            .padding(5)
+        VStack(alignment: .leading) {
+            Text("Theme")
+                .bold()
+            Text(themeManager.current.displayName)
+                .font(themeManager.captionFont)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(5)
+        Image(systemName: "chevron.right")
+            .padding(5)
+    }
+}
+
+struct ThemePickerView: View {
+    @Environment(ThemeManager.self) private var themeManager
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                ForEach(ThemeRegistry.all) { theme in
+                    Button {
+                        themeManager.setTheme(theme.id)
+                    } label: {
+                        themeRow(theme)
+                    }
+                    .buttonStyle(.plain)
+                }
+                Text("Themes change card backgrounds, accent colors, and typography across the app. Pick one and the rest of the UI updates immediately.")
+                    .font(themeManager.captionFont)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 4)
+                    .padding(.top, 8)
+            }
+            .padding()
+        }
+        .navigationTitle("Theme")
+        .themedNavTitle("Theme", themeManager)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    /// One row per registered theme. Each row previews the theme's
+    /// OWN cardSurface + typography so the picker doubles as a
+    /// live look-book.
+    @ViewBuilder
+    private func themeRow(_ theme: AppTheme) -> some View {
+        let isActive = theme.id == themeManager.current.id
+        HStack(spacing: 12) {
+            HStack(spacing: 6) {
+                swatch(theme.palette.cardSurface.auto)
+                swatch(theme.palette.accent.auto)
+                swatch(theme.palette.danger.auto)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(theme.displayName)
+                    .font(theme.typography.heading)
+                    .foregroundStyle(theme.palette.textPrimary.auto)
+                Text(isActive ? "Active" : "Tap to apply")
+                    .font(themeManager.captionFont)
+                    .foregroundStyle(theme.palette.textSecondary.auto)
+            }
+            Spacer()
+            if isActive {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(themeManager.title3Font)
+            }
+        }
+        .padding()
+        .background(theme.palette.cardSurface.auto)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(isActive ? Color.green : Color.primary.opacity(0.08),
+                        lineWidth: isActive ? 2 : 0.5)
+        )
+        .cornerRadius(10)
+    }
+
+    private func swatch(_ color: Color) -> some View {
+        Circle()
+            .fill(color)
+            .frame(width: 22, height: 22)
+            .overlay(Circle().stroke(Color.primary.opacity(0.15), lineWidth: 0.5))
     }
 }

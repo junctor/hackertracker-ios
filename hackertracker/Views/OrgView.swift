@@ -18,17 +18,19 @@ struct OrgView: View {
     @AppStorage("colorMode") var colorMode: Bool = false
     @Binding var tabSelection: Int
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         ScrollView {
             VStack {
                 HStack {
                     Text(org.name)
-                        .font(.title)
+                        .font(themeManager.titleFont)
                 }
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(15)
-                .background(Color(.systemGray6))
+                .background(themeManager.cardSurface)
                 .cornerRadius(15)
                 Divider()
                 if org.media.count > 0 {
@@ -46,7 +48,7 @@ struct OrgView: View {
                         }
                     }
                 }
-                Markdown(org.description)
+                Markdown(org.description).themedMarkdown(themeManager)
                 if let org_tag_id = org.tag_id_as_organizer, viewModel.events.first(where: { $0.tagIds.contains(org_tag_id)}) != nil {
                     Button {
                         if filters.filters != [org_tag_id] {
@@ -58,7 +60,7 @@ struct OrgView: View {
                             .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel() : Color(.systemGray6))
+                            .background(colorMode ? theme.carousel() : themeManager.cardSurface)
                             .cornerRadius(15)
                     }
                 }
@@ -81,6 +83,8 @@ struct showLinks: View {
     @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         VStack(alignment: .leading) {
             Button(action: {
@@ -88,18 +92,18 @@ struct showLinks: View {
             }, label: {
                 HStack {
                     Text("Links")
-                        .font(.headline)
+                        .font(themeManager.headingFont)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     if collapsed {
                         Text("Show")
                             .foregroundColor(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.right")
                             .foregroundColor(.secondary)
                     } else {
                         Text("Hide")
                             .foregroundStyle(.secondary)
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                         Image(systemName: "chevron.down")
                             .foregroundColor(.secondary)
                     }                }
@@ -120,7 +124,7 @@ struct showLinks: View {
                             .foregroundColor(.primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel() : Color(.systemGray6))
+                            .background(colorMode ? theme.carousel() : themeManager.cardSurface)
                             .cornerRadius(15)
                         }
                     }

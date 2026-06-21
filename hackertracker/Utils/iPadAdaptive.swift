@@ -19,6 +19,7 @@
 //  extensions instead.
 //
 
+import MarkdownUI
 import SwiftUI
 
 extension View {
@@ -36,6 +37,59 @@ extension View {
                 .frame(maxWidth: .infinity)
         } else {
             self
+        }
+    }
+
+    /// Detail-screen rounded cards on iPad read as "floating" tiles below
+    /// a flat nav bar, which makes the right detail pane look misaligned
+    /// from the left list. On iPad this returns the given radius as 0
+    /// (flat); on iPhone it passes through unchanged.
+    @MainActor
+    func iPadFlatCorners(_ radius: CGFloat = 15) -> some View {
+        self.cornerRadius(UIDevice.current.userInterfaceIdiom == .pad ? 0 : radius)
+    }
+
+    /// Replace the system base background with the active theme's
+    /// background color. Hides the default ScrollView background so
+    /// the themed color shows through; the result extends under the
+    /// nav bar (whose .ultraThinMaterial picks up the tint) and the
+    /// safe-area edges.
+    ///
+    /// Apply this at the root of each tab's body, e.g.:
+    /// `NavigationStack { ... }.themedBackground(themeManager)`
+    func themedBackground(_ themeManager: ThemeManager) -> some View {
+        self
+            .scrollContentBackground(.hidden)
+            .background(themeManager.background, ignoresSafeAreaEdges: .all)
+    }
+
+    /// Apply the active theme's font design (system / monospaced /
+    /// rounded) to MarkdownUI body text. MarkdownUI doesn't pick up
+    /// SwiftUI's `.font(_:)` environment default, so each `Markdown(_:)`
+    /// call site needs an explicit text-style override to match the
+    /// rest of the themed UI.
+    func themedMarkdown(_ themeManager: ThemeManager) -> some View {
+        self.markdownTextStyle(\.text) {
+            FontFamily(.system(themeManager.fontDesign))
+        }
+    }
+
+    /// Replace the default nav-bar title slot with a `Text` styled
+    /// by the active theme's heading font. UIKit's
+    /// `UINavigationBarAppearance` proxy gets reset by the per-view
+    /// `.toolbarBackground(.ultraThinMaterial, for: .navigationBar)`
+    /// calls scattered through the codebase, so a global appearance
+    /// alone never sticks. A principal ToolbarItem renders inside the
+    /// SwiftUI toolbar slot and is unaffected by background tweaks.
+    ///
+    /// Still pairs with `.navigationTitle(_:)` (kept by the caller)
+    /// so back-button labels, large-title fallbacks, and accessibility
+    /// have a string to fall back to.
+    func themedNavTitle(_ title: String, _ themeManager: ThemeManager) -> some View {
+        self.toolbar {
+            ToolbarItem(placement: .principal) {
+                Text(title).font(themeManager.headingFont)
+            }
         }
     }
 }

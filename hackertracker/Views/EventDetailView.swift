@@ -40,7 +40,7 @@ struct EventDetailView: View {
                             HStack {
                                 Image(systemName: "clock")
                                 Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.beginTimestamp)) - \(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: event.endTimestamp))")
-                                   .font(.subheadline).bold()
+                                   .font(themeManager.subheadlineFont).bold()
                             }
                             .padding(.leading, 10)
                             .padding(.trailing, 5)
@@ -51,7 +51,7 @@ struct EventDetailView: View {
                             .padding(.bottom, 5)
                             HStack {
                                 Image(systemName: "map")
-                                Text(event.location.name).font(.subheadline).bold()
+                                Text(event.location.name).font(themeManager.subheadlineFont).bold()
                             }
                             .padding(.leading, 10)
                             .padding(.trailing, 5)
@@ -66,11 +66,11 @@ struct EventDetailView: View {
                         }
                     }
                     .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(15)
+                    .background(ThemeColors.cardSurface)
+                    .iPadFlatCorners(15)
                 }
                 VStack(alignment: .leading) {
-                    Markdown(event.description).padding()
+                    Markdown(event.description).themedMarkdown(themeManager).padding()
                 }
                 if event.people.count > 0 {
                     showSpeakers(event: event)
@@ -157,7 +157,7 @@ struct showSpeakers: View {
             }, label: {
                 HStack {
                     Text("People")
-                        .font(.headline).padding(.top)
+                        .font(themeManager.headingFont).padding(.top)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
                 }
@@ -173,7 +173,7 @@ struct showSpeakers: View {
                                         VStack {
                                             Text(speaker.name)
                                             if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == person.tagId}) {
-                                                Text(tag.label).font(.caption)
+                                                Text(tag.label).font(themeManager.captionFont)
                                             }
                                         }
                                     }
@@ -192,7 +192,7 @@ struct showSpeakers: View {
                             VStack {
                                 Text(event.speakers[0].name)
                                 if let tagtype = viewModel.tagtypes.first(where: {$0.category == "content-person"}), let tag = tagtype.tags.first(where: {$0.id == people[0].tagId}) {
-                                    Text(tag.label).font(.caption)
+                                    Text(tag.label).font(themeManager.captionFont)
                                 }
                             }
                         }
@@ -214,6 +214,7 @@ struct showSpeakers: View {
 struct showTags: View {
     var tagIds: [Int]
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @State private var collapsed = false
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 
@@ -225,7 +226,7 @@ struct showTags: View {
                 }, label: {
                     HStack {
                         Text("Tags")
-                            .font(.subheadline)
+                            .font(themeManager.subheadlineFont)
                             .frame(maxWidth: .infinity, alignment: .leading)
                         collapsed ? Image(systemName: "chevron.right") : Image(systemName: "chevron.down")
                     }
@@ -239,7 +240,7 @@ struct showTags: View {
                                 VStack {
                                     HStack {
                                         Text(tag.label)
-                                            .font(.subheadline)
+                                            .font(themeManager.subheadlineFont)
                                             .foregroundColor(.white)
                                     }
                                 }

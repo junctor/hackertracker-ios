@@ -15,6 +15,7 @@ struct OrgsView: View {
     @Binding var tabSelection: Int
     @EnvironmentObject var theme: Theme
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @EnvironmentObject var selected: SelectedConference
     @State private var searchText = ""
 
@@ -133,7 +134,7 @@ struct OrgsView: View {
             HStack {
                 Spacer()
                 jumpMenu
-                    .font(.title2)
+                    .font(themeManager.title2Font)
                     .foregroundStyle(.primary)
                     .frame(width: 48, height: 48)
                     .background(.regularMaterial, in: Circle())
@@ -143,6 +144,7 @@ struct OrgsView: View {
             .padding(.bottom, 12)
         }
         .navigationTitle(title)
+        .themedNavTitle(title, themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
@@ -222,11 +224,13 @@ struct orgRow: View {
     var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
+    @Environment(ThemeManager.self) private var themeManager
+
     var body: some View {
         if let l = org.logo, let lurl = l.url, let logo_url = URL(string: lurl) {
             VStack {
                 Text(org.name)
-                    .font(.caption)
+                    .font(themeManager.captionFont)
                     .foregroundColor(colorMode ? .white : .primary)
                 KFImage(logo_url)
                     .htDownsampled(side: 200)
@@ -237,7 +241,7 @@ struct orgRow: View {
             }
             .padding(5)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(colorMode ? theme.carousel(): Color(.systemGray6))
+            .background(colorMode ? theme.carousel(): themeManager.cardSurface)
             .cornerRadius(15)
 
         } else {
@@ -245,7 +249,7 @@ struct orgRow: View {
                 .foregroundColor(colorMode ? .white : .primary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(15)
-                .background(colorMode ? theme.carousel(): Color(.systemGray6))
+                .background(colorMode ? theme.carousel(): themeManager.cardSurface)
                 .cornerRadius(15)
         }
     }
