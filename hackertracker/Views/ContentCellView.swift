@@ -114,7 +114,13 @@ struct ContentCell: View {
                             Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
                                 .foregroundColor(hasBookmarkConflict ? themeManager.danger : .primary)
                         }
-                        .accessibilityLabel(isBookmarked ? "Remove bookmark" : "Add bookmark")
+                        .accessibilityLabel(
+                            isBookmarked
+                                ? (hasBookmarkConflict
+                                    ? "Bookmarked, conflicts with another event"
+                                    : "Remove bookmark")
+                                : "Add bookmark"
+                        )
                     }
                     .buttonStyle(PlainButtonStyle())
                 }

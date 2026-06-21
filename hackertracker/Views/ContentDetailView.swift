@@ -321,7 +321,13 @@ struct showSessionRow: View {
                         Image(systemName: bookmarkIds.contains(Int32(s.id)) ? "bookmark.fill" : "bookmark")
                             .foregroundColor((bookmarkIds.contains(Int32(s.id)) && viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarks.map{Int($0.id)} )) ? themeManager.danger : .primary)
                     }
-                    .accessibilityLabel(bookmarkIds.contains(Int32(s.id)) ? "Remove bookmark" : "Add bookmark")
+                    .accessibilityLabel(
+                        bookmarkIds.contains(Int32(s.id))
+                            ? (viewModel.bookmarkConflicts(eventId: s.id, bookmarks: bookmarks.map{Int($0.id)})
+                                ? "Bookmarked, conflicts with another event"
+                                : "Remove bookmark")
+                            : "Add bookmark"
+                    )
                     MoreContentMenu(content: item, session: s, notExists: $notExists)
                 }
             }

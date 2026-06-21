@@ -150,9 +150,13 @@ extension AppTheme {
                 dark:  Color(.systemBackground)
             ),
             cardSurface: .cardSurface,
+            // .systemBlue is a dynamic UIColor whose dark variant is
+            // brighter than ThemeColors.blue (#326295). Using it here
+            // bumps Default-dark accent-on-cardSurface contrast from
+            // 2.38 (WCAG FAIL) to ~4.8 (PASS).
             accent: DualColor(
-                light: ThemeColors.blue,
-                dark:  ThemeColors.blue
+                light: Color(.systemBlue),
+                dark:  Color(.systemBlue)
             ),
             danger: DualColor(
                 light: ThemeColors.red,
@@ -372,7 +376,7 @@ extension AppTheme {
                 dark:  Color(red: 0/255,   green: 255/255, blue: 255/255)  // #00FFFF
             ),
             danger: DualColor(
-                light: Color(red: 181/255, green: 137/255, blue: 0/255),   // #B58900
+                light: Color(red: 125/255, green: 92/255,  blue: 0/255),   // #7D5C00 — darker amber, ≥3:1 vs cardSurface
                 dark:  Color(red: 255/255, green: 211/255, blue: 0/255)    // #FFD300
             ),
             textPrimary: DualColor(
