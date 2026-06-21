@@ -60,6 +60,27 @@ extension [Speaker] {
         guard !text.isEmpty else { return self }
         return filter { _searchMatches($0.name, needle: text) || _searchMatches($0.description, needle: text) }
     }
+
+    /// Speaker search with the speaker's event titles as additional
+    /// match surface. Passing an `eventsById` dict lets the search
+    /// match against talk titles too — useful when the user is
+    /// looking up "who's giving the BadgeLife panel" rather than the
+    /// speaker by name. Falls back gracefully when an event id isn't
+    /// in the dict (cold load), in which case that event just
+    /// doesn't contribute to the match for this speaker.
+    func search(text: String, eventsById: [Int: Event]) -> Self {
+        guard !text.isEmpty else { return self }
+        return filter { speaker in
+            if _searchMatches(speaker.name, needle: text)
+                || _searchMatches(speaker.description, needle: text) {
+                return true
+            }
+            return speaker.eventIds.contains { id in
+                guard let title = eventsById[id]?.title else { return false }
+                return _searchMatches(title, needle: text)
+            }
+        }
+    }
 }
 
 extension [Content] {

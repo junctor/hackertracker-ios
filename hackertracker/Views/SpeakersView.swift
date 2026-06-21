@@ -68,9 +68,11 @@ struct SpeakersView: View {
 
     /// Apply search + the speakerFilters chip selection using the
     /// precomputed per-speaker tag-id map. O(speakers) per render
-    /// instead of O(speakers × events).
+    /// instead of O(speakers × events). Search includes the speaker's
+    /// event titles so a user looking up "BadgeLife" finds the
+    /// speakers presenting that talk even if their name doesn't match.
     private var filteredSpeakers: [Speaker] {
-        let searched = speakers.search(text: searchText)
+        let searched = speakers.search(text: searchText, eventsById: viewModel.eventsById)
         let selected = speakerFilters.filters
         guard !selected.isEmpty else { return searched }
         return searched.filter { speaker in
