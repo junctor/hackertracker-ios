@@ -769,6 +769,15 @@ struct SettingsView_Previews: PreviewProvider {
 struct AISummarySettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
     @AppStorage("aiSummaries") var aiSummaries: Bool = false
+    /// Hidden gate for AI-generated speaker bios. Off by default and
+    /// the toggle only becomes visible after a 7-tap chord on the
+    /// "AI Summaries" row (or stays visible if already on, so users
+    /// can switch it back off without re-discovering the chord).
+    @AppStorage("speakerAISummaries") var speakerAISummaries: Bool = false
+    /// Tap-counter chord. Transient — resets on view rebuild, which
+    /// is fine because revealing the row is a one-time discovery.
+    @State private var aiTapCount: Int = 0
+    @State private var showSpeakerToggle: Bool = false
 
     var body: some View {
         if AISummaryAvailability.isPossiblyAvailable {
@@ -778,6 +787,18 @@ struct AISummarySettingsView: View {
                     .onChange(of: aiSummaries) { _, value in
                         Log.ui.debug("aiSummaries=\(value)")
                     }
+                    // 7-tap chord on the row label reveals the hidden
+                    // Speaker bios toggle below. contentShape on the
+                    // VStack ensures taps on the label area register
+                    // — the Toggle's switch handles its own taps.
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        aiTapCount += 1
+                        if aiTapCount >= 7 {
+                            showSpeakerToggle = true
+                            aiTapCount = 0
+                        }
+                    }
                 Text("Show one-sentence summaries of talk descriptions, generated on-device by Apple Intelligence. Summaries are cached and only generated for descriptions longer than 100 characters.")
                     .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
@@ -786,8 +807,31 @@ struct AISummarySettingsView: View {
                         .font(themeManager.captionFont)
                         .foregroundStyle(.tertiary)
                 }
+
+                // Hidden secondary toggle. Visible when (a) revealed
+                // by the chord this session, or (b) the user already
+                // turned it on previously — so they can disable it
+                // without having to re-tap the chord.
+                if showSpeakerToggle || speakerAISummaries {
+                    Divider()
+                        .padding(.vertical, 4)
+                    Toggle("Speaker bios (experimental)", isOn: $speakerAISummaries)
+                        .disabled(!aiSummaries || !AISummaryAvailability.isSupported)
+                        .onChange(of: speakerAISummaries) { _, value in
+                            Log.ui.debug("speakerAISummaries=\(value)")
+                        }
+                    Text("Also summarize speaker bios on the Speakers list when no job title is provided. Bios shorter than 100 characters render verbatim either way.")
+                        .font(themeManager.captionFont)
+                        .foregroundStyle(.secondary)
+                }
             }
             .padding(5)
+            .onAppear {
+                // Surface the toggle immediately on appear if the
+                // flag's already true (the chord only matters when
+                // it's currently off).
+                if speakerAISummaries { showSpeakerToggle = true }
+            }
             Divider()
         }
     }
