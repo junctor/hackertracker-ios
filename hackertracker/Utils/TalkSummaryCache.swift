@@ -23,16 +23,38 @@ import FoundationModels
 #endif
 
 /// Common shape shared by anything we know how to summarize. Lets
-/// the cache key by stable Int id + accept either a `Content`
-/// (All Content / Talks tab) or an `Event` (Schedule tab) without
+/// the cache accept any of: `Content` (All Content / Talks tab),
+/// `Event` (Schedule tab), or `Speaker` (Speakers tab) without
 /// duplicating method bodies.
 protocol SummarizableTalk {
     var id: Int { get }
     var description: String { get }
+    /// Stable key used by the persistence layer. Default impl returns
+    /// the integer id as-is for talks; types that share id space with
+    /// talks (e.g. `Speaker` may collide with `Content`/`Event` ids)
+    /// override to namespace.
+    var summaryCacheKey: String { get }
+    /// Selects the prompt template. The talk-bio prompt isn't the same
+    /// thing as the speaker-bio prompt — we want both targeted.
+    var summaryKind: SummaryKind { get }
+}
+
+extension SummarizableTalk {
+    var summaryCacheKey: String { String(id) }
+    var summaryKind: SummaryKind { .talk }
+}
+
+enum SummaryKind {
+    case talk     // Content + Event (conference talks)
+    case speaker  // Bio of a person presenting
 }
 
 extension Content: SummarizableTalk {}
 extension Event: SummarizableTalk {}
+extension Speaker: SummarizableTalk {
+    var summaryCacheKey: String { "speaker:\(id)" }
+    var summaryKind: SummaryKind { .speaker }
+}
 
 @Observable
 @MainActor
@@ -62,12 +84,12 @@ final class TalkSummaryCache {
         let createdAt: Date
     }
 
-    private var memory: [Int: Entry] = [:]
-    @ObservationIgnored private var inflight: [Int: Task<Void, Never>] = [:]
-    /// FIFO queue of items waiting for a slot. We store id + the raw
-    /// description string rather than the SummarizableTalk itself so
+    private var memory: [String: Entry] = [:]
+    @ObservationIgnored private var inflight: [String: Task<Void, Never>] = [:]
+    /// FIFO queue of items waiting for a slot. We store key +
+    /// description + kind rather than the SummarizableTalk itself so
     /// the queue isn't tied to either model type's lifecycle.
-    @ObservationIgnored private var pending: [(id: Int, description: String)] = []
+    @ObservationIgnored private var pending: [(key: String, description: String, kind: SummaryKind)] = []
 
     private init() {
         load()
@@ -81,13 +103,14 @@ final class TalkSummaryCache {
     /// changed since we last summarized (the stale entry is dropped
     /// to force a re-warm).
     func summary(for item: any SummarizableTalk) -> String? {
-        guard let entry = memory[item.id] else { return nil }
+        let key = item.summaryCacheKey
+        guard let entry = memory[key] else { return nil }
         let currentHash = Self.stableHash(item.description)
         if entry.descriptionHash == currentHash {
             return entry.summary
         }
         // Description changed -> stale. Drop and let the next warm refill.
-        memory.removeValue(forKey: item.id)
+        memory.removeValue(forKey: key)
         persist()
         return nil
     }
@@ -109,23 +132,24 @@ final class TalkSummaryCache {
         let trimmed = item.description.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count >= minDescriptionChars else { return }
         guard summary(for: item) == nil else { return }
-        guard inflight[item.id] == nil else { return }
+        let key = item.summaryCacheKey
+        guard inflight[key] == nil else { return }
 
         if inflight.count >= maxConcurrent {
-            if !pending.contains(where: { $0.id == item.id }) {
-                pending.append((item.id, item.description))
+            if !pending.contains(where: { $0.key == key }) {
+                pending.append((key, item.description, item.summaryKind))
             }
             return
         }
-        spawn(id: item.id, description: item.description)
+        spawn(key: key, description: item.description, kind: item.summaryKind)
     }
 
     // MARK: - Generation
 
-    private func spawn(id: Int, description: String) {
+    private func spawn(key: String, description: String, kind: SummaryKind) {
         #if canImport(FoundationModels)
         if #available(iOS 26.0, *) {
-            spawnReal(id: id, description: description)
+            spawnReal(key: key, description: description, kind: kind)
             return
         }
         #endif
@@ -136,12 +160,12 @@ final class TalkSummaryCache {
 
     #if canImport(FoundationModels)
     @available(iOS 26.0, *)
-    private func spawnReal(id: Int, description: String) {
-        let prompt = Self.prompt(for: description)
+    private func spawnReal(key: String, description: String, kind: SummaryKind) {
+        let prompt = Self.prompt(for: description, kind: kind)
 
         let task = Task { @MainActor [weak self] in
             defer {
-                self?.inflight.removeValue(forKey: id)
+                self?.inflight.removeValue(forKey: key)
                 self?.pump()
             }
             do {
@@ -156,15 +180,15 @@ final class TalkSummaryCache {
                     summary: summary,
                     createdAt: Date()
                 )
-                self?.memory[id] = entry
+                self?.memory[key] = entry
                 self?.prune()
                 self?.persist()
-                Log.app.debug("AI summary OK for \(id, privacy: .public): \(summary, privacy: .public)")
+                Log.app.debug("AI summary OK for \(key, privacy: .public): \(summary, privacy: .public)")
             } catch {
-                Log.app.debug("AI summary failed for \(id, privacy: .public): \(error.localizedDescription, privacy: .public)")
+                Log.app.debug("AI summary failed for \(key, privacy: .public): \(error.localizedDescription, privacy: .public)")
             }
         }
-        inflight[id] = task
+        inflight[key] = task
     }
     #endif
 
@@ -174,32 +198,45 @@ final class TalkSummaryCache {
         while inflight.count < maxConcurrent, !pending.isEmpty {
             let next = pending.removeFirst()
             // Re-check we don't already have a fresh entry by hashing.
-            // We can't call summary(for:) here without a SummarizableTalk,
-            // but checking the stored hash directly is equivalent.
             let h = Self.stableHash(next.description)
-            if let e = memory[next.id], e.descriptionHash == h { continue }
-            guard inflight[next.id] == nil else { continue }
-            spawn(id: next.id, description: next.description)
+            if let e = memory[next.key], e.descriptionHash == h { continue }
+            guard inflight[next.key] == nil else { continue }
+            spawn(key: next.key, description: next.description, kind: next.kind)
         }
     }
 
     // MARK: - Prompt + cleanup
 
-    /// Conference-flavored single-sentence summary. We bias toward
-    /// "what will the audience actually learn" because organizers
-    /// often write descriptions in marketing voice that fails to
-    /// answer that question on its own.
-    private static func prompt(for description: String) -> String {
-        """
-        Summarize this conference talk description in ONE sentence of
-        about 15 words. Focus on what the audience will learn or what
-        is demonstrated. Be concrete and concise. No hype, no
-        marketing language, no leading phrases like "this talk" or
-        "the speaker"—just the content. Do not add quotation marks.
+    /// Single-sentence summary, prompt tailored per kind. Talk prompts
+    /// bias toward "what will the audience learn"; speaker prompts bias
+    /// toward "what is this person known for" so the result reads as a
+    /// substitute for a missing job title rather than a TL;DR of their bio.
+    private static func prompt(for description: String, kind: SummaryKind) -> String {
+        switch kind {
+        case .talk:
+            return """
+            Summarize this conference talk description in ONE sentence of
+            about 15 words. Focus on what the audience will learn or what
+            is demonstrated. Be concrete and concise. No hype, no
+            marketing language, no leading phrases like "this talk" or
+            "the speaker"—just the content. Do not add quotation marks.
 
-        Description:
-        \(description)
-        """
+            Description:
+            \(description)
+            """
+        case .speaker:
+            return """
+            Summarize this conference speaker bio in ONE short fragment of
+            about 10 words — like a job title or professional descriptor
+            that reads naturally below the speaker's name. Capture what
+            they do or are known for. No hype, no leading phrases like
+            "this speaker" or "the bio"—just the substance. Do not add
+            quotation marks. Do not end with a period.
+
+            Bio:
+            \(description)
+            """
+        }
     }
 
     /// Strip wrapping quotes, leading "Summary:" markers, trailing
@@ -225,14 +262,24 @@ final class TalkSummaryCache {
 
     private func load() {
         guard let data = UserDefaults.standard.data(forKey: Self.defaultsKey) else { return }
-        do {
-            let decoded = try JSONDecoder().decode([Int: Entry].self, from: data)
+        // Try the current shape first; fall back to the legacy [Int: Entry]
+        // shape from before the Speaker namespacing landed. Legacy entries
+        // are folded into the new String-keyed map under their bare id —
+        // matches the default summaryCacheKey for Content/Event so existing
+        // talk summaries survive the upgrade.
+        if let decoded = try? JSONDecoder().decode([String: Entry].self, from: data) {
             self.memory = decoded
             Log.app.debug("TalkSummaryCache loaded \(decoded.count, privacy: .public) summaries")
-        } catch {
-            // Corrupt or schema-changed payload — drop it.
-            UserDefaults.standard.removeObject(forKey: Self.defaultsKey)
+            return
         }
+        if let legacy = try? JSONDecoder().decode([Int: Entry].self, from: data) {
+            self.memory = Dictionary(uniqueKeysWithValues: legacy.map { (String($0.key), $0.value) })
+            Log.app.debug("TalkSummaryCache migrated \(self.memory.count, privacy: .public) legacy entries")
+            persist()
+            return
+        }
+        // Corrupt payload — drop it.
+        UserDefaults.standard.removeObject(forKey: Self.defaultsKey)
     }
 
     private func persist() {
@@ -249,8 +296,8 @@ final class TalkSummaryCache {
         // Sort by createdAt asc, drop the oldest until we're back at cap.
         let sorted = memory.sorted { $0.value.createdAt < $1.value.createdAt }
         let toDrop = sorted.count - maxEntries
-        for (id, _) in sorted.prefix(toDrop) {
-            memory.removeValue(forKey: id)
+        for (key, _) in sorted.prefix(toDrop) {
+            memory.removeValue(forKey: key)
         }
     }
 

@@ -11,6 +11,18 @@ struct SpeakerRow: View {
     var speaker: Speaker
     var themeColor: Color
     @Environment(ThemeManager.self) private var themeManager
+    /// Mirror of the AI summary toggle used by EventCell / ContentCell.
+    /// When on AND the speaker lacks a job title, we render a one-line
+    /// AI-generated bio summary in the subtitle slot.
+    @AppStorage("aiSummaries") private var aiSummaries: Bool = false
+
+    /// True when the speaker has no provided job-title/subtitle to
+    /// render. Both nil and whitespace-only titles count as empty so
+    /// data quirks like `" "` don't suppress the summary fallback.
+    private var titleIsEmpty: Bool {
+        (speaker.title?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) ?? true
+    }
+
     var body: some View {
         HStack {
             Rectangle().fill(themeColor)
@@ -20,11 +32,28 @@ struct SpeakerRow: View {
                 Text(speaker.name)
                     .font(themeManager.headingFont)
                     .foregroundColor(.primary)
-                if let title = speaker.title {
+                if let title = speaker.title, !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     Text(title)
                         .font(themeManager.subheadlineFont)
                         .multilineTextAlignment(.leading)
                         .foregroundColor(.gray)
+                } else if aiSummaries,
+                          let summary = TalkSummaryCache.shared.summary(for: speaker) {
+                    // AI summary slot — only when there's no title to
+                    // show. Same styling as the talk-cell sparkle line.
+                    HStack(alignment: .top, spacing: 4) {
+                        Image(systemName: "sparkles")
+                            .font(themeManager.captionFont)
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 2)
+                        Text(summary)
+                            .font(themeManager.captionFont)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("AI summary: \(summary)")
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -39,6 +68,16 @@ struct SpeakerRow: View {
         .cornerRadius(10)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
+        // Opportunistic warm on materialization. The cache's own
+        // gating handles minDescriptionChars + availability + dedup,
+        // so the only thing we owe it here is the "title is empty"
+        // filter — otherwise we'd burn battery generating summaries
+        // we'll never display.
+        .task {
+            if aiSummaries && titleIsEmpty {
+                TalkSummaryCache.shared.warm(speaker)
+            }
+        }
     }
 }
 
