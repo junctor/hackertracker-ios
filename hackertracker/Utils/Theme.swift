@@ -298,12 +298,168 @@ extension AppTheme {
             monospace:   .system(.body,        design: .monospaced)
         )
     )
+
+    /// DEF CON Red: black + crimson, system bold typography. Homage to
+    /// DEF CON's classic palette.
+    static let defconRed = AppTheme(
+        id: "defconRed",
+        displayName: "DEF CON Red",
+        palette: ThemePalette(
+            background: DualColor(
+                light: Color(red: 250/255, green: 245/255, blue: 245/255), // #FAF5F5
+                dark:  Color(red: 10/255,  green: 6/255,   blue: 6/255)    // #0A0606
+            ),
+            cardSurface: DualColor(
+                light: Color(red: 247/255, green: 232/255, blue: 232/255), // #F7E8E8
+                dark:  Color(red: 31/255,  green: 8/255,   blue: 8/255)    // #1F0808
+            ),
+            accent: DualColor(
+                light: Color(red: 192/255, green: 0/255,   blue: 0/255),   // #C00000
+                dark:  Color(red: 255/255, green: 45/255,  blue: 45/255)   // #FF2D2D
+            ),
+            danger: DualColor(
+                light: Color(red: 178/255, green: 34/255,  blue: 34/255),  // #B22222
+                dark:  Color(red: 255/255, green: 69/255,  blue: 0/255)    // #FF4500
+            ),
+            textPrimary: DualColor(
+                light: .black,
+                dark:  Color(red: 255/255, green: 230/255, blue: 230/255)
+            ),
+            textSecondary: DualColor(
+                light: Color(red: 90/255,  green: 30/255,  blue: 30/255),
+                dark:  Color(red: 200/255, green: 130/255, blue: 130/255)
+            ),
+            divider: DualColor(
+                light: Color(.separator),
+                dark:  Color(red: 60/255,  green: 20/255,  blue: 20/255)
+            ),
+            chipBackground: DualColor(
+                light: Color(red: 240/255, green: 215/255, blue: 215/255),
+                dark:  Color(red: 50/255,  green: 18/255,  blue: 18/255)
+            )
+        ),
+        typography: ThemeTypography(
+            largeTitle:  .system(.largeTitle).bold(),
+            title:       .system(.title).bold(),
+            title2:      .system(.title2).bold(),
+            title3:      .system(.title3).bold(),
+            heading:     .system(.headline),
+            subheadline: .system(.subheadline),
+            body:        .system(.body),
+            caption:     .system(.caption),
+            monospace:   .system(.body, design: .monospaced)
+        )
+    )
+
+    /// Cyberpunk: electric cyan + warning yellow on deep navy. Retro-
+    /// futurist neon. Rounded system typography throughout.
+    static let cyberpunk = AppTheme(
+        id: "cyberpunk",
+        displayName: "Cyberpunk",
+        palette: ThemePalette(
+            background: DualColor(
+                light: Color(red: 255/255, green: 252/255, blue: 235/255), // #FFFCEB
+                dark:  Color(red: 5/255,   green: 8/255,   blue: 24/255)   // #050818
+            ),
+            cardSurface: DualColor(
+                light: Color(red: 255/255, green: 245/255, blue: 200/255), // #FFF5C8
+                dark:  Color(red: 14/255,  green: 20/255,  blue: 40/255)   // #0E1428
+            ),
+            accent: DualColor(
+                light: Color(red: 0/255,   green: 139/255, blue: 139/255), // #008B8B
+                dark:  Color(red: 0/255,   green: 255/255, blue: 255/255)  // #00FFFF
+            ),
+            danger: DualColor(
+                light: Color(red: 181/255, green: 137/255, blue: 0/255),   // #B58900
+                dark:  Color(red: 255/255, green: 211/255, blue: 0/255)    // #FFD300
+            ),
+            textPrimary: DualColor(
+                light: .black,
+                dark:  Color(red: 220/255, green: 250/255, blue: 255/255)
+            ),
+            textSecondary: DualColor(
+                light: Color(red: 70/255,  green: 70/255,  blue: 100/255),
+                dark:  Color(red: 150/255, green: 200/255, blue: 220/255)
+            ),
+            divider: DualColor(
+                light: Color(.separator),
+                dark:  Color(red: 30/255,  green: 40/255,  blue: 80/255)
+            ),
+            chipBackground: DualColor(
+                light: Color(red: 250/255, green: 240/255, blue: 180/255),
+                dark:  Color(red: 20/255,  green: 30/255,  blue: 55/255)
+            )
+        ),
+        typography: ThemeTypography(
+            largeTitle:  .system(.largeTitle,  design: .rounded).bold(),
+            title:       .system(.title,       design: .rounded).bold(),
+            title2:      .system(.title2,      design: .rounded).bold(),
+            title3:      .system(.title3,      design: .rounded).bold(),
+            heading:     .system(.headline,    design: .rounded),
+            subheadline: .system(.subheadline, design: .rounded),
+            body:        .system(.body,        design: .rounded),
+            caption:     .system(.caption,     design: .rounded),
+            monospace:   .system(.body,        design: .monospaced)
+        )
+    )
+
+    /// Vegas: gold + neon-pink on deep plum. Casino-marquee serif
+    /// typography for that DEF CON Las Vegas home vibe.
+    static let vegas = AppTheme(
+        id: "vegas",
+        displayName: "Vegas",
+        palette: ThemePalette(
+            background: DualColor(
+                light: Color(red: 248/255, green: 239/255, blue: 255/255), // #F8EFFF
+                dark:  Color(red: 24/255,  green: 11/255,  blue: 34/255)   // #180B22
+            ),
+            cardSurface: DualColor(
+                light: Color(red: 235/255, green: 216/255, blue: 250/255), // #EBD8FA
+                dark:  Color(red: 41/255,  green: 19/255,  blue: 64/255)   // #291340
+            ),
+            accent: DualColor(
+                light: Color(red: 199/255, green: 21/255,  blue: 133/255), // #C71585
+                dark:  Color(red: 255/255, green: 20/255,  blue: 147/255)  // #FF1493
+            ),
+            danger: DualColor(
+                light: Color(red: 178/255, green: 34/255,  blue: 34/255),  // #B22222
+                dark:  Color(red: 255/255, green: 69/255,  blue: 0/255)    // #FF4500
+            ),
+            textPrimary: DualColor(
+                light: .black,
+                dark:  Color(red: 250/255, green: 240/255, blue: 220/255)
+            ),
+            textSecondary: DualColor(
+                light: Color(red: 90/255,  green: 60/255,  blue: 110/255),
+                dark:  Color(red: 215/255, green: 195/255, blue: 165/255)
+            ),
+            divider: DualColor(
+                light: Color(.separator),
+                dark:  Color(red: 100/255, green: 70/255,  blue: 130/255)
+            ),
+            chipBackground: DualColor(
+                light: Color(red: 235/255, green: 220/255, blue: 245/255),
+                dark:  Color(red: 60/255,  green: 35/255,  blue: 90/255)
+            )
+        ),
+        typography: ThemeTypography(
+            largeTitle:  .system(.largeTitle,  design: .serif).bold(),
+            title:       .system(.title,       design: .serif).bold(),
+            title2:      .system(.title2,      design: .serif).bold(),
+            title3:      .system(.title3,      design: .serif).bold(),
+            heading:     .system(.headline,    design: .serif),
+            subheadline: .system(.subheadline, design: .serif),
+            body:        .system(.body,        design: .serif),
+            caption:     .system(.caption,     design: .serif),
+            monospace:   .system(.body,        design: .monospaced)
+        )
+    )
 }
 
 /// Registry of all available themes. Adding a new theme is a one-line
 /// append here once you've defined it as an `AppTheme` static.
 enum ThemeRegistry {
-    static let all: [AppTheme] = [.default, .hackerGreen, .synthwave]
+    static let all: [AppTheme] = [.default, .hackerGreen, .synthwave, .defconRed, .cyberpunk, .vegas]
     static let fallback: AppTheme = .default
 }
 
