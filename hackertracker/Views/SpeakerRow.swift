@@ -18,10 +18,21 @@ struct SpeakerRow: View {
 
     /// True when the speaker has no provided job-title/subtitle to
     /// render. Both nil and whitespace-only titles count as empty so
-    /// data quirks like `" "` don't suppress the summary fallback.
+    /// data quirks like `" "` don't suppress the fallback chain.
     private var titleIsEmpty: Bool {
         (speaker.title?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) ?? true
     }
+
+    /// Trimmed bio text. Empty string if the speaker has no bio.
+    private var trimmedBio: String {
+        speaker.description.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Bios under this length are short enough to fit as a subtitle
+    /// verbatim. Matches `TalkSummaryCache.minDescriptionChars` so
+    /// anything we'd otherwise feed to the on-device LLM is also the
+    /// threshold for "long enough that we should summarize instead".
+    private static let inlineBioMaxChars = 100
 
     var body: some View {
         HStack {
@@ -32,15 +43,30 @@ struct SpeakerRow: View {
                 Text(speaker.name)
                     .font(themeManager.headingFont)
                     .foregroundColor(.primary)
+                // Subtitle fallback chain (first match wins):
+                //   1. Real job title.
+                //   2. Short bio (< 100 chars) — show verbatim. Same
+                //      threshold as the AI cache so we never leave a
+                //      short bio invisible just because AI is off.
+                //   3. AI summary, if user has opted in AND the cache
+                //      has produced one for this long-bio speaker.
+                //   4. Nothing.
                 if let title = speaker.title, !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     Text(title)
                         .font(themeManager.subheadlineFont)
                         .multilineTextAlignment(.leading)
                         .foregroundColor(.gray)
+                } else if !trimmedBio.isEmpty, trimmedBio.count < Self.inlineBioMaxChars {
+                    Text(trimmedBio)
+                        .font(themeManager.subheadlineFont)
+                        .multilineTextAlignment(.leading)
+                        .foregroundColor(.gray)
                 } else if aiSummaries,
                           let summary = TalkSummaryCache.shared.summary(for: speaker) {
-                    // AI summary slot — only when there's no title to
-                    // show. Same styling as the talk-cell sparkle line.
+                    // AI summary slot — same styling as the talk-cell
+                    // sparkle line. Only reachable when the bio is
+                    // long enough that the cache would actually
+                    // summarize it.
                     HStack(alignment: .top, spacing: 4) {
                         Image(systemName: "sparkles")
                             .font(themeManager.captionFont)
@@ -69,12 +95,14 @@ struct SpeakerRow: View {
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
         // Opportunistic warm on materialization. The cache's own
-        // gating handles minDescriptionChars + availability + dedup,
-        // so the only thing we owe it here is the "title is empty"
-        // filter — otherwise we'd burn battery generating summaries
-        // we'll never display.
+        // gating handles availability + dedup, but we additionally
+        // require titleIsEmpty AND a long bio — otherwise the row
+        // would render its title or the short-bio fallback verbatim
+        // and the summary would never display.
         .task {
-            if aiSummaries && titleIsEmpty {
+            if aiSummaries,
+               titleIsEmpty,
+               trimmedBio.count >= Self.inlineBioMaxChars {
                 TalkSummaryCache.shared.warm(speaker)
             }
         }
