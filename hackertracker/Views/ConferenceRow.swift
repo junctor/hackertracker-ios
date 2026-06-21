@@ -14,16 +14,17 @@ struct ConferenceRow: View {
     @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 5, content: {
+        let isActive = conference.code == code
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(conference.name)
                     .font(themeManager.title3Font)
                 if conference.startDate == conference.endDate {
                     Text(conference.endDate)
-                        .font(.body)
+                        .font(themeManager.bodyFont)
                 } else {
                     Text("\(conference.startDate) - \(conference.endDate)")
-                        .font(.body)
+                        .font(themeManager.bodyFont)
                 }
                 // Polish: surface the conference timezone so users can see at
                 // a glance which timezone the schedule renders in.
@@ -35,28 +36,32 @@ struct ConferenceRow: View {
                     .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
                 }
-            })
+                Text(isActive ? "Active" : "Tap to switch")
+                    .font(themeManager.captionFont)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 2)
+            }
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(0)
 
-            if conference.code == code {
-                HStack(alignment: .top, spacing: 0, content: {
-                    VStack(alignment: .center, spacing: 5, content: {
-                        Image(systemName: "checkmark")
-                    })
-                })
+            if isActive {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(themeManager.title3Font)
             }
         }
-        // Polish: card-style background per row so cells visually separate
-        // now that we're using LazyVStack instead of List (which used to
-        // provide its own row separators).
-        .padding(.vertical, 12)
-        .padding(.horizontal, 14)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        // Card-style row matching ThemePickerView: cardSurface
+        // background, 2pt green border + checkmark when active, soft
+        // hairline border otherwise.
+        .padding()
         .background(themeManager.cardSurface)
-        .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(isActive ? Color.green : Color.primary.opacity(0.08),
+                        lineWidth: isActive ? 2 : 0.5)
+        )
+        .cornerRadius(10)
         .padding(.horizontal, 12)
-        .padding(.vertical, 4)
+        .padding(.vertical, 6)
     }
 }
 
