@@ -124,10 +124,10 @@ struct ContentCell: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
+                .padding(.vertical, 10)
+                .padding(.trailing, 12)
             }
         }
-        .padding(.vertical, 10)
-        .padding(.trailing, 12)
         .background(themeManager.cardSurface)
         .cornerRadius(10)
         .padding(.horizontal, 8)

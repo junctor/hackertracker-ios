@@ -28,11 +28,13 @@ struct SpeakerRow: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 10)
+            .padding(.trailing, 12)
         }
         // Card treatment parity with EventCell + ContentCell so the
-        // speakers list reads as the same design family.
-        .padding(.vertical, 10)
-        .padding(.trailing, 12)
+        // speakers list reads as the same design family. Padding lives
+        // on the inner content VStack only so the leading color stripe
+        // stretches edge-to-edge of the card.
         .background(themeManager.cardSurface)
         .cornerRadius(10)
         .padding(.horizontal, 8)
