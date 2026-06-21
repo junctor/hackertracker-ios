@@ -11,6 +11,8 @@ struct SpeakersView: View {
     var speakers: [Speaker]
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
+    @EnvironmentObject var speakerFilters: SpeakerFiltersStore
+    @AppStorage("filterMatchModeSpeakers") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     @State private var searchText = ""
 
     // Polish parity with schedule / All Content.
@@ -18,11 +20,60 @@ struct SpeakersView: View {
     @FocusState private var searchFocused: Bool
     @State private var scrollToGroup: String.Element?
     @State private var lastJumpedGroup: String.Element?
+    @State private var showFilters: Bool = false
     /// iPad-only: identifies the speaker currently shown in the detail column.
     @State private var ipadSelectedSpeakerId: Int?
 
+    private var filterMatchMode: FilterMatchMode {
+        FilterMatchMode(rawOrDefault: filterMatchModeRaw)
+    }
+
+    /// Rolls a speaker's events up into their unique tag IDs. Same
+    /// logic as SpeakerRow's chip strip — keep them aligned so the
+    /// filter selects on exactly what the chips display.
+    private func tagIds(for speaker: Speaker) -> Set<Int> {
+        let mine = viewModel.events.filter { speaker.eventIds.contains($0.id) }
+        return Set(mine.flatMap(\.tagIds))
+    }
+
+    /// Apply search + the speakerFilters chip selection. Same Any/All
+    /// semantics as the schedule's filter pipeline so behavior reads
+    /// the same way to a user toggling between tabs.
+    private var filteredSpeakers: [Speaker] {
+        let searched = speakers.search(text: searchText)
+        let selected = speakerFilters.filters
+        guard !selected.isEmpty else { return searched }
+        return searched.filter { speaker in
+            let st = tagIds(for: speaker)
+            switch filterMatchMode {
+            case .any: return !st.isDisjoint(with: selected)
+            case .all: return selected.isSubset(of: st)
+            }
+        }
+    }
+
+    /// Subset of conference tagtypes that actually appear in this
+    /// speakers list. Smaller pool than the schedule's filter because
+    /// speakers are bounded by their participation — we only show
+    /// chips for tags at least one speaker is connected to.
+    private var availableTagTypes: [TagType] {
+        let speakerTagPool: Set<Int> = Set(
+            speakers
+                .flatMap { $0.eventIds }
+                .compactMap { id in viewModel.events.first(where: { $0.id == id })?.tagIds }
+                .flatMap { $0 }
+        )
+        return viewModel.tagtypes
+            .filter { $0.category == "content" && $0.isBrowsable }
+            .compactMap { tagtype in
+                var copy = tagtype
+                copy.tags = tagtype.tags.filter { speakerTagPool.contains($0.id) }
+                return copy.tags.isEmpty ? nil : copy
+            }
+    }
+
     private var grouped: [(key: String.Element, value: [Speaker])] {
-        Dictionary(grouping: speakers.search(text: searchText),
+        Dictionary(grouping: filteredSpeakers,
                    by: { $0.name.lowercased().first ?? "-" })
             .sorted { $0.key < $1.key }
     }
@@ -149,7 +200,23 @@ struct SpeakersView: View {
         }
         .overlay(alignment: .bottom) {
             HStack {
+                // Filter circle on the leading side, mirroring
+                // Schedule's affordance placement.
+                Button {
+                    showFilters.toggle()
+                } label: {
+                    Image(systemName: speakerFilters.filters.isEmpty
+                          ? "line.3.horizontal.decrease.circle"
+                          : "line.3.horizontal.decrease.circle.fill")
+                        .font(themeManager.title2Font)
+                        .frame(width: 48, height: 48)
+                        .background(.regularMaterial, in: Circle())
+                }
+                .tint(.primary)
+                .accessibilityLabel(speakerFilters.filters.isEmpty ? "Filters" : "Filters active")
+
                 Spacer()
+
                 jumpToGroupMenu
                     .font(themeManager.title2Font)
                     .foregroundStyle(.primary)
@@ -159,6 +226,13 @@ struct SpeakersView: View {
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
+        }
+        .sheet(isPresented: $showFilters) {
+            SpeakerFiltersSheet(
+                tagtypes: availableTagTypes,
+                showFilters: $showFilters,
+                matchedCount: filteredSpeakers.count
+            )
         }
         .navigationTitle("Speakers")
         .themedNavTitle("Speakers", themeManager)
@@ -238,5 +312,123 @@ struct SpeakersView_Previews: PreviewProvider {
         NavigationView {
             SpeakersView(speakers: []).preferredColorScheme(.dark)
         }
+    }
+}
+
+/// Filter sheet for the Speakers list. Mirrors the chrome of
+/// `EventFilters` (Match Any/All picker + live tally + tagtype-
+/// grouped chip grid + Clear/Done toolbar buttons) so users see the
+/// same shape they already know from Schedule. Differences:
+///
+/// - Reads `SpeakerFiltersStore` instead of `Filters`, so toggling a
+///   chip here doesn't bleed into Schedule / All Content selections.
+/// - Persists Match mode under "filterMatchModeSpeakers" so the
+///   speakers list mode is independent from the schedule's.
+/// - No pseudo-tag chips. Bookmarks don't apply to speakers and
+///   notes aren't authored on speakers at present — re-add when
+///   either becomes meaningful for this list.
+/// - Tag pool is already pre-filtered upstream by `SpeakersView` to
+///   only the tags at least one visible speaker is connected to.
+struct SpeakerFiltersSheet: View {
+    let tagtypes: [TagType]
+    @Binding var showFilters: Bool
+    @EnvironmentObject var speakerFilters: SpeakerFiltersStore
+    @Environment(ThemeManager.self) private var themeManager
+    /// Same shape as EventFilters' matchedCount — caller computes
+    /// using the same filter pipeline so the displayed tally is the
+    /// row count the list will render.
+    var matchedCount: Int = 0
+    @AppStorage("filterMatchModeSpeakers") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+
+    let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                MatchModePickerRow(raw: $filterMatchModeRaw)
+                FilterMatchCountLabel(count: matchedCount, unit: "speaker")
+
+                ForEach(tagtypes.sorted { $0.sortOrder < $1.sortOrder }) { tagtype in
+                    Section {
+                        LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 10) {
+                            ForEach(tagtype.tags.sorted { $0.sortOrder < $1.sortOrder }) { tag in
+                                SpeakerFilterRow(
+                                    id: tag.id,
+                                    name: tag.label,
+                                    color: Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple)
+                                )
+                            }
+                        }
+                    } header: {
+                        Text(tagtype.label)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .headerProminence(.increased)
+            }
+            .padding(.horizontal, 10)
+            .navigationTitle("Filters")
+            .themedNavTitle("Filters", themeManager)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Clear") {
+                        speakerFilters.filters.removeAll()
+                    }
+                    .disabled(speakerFilters.filters.isEmpty)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
+                        showFilters = false
+                    }
+                    .bold()
+                }
+            }
+        }
+    }
+}
+
+/// Speaker-list flavored copy of FilterRow. Same chip styling as the
+/// schedule's row but writes to `SpeakerFiltersStore`. A separate
+/// struct (vs. parameterizing FilterRow with a generic store) keeps
+/// EnvironmentObject typing clean — both Filters and
+/// SpeakerFiltersStore can be present in the env without one chip
+/// row picking the wrong store.
+struct SpeakerFilterRow: View {
+    let id: Int
+    let name: String
+    let color: Color
+    @EnvironmentObject var speakerFilters: SpeakerFiltersStore
+    @Environment(ThemeManager.self) private var themeManager
+
+    var body: some View {
+        Button(action: {
+            if speakerFilters.filters.contains(id) {
+                speakerFilters.filters.remove(id)
+            } else {
+                speakerFilters.filters.insert(id)
+            }
+            Log.ui.debug("SpeakerFilters=\(speakerFilters.filters)")
+        }) {
+            VStack(alignment: .leading) {
+                HStack {
+                    Text(name)
+                        .font(themeManager.subheadlineFont)
+                        .padding(5)
+                }
+            }
+            .foregroundColor(speakerFilters.filters.contains(id) ? .white : .primary)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .padding(5)
+            .background(speakerFilters.filters.contains(id) ? color : Color.clear)
+            .cornerRadius(10)
+            .overlay(
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(color, lineWidth: 1.5)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }

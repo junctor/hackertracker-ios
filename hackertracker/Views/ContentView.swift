@@ -50,6 +50,9 @@ struct ContentView: View {
     @StateObject private var toCurrent = ToCurrent()
     @StateObject private var toNext = ToNext()
     @StateObject var filters = Filters(filters:[])
+    /// Independent filter set for the Speakers list — selections here
+    /// don't bleed into Schedule / All Content.
+    @StateObject var speakerFilters = SpeakerFiltersStore()
     @State private var tabSelection = 1
     // @State private var tappedMainTwice = false
     // @State private var tappedScheduleTwice = false
@@ -157,6 +160,7 @@ struct ContentView: View {
             .environmentObject(toCurrent)
             .environmentObject(toNext)
             .environmentObject(filters)
+            .environmentObject(speakerFilters)
             // Themes: set the default body font for the entire tab
             // tree. Any Text() that doesn't explicitly call .font()
             // inherits this — so card labels, schedule rows, settings
@@ -182,6 +186,7 @@ struct ContentView: View {
                     .environmentObject(theme)
                     .environment(themeManager)
                     .environmentObject(filters)
+                    .environmentObject(speakerFilters)
             } else {
                 _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
                     .preferredColorScheme(theme.colorScheme)
@@ -191,6 +196,7 @@ struct ContentView: View {
                     .environmentObject(theme)
                     .environment(themeManager)
                     .environmentObject(filters)
+                    .environmentObject(speakerFilters)
                     .task {
                         Log.app.debug("ContentView selected=\(selected.code, privacy: .public) stored=\(conferenceCode, privacy: .public)")
                         if selected.code != conferenceCode {
