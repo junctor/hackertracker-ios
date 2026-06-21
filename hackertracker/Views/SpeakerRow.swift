@@ -46,13 +46,20 @@ struct SpeakerRow: View {
     private static let inlineBioMaxChars = 100
 
     /// Unique tag IDs rolled up across every event this speaker is
-    /// associated with. Drives the chip strip — gives the user a
-    /// glanceable signal of what kind of work this speaker does
-    /// (Event Category + Organizer chips, etc.) without having to
-    /// tap into the detail screen.
+    /// associated with, minus tagtypes that are intentionally hidden
+    /// from the speakers list (see `SpeakerListConfig`). Drives the
+    /// chip strip — gives the user a glanceable signal of what kind
+    /// of work this speaker does (Event Category, Organizer, etc.)
+    /// without having to tap into the detail screen.
     private var speakerTagIds: [Int] {
         let mine = viewModel.events.filter { speaker.eventIds.contains($0.id) }
-        return Array(Set(mine.flatMap(\.tagIds)))
+        let all = Set(mine.flatMap(\.tagIds))
+        let excluded: Set<Int> = Set(
+            viewModel.tagtypes
+                .filter { SpeakerListConfig.excludedTagTypeLabels.contains($0.label) }
+                .flatMap { $0.tags.map(\.id) }
+        )
+        return Array(all.subtracting(excluded))
     }
 
     var body: some View {

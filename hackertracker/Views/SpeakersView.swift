@@ -28,12 +28,25 @@ struct SpeakersView: View {
         FilterMatchMode(rawOrDefault: filterMatchModeRaw)
     }
 
-    /// Rolls a speaker's events up into their unique tag IDs. Same
-    /// logic as SpeakerRow's chip strip — keep them aligned so the
-    /// filter selects on exactly what the chips display.
+    /// Tag IDs from tagtypes intentionally hidden from the speakers
+    /// list (`SpeakerListConfig.excludedTagTypeLabels`). Cached as a
+    /// computed property so the filter pipeline and the chip-pool
+    /// computation both pull from the same exclusion set.
+    private var excludedTagIds: Set<Int> {
+        Set(
+            viewModel.tagtypes
+                .filter { SpeakerListConfig.excludedTagTypeLabels.contains($0.label) }
+                .flatMap { $0.tags.map(\.id) }
+        )
+    }
+
+    /// Rolls a speaker's events up into their unique tag IDs minus
+    /// the excluded tagtypes. Same logic as SpeakerRow's chip strip
+    /// — keep them aligned so the filter selects on exactly what the
+    /// chips display.
     private func tagIds(for speaker: Speaker) -> Set<Int> {
         let mine = viewModel.events.filter { speaker.eventIds.contains($0.id) }
-        return Set(mine.flatMap(\.tagIds))
+        return Set(mine.flatMap(\.tagIds)).subtracting(excludedTagIds)
     }
 
     /// Apply search + the speakerFilters chip selection. Same Any/All
@@ -65,6 +78,7 @@ struct SpeakersView: View {
         )
         return viewModel.tagtypes
             .filter { $0.category == "content" && $0.isBrowsable }
+            .filter { !SpeakerListConfig.excludedTagTypeLabels.contains($0.label) }
             .compactMap { tagtype in
                 var copy = tagtype
                 copy.tags = tagtype.tags.filter { speakerTagPool.contains($0.id) }
