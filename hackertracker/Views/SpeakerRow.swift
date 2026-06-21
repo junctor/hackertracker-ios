@@ -29,6 +29,14 @@ struct SpeakerRow: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+        // Card treatment parity with EventCell + ContentCell so the
+        // speakers list reads as the same design family.
+        .padding(.vertical, 10)
+        .padding(.trailing, 12)
+        .background(themeManager.cardSurface)
+        .cornerRadius(10)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
     }
 }
 
