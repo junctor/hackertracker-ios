@@ -87,11 +87,11 @@ struct ContentCell: View {
                                 HStack(alignment: .top, spacing: 4) {
                                     Image(systemName: "sparkles")
                                         .font(themeManager.captionFont)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundColor(ThemeColors.muted)
                                         .padding(.top, 2)
                                     Text(summary)
                                         .font(themeManager.captionFont)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundColor(ThemeColors.muted)
                                         .lineLimit(2)
                                         .multilineTextAlignment(.leading)
                                 }

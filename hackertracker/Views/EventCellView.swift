@@ -91,11 +91,11 @@ struct EventCell: View {
                                 HStack(alignment: .top, spacing: 4) {
                                     Image(systemName: "sparkles")
                                         .font(themeManager.captionFont)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundColor(ThemeColors.muted)
                                         .padding(.top, 2)
                                     Text(summary)
                                         .font(themeManager.captionFont)
-                                        .foregroundStyle(.secondary)
+                                        .foregroundColor(ThemeColors.muted)
                                         .lineLimit(2)
                                         .multilineTextAlignment(.leading)
                                 }
@@ -202,6 +202,9 @@ struct EventCell: View {
 
 struct ShowEventCellTags: View {
     var tagIds: [Int]
+    /// Legacy parameter kept for source compatibility with existing
+    /// call sites. The horizontal-scroll layout below ignores it;
+    /// chips size to their natural label width now.
     var minWidth: CGFloat = 100
     @Environment(ThemeManager.self) private var themeManager
     /// When true, prepend a synthetic "Custom Event" chip ahead of
@@ -218,31 +221,48 @@ struct ShowEventCellTags: View {
         return .purple
     }
 
+    /// Single-line, naturally-sized chips. A horizontal ScrollView
+    /// wraps the HStack so overflow scrolls instead of wrapping into
+    /// a 2- or 3-column grid (which made longer labels like "Hands-on
+    /// Workshop" wrap awkwardly and split rows of unequal height).
+    /// `lineLimit(1)` + `.fixedSize` keep each chip tight to its
+    /// label so the row reads as one rail.
     var body: some View {
-        LazyVGrid(columns: [GridItem(.adaptive(minimum: minWidth))], alignment: .leading, spacing: 1) {
-            if customEvent {
-                HStack {
-                    Circle().foregroundColor(customChipColor)
-                        .frame(width: 8, height: 8, alignment: .center)
-                    Text("Custom Event").font(themeManager.captionFont)
-                        .multilineTextAlignment(.leading)
-                        .frame(alignment: .leading)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 10) {
+                if customEvent {
+                    chip(color: customChipColor, label: "Custom Event")
                 }
-            }
-            ForEach(tagIds, id: \.self) { tagId in
-                if let tag = viewModel.tagsById[tagId] {
-                    VStack {
-                        HStack {
-                            Circle().foregroundColor(Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple))
-                                .frame(width: 8, height: 8, alignment: .center)
-                            Text(tag.label).font(themeManager.captionFont)
-                                .multilineTextAlignment(.leading)
-                                .frame(alignment: .leading)
-                        }
+                ForEach(tagIds, id: \.self) { tagId in
+                    if let tag = viewModel.tagsById[tagId] {
+                        chip(
+                            color: Color(UIColor(hex: tag.colorBackground ?? "#2c8f07") ?? .purple),
+                            label: tag.label
+                        )
                     }
                 }
             }
         }
+        // ScrollView reports its content size as the smaller of its
+        // intrinsic content width or the parent's available width.
+        // .scrollIndicators(.hidden) + .scrollClipDisabled() let
+        // chips visually bleed up against the leading edge without
+        // a dim scroll indicator.
+        .scrollIndicators(.hidden)
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    @ViewBuilder
+    private func chip(color: Color, label: String) -> some View {
+        HStack(spacing: 4) {
+            Circle()
+                .foregroundColor(color)
+                .frame(width: 8, height: 8)
+            Text(label)
+                .font(themeManager.captionFont)
+                .foregroundColor(ThemeColors.muted)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+        }
     }
 }

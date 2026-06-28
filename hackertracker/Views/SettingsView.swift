@@ -20,6 +20,24 @@ enum IPadSheetSize {
     case form
 }
 
+/// Card styling for Settings rows. Mirrors the schedule / content
+/// cell look (themed cardSurface, 10pt corners, 8/3 outer padding)
+/// so the Settings tab reads as the same card-based surface the rest
+/// of the app uses instead of a flat form.
+extension View {
+    @ViewBuilder
+    func settingsCard(_ themeManager: ThemeManager) -> some View {
+        self
+            .padding(.horizontal, 10)
+            .padding(.vertical, 10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(themeManager.cardSurface)
+            .cornerRadius(10)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 3)
+    }
+}
+
 extension View {
     /// Sheet sizing for iPad presentations. iOS 18+ uses the native
     /// `.presentationSizing(...)`. iOS 17 falls back to an explicit
@@ -78,7 +96,6 @@ struct SettingsView: View {
                     AboutSettingsView(iPadAction: IPadAdaptive.isIPad ? { iPadSheet = .about } : nil)
                     selectConferenceRow
                     ThemePickerSettingsView(iPadAction: IPadAdaptive.isIPad ? { iPadSheet = .theme } : nil)
-                    Divider()
                 }
                 if IPadAdaptive.isIPad {
                     // iPad: explicit 2-column HStack. Each panel is
@@ -176,9 +193,7 @@ struct SettingsView: View {
             }
         }
         .foregroundColor(.primary)
-        .frame(maxWidth: .infinity)
-        .background(themeManager.cardSurface)
-        .cornerRadius(5)
+        .settingsCard(themeManager)
     }
 
     @ViewBuilder private var conferenceRowLabel: some View {
@@ -254,8 +269,7 @@ struct EasterEggSettingsView: View {
                 }
             }
         }
-        .padding(5)
-        Divider()
+        .settingsCard(themeManager)
     }
 }
 
@@ -266,20 +280,26 @@ struct NotificationSettingsView: View {
     @State private var showingAlert = false
 
     var body: some View {
-        Text("Notifications")
-            .font(themeManager.headingFont)
-        VStack(alignment: .leading) {
-            Stepper("Before Event: \(notifyAt)", value: $notifyAt, in: 0...60)
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Notifications")
+                .font(themeManager.headingFont)
+            VStack(alignment: .leading) {
+                Stepper("Before Event: \(notifyAt)", value: $notifyAt, in: 0...60)
                 Text("Notification time in minutes")
                     .font(themeManager.captionFont)
-        }
-        .padding(5)
-        HStack {
+            }
             Button {
                 showingAlert = true
             } label: {
-                Text("Remove all notifications")
-                Image(systemName: "trash")
+                HStack {
+                    Text("Remove all notifications")
+                    Image(systemName: "trash")
+                }
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding(5)
+                .background(themeManager.danger)
+                .cornerRadius(5)
             }
             .alert("Are you sure", isPresented: $showingAlert) {
                 Button("Yes") {
@@ -288,16 +308,9 @@ struct NotificationSettingsView: View {
                 Button("No", role: .cancel) { }
             }
         }
-        .foregroundColor(.white)
-        .frame(maxWidth: .infinity)
-        .padding(5)
-        .background(themeManager.danger)
-        .cornerRadius(5)
-        Divider()
+        .settingsCard(themeManager)
         ShowConflictAlertView()
-        Divider()
         ShowMerchInfoSettingsView()
-        Divider()
     }
 }
 
@@ -327,10 +340,7 @@ struct AboutSettingsView: View {
             }
         }
         .foregroundColor(.primary)
-        .frame(maxWidth: .infinity)
-        .background(themeManager.cardSurface)
-        .cornerRadius(5)
-        Divider()
+        .settingsCard(themeManager)
     }
 
     @ViewBuilder private func aboutRowLabel(v1: String, v2: String) -> some View {
@@ -562,8 +572,7 @@ struct ShowNewsSettingsView: View {
                 Text("Show the most recent news article on the home screen")
                     .font(themeManager.captionFont)
         }
-        .padding(5)
-        Divider()
+        .settingsCard(themeManager)
     }
 }
 
@@ -580,8 +589,7 @@ struct ShowMerchInfoSettingsView: View {
                 Text("Show the merchandise information link on the merch list")
                     .font(themeManager.captionFont)
         }
-        .padding(5)
-        Divider()
+        .settingsCard(themeManager)
     }
 }
 
@@ -600,8 +608,7 @@ struct ShowPastEventsSettingsView: View {
             Text("Show or hide past events in the conference schedule")
                 .font(themeManager.captionFont)
         }
-        .padding(5)
-        Divider()
+        .settingsCard(themeManager)
     }
 }
 
@@ -619,13 +626,13 @@ struct ShowConflictAlertView: View {
             Text("Show the conflict alert icon on the schedule")
                 .font(themeManager.captionFont)
         }
-        .padding(5)
-        Divider()
+        .settingsCard(themeManager)
     }
 }
 
 struct LightModeSettingsView: View {
     @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("lightMode") var lightMode: Bool = false
     @AppStorage("colorMode") var colorMode: Bool = false
     @EnvironmentObject var theme: Theme
@@ -633,7 +640,7 @@ struct LightModeSettingsView: View {
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Enable Light Mode", isOn: $lightMode)
-                .onChange(of: lightMode) { _, value in 
+                .onChange(of: lightMode) { _, value in
                     Log.ui.debug("lightMode=\(value)")
                     if value {
                         theme.colorScheme = .light
@@ -642,17 +649,14 @@ struct LightModeSettingsView: View {
                     }
                 }
         }
-        .padding(5)
-        Divider()
+        .settingsCard(themeManager)
         VStack(alignment: .leading) {
             Toggle("Enable Colorful Mode", isOn: $colorMode)
-                .onChange(of: colorMode) { _, value in 
+                .onChange(of: colorMode) { _, value in
                     Log.ui.debug("colorMode=\(value)")
-                    //colorMode = value
                 }
         }
-        .padding(5)
-        Divider()
+        .settingsCard(themeManager)
     }
 }
 
@@ -669,6 +673,7 @@ struct StartScreenSettingsView: View {
 }
 
 struct StartScreenPickerView: View {
+    @Environment(ThemeManager.self) private var themeManager
     @AppStorage("launchScreen") var launchScreen: String = "Main"
     let startScreens = ["Main", "Schedule", "Maps"]
 
@@ -682,7 +687,7 @@ struct StartScreenPickerView: View {
             }
             .pickerStyle(.segmented)
         }
-        .padding(5)
+        .settingsCard(themeManager)
     }
 }
 
@@ -736,18 +741,16 @@ struct ShowLocaltimeSettingsView: View {
             Text("Show event times in current localtime instead of conference time")
                 .font(themeManager.captionFont)
         }
-        .padding(5)
-        Divider()
+        .settingsCard(themeManager)
         VStack(alignment: .leading) {
             Toggle("Show 24 Hour Time", isOn: $show24hourtime)
-                .onChange(of: show24hourtime) { _, value in 
+                .onChange(of: show24hourtime) { _, value in
                     Log.ui.debug("show24hourtime=\(value)")
                 }
             Text("Show event times in 24 hour time (13:00) instead of 12 hour time (1:00 PM)")
                 .font(themeManager.captionFont)
         }
-        .padding(5)
-        Divider()
+        .settingsCard(themeManager)
     }
 }
 
@@ -769,6 +772,15 @@ struct SettingsView_Previews: PreviewProvider {
 struct AISummarySettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
     @AppStorage("aiSummaries") var aiSummaries: Bool = false
+    /// Hidden gate for AI-generated speaker bios. Off by default and
+    /// the toggle only becomes visible after a 7-tap chord on the
+    /// "AI Summaries" row (or stays visible if already on, so users
+    /// can switch it back off without re-discovering the chord).
+    @AppStorage("speakerAISummaries") var speakerAISummaries: Bool = false
+    /// Tap-counter chord. Transient — resets on view rebuild, which
+    /// is fine because revealing the row is a one-time discovery.
+    @State private var aiTapCount: Int = 0
+    @State private var showSpeakerToggle: Bool = false
 
     var body: some View {
         if AISummaryAvailability.isPossiblyAvailable {
@@ -778,6 +790,18 @@ struct AISummarySettingsView: View {
                     .onChange(of: aiSummaries) { _, value in
                         Log.ui.debug("aiSummaries=\(value)")
                     }
+                    // 7-tap chord on the row label reveals the hidden
+                    // Speaker bios toggle below. contentShape on the
+                    // VStack ensures taps on the label area register
+                    // — the Toggle's switch handles its own taps.
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        aiTapCount += 1
+                        if aiTapCount >= 7 {
+                            showSpeakerToggle = true
+                            aiTapCount = 0
+                        }
+                    }
                 Text("Show one-sentence summaries of talk descriptions, generated on-device by Apple Intelligence. Summaries are cached and only generated for descriptions longer than 100 characters.")
                     .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
@@ -786,9 +810,31 @@ struct AISummarySettingsView: View {
                         .font(themeManager.captionFont)
                         .foregroundStyle(.tertiary)
                 }
+
+                // Hidden secondary toggle. Visible when (a) revealed
+                // by the chord this session, or (b) the user already
+                // turned it on previously — so they can disable it
+                // without having to re-tap the chord.
+                if showSpeakerToggle || speakerAISummaries {
+                    Divider()
+                        .padding(.vertical, 4)
+                    Toggle("Speaker bios (experimental)", isOn: $speakerAISummaries)
+                        .disabled(!aiSummaries || !AISummaryAvailability.isSupported)
+                        .onChange(of: speakerAISummaries) { _, value in
+                            Log.ui.debug("speakerAISummaries=\(value)")
+                        }
+                    Text("Also summarize speaker bios on the Speakers list when no job title is provided. Bios shorter than 100 characters render verbatim either way.")
+                        .font(themeManager.captionFont)
+                        .foregroundStyle(.secondary)
+                }
             }
-            .padding(5)
-            Divider()
+            .settingsCard(themeManager)
+            .onAppear {
+                // Surface the toggle immediately on appear if the
+                // flag's already true (the chord only matters when
+                // it's currently off).
+                if speakerAISummaries { showSpeakerToggle = true }
+            }
         }
     }
 }
@@ -808,8 +854,7 @@ struct ShowCustomEventsSettingsView: View {
                 .font(themeManager.captionFont)
                 .foregroundStyle(.secondary)
         }
-        .padding(5)
-        Divider()
+        .settingsCard(themeManager)
     }
 }
 
@@ -832,10 +877,7 @@ struct ThemePickerSettingsView: View {
             }
         }
         .foregroundColor(.primary)
-        .frame(maxWidth: .infinity)
-        .background(themeManager.cardSurface)
-        .cornerRadius(5)
-        Divider()
+        .settingsCard(themeManager)
     }
 
     @ViewBuilder private var themeRowLabel: some View {

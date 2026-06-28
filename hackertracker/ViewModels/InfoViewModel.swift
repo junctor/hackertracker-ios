@@ -71,7 +71,9 @@ final class InfoViewModel {
         }
     }
     /// Phase 2: index rebuilt whenever `events` changes.
-    @ObservationIgnored private var eventsById: [Int: Event] = [:]
+    /// Exposed as `private(set)` so views needing O(1) lookups
+    /// (e.g. SpeakerRow's tag rollup) don't have to do O(n) scans.
+    @ObservationIgnored private(set) var eventsById: [Int: Event] = [:]
     /// Phase 2: cached per-event conflict result for a given bookmark set.
     /// Cleared when events change or bookmarks change.
     @ObservationIgnored private var conflictCache: [Int: Bool] = [:]
