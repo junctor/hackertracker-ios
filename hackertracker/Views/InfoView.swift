@@ -17,6 +17,10 @@ struct InfoView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @AppStorage("showLocaltime") var showLocaltime: Bool = false
     @AppStorage("colorMode") var colorMode: Bool = false
+    /// Per-conference collapse state for the square logo on this
+    /// screen. Stored as a JSON-encoded Set<String> of conference
+    /// codes that the user has collapsed; persists across launches.
+    @AppStorage("infoLogoCollapsedCodes") private var collapsedLogoCodesRaw: String = "[]"
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var theme: Theme
     @EnvironmentObject var filters: Filters
@@ -261,13 +265,36 @@ struct InfoView: View {
                         }
                     }
                     if let logo = viewModel.conference?.squareLogo(for: theme.colorScheme),
-                       let logoUrl = URL(string: logo) {
-                        KFImage(logoUrl)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: 160, maxHeight: 160)
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 12)
+                       let logoUrl = URL(string: logo),
+                       let code = viewModel.conference?.code {
+                        let isCollapsed = collapsedLogoCodes.contains(code)
+                        VStack(spacing: 6) {
+                            Button {
+                                toggleLogoCollapsed(for: code)
+                            } label: {
+                                HStack(spacing: 6) {
+                                    Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
+                                        .font(themeManager.captionFont)
+                                    Text(isCollapsed ? "Show conference logo" : "Hide conference logo")
+                                        .font(themeManager.captionFont)
+                                }
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(isCollapsed ? "Show conference logo" : "Hide conference logo")
+
+                            if !isCollapsed {
+                                KFImage(logoUrl)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(maxWidth: 160, maxHeight: 160)
+                                    .frame(maxWidth: .infinity)
+                                    .onTapGesture { toggleLogoCollapsed(for: code) }
+                            }
+                        }
+                        .padding(.top, 12)
                     }
                     if let url = URL(string: "mailto:hackertracker@defcon.org?subject=HackerTracker&body=\r\n-----------------------\r\nVersion: \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "Unknown")  (\(Bundle.main.infoDictionary?["CFBundleVersion"] ?? "Unknown"))\r\niOS: \(ProcessInfo.processInfo.operatingSystemVersionString)\r\nApp: \(Bundle.main.bundleIdentifier ?? "Unknown")\r\n-----------------------\r\n".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!) {
                         Divider()
@@ -573,6 +600,25 @@ struct InfoView: View {
         }
         // print("KidsTags: \(kidsTags)")
         return kidsTags
+    }
+
+    /// Decoded copy of the JSON-encoded collapsed-codes set. Reads
+    /// the `@AppStorage` raw string and falls back to an empty set
+    /// when the value is missing or malformed.
+    private var collapsedLogoCodes: Set<String> {
+        guard let data = collapsedLogoCodesRaw.data(using: .utf8),
+              let set = try? JSONDecoder().decode(Set<String>.self, from: data)
+        else { return [] }
+        return set
+    }
+
+    private func toggleLogoCollapsed(for code: String) {
+        var codes = collapsedLogoCodes
+        if codes.contains(code) { codes.remove(code) } else { codes.insert(code) }
+        if let data = try? JSONEncoder().encode(codes),
+           let raw = String(data: data, encoding: .utf8) {
+            collapsedLogoCodesRaw = raw
+        }
     }
 
     func tapped() {
