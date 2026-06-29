@@ -37,10 +37,10 @@ struct Conference: Codable, Identifiable, Equatable {
     var merchMandatoryAck: String?
     var merchTaxStatement: String?
     var emergencyDocId: Int?
-    /// Optional per-conference branding assets. Each entry carries
-    /// `dark` and/or `light` variants — the picker resolves which to
-    /// show based on the active color scheme.
-    var media: [ConferenceMediaEntry]?
+    /// Optional per-conference branding assets. Carries `dark` and/or
+    /// `light` variants — the picker resolves which to show based on
+    /// the active color scheme.
+    var media: ConferenceMediaEntry?
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -73,26 +73,17 @@ struct Conference: Codable, Identifiable, Equatable {
     /// requested one isn't published. Returns nil when no media is
     /// configured at all.
     func squareLogo(for colorScheme: ColorScheme) -> String? {
-        guard let media, !media.isEmpty else { return nil }
-        let preferred: (ConferenceMediaEntry) -> String? = {
-            colorScheme == .dark
-                ? { $0.dark?.squareLogo }
-                : { $0.light?.squareLogo }
-        }()
-        let fallback: (ConferenceMediaEntry) -> String? = {
-            colorScheme == .dark
-                ? { $0.light?.squareLogo }
-                : { $0.dark?.squareLogo }
-        }()
-        if let hit = media.compactMap(preferred).first(where: { !$0.isEmpty }) {
-            return hit
-        }
-        return media.compactMap(fallback).first(where: { !$0.isEmpty })
+        guard let media else { return nil }
+        let preferred = colorScheme == .dark ? media.dark?.squareLogo : media.light?.squareLogo
+        if let preferred, !preferred.isEmpty { return preferred }
+        let fallback = colorScheme == .dark ? media.light?.squareLogo : media.dark?.squareLogo
+        if let fallback, !fallback.isEmpty { return fallback }
+        return nil
     }
 }
 
-/// One entry in `Conference.media`. Either side may be missing — a
-/// conference may publish only a dark logo, only a light one, or
+/// Per-conference branding assets. Either side may be missing — a
+/// conference may publish only a dark variant, only a light one, or
 /// both. Field names match the Firestore document
 /// (banner_background, banner_logo, square_logo).
 struct ConferenceMediaEntry: Codable, Equatable {
