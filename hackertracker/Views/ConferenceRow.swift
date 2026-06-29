@@ -5,6 +5,7 @@
 //  Created by Seth W Law on 6/7/22.
 //
 
+import Kingfisher
 import SwiftUI
 
 struct ConferenceRow: View {
@@ -12,10 +13,19 @@ struct ConferenceRow: View {
     var code: String
 
     @Environment(ThemeManager.self) private var themeManager
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         let isActive = conference.code == code
         HStack(spacing: 12) {
+            if let logo = conference.squareLogo(for: colorScheme),
+               let url = URL(string: logo) {
+                KFImage(url)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 44, height: 44)
+                    .cornerRadius(6)
+            }
             VStack(alignment: .leading, spacing: 4) {
                 Text(conference.name)
                     .font(themeManager.title3Font)
