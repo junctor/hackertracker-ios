@@ -6,6 +6,7 @@
 //
 
 import FirebaseFirestore
+import Kingfisher
 import SwiftUI
 import WebKit
 
@@ -258,6 +259,15 @@ struct InfoView: View {
                                 CardView(systemImage: "dollarsign", text: "Merch", color: colorMode ? ThemeColors.drkGreen : themeManager.cardSurface)
                             }
                         }
+                    }
+                    if let logo = viewModel.conference?.squareLogo(for: theme.colorScheme),
+                       let logoUrl = URL(string: logo) {
+                        KFImage(logoUrl)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(maxWidth: 160, maxHeight: 160)
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 12)
                     }
                     if let url = URL(string: "mailto:hackertracker@defcon.org?subject=HackerTracker&body=\r\n-----------------------\r\nVersion: \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "Unknown")  (\(Bundle.main.infoDictionary?["CFBundleVersion"] ?? "Unknown"))\r\niOS: \(ProcessInfo.processInfo.operatingSystemVersionString)\r\nApp: \(Bundle.main.bundleIdentifier ?? "Unknown")\r\n-----------------------\r\n".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!) {
                         Divider()
