@@ -29,14 +29,6 @@ struct ConferenceRow: View {
                 }
             }
             HStack(alignment: .center, spacing: 12) {
-                if let logo = conference.squareLogo(for: colorScheme),
-                   let url = URL(string: logo) {
-                    KFImage(url)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 56, height: 56)
-                        .cornerRadius(6)
-                }
                 VStack(alignment: .leading, spacing: 4) {
                     if conference.startDate == conference.endDate {
                         Text(conference.endDate)
@@ -61,6 +53,15 @@ struct ConferenceRow: View {
                         .padding(.top, 2)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+
+                if let logo = conference.squareLogo(for: colorScheme),
+                   let url = URL(string: logo) {
+                    KFImage(url)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 56, height: 56)
+                        .cornerRadius(6)
+                }
             }
         }
         // Card-style row matching ThemePickerView: cardSurface
