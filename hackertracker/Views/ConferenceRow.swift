@@ -17,46 +17,50 @@ struct ConferenceRow: View {
 
     var body: some View {
         let isActive = conference.code == code
-        HStack(spacing: 12) {
-            if let logo = conference.squareLogo(for: colorScheme),
-               let url = URL(string: logo) {
-                KFImage(url)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 44, height: 44)
-                    .cornerRadius(6)
-            }
-            VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top) {
                 Text(conference.name)
                     .font(themeManager.title3Font)
-                if conference.startDate == conference.endDate {
-                    Text(conference.endDate)
-                        .font(themeManager.bodyFont)
-                } else {
-                    Text("\(conference.startDate) - \(conference.endDate)")
-                        .font(themeManager.bodyFont)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                if isActive {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                        .font(themeManager.title3Font)
                 }
-                // Polish: surface the conference timezone so users can see at
-                // a glance which timezone the schedule renders in.
-                if let tz = conference.timezone, !tz.isEmpty {
-                    HStack(spacing: 4) {
-                        Image(systemName: "clock")
-                        Text(tz)
-                    }
-                    .font(themeManager.captionFont)
-                    .foregroundStyle(.secondary)
-                }
-                Text(isActive ? "Active" : "Tap to switch")
-                    .font(themeManager.captionFont)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 2)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            if isActive {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-                    .font(themeManager.title3Font)
+            HStack(alignment: .center, spacing: 12) {
+                if let logo = conference.squareLogo(for: colorScheme),
+                   let url = URL(string: logo) {
+                    KFImage(url)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 56, height: 56)
+                        .cornerRadius(6)
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    if conference.startDate == conference.endDate {
+                        Text(conference.endDate)
+                            .font(themeManager.bodyFont)
+                    } else {
+                        Text("\(conference.startDate) - \(conference.endDate)")
+                            .font(themeManager.bodyFont)
+                    }
+                    // Polish: surface the conference timezone so users can see at
+                    // a glance which timezone the schedule renders in.
+                    if let tz = conference.timezone, !tz.isEmpty {
+                        HStack(spacing: 4) {
+                            Image(systemName: "clock")
+                            Text(tz)
+                        }
+                        .font(themeManager.captionFont)
+                        .foregroundStyle(.secondary)
+                    }
+                    Text(isActive ? "Active" : "Tap to switch")
+                        .font(themeManager.captionFont)
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 2)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         // Card-style row matching ThemePickerView: cardSurface
