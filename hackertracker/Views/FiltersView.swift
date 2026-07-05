@@ -11,7 +11,7 @@ struct EventFilters: View {
     let tagtypes: [TagType]
     @Binding var showFilters: Bool
     @EnvironmentObject var filters: Filters
-    @EnvironmentObject var toTop: ToTop
+    @EnvironmentObject var scrollBus: ScrollCommandBus
     @Environment(ThemeManager.self) private var themeManager
     var showBookmarks: Bool = true
     /// Number of items that would survive the current filter selection.
@@ -81,7 +81,7 @@ struct EventFilters: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") {
                         showFilters = false
-                        toTop.val = true
+                        scrollBus.send(.top)
                     }
                     .bold()
                 }

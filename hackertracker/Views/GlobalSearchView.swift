@@ -17,7 +17,11 @@ struct GlobalSearchView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
     @AppStorage("colorMode") var colorMode: Bool = false
-    
+    /// Perf C: single list-level bookmarks fetch published into the
+    /// environment for the EventCells in the Schedule section (they no
+    /// longer run a per-row @FetchRequest).
+    @FetchRequest(sortDescriptors: []) private var bookmarks: FetchedResults<Bookmarks>
+
     var body: some View {
         ScrollView {
             ScrollViewReader { _ in
@@ -102,6 +106,7 @@ struct GlobalSearchView: View {
                     }
                 }
             }
+            .environment(\.bookmarkSnapshot, BookmarkSnapshot(bookmarkIds: bookmarks.map(\.id)))
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
             .navigationTitle("Global Search")
             .themedNavTitle("Global Search", themeManager)

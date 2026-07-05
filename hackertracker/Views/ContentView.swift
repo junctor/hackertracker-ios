@@ -5,6 +5,7 @@
 //  Created by Seth W Law on 5/2/22.
 //
 
+import Combine
 import CoreData
 import FirebaseFirestore
 import FirebaseAnalytics
@@ -14,17 +15,25 @@ class SelectedConference: ObservableObject {
     @Published var code = "INIT"
 }
 
-class GoToButton: ObservableObject, Equatable {
-    static func == (lhs: GoToButton, rhs: GoToButton) -> Bool {
-        lhs.val == rhs.val
-    }
-    @Published var val: Bool = false
+/// Scroll commands the schedule (and any other scrollable list) can
+/// respond to. Sent through ScrollCommandBus below.
+enum ScrollCommand {
+    case top, bottom, current, next
 }
 
-class ToTop: GoToButton {}
-class ToBottom: GoToButton {}
-class ToCurrent: GoToButton {}
-class ToNext: GoToButton {}
+/// Fire-and-forget command bus for scroll-to actions. Intentionally an
+/// ObservableObject with NO @Published properties: `objectWillChange`
+/// never fires, so sending a command doesn't invalidate every view
+/// holding the bus via @EnvironmentObject — consumers subscribe with
+/// `.onReceive(bus.subject)` and scroll their own proxy. This replaces
+/// the old ToTop/ToBottom/ToCurrent/ToNext published-Bool handshake,
+/// which re-evaluated the whole schedule body twice per command.
+final class ScrollCommandBus: ObservableObject {
+    let subject = PassthroughSubject<ScrollCommand, Never>()
+    func send(_ command: ScrollCommand) {
+        subject.send(command)
+    }
+}
 
 struct ContentView: View {
     @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
@@ -45,10 +54,7 @@ struct ContentView: View {
     /// Injected here so it has a single source of truth at the
     /// ContentView level, same as the other long-lived stores.
     @State private var themeManager = ThemeManager()
-    @StateObject private var toTop = ToTop()
-    @StateObject private var toBottom = ToBottom()
-    @StateObject private var toCurrent = ToCurrent()
-    @StateObject private var toNext = ToNext()
+    @StateObject private var scrollBus = ScrollCommandBus()
     @StateObject var filters = Filters(filters:[])
     /// Independent filter set for the Speakers list — selections here
     /// don't bleed into Schedule / All Content.
@@ -58,12 +64,7 @@ struct ContentView: View {
     /// selection survives tab switches (and now cold launches too).
     @StateObject var merchFilters = MerchFiltersStore()
     @State private var tabSelection = 1
-    // @State private var tappedMainTwice = false
-    // @State private var tappedScheduleTwice = false
-    @State private var info = UUID()
-    @State private var schedule = UUID()
     @State private var isInit: Bool = false
-    @State private var scheduleView = ScheduleView(tagIds: [])
     @State private var showingEmergencySheet = false
 
     var body: some View {
@@ -85,15 +86,13 @@ struct ContentView: View {
                         // Text("Info")
                     }
                     .tag(1)
-                    .id(info)
                     .preferredColorScheme(theme.colorScheme)
-                scheduleView
+                ScheduleView(tagIds: [])
                     .tabItem {
                         Image(systemName: "calendar")
                         // Text("Main")
                     }
                     .tag(2)
-                    .id(schedule)
                     .preferredColorScheme(theme.colorScheme)
                 MapView()
                     .tabItem {
@@ -159,10 +158,7 @@ struct ContentView: View {
             .environmentObject(theme)
             .environment(themeManager)
             .environment(consViewModel)
-            .environmentObject(toTop)
-            .environmentObject(toBottom)
-            .environmentObject(toCurrent)
-            .environmentObject(toNext)
+            .environmentObject(scrollBus)
             .environmentObject(filters)
             .environmentObject(speakerFilters)
             .environmentObject(merchFilters)

@@ -140,10 +140,17 @@ final class InfoViewModel {
     @ObservationIgnored private var db = Firestore.firestore()
     
     func bookmarkConflicts(eventId: Int, bookmarks: [Int]) -> Bool {
-        // Phase 2: O(1) dict lookup + per-event memoization keyed on bookmark identity.
+        // Convenience overload: derives the bookmark identity key here.
+        // Callers that render many rows against the same bookmark set
+        // (EventCell) should precompute the key once (BookmarkSnapshot)
+        // and use the overload below so the array isn't re-hashed per call.
         var hasher = Hasher()
         for b in bookmarks { hasher.combine(b) }
-        let bookmarkKey = hasher.finalize()
+        return bookmarkConflicts(eventId: eventId, bookmarks: bookmarks, bookmarkKey: hasher.finalize())
+    }
+
+    func bookmarkConflicts(eventId: Int, bookmarks: [Int], bookmarkKey: Int) -> Bool {
+        // Phase 2: O(1) dict lookup + per-event memoization keyed on bookmark identity.
         if bookmarkKey != conflictCacheBookmarkKey {
             conflictCache.removeAll(keepingCapacity: true)
             conflictCacheBookmarkKey = bookmarkKey

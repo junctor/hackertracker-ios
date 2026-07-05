@@ -532,6 +532,9 @@ struct InfoView: View {
                       showPastEvents: true, includeNav: true,
                       showLocaltime: $showLocaltime)
                     //EventsView(sharedEvents: sharedEvents)
+                    // Perf C: EventCells read bookmarks from the
+                    // environment; publish this view's fetch results.
+                    .environment(\.bookmarkSnapshot, BookmarkSnapshot(bookmarkIds: bookmarks.map(\.id)))
                     .onAppear {
                         Log.app.debug("navigating to \(value, privacy: .public)")
                     }
