@@ -266,7 +266,7 @@ struct MerchInfo: View {
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity)
                 .padding(10)
-                .background(themeManager.danger)
+                .background(themeManager.cardSurface)
                 .cornerRadius(15)
             }
             Divider()

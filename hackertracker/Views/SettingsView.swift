@@ -32,7 +32,7 @@ extension View {
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(themeManager.cardSurface)
-            .cornerRadius(10)
+            .cornerRadius(ThemeMetrics.cardRadius)
             .padding(.horizontal, 8)
             .padding(.vertical, 3)
     }
@@ -444,7 +444,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             Text("Version \(marketingVersion)")
                 .font(themeManager.title3Font).bold()
             Text("Build \(buildVersion)")
-                .font(.callout)
+                .font(themeManager.calloutFont)
                 .foregroundStyle(.secondary)
         }
     }
@@ -458,7 +458,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             }
 
             Text("What this app does and doesn’t collect. The full disclosure mirrors the docs/privacy.md page in the public repo.")
-                .font(.footnote)
+                .font(themeManager.footnoteFont)
                 .foregroundStyle(.secondary)
 
             NavigationLink(destination: DocumentView(
@@ -471,7 +471,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 Label("Read the full disclosure", systemImage: "doc.text")
                     .frame(maxWidth: .infinity)
                     .padding(10)
-                    .background(Color.accentColor.opacity(0.15))
+                    .background(themeManager.accent.opacity(0.15))
                     .cornerRadius(8)
             }
         }
@@ -488,7 +488,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             }
 
             Text("Stamped at build time. Tap **View on GitHub** to confirm this build came from a specific public commit — if the page 404s, this build was not produced from a public commit on the official repo.")
-                .font(.footnote)
+                .font(themeManager.footnoteFont)
                 .foregroundStyle(.secondary)
 
             VStack(alignment: .leading, spacing: 10) {
@@ -504,7 +504,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
 
             if info.dirty {
                 Label("This build was produced from a working copy with uncommitted changes. It does not correspond to a single public commit.", systemImage: "exclamationmark.triangle.fill")
-                    .font(.footnote)
+                    .font(themeManager.footnoteFont)
                     .foregroundStyle(.orange)
                     .padding()
                     .background(Color.orange.opacity(0.1))
@@ -518,7 +518,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                     Label("View on GitHub", systemImage: "arrow.up.right.square")
                         .frame(maxWidth: .infinity)
                         .padding(10)
-                        .background(Color.accentColor.opacity(0.15))
+                        .background(themeManager.accent.opacity(0.15))
                         .cornerRadius(8)
                 }
             }
@@ -536,7 +536,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 Label("Copy build info", systemImage: "doc.on.doc")
                     .frame(maxWidth: .infinity)
                     .padding(10)
-                    .background(Color(.systemGray5))
+                    .background(themeManager.cardSurface)
                     .cornerRadius(8)
             }
         }
@@ -549,7 +549,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 .font(themeManager.captionFont)
                 .foregroundStyle(.secondary)
             Text(value)
-                .font(mono ? .system(.footnote, design: .monospaced) : .body)
+                .font(mono ? .system(.footnote, design: .monospaced) : themeManager.bodyFont)
                 .textSelection(.enabled)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -947,18 +947,18 @@ struct ThemePickerView: View {
             Spacer()
             if isActive {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+                    .foregroundStyle(themeManager.success)
                     .font(themeManager.title3Font)
             }
         }
         .padding()
         .background(theme.palette.cardSurface.auto)
         .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(isActive ? Color.green : Color.primary.opacity(0.08),
+            RoundedRectangle(cornerRadius: ThemeMetrics.cardRadius)
+                .stroke(isActive ? themeManager.success : Color.primary.opacity(0.08),
                         lineWidth: isActive ? 2 : 0.5)
         )
-        .cornerRadius(10)
+        .cornerRadius(ThemeMetrics.cardRadius)
     }
 
     private func swatch(_ color: Color) -> some View {

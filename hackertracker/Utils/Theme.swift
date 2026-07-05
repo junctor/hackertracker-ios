@@ -113,6 +113,7 @@ struct ThemePalette: Hashable {
     let background: DualColor    // base screen background — shows below cards
     let cardSurface: DualColor   // standout-button and detail-card fill
     let accent: DualColor         // primary tinted action color
+    let success: DualColor        // active, selected, positive affordances
     let danger: DualColor         // warnings, conflicts, destructive
     let textPrimary: DualColor    // headings + body text
     let textSecondary: DualColor  // metadata + captions
@@ -163,6 +164,10 @@ extension AppTheme {
             accent: DualColor(
                 light: Color(.systemBlue),
                 dark:  Color(.systemBlue)
+            ),
+            success: DualColor(
+                light: Color(.systemGreen),
+                dark:  Color(.systemGreen)
             ),
             danger: DualColor(
                 light: ThemeColors.red,
@@ -216,6 +221,10 @@ extension AppTheme {
             accent: DualColor(
                 light: Color(red: 0/255,   green: 140/255, blue: 50/255),  // #008C32 (readable on white)
                 dark:  Color(red: 0/255,   green: 255/255, blue: 65/255)   // #00FF41 (matrix green)
+            ),
+            success: DualColor(
+                light: Color(red: 0/255,   green: 140/255, blue: 50/255),  // #008C32
+                dark:  Color(red: 0/255,   green: 255/255, blue: 65/255)   // #00FF41
             ),
             danger: DualColor(
                 light: ThemeColors.red,
@@ -274,6 +283,10 @@ extension AppTheme {
                 light: Color(red: 200/255, green: 0/255,   blue: 150/255), // deep magenta
                 dark:  Color(red: 255/255, green: 64/255,  blue: 200/255)  // neon magenta
             ),
+            success: DualColor(
+                light: Color(red: 200/255, green: 0/255,   blue: 150/255), // deep magenta
+                dark:  Color(red: 255/255, green: 64/255,  blue: 200/255)  // neon magenta
+            ),
             danger: DualColor(
                 light: ThemeColors.red,
                 dark:  ThemeColors.red
@@ -329,6 +342,10 @@ extension AppTheme {
                 light: Color(red: 192/255, green: 0/255,   blue: 0/255),   // #C00000
                 dark:  Color(red: 255/255, green: 45/255,  blue: 45/255)   // #FF2D2D
             ),
+            success: DualColor(
+                light: Color(red: 192/255, green: 0/255,   blue: 0/255),   // #C00000
+                dark:  Color(red: 255/255, green: 45/255,  blue: 45/255)   // #FF2D2D
+            ),
             danger: DualColor(
                 light: Color(red: 178/255, green: 34/255,  blue: 34/255),  // #B22222
                 dark:  Color(red: 255/255, green: 69/255,  blue: 0/255)    // #FF4500
@@ -378,6 +395,10 @@ extension AppTheme {
                 dark:  Color(red: 14/255,  green: 20/255,  blue: 40/255)   // #0E1428
             ),
             accent: DualColor(
+                light: Color(red: 0/255,   green: 139/255, blue: 139/255), // #008B8B
+                dark:  Color(red: 0/255,   green: 255/255, blue: 255/255)  // #00FFFF
+            ),
+            success: DualColor(
                 light: Color(red: 0/255,   green: 139/255, blue: 139/255), // #008B8B
                 dark:  Color(red: 0/255,   green: 255/255, blue: 255/255)  // #00FFFF
             ),
@@ -433,6 +454,10 @@ extension AppTheme {
                 light: Color(red: 199/255, green: 21/255,  blue: 133/255), // #C71585
                 dark:  Color(red: 255/255, green: 20/255,  blue: 147/255)  // #FF1493
             ),
+            success: DualColor(
+                light: Color(red: 199/255, green: 21/255,  blue: 133/255), // #C71585
+                dark:  Color(red: 255/255, green: 20/255,  blue: 147/255)  // #FF1493
+            ),
             danger: DualColor(
                 light: Color(red: 178/255, green: 34/255,  blue: 34/255),  // #B22222
                 dark:  Color(red: 255/255, green: 69/255,  blue: 0/255)    // #FF4500
@@ -473,6 +498,14 @@ extension AppTheme {
 enum ThemeRegistry {
     static let all: [AppTheme] = [.default, .hackerGreen, .synthwave, .defconRed, .cyberpunk, .vegas]
     static let fallback: AppTheme = .default
+}
+
+/// Spacing and sizing tokens for consistent layout across themes.
+enum ThemeMetrics {
+    /// Standard corner radius for card surfaces and semantic containers.
+    /// Note: InfoView cards use 15 and small buttons use 5 — those are
+    /// intentional design choices and left unchanged.
+    static let cardRadius: CGFloat = 10
 }
 
 /// Observable holder for the active theme. Read by views via
@@ -579,6 +612,7 @@ final class ThemeManager {
     var background: Color     { current.palette.background.auto }
     var cardSurface: Color    { current.palette.cardSurface.auto }
     var accent: Color         { current.palette.accent.auto }
+    var success: Color        { current.palette.success.auto }
     var danger: Color         { current.palette.danger.auto }
     var textPrimary: Color    { current.palette.textPrimary.auto }
     var textSecondary: Color  { current.palette.textSecondary.auto }
@@ -603,6 +637,8 @@ final class ThemeManager {
     var headingFont: Font     { current.typography.heading }
     var subheadlineFont: Font { current.typography.subheadline }
     var bodyFont: Font        { current.typography.body }
+    var calloutFont: Font     { .system(.callout, design: fontDesign == .monospaced ? .monospaced : fontDesign == .rounded ? .rounded : .default) }
+    var footnoteFont: Font    { current.typography.caption }
     var captionFont: Font     { current.typography.caption }
     var monospaceFont: Font   { current.typography.monospace }
 }

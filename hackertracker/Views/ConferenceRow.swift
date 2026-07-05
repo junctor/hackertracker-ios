@@ -24,7 +24,7 @@ struct ConferenceRow: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 if isActive {
                     Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
+                        .foregroundStyle(themeManager.success)
                         .font(themeManager.title3Font)
                 }
             }
@@ -66,16 +66,16 @@ struct ConferenceRow: View {
             }
         }
         // Card-style row matching ThemePickerView: cardSurface
-        // background, 2pt green border + checkmark when active, soft
+        // background, success border + checkmark when active, soft
         // hairline border otherwise.
         .padding()
         .background(themeManager.cardSurface)
         .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(isActive ? Color.green : Color.primary.opacity(0.08),
+            RoundedRectangle(cornerRadius: ThemeMetrics.cardRadius)
+                .stroke(isActive ? themeManager.success : Color.primary.opacity(0.08),
                         lineWidth: isActive ? 2 : 0.5)
         )
-        .cornerRadius(10)
+        .cornerRadius(ThemeMetrics.cardRadius)
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
     }

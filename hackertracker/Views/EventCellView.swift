@@ -148,7 +148,7 @@ struct EventCell: View {
 
         }
         .background(themeManager.cardSurface)
-        .cornerRadius(10)
+        .cornerRadius(ThemeMetrics.cardRadius)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
         // Opportunistic warm on cell materialization, mirroring

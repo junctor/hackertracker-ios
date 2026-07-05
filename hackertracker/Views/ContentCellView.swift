@@ -129,7 +129,7 @@ struct ContentCell: View {
             }
         }
         .background(themeManager.cardSurface)
-        .cornerRadius(10)
+        .cornerRadius(ThemeMetrics.cardRadius)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
         // LazyVStack inside ContentListView materializes cells as they

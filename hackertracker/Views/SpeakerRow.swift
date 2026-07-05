@@ -168,7 +168,7 @@ struct SpeakerRow: View {
         // on the inner content VStack only so the leading color stripe
         // stretches edge-to-edge of the card.
         .background(themeManager.cardSurface)
-        .cornerRadius(10)
+        .cornerRadius(ThemeMetrics.cardRadius)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
         // Opportunistic warm on materialization. The cache's own
