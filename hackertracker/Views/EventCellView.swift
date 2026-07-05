@@ -149,12 +149,6 @@ struct EventCell: View {
         .cornerRadius(10)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
-        .swipeActions {
-            Button(bookmarkIds.contains(Int32(event.id)) ? "Remove Bookmark" : "Bookmark") {
-                bookmarkAction()
-            }.buttonStyle(DefaultButtonStyle())
-                .tint(bookmarkIds.contains(Int32(event.id)) ? .red : .yellow)
-        }
         // Opportunistic warm on cell materialization, mirroring
         // ContentCellView. Gated on user toggle + cache's own
         // capability + 100-char checks.

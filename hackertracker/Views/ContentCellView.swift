@@ -132,12 +132,6 @@ struct ContentCell: View {
         .cornerRadius(10)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
-        .swipeActions {
-            Button(isBookmarked ? "Remove Bookmark" : "Bookmark") {
-                bookmarkAction()
-            }.buttonStyle(DefaultButtonStyle())
-                .tint(isBookmarked ? .red : .yellow)
-        }
         // LazyVStack inside ContentListView materializes cells as they
         // scroll into view; this .task runs once per materialization.
         // Cheap no-op when aiSummaries is off or the device can't run

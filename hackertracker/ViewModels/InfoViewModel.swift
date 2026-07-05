@@ -198,39 +198,14 @@ final class InfoViewModel {
     func removeListeners() {
         // print("Removing listeners")
         // print("DB Cache Settings: \(db.settings.isPersistenceEnabled)")
-        if let cl = conferenceListener {
-            cl.remove()
-        }
-        if let dl = documentListener {
-            dl.remove()
-        }
-        if let tl = tagListener {
-            tl.remove()
-        }
-        if let ll = locationListener {
-            ll.remove()
-        }
-        if let pl = productListener {
-            pl.remove()
-        }
-        if let cl = contentListener {
-            cl.remove()
-        }
-        if let sl = speakerListener {
-            sl.remove()
-        }
-        if let ll = listListener {
-            ll.remove()
-        }
-        if let al = articleListener {
-            al.remove()
-        }
-        if let ml = menuListener {
-            ml.remove()
-        }
-        if let fl = feedbackFormsListener {
-            fl.remove()
-        }
+        // Bugfix: this used to hand-roll its own list of `if let ... .remove()`
+        // and had drifted out of sync with removeListenersImmediate() /
+        // deinit — it was missing orgListener, so fetchData() -> removeListeners()
+        // followed by fetchOrgs() orphaned the previous conference's org
+        // listener (leaked live Firestore listener + possible stale-data
+        // clobber). Delegate to removeListenersImmediate() so there's a
+        // single source of truth for "which listeners exist."
+        removeListenersImmediate()
     }
 
     /// deinit-safe variant that doesn't touch @Published state.
@@ -418,10 +393,25 @@ final class InfoViewModel {
                                 completion(nil, error)
                             }
                         } else {
-                            completion(nil, error)
+                            // Bugfix: statusCode == 200 but no temp file — treat as a
+                            // failure so `completion` still fires exactly once instead
+                            // of silently dropping the callback.
+                            Log.network.error("download reported success but no temp file")
+                            completion(nil, URLError(.badServerResponse))
                         }
-
+                    } else {
+                        // Bugfix: non-200 responses (404/500/etc) previously fell through
+                        // without calling `completion` at all, which left
+                        // pendingMapDownloads permanently incremented and the Maps tab
+                        // spinner stuck on for the rest of the session.
+                        Log.network.error("download failed with status \(response.statusCode, privacy: .public)")
+                        completion(nil, URLError(.badServerResponse))
                     }
+                } else {
+                    // Bugfix: cast to HTTPURLResponse failed (non-HTTP response, or nil) —
+                    // same "never call completion" hole as the non-200 branch above.
+                    Log.network.error("download response was not an HTTPURLResponse")
+                    completion(nil, URLError(.badServerResponse))
                 }
 
             }
