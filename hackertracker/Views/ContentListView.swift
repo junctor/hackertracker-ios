@@ -78,13 +78,9 @@ struct ContentListView: View {
     /// iPad-only: identifies the content currently shown in the detail column.
     @State private var ipadSelectedContentId: Int?
 
-    /// Number of Content rows surviving the current filter +
-    /// search pipeline. Same shape as scheduleFilteredCount.
-    private var contentFilteredCount: Int {
-        contentGroup().values.reduce(0) { $0 + $1.count }
-    }
-
-    func contentGroup() -> [String.Element: [Content]] {
+    /// Grouped content computed once per body evaluation, shared by
+    /// contentFilteredCount and grouped to avoid duplicate filtering.
+    private var groupedContent: [String.Element: [Content]] {
         let bookmarkIds = Set(bookmarks.map(\.id))
         // Predicate composes search text + filter chips. The chips OR
         // with each other (matches any one keeps the row). Real tags
@@ -122,8 +118,14 @@ struct ContentListView: View {
         )
     }
 
+    /// Number of Content rows surviving the current filter +
+    /// search pipeline. Same shape as scheduleFilteredCount.
+    private var contentFilteredCount: Int {
+        groupedContent.values.reduce(0) { $0 + $1.count }
+    }
+
     private var grouped: [(key: String.Element, value: [Content])] {
-        contentGroup().sorted { $0.key < $1.key }
+        groupedContent.sorted { $0.key < $1.key }
     }
 
     /// Inline search bar shown only when `isSearching` is true.

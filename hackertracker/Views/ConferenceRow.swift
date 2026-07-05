@@ -57,6 +57,7 @@ struct ConferenceRow: View {
                 if let logo = conference.squareLogo(for: colorScheme),
                    let url = URL(string: logo) {
                     KFImage(url)
+                        .htDownsampled(side: 56)
                         .resizable()
                         .scaledToFit()
                         .frame(width: 56, height: 56)

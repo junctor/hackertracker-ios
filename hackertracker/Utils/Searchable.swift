@@ -30,16 +30,16 @@ extension [Event] {
     /// Build a per-call id->name index and match against it.
     func search(text: String, speakers: [Speaker]) -> Self {
         guard !text.isEmpty else { return self }
-        let needle = text.lowercased()
+        let needle = text
         // Index speaker names once per call instead of O(events * speakers).
         let speakerNameById: [Int: String] = Dictionary(
-            uniqueKeysWithValues: speakers.map { ($0.id, $0.name.lowercased()) }
+            uniqueKeysWithValues: speakers.map { ($0.id, $0.name) }
         )
         return self.filter { event in
-            if event.title.lowercased().contains(needle) { return true }
-            if event.description.lowercased().contains(needle) { return true }
+            if _searchMatches(event.title, needle: needle) { return true }
+            if _searchMatches(event.description, needle: needle) { return true }
             for person in event.people {
-                if let name = speakerNameById[person.id], name.contains(needle) {
+                if let name = speakerNameById[person.id], _searchMatches(name, needle: needle) {
                     return true
                 }
             }

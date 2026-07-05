@@ -38,6 +38,7 @@ struct OrgView: View {
                         ForEach(org.media, id: \.assetId) { m in
                             if let url = URL(string: m.url) {
                                 KFImage(url)
+                                    .htDownsampled(side: 300)
                                     .resizable()
                                     .scaledToFit()
                                     .aspectRatio(contentMode: .fit)

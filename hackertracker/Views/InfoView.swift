@@ -287,6 +287,7 @@ struct InfoView: View {
 
                             if !isCollapsed {
                                 KFImage(logoUrl)
+                                    .htDownsampled(side: 160)
                                     .resizable()
                                     .scaledToFit()
                                     .frame(maxWidth: 160, maxHeight: 160)
