@@ -38,65 +38,10 @@ struct ConferencesView: View {
         }
     }
 
-    @ViewBuilder private var inlineSearchBar: some View {
-        if isSearching {
-            HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass").foregroundColor(.secondary)
-                TextField("Search conferences", text: $searchText)
-                    .focused($searchFocused)
-                    .submitLabel(.search)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                if !searchText.isEmpty {
-                    Button {
-                        searchText = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
-                    }
-                    .accessibilityLabel("Clear search text")
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(.thinMaterial)
-            .transition(.move(edge: .top).combined(with: .opacity))
-        }
-    }
-
-    @ViewBuilder private var searchToggleButton: some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                isSearching.toggle()
-            }
-            if isSearching {
-                searchFocused = true
-            } else {
-                searchText = ""
-            }
-        } label: {
-            Image(systemName: isSearching ? "xmark.circle" : "magnifyingglass")
-        }
-        .accessibilityLabel(isSearching ? "Close search" : "Search conferences")
-    }
-
-    @ViewBuilder private var jumpMenu: some View {
-        Menu {
-            Button {
-                jumpTarget = "__top"
-            } label: { Label("Top", systemImage: "arrow.up") }
-            Button {
-                jumpTarget = "__bottom"
-            } label: { Label("Bottom", systemImage: "arrow.down") }
-        } label: {
-            Image(systemName: "arrow.up.arrow.down")
-        }
-        .menuOrder(.fixed)
-    }
-
     var body: some View {
         if consViewModel.conferences.count > 0 {
             VStack(spacing: 0) {
-                inlineSearchBar
+                InlineSearchBar(placeholder: "Search conferences", text: $searchText, isFocused: $searchFocused, visible: isSearching)
                 ScrollView {
                     if filteredConferences.isEmpty {
                         ContentUnavailableView.search(text: searchText)
@@ -139,12 +84,7 @@ struct ConferencesView: View {
             .overlay(alignment: .bottom) {
                 HStack {
                     Spacer()
-                    jumpMenu
-                        .font(themeManager.title2Font)
-                        .foregroundStyle(.primary)
-                        .frame(width: 48, height: 48)
-                        .background(.regularMaterial, in: Circle())
-                        .accessibilityLabel("Jump")
+                    JumpMenuOverlay(target: $jumpTarget)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 12)
@@ -156,7 +96,7 @@ struct ConferencesView: View {
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    searchToggleButton
+                    SearchToggleButton(isSearching: $isSearching, searchText: $searchText, isFocused: $searchFocused, searchLabel: "Search conferences")
                 }
             }
             .analyticsScreen(name: "ConferencesView")

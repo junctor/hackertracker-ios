@@ -121,47 +121,6 @@ struct SpeakersView: View {
             .sorted { $0.key < $1.key }
     }
 
-    @ViewBuilder private var inlineSearchBar: some View {
-        if isSearching {
-            HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass").foregroundColor(.secondary)
-                TextField("Search speakers", text: $searchText)
-                    .focused($searchFocused)
-                    .submitLabel(.search)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                if !searchText.isEmpty {
-                    Button {
-                        searchText = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
-                    }
-                    .accessibilityLabel("Clear search text")
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(.thinMaterial)
-            .transition(.move(edge: .top).combined(with: .opacity))
-        }
-    }
-
-    @ViewBuilder private var searchToggleButton: some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                isSearching.toggle()
-            }
-            if isSearching {
-                searchFocused = true
-            } else {
-                searchText = ""
-            }
-        } label: {
-            Image(systemName: isSearching ? "xmark.circle" : "magnifyingglass")
-        }
-        .accessibilityLabel(isSearching ? "Close search" : "Search speakers")
-    }
-
     @ViewBuilder private var jumpToGroupMenu: some View {
         Menu {
             ForEach(grouped, id: \.key) { char, _ in
@@ -204,7 +163,7 @@ struct SpeakersView: View {
     @ViewBuilder
     private var speakerSidebar: some View {
         VStack(spacing: 0) {
-            inlineSearchBar
+            InlineSearchBar(placeholder: "Search speakers", text: $searchText, isFocused: $searchFocused, visible: isSearching)
             ScrollView {
                 if grouped.isEmpty {
                     if searchText.isEmpty {
@@ -292,7 +251,7 @@ struct SpeakersView: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
-                searchToggleButton
+                SearchToggleButton(isSearching: $isSearching, searchText: $searchText, isFocused: $searchFocused, searchLabel: "Search speakers")
             }
         }
         .analyticsScreen(name: "SpeakersView")

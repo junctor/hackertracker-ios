@@ -210,32 +210,6 @@ struct EventsView: View {
   /// other so the detail pane never shows stale state.
   @State private var ipadSelectedCustomEventId: UUID? = nil
 
-  /// Inline search bar shown only when `isSearching` is true.
-  @ViewBuilder private var inlineSearchBar: some View {
-      if isSearching {
-          HStack(spacing: 8) {
-              Image(systemName: "magnifyingglass").foregroundColor(.secondary)
-              TextField("Search title, speaker, or description", text: $searchText)
-                  .focused($searchFocused)
-                  .submitLabel(.search)
-                  .autocorrectionDisabled()
-                  .textInputAutocapitalization(.never)
-              if !searchText.isEmpty {
-                  Button {
-                      searchText = ""
-                  } label: {
-                      Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
-                  }
-                  .accessibilityLabel("Clear search text")
-              }
-          }
-          .padding(.horizontal, 12)
-          .padding(.vertical, 8)
-          .background(.thinMaterial)
-          .transition(.move(edge: .top).combined(with: .opacity))
-      }
-  }
-
   /// Polish: "Jump to Day" Menu. Now displayed as a floating button at the
   /// bottom-right of the schedule (see .overlay on the schedule VStack).
   /// The label here is just the icon; the surrounding floating-button chrome
@@ -281,23 +255,6 @@ struct EventsView: View {
       .menuOrder(.fixed)
   }
 
-  /// Toolbar button that toggles the inline search field.
-  @ViewBuilder private var searchToggleButton: some View {
-      Button {
-          withAnimation(.easeInOut(duration: 0.2)) {
-              isSearching.toggle()
-          }
-          if isSearching {
-              searchFocused = true
-          } else {
-              searchText = ""
-          }
-      } label: {
-          Image(systemName: isSearching ? "xmark.circle" : "magnifyingglass")
-      }
-      .accessibilityLabel(isSearching ? "Close search" : "Search schedule")
-  }
-
   /// Schedule body content used inside both the iPhone NavigationStack
   /// and the iPad NavigationSplitView sidebar. Contains the emergency
   /// banner, inline-search bar, EventScrollView, floating Filter +
@@ -313,7 +270,7 @@ struct EventsView: View {
         }
       }
       VStack(spacing: 0) {
-        inlineSearchBar
+        InlineSearchBar(placeholder: "Search title, speaker, or description", text: $searchText, isFocused: $searchFocused, visible: isSearching)
         EventScrollView(
           events: scheduleGrouped,
           dayTag: eventDay,
@@ -408,7 +365,7 @@ struct EventsView: View {
             Image(systemName: "plus")
           }
           .accessibilityLabel("Add custom event")
-          searchToggleButton
+          SearchToggleButton(isSearching: $isSearching, searchText: $searchText, isFocused: $searchFocused, searchLabel: "Search schedule")
         }
       }
       .task(id: searchText) {
@@ -542,7 +499,7 @@ struct EventsView: View {
       } */
     } else {
       VStack(spacing: 0) {
-        inlineSearchBar
+        InlineSearchBar(placeholder: "Search title, speaker, or description", text: $searchText, isFocused: $searchFocused, visible: isSearching)
         EventScrollView(
           events: scheduleGrouped,
           dayTag: eventDay,
@@ -603,7 +560,7 @@ struct EventsView: View {
               Image(systemName: "arrow.up.arrow.down")
             }
             .accessibilityLabel("Jump to day")
-            searchToggleButton
+            SearchToggleButton(isSearching: $isSearching, searchText: $searchText, isFocused: $searchFocused, searchLabel: "Search schedule")
           }
         }
         .task(id: searchText) {

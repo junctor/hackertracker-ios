@@ -40,20 +40,6 @@ struct SharedScheduleView: View {
         return order.map { ($0, bucket[$0] ?? []) }
     }
 
-    @ViewBuilder private var jumpMenu: some View {
-        Menu {
-            Button {
-                jumpTarget = "__top"
-            } label: { Label("Top", systemImage: "arrow.up") }
-            Button {
-                jumpTarget = "__bottom"
-            } label: { Label("Bottom", systemImage: "arrow.down") }
-        } label: {
-            Image(systemName: "arrow.up.arrow.down")
-        }
-        .menuOrder(.fixed)
-    }
-
     var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility tz changes.
         let _ = dfu.tzGeneration
@@ -98,12 +84,7 @@ struct SharedScheduleView: View {
             if !sharedSchedule.entries.isEmpty {
                 HStack {
                     Spacer()
-                    jumpMenu
-                        .font(themeManager.title2Font)
-                        .foregroundStyle(.primary)
-                        .frame(width: 48, height: 48)
-                        .background(.regularMaterial, in: Circle())
-                        .accessibilityLabel("Jump")
+                    JumpMenuOverlay(target: $jumpTarget)
                 }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 12)
