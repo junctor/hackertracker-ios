@@ -9,10 +9,10 @@ import SwiftUI
 
 struct EventsView: View {
     @EnvironmentObject var selected: SelectedConference
-    @AppStorage("showLocaltime") var showLocaltime: Bool = false
-    @AppStorage("show24hourtime") var show24hourtime: Bool = true
-    @AppStorage("showPastEvents") var showPastEvents: Bool = true
-    @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
+    @AppStorage(AppStorageKeys.showLocaltime) var showLocaltime: Bool = false
+    @AppStorage(AppStorageKeys.show24hourtime) var show24hourtime: Bool = true
+    @AppStorage(AppStorageKeys.showPastEvents) var showPastEvents: Bool = true
+    @AppStorage(AppStorageKeys.showConflictAlert) var showConflictAlert: Bool = true
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
     @EnvironmentObject var scrollBus: ScrollCommandBus
@@ -81,10 +81,10 @@ struct EventsView: View {
     /// User toggle (defaulting on) for whether custom events appear in
     /// the schedule at all. Lives next to the rest of the schedule
     /// state so its value is read inline with the synthesizer.
-    @AppStorage("showCustomEvents") private var showCustomEventsInSchedule: Bool = true
+    @AppStorage(AppStorageKeys.showCustomEvents) private var showCustomEventsInSchedule: Bool = true
     /// Filter-chip composition mode. Read from the same
     /// AppStorage key the Filters sheet writes to.
-    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    @AppStorage(AppStorageKeys.filterMatchMode) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     private var filterMatchMode: FilterMatchMode {
         FilterMatchMode(rawOrDefault: filterMatchModeRaw)
     }

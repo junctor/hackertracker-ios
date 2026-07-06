@@ -40,7 +40,7 @@ struct NotificationButton: View {
     var content: Content
     var session: Session
     @Binding var notExists: Bool
-    @AppStorage("notifyAt") var notifyAt: Int = 20
+    @AppStorage(AppStorageKeys.notifyAt) var notifyAt: Int = 20
     @Environment(InfoViewModel.self) private var viewModel
     
     var body: some View {

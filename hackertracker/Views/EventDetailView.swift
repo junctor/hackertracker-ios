@@ -18,7 +18,7 @@ struct EventDetailView: View {
     @State var nExists = false
 
     @Environment(\.managedObjectContext) private var viewContext
-    @AppStorage("notifyAt") var notifyAt: Int = 20
+    @AppStorage(AppStorageKeys.notifyAt) var notifyAt: Int = 20
 
     let columns = [
         GridItem(.flexible()),

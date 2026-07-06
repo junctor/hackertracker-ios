@@ -15,7 +15,7 @@ struct GlobalSearchView: View {
     @State private var debouncedSearch = ""
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
     /// Perf C: single list-level bookmarks fetch published into the
     /// environment for the EventCells in the Schedule section (they no
     /// longer run a per-row @FetchRequest).

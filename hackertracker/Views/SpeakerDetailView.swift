@@ -109,7 +109,7 @@ struct showSpeakerLinks: View {
     var links: [SpeakerLink]
     @Environment(\.openURL) private var openURL
     @State private var collapsed = false
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
 
     @Environment(ThemeManager.self) private var themeManager
 
@@ -252,7 +252,7 @@ struct SpeakerEventView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("notifyAt") var notifyAt: Int = 20
+    @AppStorage(AppStorageKeys.notifyAt) var notifyAt: Int = 20
 
     var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI

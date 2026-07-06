@@ -9,7 +9,7 @@ import SwiftUI
 struct ShareBookmarksView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
     @State private var message = "Tap link to copy"
     
     @Environment(ThemeManager.self) private var themeManager

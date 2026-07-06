@@ -17,11 +17,11 @@ struct SpeakerRow: View {
     /// Mirror of the AI summary toggle used by EventCell / ContentCell.
     /// When on AND the speaker lacks a job title, we render a one-line
     /// AI-generated bio summary in the subtitle slot.
-    @AppStorage("aiSummaries") private var aiSummaries: Bool = false
+    @AppStorage(AppStorageKeys.aiSummaries) private var aiSummaries: Bool = false
     /// Hidden secondary gate — speaker bios are only summarized when
     /// the user discovers + flips the chord-revealed toggle in
     /// Settings → AI Summaries (7-tap on the main row).
-    @AppStorage("speakerAISummaries") private var speakerAISummaries: Bool = false
+    @AppStorage(AppStorageKeys.speakerAISummaries) private var speakerAISummaries: Bool = false
 
     /// True when both the main AI Summaries toggle AND the hidden
     /// speaker-specific gate are enabled.

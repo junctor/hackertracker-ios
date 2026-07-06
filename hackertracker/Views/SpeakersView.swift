@@ -12,7 +12,7 @@ struct SpeakersView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
     @EnvironmentObject var speakerFilters: SpeakerFiltersStore
-    @AppStorage("filterMatchModeSpeakers") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    @AppStorage(AppStorageKeys.filterMatchModeSpeakers) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     @State private var searchText = ""
 
     // Polish parity with schedule / All Content.
@@ -353,7 +353,7 @@ struct SpeakerFiltersSheet: View {
     /// using the same filter pipeline so the displayed tally is the
     /// row count the list will render.
     var matchedCount: Int = 0
-    @AppStorage("filterMatchModeSpeakers") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    @AppStorage(AppStorageKeys.filterMatchModeSpeakers) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
 
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 

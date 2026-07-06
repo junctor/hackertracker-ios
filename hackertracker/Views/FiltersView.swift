@@ -22,7 +22,7 @@ struct EventFilters: View {
     /// Singular noun used in the live tally label ("event", "talk",
     /// etc.). Plural is auto-derived with a trailing s.
     var unitLabel: String = "event"
-    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    @AppStorage(AppStorageKeys.filterMatchMode) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
 
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
 

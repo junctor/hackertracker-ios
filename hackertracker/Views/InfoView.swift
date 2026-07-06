@@ -15,12 +15,12 @@ struct InfoView: View {
     //@Binding var tappedMainTwice: Bool
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.managedObjectContext) private var viewContext
-    @AppStorage("showLocaltime") var showLocaltime: Bool = false
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.showLocaltime) var showLocaltime: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
     /// Per-conference collapse state for the square logo on this
     /// screen. Stored as a JSON-encoded Set<String> of conference
     /// codes that the user has collapsed; persists across launches.
-    @AppStorage("infoLogoCollapsedCodes") private var collapsedLogoCodesRaw: String = "[]"
+    @AppStorage(AppStorageKeys.infoLogoCollapsedCodes) private var collapsedLogoCodesRaw: String = "[]"
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var filters: Filters
     @Environment(ConferencesViewModel.self) private var consViewModel
@@ -56,7 +56,7 @@ struct InfoView: View {
     /// flip both AppStorage toggles, show a celebratory overlay for
     /// 3s, then fire the rickroll. State is local so the overlay can
     /// be triggered independently of the global enable flags.
-    @AppStorage("easterEgg") private var easterEgg: Bool = false
+    @AppStorage(AppStorageKeys.easterEgg) private var easterEgg: Bool = false
     @State private var easterEggOverlayVisible: Bool = false
     @Environment(\.colorScheme) private var easterEggOverlayColorScheme
     @State var schedule = UUID()
@@ -687,7 +687,7 @@ struct MenuView: View {
     // @Binding var tappedMainTwice: Bool
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var filters: Filters
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
     @State var schedule = UUID()
     @FetchRequest(sortDescriptors: []) var readnews: FetchedResults<News>
@@ -789,7 +789,7 @@ struct CardView: View {
     var foregroundColor: Color?
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
 
     var body: some View {
         if colorMode {

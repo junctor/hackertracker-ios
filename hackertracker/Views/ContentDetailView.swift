@@ -146,7 +146,7 @@ struct ContentDetailView: View {
 struct showFeedbackButton: View {
     @Binding var showFeedback: Bool
     @Environment(InfoViewModel.self) private var viewModel
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
 
     @Environment(ThemeManager.self) private var themeManager
 
@@ -244,8 +244,8 @@ struct showSessionRow: View {
     let dfu = DateFormatterUtility.shared
     
     @State var notExists: Bool = false
-    @AppStorage("notifyAt") var notifyAt: Int = 20
-    @AppStorage("show24hourtime") var show24hourtime: Bool = true
+    @AppStorage(AppStorageKeys.notifyAt) var notifyAt: Int = 20
+    @AppStorage(AppStorageKeys.show24hourtime) var show24hourtime: Bool = true
     @Environment(InfoViewModel.self) private var viewModel
     
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
@@ -417,7 +417,7 @@ struct showPeople: View {
     var content: Content
     @Environment(InfoViewModel.self) private var viewModel
     @State private var collapsed = false
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     @Environment(ThemeManager.self) private var themeManager

@@ -18,7 +18,7 @@ struct ContentListView: View {
     @State private var debouncedSearch = ""
     /// Filter-chip composition mode. Mirrors EventsView so both
     /// lists honor the same user choice from the Filters sheet.
-    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    @AppStorage(AppStorageKeys.filterMatchMode) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     private var filterMatchMode: FilterMatchMode {
         FilterMatchMode(rawOrDefault: filterMatchModeRaw)
     }

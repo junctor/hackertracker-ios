@@ -115,7 +115,7 @@ struct SharedScheduleView: View {
 struct SharedScheduleRow: View {
     let entry: SharedScheduleStore.Entry
     let dfu = DateFormatterUtility.shared
-    @AppStorage("show24hourtime") var show24hourtime: Bool = true
+    @AppStorage(AppStorageKeys.show24hourtime) var show24hourtime: Bool = true
 
     /// Format event start time in the device-current zone so the combined
     /// view stays self-consistent regardless of which conference the row

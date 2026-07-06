@@ -494,7 +494,7 @@ enum ThemeMetrics {
 @MainActor
 final class ThemeManager {
     private static let userDefaultsKey = "themeID"
-    private static let lightModeKey = "lightMode"
+    private static let lightModeKey = AppStorageKeys.lightMode
 
     /// Backing storage. @Observable tracks reads + writes of this.
     private var storedID: String
@@ -521,7 +521,7 @@ final class ThemeManager {
     }
 
     /// Flip light mode. The SettingsView Toggle binds its own
-    /// @AppStorage("lightMode") for UI state and calls this in
+    /// @AppStorage(AppStorageKeys.lightMode) for UI state and calls this in
     /// onChange so observation fires app-wide.
     func setLightMode(_ on: Bool) {
         storedLightMode = on

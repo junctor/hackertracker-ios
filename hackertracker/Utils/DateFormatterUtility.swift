@@ -73,7 +73,7 @@ class DateFormatterUtility {
     }
 
     func preferLocalTime() -> Bool {
-        UserDefaults.standard.bool(forKey: "showLocaltime")
+        UserDefaults.standard.bool(forKey: AppStorageKeys.showLocaltime)
     }
 
     // time format

@@ -14,7 +14,7 @@ struct OrgView: View {
     // @Binding var tappedScheduleTwice: Bool
     @Environment(InfoViewModel.self) private var viewModel
     @EnvironmentObject var filters: Filters
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
     @Binding var tabSelection: Int
 
     @Environment(ThemeManager.self) private var themeManager
@@ -80,7 +80,7 @@ struct showLinks: View {
     var links: [Link]
     @Environment(\.openURL) private var openURL
     @State private var collapsed = false
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
 
     @Environment(ThemeManager.self) private var themeManager
 

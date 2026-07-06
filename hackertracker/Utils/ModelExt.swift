@@ -84,7 +84,7 @@ enum PseudoTagID {
     static let all: Set<Int> = [bookmarks, customEvents, hasNotes]
 }
 
-/// Filter-chip composition mode. Read from @AppStorage("filterMatchMode")
+/// Filter-chip composition mode. Read from @AppStorage(AppStorageKeys.filterMatchMode)
 /// by FiltersView (writes) and the predicate consumers (reads). Storing
 /// the raw string lets us swap it cleanly via @AppStorage on multiple
 /// independent views without an envelope object.

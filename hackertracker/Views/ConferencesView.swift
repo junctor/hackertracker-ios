@@ -18,9 +18,9 @@ struct ConferencesView: View {
     @Environment(\.presentationMode) var presentationMode
     @Environment(ThemeManager.self) private var themeManager
     @Environment(\.managedObjectContext) private var viewContext
-    @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
-    @AppStorage("showHidden") var showHidden: Bool = false
-    @AppStorage("showLocaltime") var showLocaltime: Bool = false
+    @AppStorage(AppStorageKeys.conferenceCode) var conferenceCode: String = "INIT"
+    @AppStorage(AppStorageKeys.showHidden) var showHidden: Bool = false
+    @AppStorage(AppStorageKeys.showLocaltime) var showLocaltime: Bool = false
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
 
     // Polish parity with the other top-level lists.

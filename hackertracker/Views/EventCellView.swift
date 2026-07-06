@@ -14,11 +14,11 @@ struct EventCell: View {
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
     let dfu = DateFormatterUtility.shared
-    @AppStorage("notifyAt") var notifyAt: Int = 20
-    @AppStorage("show24hourtime") var show24hourtime: Bool = true
+    @AppStorage(AppStorageKeys.notifyAt) var notifyAt: Int = 20
+    @AppStorage(AppStorageKeys.show24hourtime) var show24hourtime: Bool = true
     /// Mirror of ContentCellView's AI summary plumbing — Schedule
     /// tab rows now opt into on-device summaries the same way.
-    @AppStorage("aiSummaries") private var aiSummaries: Bool = false
+    @AppStorage(AppStorageKeys.aiSummaries) private var aiSummaries: Bool = false
     @State private var showingOriginalDescription: Bool = false
     /// Perf C: bookmark ids come from the environment instead of a
     /// per-row @FetchRequest. The list-level view that owns the single

@@ -159,7 +159,7 @@ struct orgSearchRow: View {
 
 struct orgRow: View {
     let org: Organization
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
 
     @Environment(ThemeManager.self) private var themeManager
 

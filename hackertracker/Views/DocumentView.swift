@@ -17,7 +17,7 @@ struct DocumentView: View {
     /// bar (not duplicated in the scroll body). Emergency / merch-help docs
     /// still want the prominent in-body banner, so this defaults to true.
     var showInlineTitle: Bool = true
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
 
     @Environment(ThemeManager.self) private var themeManager
 
