@@ -7,39 +7,11 @@
 
 import SwiftUI
 
-class Theme: ObservableObject {
-    @AppStorage("lightMode") var lightMode: Bool = false
-    @Published var colorScheme: ColorScheme = .dark
-
-    let colors = ["#326295", "#71cc98", "#c16784", "#4b9560", "#c04c36"]
-    let font = ThemeFont()
-    var index = 0
-    
-    init() {
-        if lightMode {
-            self.colorScheme = .light
-        } else {
-            self.colorScheme = .dark
-        }
-    }
-
-    func carousel() -> Color {
-        if index >= colors.count {
-            index = 0
-        }
-
-        let color = colors[index]
-        index += 1
-
-        return Color(UIColor(hex: color) ?? .purple)
-    }
-}
-
-struct ThemeFont {
-    let bold = "Futura Bold"
-    let regular = "Futura Medium"
-    let italic = "Futura Medium Italic"
-}
+// The legacy `Theme` ObservableObject (colorScheme flag + impure
+// carousel() color cycler + unused Futura ThemeFont) is gone — its
+// responsibilities folded into ThemeManager below: lightMode /
+// preferredColorScheme for the app-wide scheme, carouselColor(index:)
+// for the colorful-mode card palette.
 
 enum ThemeColors {
     static let pink = hexSwiftUIColor(hex: "#c16784")
@@ -522,14 +494,58 @@ enum ThemeMetrics {
 @MainActor
 final class ThemeManager {
     private static let userDefaultsKey = "themeID"
+    private static let lightModeKey = "lightMode"
 
     /// Backing storage. @Observable tracks reads + writes of this.
     private var storedID: String
 
+    /// Light/dark selection, folded in from the legacy `Theme` class.
+    /// Same hand-rolled persistence pattern as `storedID` (see the
+    /// header comment): plain stored property for observation, synced
+    /// to UserDefaults under the SAME "lightMode" key the old system
+    /// used so existing user settings carry over.
+    private var storedLightMode: Bool
+
     init() {
         self.storedID = UserDefaults.standard.string(forKey: ThemeManager.userDefaultsKey)
             ?? AppTheme.default.id
+        self.storedLightMode = UserDefaults.standard.bool(forKey: ThemeManager.lightModeKey)
         applyNavBarAppearance()
+    }
+
+    /// App-wide color scheme. The app intentionally never returns nil
+    /// (system-follow) — dark unless the user opted into light mode,
+    /// matching the legacy Theme behavior.
+    var preferredColorScheme: ColorScheme {
+        storedLightMode ? .light : .dark
+    }
+
+    /// Flip light mode. The SettingsView Toggle binds its own
+    /// @AppStorage("lightMode") for UI state and calls this in
+    /// onChange so observation fires app-wide.
+    func setLightMode(_ on: Bool) {
+        storedLightMode = on
+        UserDefaults.standard.set(on, forKey: ThemeManager.lightModeKey)
+    }
+
+    /// Colorful-mode card palette, folded in from the legacy
+    /// `Theme.carousel()`. That version mutated a shared index per
+    /// call, so card colors depended on render order; this is pure —
+    /// pass the card's stable position and it always gets the same
+    /// color.
+    private static let carouselColors = ["#326295", "#71cc98", "#c16784", "#4b9560", "#c04c36"]
+    func carouselColor(index: Int) -> Color {
+        let colors = ThemeManager.carouselColors
+        let hex = colors[((index % colors.count) + colors.count) % colors.count]
+        return Color(UIColor(hex: hex) ?? .purple)
+    }
+
+    /// Carousel color for a String-keyed model (e.g. Organization,
+    /// whose `id` is a Firestore `@DocumentID String?`). Derives a
+    /// stable, launch-independent index from the key's scalars so the
+    /// same org always gets the same tint.
+    func carouselColor(forKey key: String) -> Color {
+        carouselColor(index: key.unicodeScalars.reduce(0) { $0 + Int($1.value) })
     }
 
     /// The currently active theme. Falls back to the default if the

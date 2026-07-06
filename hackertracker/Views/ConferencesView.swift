@@ -13,7 +13,6 @@ struct ConferencesView: View {
     // var conferences: [Conference]
     @EnvironmentObject var selected: SelectedConference
     @Environment(InfoViewModel.self) private var viewModel
-    @EnvironmentObject var theme: Theme
     @Environment(ConferencesViewModel.self) private var consViewModel
     @EnvironmentObject var filters: Filters
     @Environment(\.presentationMode) var presentationMode

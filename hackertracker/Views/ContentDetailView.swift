@@ -146,7 +146,6 @@ struct ContentDetailView: View {
 struct showFeedbackButton: View {
     @Binding var showFeedback: Bool
     @Environment(InfoViewModel.self) private var viewModel
-    @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
     @Environment(ThemeManager.self) private var themeManager
@@ -161,7 +160,7 @@ struct showFeedbackButton: View {
             .foregroundColor(colorMode ? .white : .primary)
             .frame(maxWidth: .infinity)
             .padding(15)
-            .background(colorMode ? theme.carousel() : themeManager.cardSurface)
+            .background(colorMode ? themeManager.carouselColor(index: 0) : themeManager.cardSurface)
             .cornerRadius(15)
         }
     }
@@ -417,7 +416,6 @@ struct showRelated: View {
 struct showPeople: View {
     var content: Content
     @Environment(InfoViewModel.self) private var viewModel
-    @EnvironmentObject var theme: Theme
     @State private var collapsed = false
     @AppStorage("colorMode") var colorMode: Bool = false
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
@@ -469,7 +467,7 @@ struct showPeople: View {
                                 .foregroundColor(.primary)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding(15)
-                                .background(colorMode ? theme.carousel(): themeManager.cardSurface)
+                                .background(colorMode ? themeManager.carouselColor(index: person.id) : themeManager.cardSurface)
                                 .cornerRadius(15)
                             }
                         }
@@ -488,7 +486,7 @@ struct showPeople: View {
                     .foregroundColor(.primary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(colorMode ? theme.carousel(): themeManager.cardSurface)
+                    .background(colorMode ? themeManager.carouselColor(index: speaker.id) : themeManager.cardSurface)
                     .cornerRadius(15)
                 }
             }

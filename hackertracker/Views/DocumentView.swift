@@ -17,7 +17,6 @@ struct DocumentView: View {
     /// bar (not duplicated in the scroll body). Emergency / merch-help docs
     /// still want the prominent in-body banner, so this defaults to true.
     var showInlineTitle: Bool = true
-    @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
     @Environment(ThemeManager.self) private var themeManager
@@ -37,7 +36,7 @@ struct DocumentView: View {
                     .foregroundColor(colorMode ? .white : .primary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(color ?? (colorMode ? theme.carousel() : themeManager.cardSurface))
+                    .background(color ?? (colorMode ? themeManager.carouselColor(index: 0) : themeManager.cardSurface))
                     .cornerRadius(15)
                     Divider()
                 }

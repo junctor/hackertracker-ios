@@ -73,7 +73,6 @@ extension View {
 struct SettingsView: View {
     @EnvironmentObject var selected: SelectedConference
     @Environment(InfoViewModel.self) private var viewModel
-    @EnvironmentObject var theme: Theme
     @AppStorage("showNews") var showNews: Bool = true
     @State private var iPadSheet: SettingsIPadSheet?
 
@@ -635,18 +634,16 @@ struct LightModeSettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
     @AppStorage("lightMode") var lightMode: Bool = false
     @AppStorage("colorMode") var colorMode: Bool = false
-    @EnvironmentObject var theme: Theme
 
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Enable Light Mode", isOn: $lightMode)
                 .onChange(of: lightMode) { _, value in
                     Log.ui.debug("lightMode=\(value)")
-                    if value {
-                        theme.colorScheme = .light
-                    } else {
-                        theme.colorScheme = .dark
-                    }
+                    // The @AppStorage binding drives the Toggle UI; the
+                    // ThemeManager stored property is what the rest of
+                    // the app observes via preferredColorScheme.
+                    themeManager.setLightMode(value)
                 }
         }
         .settingsCard(themeManager)

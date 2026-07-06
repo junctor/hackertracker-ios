@@ -13,7 +13,6 @@ struct OrgView: View {
     var org: Organization
     // @Binding var tappedScheduleTwice: Bool
     @Environment(InfoViewModel.self) private var viewModel
-    @EnvironmentObject var theme: Theme
     @EnvironmentObject var filters: Filters
     @AppStorage("colorMode") var colorMode: Bool = false
     @Binding var tabSelection: Int
@@ -61,7 +60,7 @@ struct OrgView: View {
                             .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel() : themeManager.cardSurface)
+                            .background(colorMode ? themeManager.carouselColor(forKey: org.id ?? org.name) : themeManager.cardSurface)
                             .cornerRadius(15)
                     }
                 }
@@ -81,7 +80,6 @@ struct showLinks: View {
     var links: [Link]
     @Environment(\.openURL) private var openURL
     @State private var collapsed = false
-    @EnvironmentObject var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
     @Environment(ThemeManager.self) private var themeManager
@@ -125,7 +123,7 @@ struct showLinks: View {
                             .foregroundColor(.primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel() : themeManager.cardSurface)
+                            .background(colorMode ? themeManager.carouselColor(forKey: link.url) : themeManager.cardSurface)
                             .cornerRadius(15)
                         }
                     }

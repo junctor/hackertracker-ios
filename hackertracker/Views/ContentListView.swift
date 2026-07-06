@@ -321,7 +321,6 @@ struct ContentListView: View {
 struct ContentData: View {
     let char: String.Element
     let content: [Content]
-    @EnvironmentObject var theme: Theme
     @Environment(ThemeManager.self) private var themeManager
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>

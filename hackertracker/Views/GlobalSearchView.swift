@@ -13,7 +13,6 @@ struct GlobalSearchView: View {
     /// .task(id:) so search results re-filter once per pause rather
     /// than on every keystroke.
     @State private var debouncedSearch = ""
-    @EnvironmentObject var theme: Theme
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
     @AppStorage("colorMode") var colorMode: Bool = false
@@ -44,7 +43,7 @@ struct GlobalSearchView: View {
                                     $0.name < $1.name
                                 }, id: \.id) { speaker in
                                     NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
-                                        SpeakerRow(speaker: speaker, themeColor: theme.carousel())
+                                        SpeakerRow(speaker: speaker, themeColor: themeManager.carouselColor(index: speaker.id))
                                             .id(speaker.id)
                                             .foregroundColor(.primary)
                                             .padding(1)
@@ -59,7 +58,7 @@ struct GlobalSearchView: View {
                                 $0.title < $1.title
                             }, id: \.id) { document in
                                 NavigationLink(destination: DocumentView(title_text: document.title, body_text: document.body)) {
-                                    docSearchRow(title_text: document.title, themeColor: colorMode ? theme.carousel() : Color(.systemGray2))
+                                    docSearchRow(title_text: document.title, themeColor: colorMode ? themeManager.carouselColor(index: document.id) : Color(.systemGray2))
                                         .foregroundColor(.primary)
                                         .padding(1)
                                 }
@@ -73,7 +72,7 @@ struct GlobalSearchView: View {
                                         $0.name < $1.name
                                     }, id: \.id) { org in
                                         NavigationLink(destination: DocumentView(title_text: org.name, body_text: org.description)) {
-                                            orgSearchRow(org: org, themeColor: theme.carousel())
+                                            orgSearchRow(org: org, themeColor: themeManager.carouselColor(forKey: org.id ?? org.name))
                                                 .foregroundColor(.primary)
                                                 .padding(1)
                                         }

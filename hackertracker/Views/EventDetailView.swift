@@ -13,7 +13,6 @@ struct EventDetailView: View {
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
     @EnvironmentObject var selected: SelectedConference
     @Environment(InfoViewModel.self) private var viewModel
-    @EnvironmentObject var theme: Theme
     let dfu = DateFormatterUtility.shared
     @State var showingAlert = false
     @State var nExists = false
@@ -145,7 +144,7 @@ struct EventDetailView: View {
 struct showSpeakers: View {
     var event: Event
     @Environment(InfoViewModel.self) private var viewModel
-    @EnvironmentObject var theme: Theme
+    @Environment(ThemeManager.self) private var themeManager
     @State private var collapsed = false
     let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
@@ -181,7 +180,7 @@ struct showSpeakers: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                 .padding(15)
-                                .background(theme.carousel().gradient)
+                                .background(themeManager.carouselColor(index: person.id).gradient)
                                 .cornerRadius(15)
                             }
                         }
@@ -200,7 +199,7 @@ struct showSpeakers: View {
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .padding(15)
-                    .background(theme.carousel().gradient)
+                    .background(themeManager.carouselColor(index: people[0].id).gradient)
                     .cornerRadius(15)
                 }
             }

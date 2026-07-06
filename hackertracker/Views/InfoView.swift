@@ -22,7 +22,6 @@ struct InfoView: View {
     /// codes that the user has collapsed; persists across launches.
     @AppStorage("infoLogoCollapsedCodes") private var collapsedLogoCodesRaw: String = "[]"
     @EnvironmentObject var selected: SelectedConference
-    @EnvironmentObject var theme: Theme
     @EnvironmentObject var filters: Filters
     @Environment(ConferencesViewModel.self) private var consViewModel
     @Environment(\.openURL) private var openURL
@@ -122,7 +121,7 @@ struct InfoView: View {
                                 CountdownView(start: con.kickoffTimestamp)
                             }
                         } else {
-                            _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
+                            _04View(message: "Loading", show404: false).preferredColorScheme(themeManager.preferredColorScheme)
                                 .task {
                                     Log.app.debug("InfoView fetch data for \(selected.code, privacy: .public)")
                                     viewModel.fetchData(code: selected.code)
@@ -145,7 +144,7 @@ struct InfoView: View {
                             .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel() : themeManager.cardSurface)
+                            .background(colorMode ? themeManager.carouselColor(index: 0) : themeManager.cardSurface)
                             .cornerRadius(15)
                             Divider()
                         }
@@ -193,41 +192,41 @@ struct InfoView: View {
                                 }
                             }
                             NavigationLink(destination: GlobalSearchView()) {
-                                CardView(systemImage: "magnifyingglass", text: "Search", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                                CardView(systemImage: "magnifyingglass", text: "Search", color: colorMode ? themeManager.carouselColor(index: 1) : themeManager.cardSurface)
                             }
                             Button {
                                 tabSelection = 2
                             } label: {
-                                CardView(systemImage: "calendar", text: "Schedule", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                                CardView(systemImage: "calendar", text: "Schedule", color: colorMode ? themeManager.carouselColor(index: 2) : themeManager.cardSurface)
                             }
                             Button {
                                 tabSelection = 3
                             } label: {
-                                CardView(systemImage: "map", text: "Maps", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                                CardView(systemImage: "map", text: "Maps", color: colorMode ? themeManager.carouselColor(index: 3) : themeManager.cardSurface)
                             }
                             // Combined-schedule entry-point: only when SharedScheduleStore
                             // has resolved >=2 overlapping conferences with bookmarks in each.
                             if sharedSchedule.isAvailable {
                                 NavigationLink(destination: SharedScheduleView()) {
-                                    CardView(systemImage: "calendar.badge.plus", text: "Combined Schedule", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                                    CardView(systemImage: "calendar.badge.plus", text: "Combined Schedule", color: colorMode ? themeManager.carouselColor(index: 4) : themeManager.cardSurface)
                                 }
                             }
                             NavigationLink(destination: SpeakersView(speakers: viewModel.speakers)) {
-                                CardView(systemImage: "person.crop.rectangle", text: "Speakers", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                                CardView(systemImage: "person.crop.rectangle", text: "Speakers", color: colorMode ? themeManager.carouselColor(index: 5) : themeManager.cardSurface)
                             }
                             if self.viewModel.locations.count > 0 {
                                 NavigationLink(destination: LocationView(locations: self.viewModel.locations)) {
-                                    CardView(systemImage: "mappin.and.ellipse", text: "Locations", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                                    CardView(systemImage: "mappin.and.ellipse", text: "Locations", color: colorMode ? themeManager.carouselColor(index: 6) : themeManager.cardSurface)
                                 }
                             }
                             if viewModel.faqs.count > 0 {
                                 NavigationLink(destination: FAQListView()) {
-                                    CardView(systemImage: "questionmark.app", text: "FAQ", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                                    CardView(systemImage: "questionmark.app", text: "FAQ", color: colorMode ? themeManager.carouselColor(index: 7) : themeManager.cardSurface)
                                 }
                             }
                             if viewModel.news.count > 0 {
                                 NavigationLink(destination: NewsListView()) {
-                                    CardView(systemImage: "newspaper", text: "News", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                                    CardView(systemImage: "newspaper", text: "News", color: colorMode ? themeManager.carouselColor(index: 8) : themeManager.cardSurface)
                                 }
                             }
                             if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga" }) {
@@ -235,7 +234,7 @@ struct InfoView: View {
                                 ForEach(sortedTags, id: \.id) { tag in
                                     if viewModel.orgs.first(where: {$0.tag_ids.contains(tag.id)}) != nil {
                                         NavigationLink(destination: OrgsView(title: tag.label, tagId: tag.id, tabSelection: $tabSelection)) {
-                                            CardView(systemImage: "bag", text: tag.label, color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                                            CardView(systemImage: "bag", text: tag.label, color: colorMode ? themeManager.carouselColor(index: tag.id) : themeManager.cardSurface)
                                         }
                                     }
                                 }
@@ -250,7 +249,7 @@ struct InfoView: View {
                                     tabSelection = 2
                                 } label: {
                                     // NavigationLink(destination: ScheduleView(tagIds: [1337], includeNav: false, navTitle: item.title)) {
-                                    CardView(systemImage: "figure.and.child.holdinghands", text: "Kids Content", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                                    CardView(systemImage: "figure.and.child.holdinghands", text: "Kids Content", color: colorMode ? themeManager.carouselColor(index: 9) : themeManager.cardSurface)
                                     // }
                                 }
                             }
@@ -264,7 +263,7 @@ struct InfoView: View {
                             }
                         }
                     }
-                    if let logo = viewModel.conference?.squareLogo(for: theme.colorScheme),
+                    if let logo = viewModel.conference?.squareLogo(for: themeManager.preferredColorScheme),
                        let logoUrl = URL(string: logo),
                        let code = viewModel.conference?.code {
                         let isCollapsed = collapsedLogoCodes.contains(code)
@@ -352,7 +351,6 @@ struct InfoView: View {
                 /*
                  @Environment(InfoViewModel.self) private var viewModel
                  @EnvironmentObject var selected: SelectedConference
-                 @EnvironmentObject var theme: Theme
                  @EnvironmentObject var filters: Filters
                  
                 if #available(iOS 17.0, *) {
@@ -378,7 +376,6 @@ struct InfoView: View {
                 }
                 .onAppear {
                     Log.app.debug("InfoView selectedCode=\(selected.code, privacy: .public)")
-                    if colorMode { theme.index = 0 }
                     checkAppUpdate()
                 }
                 .themedBackground(themeManager)
@@ -689,7 +686,6 @@ struct MenuView: View {
     @Binding var tabSelection: Int
     // @Binding var tappedMainTwice: Bool
     @Environment(InfoViewModel.self) private var viewModel
-    @EnvironmentObject var theme: Theme
     @EnvironmentObject var filters: Filters
     @AppStorage("colorMode") var colorMode: Bool = false
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
@@ -713,13 +709,13 @@ struct MenuView: View {
                 
                 case "locations":
                     NavigationLink(destination: LocationView(locations: self.viewModel.locations)) {
-                        CardView(systemImage: item.symbol ?? "mappin.and.ellipse", text: "Locations", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                        CardView(systemImage: item.symbol ?? "mappin.and.ellipse", text: "Locations", color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                     }
                 case "maps":
                     Button {
                         tabSelection = 3
                     } label: {
-                        CardView(systemImage: item.symbol ?? "map", text: "Maps", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                        CardView(systemImage: item.symbol ?? "map", text: "Maps", color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                     }
                 case "menu":
                     if let menuId = item.menuId, let m = viewModel.menus.first(where: {$0.id == menuId}) {
@@ -728,26 +724,26 @@ struct MenuView: View {
                         }
                             .padding(15)
                         ) {
-                            CardView(systemImage: item.symbol ?? "menucard", text: item.title, color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                            CardView(systemImage: item.symbol ?? "menucard", text: item.title, color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                         }
                     }
                 case "news":
                     NavigationLink(destination: NewsListView()) {
-                        CardView(systemImage: item.symbol ?? "newspaper", text: "News", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                        CardView(systemImage: item.symbol ?? "newspaper", text: "News", color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                     }
                 case "content":
                     NavigationLink(destination: ContentListView(content: viewModel.content)) {
-                        CardView(systemImage: item.symbol ?? "list.dash", text: item.title, color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                        CardView(systemImage: item.symbol ?? "list.dash", text: item.title, color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                     }
                 case "organizations":
                     if viewModel.orgs.first(where: {$0.tag_ids.contains(item.appliedTagIds[0])}) != nil {
                         NavigationLink(destination: OrgsView(title: item.title, tagId: item.appliedTagIds[0], tabSelection: $tabSelection)) {
-                            CardView(systemImage: item.symbol ?? "figure.walk", text: item.title, color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                            CardView(systemImage: item.symbol ?? "figure.walk", text: item.title, color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                         }
                     }
                 case "people":
                     NavigationLink(destination: SpeakersView(speakers: viewModel.speakers)) {
-                        CardView(systemImage: item.symbol ?? "person.3", text: "Speakers", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                        CardView(systemImage: item.symbol ?? "person.3", text: "Speakers", color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                     }
                 case "products":
                     if let c = self.viewModel.conference, c.enableMerch {
@@ -757,24 +753,24 @@ struct MenuView: View {
                     }
                 case "faq":
                     NavigationLink(destination: FAQListView()) {
-                        CardView(systemImage: item.symbol ?? "questionmark.app", text: "FAQ", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                        CardView(systemImage: item.symbol ?? "questionmark.app", text: "FAQ", color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                     }
                 case "schedule":
                         Button {
                             tabSelection = 2
                         } label: {
-                            CardView(systemImage: item.symbol ?? "calendar", text: "Schedule", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                            CardView(systemImage: item.symbol ?? "calendar", text: "Schedule", color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                         }
                 case "schedule_bookmark":
                     Button {
                         filters.filters = [1337]
                         tabSelection = 2
                     } label: {
-                        CardView(systemImage: item.symbol ?? "calendar", text: item.title, color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                        CardView(systemImage: item.symbol ?? "calendar", text: item.title, color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                     }
                 case "search":
                      NavigationLink(destination: GlobalSearchView()) {
-                         CardView(systemImage: item.symbol ?? "magnifyingglass", text: "Search", color: colorMode ? theme.carousel() : themeManager.cardSurface)
+                         CardView(systemImage: item.symbol ?? "magnifyingglass", text: "Search", color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                      }
                 default:
                     EmptyView()

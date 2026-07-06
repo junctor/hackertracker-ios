@@ -13,7 +13,6 @@ struct OrgsView: View {
     var title: String
     var tagId: Int
     @Binding var tabSelection: Int
-    @EnvironmentObject var theme: Theme
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
     @EnvironmentObject var selected: SelectedConference
@@ -57,7 +56,7 @@ struct OrgsView: View {
                         Color.clear.frame(height: 1).id("__top")
                         LazyVGrid(columns: gridItemLayout, spacing: 20) {
                             ForEach(filteredOrgs, id: \.id) { org in
-                                OrgCell(org: org, theme: theme, tabSelection: $tabSelection)
+                                OrgCell(org: org, tabSelection: $tabSelection)
                             }
                         }
                         Color.clear.frame(height: 1).id("__bottom")
@@ -125,7 +124,6 @@ struct OrgsView: View {
 
 struct OrgCell: View {
     let org: Organization
-    let theme: Theme
     @Binding var tabSelection: Int
     @Environment(\.iPadOrgSelection) private var iPadOrgSelection
 
@@ -134,12 +132,12 @@ struct OrgCell: View {
             Button {
                 sel.wrappedValue = org.id
             } label: {
-                orgRow(org: org, theme: theme)
+                orgRow(org: org)
             }
             .buttonStyle(.plain)
         } else {
             NavigationLink(destination: OrgView(org: org, tabSelection: $tabSelection)) {
-                orgRow(org: org, theme: theme)
+                orgRow(org: org)
             }
         }
     }
@@ -161,7 +159,6 @@ struct orgSearchRow: View {
 
 struct orgRow: View {
     let org: Organization
-    var theme: Theme
     @AppStorage("colorMode") var colorMode: Bool = false
 
     @Environment(ThemeManager.self) private var themeManager
@@ -181,7 +178,7 @@ struct orgRow: View {
             }
             .padding(5)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(colorMode ? theme.carousel(): themeManager.cardSurface)
+            .background(colorMode ? themeManager.carouselColor(forKey: org.id ?? org.name) : themeManager.cardSurface)
             .cornerRadius(15)
 
         } else {
@@ -189,7 +186,7 @@ struct orgRow: View {
                 .foregroundColor(colorMode ? .white : .primary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(15)
-                .background(colorMode ? theme.carousel(): themeManager.cardSurface)
+                .background(colorMode ? themeManager.carouselColor(forKey: org.id ?? org.name) : themeManager.cardSurface)
                 .cornerRadius(15)
         }
     }

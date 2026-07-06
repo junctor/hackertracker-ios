@@ -48,11 +48,11 @@ struct ContentView: View {
     @StateObject var selected = SelectedConference()
     @State private var viewModel = InfoViewModel()
     @State private var consViewModel = ConferencesViewModel()
-    @StateObject var theme = Theme()
-    /// Themes-PR1 plumbing: app-wide theme manager. Read by call
-    /// sites in subsequent PRs via `@Environment(ThemeManager.self)`.
-    /// Injected here so it has a single source of truth at the
-    /// ContentView level, same as the other long-lived stores.
+    /// App-wide theme manager: palettes, typography, light/dark
+    /// preference, and the colorful-mode card palette. The single
+    /// theming source of truth (the legacy `Theme` ObservableObject
+    /// is gone). Injected here at the ContentView level, same as the
+    /// other long-lived stores.
     @State private var themeManager = ThemeManager()
     @StateObject private var scrollBus = ScrollCommandBus()
     @StateObject var filters = Filters(filters:[])
@@ -86,14 +86,14 @@ struct ContentView: View {
                         // Text("Info")
                     }
                     .tag(1)
-                    .preferredColorScheme(theme.colorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
                 ScheduleView(tagIds: [])
                     .tabItem {
                         Image(systemName: "calendar")
                         // Text("Main")
                     }
                     .tag(2)
-                    .preferredColorScheme(theme.colorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
                 MapView()
                     .tabItem {
                         // Animate the SF Symbol while map assets are
@@ -104,14 +104,14 @@ struct ContentView: View {
                         // Text("Maps")
                     }
                     .tag(3)
-                    .preferredColorScheme(theme.colorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
                 SettingsView()
                     .tabItem {
                         Image(systemName: "gearshape")
                         // Text("Settings")
                     }
                     .tag(4)
-                    .preferredColorScheme(theme.colorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
             }
             // Easter-egg overlay: faint, fading beezle behind the UI.
             // Only renders when easterEgg is on. With colorMode also on,
@@ -155,7 +155,6 @@ struct ContentView: View {
             }
             .environmentObject(selected)
             .environment(viewModel)
-            .environmentObject(theme)
             .environment(themeManager)
             .environment(consViewModel)
             .environmentObject(scrollBus)
@@ -180,22 +179,20 @@ struct ContentView: View {
                 NavigationStack {
                     ConferencesView()
                 }
-                    .preferredColorScheme(theme.colorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
                     .environmentObject(selected)
                     .environment(viewModel)
                     .environment(consViewModel)
-                    .environmentObject(theme)
                     .environment(themeManager)
                     .environmentObject(filters)
                     .environmentObject(speakerFilters)
                     .environmentObject(merchFilters)
             } else {
-                _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
-                    .preferredColorScheme(theme.colorScheme)
+                _04View(message: "Loading", show404: false).preferredColorScheme(themeManager.preferredColorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
                     .environmentObject(selected)
                     .environment(viewModel)
                     .environment(consViewModel)
-                    .environmentObject(theme)
                     .environment(themeManager)
                     .environmentObject(filters)
                     .environmentObject(speakerFilters)

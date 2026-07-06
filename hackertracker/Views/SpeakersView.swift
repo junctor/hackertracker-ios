@@ -286,7 +286,6 @@ struct SpeakersView: View {
 struct SpeakerData: View {
     let char: String.Element
     let speakers: [Speaker]
-    @EnvironmentObject var theme: Theme
     @Environment(ThemeManager.self) private var themeManager
     /// iPad split-view: row taps update detail column instead of pushing.
     @Environment(\.iPadSpeakerSelection) private var iPadSpeakerSelection
@@ -304,12 +303,12 @@ struct SpeakerData: View {
                     Button {
                         sel.wrappedValue = speaker.id
                     } label: {
-                        SpeakerRow(speaker: speaker, themeColor: theme.carousel())
+                        SpeakerRow(speaker: speaker, themeColor: themeManager.carouselColor(index: speaker.id))
                     }
                     .buttonStyle(.plain)
                 } else {
                     NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
-                        SpeakerRow(speaker: speaker, themeColor: theme.carousel())
+                        SpeakerRow(speaker: speaker, themeColor: themeManager.carouselColor(index: speaker.id))
                     }
                     // Without .plain, NavigationLink tints every
                     // child view with the system accent color (system
