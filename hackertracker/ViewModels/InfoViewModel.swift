@@ -20,20 +20,6 @@ import SwiftUI
 // `Task { @MainActor in ... }` for the actual array assignment. This closes
 // the SwiftUI "Publishing changes from background threads" warning surface
 // and is a prerequisite for Swift 6 strict concurrency.
-/// Firestore's `QueryDocumentSnapshot` (and the `[QueryDocumentSnapshot]` arrays
-/// handed to snapshot listener closures) are not declared `Sendable` in the
-/// firebase-ios-sdk version this project pins (10.29.0), even though the
-/// underlying ObjC snapshot objects are immutable, thread-safe-to-read value
-/// snapshots — decoding one on a background thread is exactly what Firebase's
-/// own `data(as:)` does under the hood and is safe regardless of which thread
-/// calls it. This box exists solely to carry such an array across the
-/// `Task.detached` boundary for the off-main decode in fetchContent/fetchSpeakers
-/// without asserting a blanket, unverifiable Sendable conformance on Firebase's
-/// own types.
-private struct UncheckedSendableBox<Value>: @unchecked Sendable {
-    let value: Value
-}
-
 @Observable
 @MainActor
 final class InfoViewModel {
@@ -586,17 +572,16 @@ final class InfoViewModel {
                 // Phase perf: DEF CON has 1000+ content docs, so the Codable
                 // decode + event rebuild below is expensive enough to cause a
                 // visible main-thread stall if done inline in this listener
-                // closure (which Firestore invokes on the main queue). Box the
-                // [QueryDocumentSnapshot] (not Sendable in this SDK version, but
-                // safe to read off-main — see UncheckedSendableBox) and hop to a
+                // closure (which Firestore invokes on the main queue). Hop to a
                 // detached task to do the heavy lifting off-main; only the
                 // final array assignment comes back to the MainActor.
                 self.contentGeneration += 1
                 let generation = self.contentGeneration
-                let boxedDocs = UncheckedSendableBox(value: docs)
 
+                // firebase-ios-sdk 11.3+ declares QueryDocumentSnapshot
+                // Sendable, so the docs array crosses the Task.detached
+                // boundary directly — no @unchecked box needed.
                 Task.detached(priority: .userInitiated) { [weak self] in
-                    let docs = boxedDocs.value
                     var cache = 0
                     var firestore = 0
                     // Phase 1 fix: previously `self.events = []` lived inside the per-document
@@ -666,10 +651,8 @@ final class InfoViewModel {
                 // in full on every snapshot tick.
                 self.speakerGeneration += 1
                 let generation = self.speakerGeneration
-                let boxedDocs = UncheckedSendableBox(value: docs)
 
                 Task.detached(priority: .userInitiated) { [weak self] in
-                    let docs = boxedDocs.value
                     var cache = 0
                     var firestore = 0
                     var decodedSpeakers: [Speaker] = docs.compactMap { queryDocumentSnapshot -> Speaker? in
