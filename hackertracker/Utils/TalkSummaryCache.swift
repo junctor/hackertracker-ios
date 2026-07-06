@@ -91,28 +91,35 @@ final class TalkSummaryCache {
     /// the queue isn't tied to either model type's lifecycle.
     @ObservationIgnored private var pending: [(key: String, description: String, kind: SummaryKind)] = []
 
+    /// Cap on the pending queue. Scroll-driven pre-warms can enqueue
+    /// far more items than we'll ever get to; without a bound this
+    /// retains full description strings indefinitely and keeps
+    /// scheduling stale work long after the user has scrolled away.
+    /// When full, the oldest (least likely to still be on-screen)
+    /// entry is dropped to make room for the newest.
+    private let maxPending = 64
+
+    @ObservationIgnored private var persistTask: Task<Void, Never>?
+    @ObservationIgnored private var dirty = false
+
     private init() {
         load()
     }
 
     // MARK: - Public API
 
-    /// Returns the cached summary for `content` if we have one whose
-    /// description hash matches the current description. Returns nil
-    /// when there's no summary yet OR when the description has
-    /// changed since we last summarized (the stale entry is dropped
-    /// to force a re-warm).
+    /// Returns the cached summary for `content`, or nil if we don't
+    /// have one yet. This is a plain dictionary lookup by
+    /// `summaryCacheKey` — it deliberately does NOT hash the
+    /// description, since it's on the hot render path (called from
+    /// cell bodies on every scroll/redraw). Staleness detection
+    /// (hashing the description to notice server-side edits) happens
+    /// only in `warm(_:)`, which runs far less often, so a stale
+    /// summary can be returned here for at most one warm cycle before
+    /// `warm` drops and regenerates it.
     func summary(for item: any SummarizableTalk) -> String? {
         let key = item.summaryCacheKey
-        guard let entry = memory[key] else { return nil }
-        let currentHash = Self.stableHash(item.description)
-        if entry.descriptionHash == currentHash {
-            return entry.summary
-        }
-        // Description changed -> stale. Drop and let the next warm refill.
-        memory.removeValue(forKey: key)
-        persist()
-        return nil
+        return memory[key]?.summary
     }
 
     /// Minimum description length that warrants summarization.
@@ -131,12 +138,25 @@ final class TalkSummaryCache {
         guard AISummaryAvailability.isSupported else { return }
         let trimmed = item.description.trimmingCharacters(in: .whitespacesAndNewlines)
         guard trimmed.count >= minDescriptionChars else { return }
-        guard summary(for: item) == nil else { return }
         let key = item.summaryCacheKey
+        if let entry = memory[key] {
+            // Only hash here, on the warm/write path, not on every
+            // render-time read — description hashing is comparatively
+            // expensive and reads happen far more often than warms.
+            if entry.descriptionHash == Self.stableHash(item.description) {
+                return
+            }
+            // Description changed -> stale. Drop and fall through to re-warm.
+            memory.removeValue(forKey: key)
+            markDirty()
+        }
         guard inflight[key] == nil else { return }
 
         if inflight.count >= maxConcurrent {
             if !pending.contains(where: { $0.key == key }) {
+                if pending.count >= maxPending {
+                    pending.removeFirst()
+                }
                 pending.append((key, item.description, item.summaryKind))
             }
             return
@@ -182,7 +202,7 @@ final class TalkSummaryCache {
                 )
                 self?.memory[key] = entry
                 self?.prune()
-                self?.persist()
+                self?.markDirty()
                 Log.app.debug("AI summary OK for \(key, privacy: .public): \(summary, privacy: .public)")
             } catch {
                 Log.app.debug("AI summary failed for \(key, privacy: .public): \(error.localizedDescription, privacy: .public)")
@@ -280,6 +300,34 @@ final class TalkSummaryCache {
         }
         // Corrupt payload — drop it.
         UserDefaults.standard.removeObject(forKey: Self.defaultsKey)
+    }
+
+    /// Marks the cache dirty and schedules a coalesced flush a short
+    /// while later. Re-entering this while a flush is already pending
+    /// just extends the debounce — a warm sweep that touches dozens of
+    /// entries in quick succession ends up doing one encode instead of
+    /// one per entry. `flush()` is still available for callers that
+    /// need the write to happen immediately (e.g. going to background).
+    private func markDirty() {
+        dirty = true
+        persistTask?.cancel()
+        persistTask = Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            guard !Task.isCancelled else { return }
+            self?.flush()
+        }
+    }
+
+    /// Immediately writes the cache to UserDefaults if there are
+    /// unsaved changes, bypassing the debounce. Safe to call at any
+    /// time (e.g. scenePhase -> .background) as a belt-and-suspenders
+    /// flush so a debounced write in flight is never lost.
+    func flush() {
+        persistTask?.cancel()
+        persistTask = nil
+        guard dirty else { return }
+        dirty = false
+        persist()
     }
 
     private func persist() {
