@@ -7,39 +7,11 @@
 
 import SwiftUI
 
-class Theme: ObservableObject {
-    @AppStorage("lightMode") var lightMode: Bool = false
-    @Published var colorScheme: ColorScheme = .dark
-
-    let colors = ["#326295", "#71cc98", "#c16784", "#4b9560", "#c04c36"]
-    let font = ThemeFont()
-    var index = 0
-    
-    init() {
-        if lightMode {
-            self.colorScheme = .light
-        } else {
-            self.colorScheme = .dark
-        }
-    }
-
-    func carousel() -> Color {
-        if index >= colors.count {
-            index = 0
-        }
-
-        let color = colors[index]
-        index += 1
-
-        return Color(UIColor(hex: color) ?? .purple)
-    }
-}
-
-struct ThemeFont {
-    let bold = "Futura Bold"
-    let regular = "Futura Medium"
-    let italic = "Futura Medium Italic"
-}
+// The legacy `Theme` ObservableObject (colorScheme flag + impure
+// carousel() color cycler + unused Futura ThemeFont) is gone — its
+// responsibilities folded into ThemeManager below: lightMode /
+// preferredColorScheme for the app-wide scheme, carouselColor(index:)
+// for the colorful-mode card palette.
 
 enum ThemeColors {
     static let pink = hexSwiftUIColor(hex: "#c16784")
@@ -113,6 +85,7 @@ struct ThemePalette: Hashable {
     let background: DualColor    // base screen background — shows below cards
     let cardSurface: DualColor   // standout-button and detail-card fill
     let accent: DualColor         // primary tinted action color
+    let success: DualColor        // active, selected, positive affordances
     let danger: DualColor         // warnings, conflicts, destructive
     let textPrimary: DualColor    // headings + body text
     let textSecondary: DualColor  // metadata + captions
@@ -163,6 +136,10 @@ extension AppTheme {
             accent: DualColor(
                 light: Color(.systemBlue),
                 dark:  Color(.systemBlue)
+            ),
+            success: DualColor(
+                light: Color(.systemGreen),
+                dark:  Color(.systemGreen)
             ),
             danger: DualColor(
                 light: ThemeColors.red,
@@ -216,6 +193,10 @@ extension AppTheme {
             accent: DualColor(
                 light: Color(red: 0/255,   green: 140/255, blue: 50/255),  // #008C32 (readable on white)
                 dark:  Color(red: 0/255,   green: 255/255, blue: 65/255)   // #00FF41 (matrix green)
+            ),
+            success: DualColor(
+                light: Color(red: 0/255,   green: 140/255, blue: 50/255),  // #008C32
+                dark:  Color(red: 0/255,   green: 255/255, blue: 65/255)   // #00FF41
             ),
             danger: DualColor(
                 light: ThemeColors.red,
@@ -274,6 +255,10 @@ extension AppTheme {
                 light: Color(red: 200/255, green: 0/255,   blue: 150/255), // deep magenta
                 dark:  Color(red: 255/255, green: 64/255,  blue: 200/255)  // neon magenta
             ),
+            success: DualColor(
+                light: Color(red: 200/255, green: 0/255,   blue: 150/255), // deep magenta
+                dark:  Color(red: 255/255, green: 64/255,  blue: 200/255)  // neon magenta
+            ),
             danger: DualColor(
                 light: ThemeColors.red,
                 dark:  ThemeColors.red
@@ -329,6 +314,10 @@ extension AppTheme {
                 light: Color(red: 192/255, green: 0/255,   blue: 0/255),   // #C00000
                 dark:  Color(red: 255/255, green: 45/255,  blue: 45/255)   // #FF2D2D
             ),
+            success: DualColor(
+                light: Color(red: 192/255, green: 0/255,   blue: 0/255),   // #C00000
+                dark:  Color(red: 255/255, green: 45/255,  blue: 45/255)   // #FF2D2D
+            ),
             danger: DualColor(
                 light: Color(red: 178/255, green: 34/255,  blue: 34/255),  // #B22222
                 dark:  Color(red: 255/255, green: 69/255,  blue: 0/255)    // #FF4500
@@ -378,6 +367,10 @@ extension AppTheme {
                 dark:  Color(red: 14/255,  green: 20/255,  blue: 40/255)   // #0E1428
             ),
             accent: DualColor(
+                light: Color(red: 0/255,   green: 139/255, blue: 139/255), // #008B8B
+                dark:  Color(red: 0/255,   green: 255/255, blue: 255/255)  // #00FFFF
+            ),
+            success: DualColor(
                 light: Color(red: 0/255,   green: 139/255, blue: 139/255), // #008B8B
                 dark:  Color(red: 0/255,   green: 255/255, blue: 255/255)  // #00FFFF
             ),
@@ -433,6 +426,10 @@ extension AppTheme {
                 light: Color(red: 199/255, green: 21/255,  blue: 133/255), // #C71585
                 dark:  Color(red: 255/255, green: 20/255,  blue: 147/255)  // #FF1493
             ),
+            success: DualColor(
+                light: Color(red: 199/255, green: 21/255,  blue: 133/255), // #C71585
+                dark:  Color(red: 255/255, green: 20/255,  blue: 147/255)  // #FF1493
+            ),
             danger: DualColor(
                 light: Color(red: 178/255, green: 34/255,  blue: 34/255),  // #B22222
                 dark:  Color(red: 255/255, green: 69/255,  blue: 0/255)    // #FF4500
@@ -475,6 +472,14 @@ enum ThemeRegistry {
     static let fallback: AppTheme = .default
 }
 
+/// Spacing and sizing tokens for consistent layout across themes.
+enum ThemeMetrics {
+    /// Standard corner radius for card surfaces and semantic containers.
+    /// Note: InfoView cards use 15 and small buttons use 5 — those are
+    /// intentional design choices and left unchanged.
+    static let cardRadius: CGFloat = 10
+}
+
 /// Observable holder for the active theme. Read by views via
 /// `@Environment(ThemeManager.self)`.
 ///
@@ -489,14 +494,58 @@ enum ThemeRegistry {
 @MainActor
 final class ThemeManager {
     private static let userDefaultsKey = "themeID"
+    private static let lightModeKey = AppStorageKeys.lightMode
 
     /// Backing storage. @Observable tracks reads + writes of this.
     private var storedID: String
 
+    /// Light/dark selection, folded in from the legacy `Theme` class.
+    /// Same hand-rolled persistence pattern as `storedID` (see the
+    /// header comment): plain stored property for observation, synced
+    /// to UserDefaults under the SAME "lightMode" key the old system
+    /// used so existing user settings carry over.
+    private var storedLightMode: Bool
+
     init() {
         self.storedID = UserDefaults.standard.string(forKey: ThemeManager.userDefaultsKey)
             ?? AppTheme.default.id
+        self.storedLightMode = UserDefaults.standard.bool(forKey: ThemeManager.lightModeKey)
         applyNavBarAppearance()
+    }
+
+    /// App-wide color scheme. The app intentionally never returns nil
+    /// (system-follow) — dark unless the user opted into light mode,
+    /// matching the legacy Theme behavior.
+    var preferredColorScheme: ColorScheme {
+        storedLightMode ? .light : .dark
+    }
+
+    /// Flip light mode. The SettingsView Toggle binds its own
+    /// @AppStorage(AppStorageKeys.lightMode) for UI state and calls this in
+    /// onChange so observation fires app-wide.
+    func setLightMode(_ on: Bool) {
+        storedLightMode = on
+        UserDefaults.standard.set(on, forKey: ThemeManager.lightModeKey)
+    }
+
+    /// Colorful-mode card palette, folded in from the legacy
+    /// `Theme.carousel()`. That version mutated a shared index per
+    /// call, so card colors depended on render order; this is pure —
+    /// pass the card's stable position and it always gets the same
+    /// color.
+    private static let carouselColors = ["#326295", "#71cc98", "#c16784", "#4b9560", "#c04c36"]
+    func carouselColor(index: Int) -> Color {
+        let colors = ThemeManager.carouselColors
+        let hex = colors[((index % colors.count) + colors.count) % colors.count]
+        return Color(UIColor(hex: hex) ?? .purple)
+    }
+
+    /// Carousel color for a String-keyed model (e.g. Organization,
+    /// whose `id` is a Firestore `@DocumentID String?`). Derives a
+    /// stable, launch-independent index from the key's scalars so the
+    /// same org always gets the same tint.
+    func carouselColor(forKey key: String) -> Color {
+        carouselColor(index: key.unicodeScalars.reduce(0) { $0 + Int($1.value) })
     }
 
     /// The currently active theme. Falls back to the default if the
@@ -579,6 +628,7 @@ final class ThemeManager {
     var background: Color     { current.palette.background.auto }
     var cardSurface: Color    { current.palette.cardSurface.auto }
     var accent: Color         { current.palette.accent.auto }
+    var success: Color        { current.palette.success.auto }
     var danger: Color         { current.palette.danger.auto }
     var textPrimary: Color    { current.palette.textPrimary.auto }
     var textSecondary: Color  { current.palette.textSecondary.auto }
@@ -603,6 +653,8 @@ final class ThemeManager {
     var headingFont: Font     { current.typography.heading }
     var subheadlineFont: Font { current.typography.subheadline }
     var bodyFont: Font        { current.typography.body }
+    var calloutFont: Font     { .system(.callout, design: fontDesign == .monospaced ? .monospaced : fontDesign == .rounded ? .rounded : .default) }
+    var footnoteFont: Font    { current.typography.caption }
     var captionFont: Font     { current.typography.caption }
     var monospaceFont: Font   { current.typography.monospace }
 }

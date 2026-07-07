@@ -15,12 +15,12 @@ struct ContentCell: View {
     @Environment(\.noteContentIDs) private var noteContentIDs
     @Environment(ThemeManager.self) private var themeManager
     let dfu = DateFormatterUtility.shared
-    @AppStorage("notifyAt") var notifyAt: Int = 20
+    @AppStorage(AppStorageKeys.notifyAt) var notifyAt: Int = 20
     /// Step 3 of the AI summary spike: warm the on-device LLM
     /// cache when this cell materializes IF the user has opted in.
     /// TalkSummaryCache.warm is a no-op when the device can't run
     /// FoundationModels, so this stays safe on iOS < 26.
-    @AppStorage("aiSummaries") private var aiSummaries: Bool = false
+    @AppStorage(AppStorageKeys.aiSummaries) private var aiSummaries: Bool = false
     /// Whether to present the original description sheet in response
     /// to a long-press. Only used when an AI summary is shown — long-
     /// pressing a cell with no summary is a no-op so we don't compete
@@ -129,15 +129,9 @@ struct ContentCell: View {
             }
         }
         .background(themeManager.cardSurface)
-        .cornerRadius(10)
+        .cornerRadius(ThemeMetrics.cardRadius)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
-        .swipeActions {
-            Button(isBookmarked ? "Remove Bookmark" : "Bookmark") {
-                bookmarkAction()
-            }.buttonStyle(DefaultButtonStyle())
-                .tint(isBookmarked ? .red : .yellow)
-        }
         // LazyVStack inside ContentListView materializes cells as they
         // scroll into view; this .task runs once per materialization.
         // Cheap no-op when aiSummaries is off or the device can't run

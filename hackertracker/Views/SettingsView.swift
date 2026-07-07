@@ -32,7 +32,7 @@ extension View {
             .padding(.vertical, 10)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(themeManager.cardSurface)
-            .cornerRadius(10)
+            .cornerRadius(ThemeMetrics.cardRadius)
             .padding(.horizontal, 8)
             .padding(.vertical, 3)
     }
@@ -73,8 +73,7 @@ extension View {
 struct SettingsView: View {
     @EnvironmentObject var selected: SelectedConference
     @Environment(InfoViewModel.self) private var viewModel
-    @EnvironmentObject var theme: Theme
-    @AppStorage("showNews") var showNews: Bool = true
+    @AppStorage(AppStorageKeys.showNews) var showNews: Bool = true
     @State private var iPadSheet: SettingsIPadSheet?
 
     @Environment(ThemeManager.self) private var themeManager
@@ -216,9 +215,9 @@ struct SettingsView: View {
 struct EasterEggSettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
-    @AppStorage("easterEgg") var easterEgg: Bool = false
-    @AppStorage("easterEggMaxOpacity") var easterEggMaxOpacity: Double = 0.20
-    @AppStorage("easterEggPeriod") var easterEggPeriod: Double = 12.0
+    @AppStorage(AppStorageKeys.easterEgg) var easterEgg: Bool = false
+    @AppStorage(AppStorageKeys.easterEggMaxOpacity) var easterEggMaxOpacity: Double = 0.20
+    @AppStorage(AppStorageKeys.easterEggPeriod) var easterEggPeriod: Double = 12.0
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -276,7 +275,7 @@ struct EasterEggSettingsView: View {
 struct NotificationSettingsView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("notifyAt") var notifyAt: Int = 20
+    @AppStorage(AppStorageKeys.notifyAt) var notifyAt: Int = 20
     @State private var showingAlert = false
 
     var body: some View {
@@ -444,7 +443,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             Text("Version \(marketingVersion)")
                 .font(themeManager.title3Font).bold()
             Text("Build \(buildVersion)")
-                .font(.callout)
+                .font(themeManager.calloutFont)
                 .foregroundStyle(.secondary)
         }
     }
@@ -458,7 +457,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             }
 
             Text("What this app does and doesn’t collect. The full disclosure mirrors the docs/privacy.md page in the public repo.")
-                .font(.footnote)
+                .font(themeManager.footnoteFont)
                 .foregroundStyle(.secondary)
 
             NavigationLink(destination: DocumentView(
@@ -471,7 +470,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 Label("Read the full disclosure", systemImage: "doc.text")
                     .frame(maxWidth: .infinity)
                     .padding(10)
-                    .background(Color.accentColor.opacity(0.15))
+                    .background(themeManager.accent.opacity(0.15))
                     .cornerRadius(8)
             }
         }
@@ -488,7 +487,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             }
 
             Text("Stamped at build time. Tap **View on GitHub** to confirm this build came from a specific public commit — if the page 404s, this build was not produced from a public commit on the official repo.")
-                .font(.footnote)
+                .font(themeManager.footnoteFont)
                 .foregroundStyle(.secondary)
 
             VStack(alignment: .leading, spacing: 10) {
@@ -504,7 +503,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
 
             if info.dirty {
                 Label("This build was produced from a working copy with uncommitted changes. It does not correspond to a single public commit.", systemImage: "exclamationmark.triangle.fill")
-                    .font(.footnote)
+                    .font(themeManager.footnoteFont)
                     .foregroundStyle(.orange)
                     .padding()
                     .background(Color.orange.opacity(0.1))
@@ -518,7 +517,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                     Label("View on GitHub", systemImage: "arrow.up.right.square")
                         .frame(maxWidth: .infinity)
                         .padding(10)
-                        .background(Color.accentColor.opacity(0.15))
+                        .background(themeManager.accent.opacity(0.15))
                         .cornerRadius(8)
                 }
             }
@@ -536,7 +535,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 Label("Copy build info", systemImage: "doc.on.doc")
                     .frame(maxWidth: .infinity)
                     .padding(10)
-                    .background(Color(.systemGray5))
+                    .background(themeManager.cardSurface)
                     .cornerRadius(8)
             }
         }
@@ -549,7 +548,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 .font(themeManager.captionFont)
                 .foregroundStyle(.secondary)
             Text(value)
-                .font(mono ? .system(.footnote, design: .monospaced) : .body)
+                .font(mono ? .system(.footnote, design: .monospaced) : themeManager.bodyFont)
                 .textSelection(.enabled)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -560,7 +559,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
 struct ShowNewsSettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
-    @AppStorage("showNews") var showNews: Bool = true
+    @AppStorage(AppStorageKeys.showNews) var showNews: Bool = true
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -578,7 +577,7 @@ struct ShowNewsSettingsView: View {
 
 struct ShowMerchInfoSettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
+    @AppStorage(AppStorageKeys.showMerchInfo) var showMerchInfo: Bool = true
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -596,7 +595,7 @@ struct ShowMerchInfoSettingsView: View {
 struct ShowPastEventsSettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
-    @AppStorage("showPastEvents") var showPastEvents: Bool = true
+    @AppStorage(AppStorageKeys.showPastEvents) var showPastEvents: Bool = true
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -615,7 +614,7 @@ struct ShowPastEventsSettingsView: View {
 struct ShowConflictAlertView: View {
     @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
-    @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
+    @AppStorage(AppStorageKeys.showConflictAlert) var showConflictAlert: Bool = true
     
     var body: some View {
         VStack(alignment: .leading) {
@@ -633,20 +632,18 @@ struct ShowConflictAlertView: View {
 struct LightModeSettingsView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("lightMode") var lightMode: Bool = false
-    @AppStorage("colorMode") var colorMode: Bool = false
-    @EnvironmentObject var theme: Theme
+    @AppStorage(AppStorageKeys.lightMode) var lightMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
 
     var body: some View {
         VStack(alignment: .leading) {
             Toggle("Enable Light Mode", isOn: $lightMode)
                 .onChange(of: lightMode) { _, value in
                     Log.ui.debug("lightMode=\(value)")
-                    if value {
-                        theme.colorScheme = .light
-                    } else {
-                        theme.colorScheme = .dark
-                    }
+                    // The @AppStorage binding drives the Toggle UI; the
+                    // ThemeManager stored property is what the rest of
+                    // the app observes via preferredColorScheme.
+                    themeManager.setLightMode(value)
                 }
         }
         .settingsCard(themeManager)
@@ -674,7 +671,7 @@ struct StartScreenSettingsView: View {
 
 struct StartScreenPickerView: View {
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("launchScreen") var launchScreen: String = "Main"
+    @AppStorage(AppStorageKeys.launchScreen) var launchScreen: String = "Main"
     let startScreens = ["Main", "Schedule", "Maps"]
 
     var body: some View {
@@ -694,8 +691,8 @@ struct StartScreenPickerView: View {
 struct ShowLocaltimeSettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
     @Environment(InfoViewModel.self) private var viewModel
-    @AppStorage("showLocaltime") var showLocaltime: Bool = false
-    @AppStorage("show24hourtime") var show24hourtime: Bool = true
+    @AppStorage(AppStorageKeys.showLocaltime) var showLocaltime: Bool = false
+    @AppStorage(AppStorageKeys.show24hourtime) var show24hourtime: Bool = true
     let dfu = DateFormatterUtility.shared
 
     /// The IANA identifier of the timezone the schedule currently renders in.
@@ -771,12 +768,12 @@ struct SettingsView_Previews: PreviewProvider {
 ///   - Fully interactive otherwise.
 struct AISummarySettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("aiSummaries") var aiSummaries: Bool = false
+    @AppStorage(AppStorageKeys.aiSummaries) var aiSummaries: Bool = false
     /// Hidden gate for AI-generated speaker bios. Off by default and
     /// the toggle only becomes visible after a 7-tap chord on the
     /// "AI Summaries" row (or stays visible if already on, so users
     /// can switch it back off without re-discovering the chord).
-    @AppStorage("speakerAISummaries") var speakerAISummaries: Bool = false
+    @AppStorage(AppStorageKeys.speakerAISummaries) var speakerAISummaries: Bool = false
     /// Tap-counter chord. Transient — resets on view rebuild, which
     /// is fine because revealing the row is a one-time discovery.
     @State private var aiTapCount: Int = 0
@@ -845,7 +842,7 @@ struct AISummarySettingsView: View {
 /// wanting them visible.
 struct ShowCustomEventsSettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("showCustomEvents") var showCustomEvents: Bool = true
+    @AppStorage(AppStorageKeys.showCustomEvents) var showCustomEvents: Bool = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -947,18 +944,18 @@ struct ThemePickerView: View {
             Spacer()
             if isActive {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+                    .foregroundStyle(themeManager.success)
                     .font(themeManager.title3Font)
             }
         }
         .padding()
         .background(theme.palette.cardSurface.auto)
         .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(isActive ? Color.green : Color.primary.opacity(0.08),
+            RoundedRectangle(cornerRadius: ThemeMetrics.cardRadius)
+                .stroke(isActive ? themeManager.success : Color.primary.opacity(0.08),
                         lineWidth: isActive ? 2 : 0.5)
         )
-        .cornerRadius(10)
+        .cornerRadius(ThemeMetrics.cardRadius)
     }
 
     private func swatch(_ color: Color) -> some View {

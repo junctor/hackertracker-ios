@@ -14,13 +14,17 @@ struct EventCell: View {
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
     let dfu = DateFormatterUtility.shared
-    @AppStorage("notifyAt") var notifyAt: Int = 20
-    @AppStorage("show24hourtime") var show24hourtime: Bool = true
+    @AppStorage(AppStorageKeys.notifyAt) var notifyAt: Int = 20
+    @AppStorage(AppStorageKeys.show24hourtime) var show24hourtime: Bool = true
     /// Mirror of ContentCellView's AI summary plumbing — Schedule
     /// tab rows now opt into on-device summaries the same way.
-    @AppStorage("aiSummaries") private var aiSummaries: Bool = false
+    @AppStorage(AppStorageKeys.aiSummaries) private var aiSummaries: Bool = false
     @State private var showingOriginalDescription: Bool = false
-    @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>
+    /// Perf C: bookmark ids come from the environment instead of a
+    /// per-row @FetchRequest. The list-level view that owns the single
+    /// Bookmarks FetchRequest (EventsView, GlobalSearchView, InfoView's
+    /// shared-schedule pane) publishes one precomputed snapshot.
+    @Environment(\.bookmarkSnapshot) private var bookmarkSnapshot
     /// Set of event ids that have a saved private Note. Published by
     /// EventsView (which holds the single Note FetchRequest); defaults
     /// to empty when this cell renders inside a screen that doesn't
@@ -32,8 +36,7 @@ struct EventCell: View {
     
 
     func bookmarkAction() {
-        let bookmarkIds = Set(bookmarks.map(\.id))
-        if bookmarkIds.contains(Int32(event.id)) {
+        if bookmarkSnapshot.ids.contains(Int32(event.id)) {
             Log.bookmarks.debug("eventCell remove \(event.id)")
             BookmarkUtility.deleteBookmark(context: viewContext, id: event.id)
             NotificationUtility.removeNotification(id: event.id)
@@ -49,8 +52,7 @@ struct EventCell: View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
-        let bookmarkIds = Set(bookmarks.map(\.id))
-        let bookmarkIntsForConflict = bookmarks.map { Int($0.id) }
+        let bookmarkIds = bookmarkSnapshot.ids
         VStack(alignment: .leading) {
             HStack(alignment: .center) {
                 Rectangle().fill(getEventTagColorBackground())
@@ -128,11 +130,11 @@ struct EventCell: View {
                             bookmarkAction()
                         } label: {
                             Image(systemName: bookmarkIds.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
-                                .foregroundColor((bookmarkIds.contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkIntsForConflict)) ? themeManager.danger : .primary)
+                                .foregroundColor((bookmarkIds.contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkSnapshot.conflictIds, bookmarkKey: bookmarkSnapshot.conflictKey)) ? themeManager.danger : .primary)
                         }
                         .accessibilityLabel(
                             bookmarkIds.contains(Int32(event.id))
-                                ? (viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkIntsForConflict)
+                                ? (viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkSnapshot.conflictIds, bookmarkKey: bookmarkSnapshot.conflictKey)
                                     ? "Bookmarked, conflicts with another event"
                                     : "Remove bookmark")
                                 : "Add bookmark"
@@ -146,15 +148,9 @@ struct EventCell: View {
 
         }
         .background(themeManager.cardSurface)
-        .cornerRadius(10)
+        .cornerRadius(ThemeMetrics.cardRadius)
         .padding(.horizontal, 8)
         .padding(.vertical, 3)
-        .swipeActions {
-            Button(bookmarkIds.contains(Int32(event.id)) ? "Remove Bookmark" : "Bookmark") {
-                bookmarkAction()
-            }.buttonStyle(DefaultButtonStyle())
-                .tint(bookmarkIds.contains(Int32(event.id)) ? .red : .yellow)
-        }
         // Opportunistic warm on cell materialization, mirroring
         // ContentCellView. Gated on user toggle + cache's own
         // capability + 100-char checks.

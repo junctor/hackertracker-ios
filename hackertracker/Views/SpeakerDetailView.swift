@@ -13,7 +13,6 @@ import FirebaseAnalytics
 struct SpeakerDetailView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(\.openURL) private var openURL
-    @EnvironmentObject var theme: Theme
 
     var id: Int
 
@@ -110,8 +109,7 @@ struct showSpeakerLinks: View {
     var links: [SpeakerLink]
     @Environment(\.openURL) private var openURL
     @State private var collapsed = false
-    @EnvironmentObject var theme: Theme
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
 
     @Environment(ThemeManager.self) private var themeManager
 
@@ -154,7 +152,7 @@ struct showSpeakerLinks: View {
                             .foregroundColor(colorMode ? .white : .primary)
                             .frame(maxWidth: .infinity)
                             .padding(15)
-                            .background(colorMode ? theme.carousel(): themeManager.cardSurface)
+                            .background(colorMode ? themeManager.carouselColor(forKey: link.url) : themeManager.cardSurface)
                             .cornerRadius(15)
                             
                         }
@@ -254,7 +252,7 @@ struct SpeakerEventView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("notifyAt") var notifyAt: Int = 20
+    @AppStorage(AppStorageKeys.notifyAt) var notifyAt: Int = 20
 
     var body: some View {
         // Phase 4 follow-up: observe DateFormatterUtility so SwiftUI

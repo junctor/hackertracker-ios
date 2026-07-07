@@ -18,7 +18,7 @@ struct ContentListView: View {
     @State private var debouncedSearch = ""
     /// Filter-chip composition mode. Mirrors EventsView so both
     /// lists honor the same user choice from the Filters sheet.
-    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    @AppStorage(AppStorageKeys.filterMatchMode) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     private var filterMatchMode: FilterMatchMode {
         FilterMatchMode(rawOrDefault: filterMatchModeRaw)
     }
@@ -78,13 +78,9 @@ struct ContentListView: View {
     /// iPad-only: identifies the content currently shown in the detail column.
     @State private var ipadSelectedContentId: Int?
 
-    /// Number of Content rows surviving the current filter +
-    /// search pipeline. Same shape as scheduleFilteredCount.
-    private var contentFilteredCount: Int {
-        contentGroup().values.reduce(0) { $0 + $1.count }
-    }
-
-    func contentGroup() -> [String.Element: [Content]] {
+    /// Grouped content computed once per body evaluation, shared by
+    /// contentFilteredCount and grouped to avoid duplicate filtering.
+    private var groupedContent: [String.Element: [Content]] {
         let bookmarkIds = Set(bookmarks.map(\.id))
         // Predicate composes search text + filter chips. The chips OR
         // with each other (matches any one keeps the row). Real tags
@@ -122,51 +118,14 @@ struct ContentListView: View {
         )
     }
 
+    /// Number of Content rows surviving the current filter +
+    /// search pipeline. Same shape as scheduleFilteredCount.
+    private var contentFilteredCount: Int {
+        groupedContent.values.reduce(0) { $0 + $1.count }
+    }
+
     private var grouped: [(key: String.Element, value: [Content])] {
-        contentGroup().sorted { $0.key < $1.key }
-    }
-
-    /// Inline search bar shown only when `isSearching` is true.
-    @ViewBuilder private var inlineSearchBar: some View {
-        if isSearching {
-            HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass").foregroundColor(.secondary)
-                TextField("Search content title or description", text: $searchText)
-                    .focused($searchFocused)
-                    .submitLabel(.search)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                if !searchText.isEmpty {
-                    Button {
-                        searchText = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
-                    }
-                    .accessibilityLabel("Clear search text")
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(.thinMaterial)
-            .transition(.move(edge: .top).combined(with: .opacity))
-        }
-    }
-
-    /// Toolbar button that toggles the inline search field.
-    @ViewBuilder private var searchToggleButton: some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                isSearching.toggle()
-            }
-            if isSearching {
-                searchFocused = true
-            } else {
-                searchText = ""
-            }
-        } label: {
-            Image(systemName: isSearching ? "xmark.circle" : "magnifyingglass")
-        }
-        .accessibilityLabel(isSearching ? "Close search" : "Search content")
+        groupedContent.sorted { $0.key < $1.key }
     }
 
     /// Floating bottom-right menu: jump to a letter group, plus
@@ -225,7 +184,7 @@ struct ContentListView: View {
     @ViewBuilder
     private var contentSidebar: some View {
         VStack(spacing: 0) {
-            inlineSearchBar
+            InlineSearchBar(placeholder: "Search content title or description", text: $searchText, isFocused: $searchFocused, visible: isSearching)
             ScrollView {
                 if grouped.isEmpty {
                     if searchText.isEmpty && filters.filters.isEmpty {
@@ -314,7 +273,7 @@ struct ContentListView: View {
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
-                searchToggleButton
+                SearchToggleButton(isSearching: $isSearching, searchText: $searchText, isFocused: $searchFocused, searchLabel: "Search content")
             }
         }
         .task(id: searchText) {
@@ -362,7 +321,6 @@ struct ContentListView: View {
 struct ContentData: View {
     let char: String.Element
     let content: [Content]
-    @EnvironmentObject var theme: Theme
     @Environment(ThemeManager.self) private var themeManager
     @Environment(\.managedObjectContext) private var viewContext
     @FetchRequest(sortDescriptors: []) var bookmarks: FetchedResults<Bookmarks>

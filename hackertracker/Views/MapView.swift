@@ -13,11 +13,10 @@ import PDFKit
 struct MapView: View {
     @EnvironmentObject var selected: SelectedConference
     @Environment(InfoViewModel.self) private var viewModel
-    @EnvironmentObject var theme: Theme
     @Environment(ThemeManager.self) private var themeManager
 
     @State private var currentIndex: Int = 0
-    @AppStorage("lastMapIndex") private var storedIndexBlob: String = ""
+    @AppStorage(AppStorageKeys.lastMapIndex) private var storedIndexBlob: String = ""
 
     /// Command sink for zoom + search. Bound to the focused map page so
     /// swipes hand off control automatically.
@@ -127,7 +126,7 @@ struct MapView: View {
                 }
             } else {
                 _04View(message: "Loading...", show404: false)
-                    .preferredColorScheme(theme.colorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
             }
         }
     }

@@ -9,18 +9,25 @@ import SwiftUI
 
 struct GlobalSearchView: View {
     @State private var searchText = ""
-    @EnvironmentObject var theme: Theme
+    /// Perf C: debounced mirror of `searchText`. Updated on a 200ms
+    /// .task(id:) so search results re-filter once per pause rather
+    /// than on every keystroke.
+    @State private var debouncedSearch = ""
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("colorMode") var colorMode: Bool = false
-    
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
+    /// Perf C: single list-level bookmarks fetch published into the
+    /// environment for the EventCells in the Schedule section (they no
+    /// longer run a per-row @FetchRequest).
+    @FetchRequest(sortDescriptors: []) private var bookmarks: FetchedResults<Bookmarks>
+
     var body: some View {
         ScrollView {
             ScrollViewReader { _ in
-                if !searchText.isEmpty {
+                if !debouncedSearch.isEmpty {
                     LazyVStack(alignment: .leading, pinnedViews: [.sectionHeaders]) {
                         Section(header: GlobalSearchHeader(headerText: "Schedule")) {
-                            ForEach(viewModel.events.search(text: searchText, speakers: viewModel.speakers).sorted {$0.beginTimestamp < $1.beginTimestamp}, id: \.id) { event in
+                            ForEach(viewModel.events.search(text: debouncedSearch, speakers: viewModel.speakers).sorted {$0.beginTimestamp < $1.beginTimestamp}, id: \.id) { event in
                                 NavigationLink(destination: ContentDetailView(contentId: event.contentId)) {
                                     EventCell(event: event, showDay: true)
                                         .id(event.id)
@@ -29,14 +36,14 @@ struct GlobalSearchView: View {
                                 }
                             }
                         }
-                        
+
                         VStack(alignment: .leading) {
                             Section(header: GlobalSearchHeader(headerText: "Speakers")) {
-                                ForEach(viewModel.speakers.search(text: searchText).sorted {
+                                ForEach(viewModel.speakers.search(text: debouncedSearch).sorted {
                                     $0.name < $1.name
                                 }, id: \.id) { speaker in
                                     NavigationLink(destination: SpeakerDetailView(id: speaker.id)) {
-                                        SpeakerRow(speaker: speaker, themeColor: theme.carousel())
+                                        SpeakerRow(speaker: speaker, themeColor: themeManager.carouselColor(index: speaker.id))
                                             .id(speaker.id)
                                             .foregroundColor(.primary)
                                             .padding(1)
@@ -45,27 +52,27 @@ struct GlobalSearchView: View {
                                 }
                             }
                         }
-                        
+
                         Section(header: GlobalSearchHeader(headerText: "Documents")) {
-                            ForEach(viewModel.documents.search(text: searchText).sorted {
+                            ForEach(viewModel.documents.search(text: debouncedSearch).sorted {
                                 $0.title < $1.title
                             }, id: \.id) { document in
                                 NavigationLink(destination: DocumentView(title_text: document.title, body_text: document.body)) {
-                                    docSearchRow(title_text: document.title, themeColor: colorMode ? theme.carousel() : Color(.systemGray2))
+                                    docSearchRow(title_text: document.title, themeColor: colorMode ? themeManager.carouselColor(index: document.id) : Color(.systemGray2))
                                         .foregroundColor(.primary)
                                         .padding(1)
                                 }
                             }
                         }
-                        
+
                         if let ott = self.viewModel.tagtypes.first(where: { $0.category == "orga" }) {
                             ForEach(ott.tags, id: \.id) { tag in
                                 Section(header: GlobalSearchHeader(headerText: tag.label)) {
-                                    ForEach(self.viewModel.orgs.filter { $0.tag_ids.contains(tag.id) }.search(text: searchText).sorted {
+                                    ForEach(self.viewModel.orgs.filter { $0.tag_ids.contains(tag.id) }.search(text: debouncedSearch).sorted {
                                         $0.name < $1.name
                                     }, id: \.id) { org in
                                         NavigationLink(destination: DocumentView(title_text: org.name, body_text: org.description)) {
-                                            orgSearchRow(org: org, themeColor: theme.carousel())
+                                            orgSearchRow(org: org, themeColor: themeManager.carouselColor(forKey: org.id ?? org.name))
                                                 .foregroundColor(.primary)
                                                 .padding(1)
                                         }
@@ -73,20 +80,20 @@ struct GlobalSearchView: View {
                                 }
                             }
                         }
-                        
+
                         if viewModel.faqs.count > 0 {
                             Section(header: GlobalSearchHeader(headerText: "FAQ")) {
-                                ForEach(self.viewModel.faqs.search(text: searchText)) { faq in
+                                ForEach(self.viewModel.faqs.search(text: debouncedSearch)) { faq in
                                     faqRow(faq: faq)
                                         .foregroundColor(.primary)
                                         .padding(1)
                                 }
                             }
                         }
-                        
+
                         if viewModel.news.count > 0 {
                             Section(header: GlobalSearchHeader(headerText: "News")) {
-                                ForEach(self.viewModel.news.search(text: searchText).sorted {
+                                ForEach(self.viewModel.news.search(text: debouncedSearch).sorted {
                                     $0.updatedAt < $1.updatedAt
                                 }) { article in
                                     articleRow(article: article)
@@ -98,9 +105,14 @@ struct GlobalSearchView: View {
                     }
                 }
             }
+            .environment(\.bookmarkSnapshot, BookmarkSnapshot(bookmarkIds: bookmarks.map(\.id)))
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
             .navigationTitle("Global Search")
             .themedNavTitle("Global Search", themeManager)
+            .task(id: searchText) {
+                try? await Task.sleep(nanoseconds: 200_000_000)
+                if !Task.isCancelled { debouncedSearch = searchText }
+            }
         }
     }
 }

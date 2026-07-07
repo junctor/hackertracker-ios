@@ -228,3 +228,54 @@ extension EnvironmentValues {
         set { self[NoteContentIDsKey.self] = newValue }
     }
 }
+
+// MARK: - Bookmark plumbing
+//
+// Perf C: EventCell used to own a per-row @FetchRequest on Bookmarks
+// and rebuild id sets/arrays on every render. Same parent-publishes-
+// into-env pattern as the Notes badge above: the list-level view that
+// already holds a Bookmarks FetchRequest (EventsView, GlobalSearchView,
+// InfoView's shared-schedule pane) computes one snapshot and publishes
+// it; cells read the value directly.
+
+/// Immutable snapshot of the user's bookmarks, precomputed once per
+/// parent render for the shapes cells actually need.
+struct BookmarkSnapshot: Equatable {
+    /// Bookmarked event ids for O(1) membership checks.
+    let ids: Set<Int32>
+    /// The same ids as Int, in fetch order, for the conflict checker.
+    let conflictIds: [Int]
+    /// Precomputed identity of `conflictIds` (same hash the old code
+    /// derived per call) so InfoViewModel.bookmarkConflicts doesn't
+    /// re-hash the array on every invocation.
+    let conflictKey: Int
+
+    init(bookmarkIds: [Int32]) {
+        var idSet: Set<Int32> = []
+        idSet.reserveCapacity(bookmarkIds.count)
+        var ints: [Int] = []
+        ints.reserveCapacity(bookmarkIds.count)
+        var hasher = Hasher()
+        for id in bookmarkIds {
+            idSet.insert(id)
+            ints.append(Int(id))
+            hasher.combine(Int(id))
+        }
+        ids = idSet
+        conflictIds = ints
+        conflictKey = hasher.finalize()
+    }
+
+    static let empty = BookmarkSnapshot(bookmarkIds: [])
+}
+
+private struct BookmarkSnapshotKey: EnvironmentKey {
+    static let defaultValue: BookmarkSnapshot = .empty
+}
+
+extension EnvironmentValues {
+    var bookmarkSnapshot: BookmarkSnapshot {
+        get { self[BookmarkSnapshotKey.self] }
+        set { self[BookmarkSnapshotKey.self] = newValue }
+    }
+}

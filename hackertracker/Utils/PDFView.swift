@@ -161,18 +161,55 @@ struct PDFView: UIViewRepresentable {
     }
 }
 
-/// Process-lifetime cache for parsed `PDFDocument`s, keyed by absolute path.
-/// Maps don't change at runtime, so once parsed they stay in memory until
-/// the app is killed. Conferences ship with only a handful of maps, so the
-/// memory cost is negligible compared to re-parsing on every swipe.
+/// Process-lifetime LRU cache for parsed `PDFDocument`s, keyed by absolute path.
+/// Maps don't change at runtime, so once parsed they're reused to avoid re-parsing.
+/// An LRU eviction policy prevents unbounded memory growth when the user visits
+/// multiple conferences with many maps (each conference's maps and prewarmed neighbors
+/// are retained; old conferences' maps are evicted as new ones are accessed).
+///
+/// Capacity is 12 documents: typically a conference has 1-4 maps, and prewarming
+/// loads the current page plus adjacent pages in the TabView (3 simultaneous). With
+/// 12 slots, a user can visit 3+ conferences and maintain responsive map access
+/// for the current + 2 neighbor pages without unbounded growth.
 @MainActor
 final class PDFDocumentCache {
     static let shared = PDFDocumentCache()
-    private var storage: [URL: PDFDocument] = [:]
+
+    /// Maximum number of PDFDocuments to retain. When the cache fills beyond
+    /// this, the least-recently-used document is evicted on the next insertion.
+    private static let capacityLimit = 12
+
+    /// Ordered list of (URL, document) pairs; index 0 is LRU, end is MRU.
+    /// Using a small array keeps append/remove O(n) but n is small (≤12).
+    private var lruOrder: [(URL, PDFDocument)] = []
 
     subscript(url: URL) -> PDFDocument? {
-        get { storage[url] }
-        set { storage[url] = newValue }
+        get {
+            // Find and move to MRU (end of array)
+            if let index = lruOrder.firstIndex(where: { $0.0 == url }) {
+                let item = lruOrder.remove(at: index)
+                lruOrder.append(item)
+                return item.1
+            }
+            return nil
+        }
+        set {
+            if let newValue {
+                // Remove existing entry with this URL if present
+                lruOrder.removeAll { $0.0 == url }
+
+                // Evict LRU (first element) if at capacity
+                if lruOrder.count >= Self.capacityLimit {
+                    lruOrder.removeFirst()
+                }
+
+                // Insert at MRU (end)
+                lruOrder.append((url, newValue))
+            } else {
+                // Explicit nil assignment removes the entry
+                lruOrder.removeAll { $0.0 == url }
+            }
+        }
     }
 
     /// Synchronously parse and cache `url` if not already cached. Safe to

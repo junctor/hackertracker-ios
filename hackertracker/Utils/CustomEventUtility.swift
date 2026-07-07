@@ -19,13 +19,13 @@ enum CustomEventUtility {
     /// Schedule or refresh a notification for the supplied event.
     /// No-op when notificationsEnabled is false or when the event
     /// is missing required fields. Uses the global "Before Event"
-    /// minutes setting (@AppStorage("notifyAt")), defaulting to 20
+    /// minutes setting (@AppStorage(AppStorageKeys.notifyAt)), defaulting to 20
     /// to match the rest of the app.
     private static func scheduleNotificationIfNeeded(_ event: CustomEvent) {
         guard event.notificationsEnabled,
               let begin = event.beginTimestamp,
               let title = event.title else { return }
-        let notifyAt = UserDefaults.standard.object(forKey: "notifyAt") as? Int ?? 20
+        let notifyAt = UserDefaults.standard.object(forKey: AppStorageKeys.notifyAt) as? Int ?? 20
         let date = begin.addingTimeInterval(Double(-notifyAt) * 60)
         let id = notificationID(for: event)
         let location = event.location ?? ""

@@ -84,7 +84,7 @@ enum PseudoTagID {
     static let all: Set<Int> = [bookmarks, customEvents, hasNotes]
 }
 
-/// Filter-chip composition mode. Read from @AppStorage("filterMatchMode")
+/// Filter-chip composition mode. Read from @AppStorage(AppStorageKeys.filterMatchMode)
 /// by FiltersView (writes) and the predicate consumers (reads). Storing
 /// the raw string lets us swap it cleanly via @AppStorage on multiple
 /// independent views without an envelope object.
@@ -168,12 +168,17 @@ extension [Event] {
         // Phase 4: single source of truth in ClockService; no more hardcoded LA fallback.
         formatter.timeZone = ClockService.resolveTimeZone(conference: conference, showLocaltime: showLocaltime)
         
+        // Perf D: sort each day's events once here so consumers
+        // (EventData's ForEach, the scroll-command handlers) can
+        // iterate directly instead of re-sorting per render.
         let eventDict = Dictionary(
             grouping: self,
             by: {
                 formatter.string(from: $0.beginTimestamp)
             }
-        )
+        ).mapValues { day in
+            day.sorted { $0.beginTimestamp < $1.beginTimestamp }
+        }
         return eventDict.sorted {
             ($0.value.first?.beginTimestamp ?? Date()) < ($1.value.first?.beginTimestamp ?? Date())
         }

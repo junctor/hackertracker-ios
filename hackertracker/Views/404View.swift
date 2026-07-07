@@ -10,7 +10,7 @@ import SwiftUI
 struct _04View: View {
     var message: String
     var show404: Bool = true
-    @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
+    @AppStorage(AppStorageKeys.conferenceCode) var conferenceCode: String = "INIT"
     @StateObject var selected = SelectedConference()
     @State private var viewModel = InfoViewModel()
     @Environment(\.colorScheme) private var beezleColorScheme

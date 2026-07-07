@@ -138,12 +138,30 @@ final class InfoViewModel {
     }
 
     @ObservationIgnored private var db = Firestore.firestore()
-    
+
+    // Phase perf: generation counters guard the off-main decode path in
+    // fetchContent/fetchSpeakers against out-of-order snapshot delivery.
+    // Firestore can fire a cache tick immediately followed by a server tick;
+    // if the cache-tick decode (dispatched first) happens to finish after the
+    // server-tick decode, applying it would clobber fresher data with stale
+    // data. Each fetcher captures the pre-increment generation before
+    // detaching its decode Task, and the result is discarded unless its
+    // generation is still the newest one issued for that fetcher.
+    @ObservationIgnored private var contentGeneration = 0
+    @ObservationIgnored private var speakerGeneration = 0
+
     func bookmarkConflicts(eventId: Int, bookmarks: [Int]) -> Bool {
-        // Phase 2: O(1) dict lookup + per-event memoization keyed on bookmark identity.
+        // Convenience overload: derives the bookmark identity key here.
+        // Callers that render many rows against the same bookmark set
+        // (EventCell) should precompute the key once (BookmarkSnapshot)
+        // and use the overload below so the array isn't re-hashed per call.
         var hasher = Hasher()
         for b in bookmarks { hasher.combine(b) }
-        let bookmarkKey = hasher.finalize()
+        return bookmarkConflicts(eventId: eventId, bookmarks: bookmarks, bookmarkKey: hasher.finalize())
+    }
+
+    func bookmarkConflicts(eventId: Int, bookmarks: [Int], bookmarkKey: Int) -> Bool {
+        // Phase 2: O(1) dict lookup + per-event memoization keyed on bookmark identity.
         if bookmarkKey != conflictCacheBookmarkKey {
             conflictCache.removeAll(keepingCapacity: true)
             conflictCacheBookmarkKey = bookmarkKey
@@ -198,39 +216,14 @@ final class InfoViewModel {
     func removeListeners() {
         // print("Removing listeners")
         // print("DB Cache Settings: \(db.settings.isPersistenceEnabled)")
-        if let cl = conferenceListener {
-            cl.remove()
-        }
-        if let dl = documentListener {
-            dl.remove()
-        }
-        if let tl = tagListener {
-            tl.remove()
-        }
-        if let ll = locationListener {
-            ll.remove()
-        }
-        if let pl = productListener {
-            pl.remove()
-        }
-        if let cl = contentListener {
-            cl.remove()
-        }
-        if let sl = speakerListener {
-            sl.remove()
-        }
-        if let ll = listListener {
-            ll.remove()
-        }
-        if let al = articleListener {
-            al.remove()
-        }
-        if let ml = menuListener {
-            ml.remove()
-        }
-        if let fl = feedbackFormsListener {
-            fl.remove()
-        }
+        // Bugfix: this used to hand-roll its own list of `if let ... .remove()`
+        // and had drifted out of sync with removeListenersImmediate() /
+        // deinit — it was missing orgListener, so fetchData() -> removeListeners()
+        // followed by fetchOrgs() orphaned the previous conference's org
+        // listener (leaked live Firestore listener + possible stale-data
+        // clobber). Delegate to removeListenersImmediate() so there's a
+        // single source of truth for "which listeners exist."
+        removeListenersImmediate()
     }
 
     /// deinit-safe variant that doesn't touch @Published state.
@@ -252,7 +245,8 @@ final class InfoViewModel {
     func fetchConference(code: String) {
         conferenceListener = db.collection("conferences")
             .document(code)
-            .addSnapshotListener { documentSnapshot, error in
+            .addSnapshotListener { [weak self] documentSnapshot, error in
+                guard let self else { return }
                 guard let doc = documentSnapshot else {
                     Log.firestore.error("conference fetch failed: \(String(describing: error), privacy: .public)")
                     if let e = error { CrashReport.record(e, context: ["op": "fetchConference"]) }
@@ -418,10 +412,25 @@ final class InfoViewModel {
                                 completion(nil, error)
                             }
                         } else {
-                            completion(nil, error)
+                            // Bugfix: statusCode == 200 but no temp file — treat as a
+                            // failure so `completion` still fires exactly once instead
+                            // of silently dropping the callback.
+                            Log.network.error("download reported success but no temp file")
+                            completion(nil, URLError(.badServerResponse))
                         }
-
+                    } else {
+                        // Bugfix: non-200 responses (404/500/etc) previously fell through
+                        // without calling `completion` at all, which left
+                        // pendingMapDownloads permanently incremented and the Maps tab
+                        // spinner stuck on for the rest of the session.
+                        Log.network.error("download failed with status \(response.statusCode, privacy: .public)")
+                        completion(nil, URLError(.badServerResponse))
                     }
+                } else {
+                    // Bugfix: cast to HTTPURLResponse failed (non-HTTP response, or nil) —
+                    // same "never call completion" hole as the non-200 branch above.
+                    Log.network.error("download response was not an HTTPURLResponse")
+                    completion(nil, URLError(.badServerResponse))
                 }
 
             }
@@ -432,7 +441,8 @@ final class InfoViewModel {
         documentListener = db.collection("conferences")
             .document(code)
             .collection("documents")
-            .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
+            .order(by: "id", descending: false).addSnapshotListener { [weak self] querySnapshot, error in
+                guard let self else { return }
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("documents: empty snapshot")
                     return
@@ -461,7 +471,8 @@ final class InfoViewModel {
         tagListener = db.collection("conferences")
             .document(code)
             .collection("tagtypes")
-            .order(by: "sort_order", descending: false).addSnapshotListener { querySnapshot, error in
+            .order(by: "sort_order", descending: false).addSnapshotListener { [weak self] querySnapshot, error in
+                guard let self else { return }
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("tags: empty snapshot")
                     return
@@ -491,7 +502,8 @@ final class InfoViewModel {
             .document(code)
             .collection("locations")
             .order(by: "peer_sort_order", descending: false)
-            .addSnapshotListener { querySnapshot, error in
+            .addSnapshotListener { [weak self] querySnapshot, error in
+                guard let self else { return }
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("locations: empty snapshot")
                     return
@@ -520,7 +532,8 @@ final class InfoViewModel {
         productListener = db.collection("conferences")
             .document(code)
             .collection("products")
-            .order(by: "sort_order", descending: false).addSnapshotListener { querySnapshot, error in
+            .order(by: "sort_order", descending: false).addSnapshotListener { [weak self] querySnapshot, error in
+                guard let self else { return }
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("products: empty snapshot")
                     return
@@ -549,57 +562,76 @@ final class InfoViewModel {
         contentListener = db.collection("conferences")
             .document(code)
             .collection("content")
-            .order(by: "title", descending: false).addSnapshotListener { querySnapshot, error in
+            .order(by: "title", descending: false).addSnapshotListener { [weak self] querySnapshot, error in
+                guard let self else { return }
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("content: empty snapshot")
                     return
                 }
 
-                var cache = 0
-                var firestore = 0
-                // Phase 1 fix: previously `self.events = []` lived inside the per-document
-                // compactMap, so each decoded doc reset events and a concurrent snapshot
-                // mid-decode could duplicate or drop entries. Build a local buffer first,
-                // then assign atomically once decoding completes.
-                let decodedContent: [Content] = docs.compactMap { queryDocumentSnapshot -> Content? in
-                    do {
-                        if queryDocumentSnapshot.metadata.isFromCache {
-                            cache = cache + 1
-                        } else {
-                            firestore = firestore + 1
-                        }
-                        return try queryDocumentSnapshot.data(as: Content.self)
-                    } catch {
-                        Log.firestore.error("content decode failed: \(error, privacy: .public)")
-                        CrashReport.record(error, context: ["op": "decodeContent"])
-                        return nil
-                    }
-                }
-                var rebuiltEvents: [Event] = []
-                var seenEventIds: Set<Int> = []
-                for c in decodedContent {
-                    if !c.sessions.isEmpty {
-                        for s in c.sessions {
-                            if seenEventIds.contains(s.id) {
-                                continue
-                            }
-                            seenEventIds.insert(s.id)
-                            let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds, relatedIds: c.relatedIds)
-                            rebuiltEvents.append(e)
-                            /* Task {
-                                if await NotificationUtility.notificationExists(id: e.id) {
-                                    NotificationUtility.removeNotification(id: e.id)
-                                    let notDate = e.beginTimestamp.addingTimeInterval(Double((-self.notifyAt)) * 60)
-                                    NotificationUtility.scheduleNotification(date: notDate, id: e.id, title: e.title, location: self.locations.first(where: {$0.id == e.locationId})?.name ?? "unknown")
-                                }
-                            } */
-                        }
-                    }
-                }
-                self.content = decodedContent
-                self.events = rebuiltEvents
+                // Phase perf: DEF CON has 1000+ content docs, so the Codable
+                // decode + event rebuild below is expensive enough to cause a
+                // visible main-thread stall if done inline in this listener
+                // closure (which Firestore invokes on the main queue). Hop to a
+                // detached task to do the heavy lifting off-main; only the
+                // final array assignment comes back to the MainActor.
+                self.contentGeneration += 1
+                let generation = self.contentGeneration
 
-                NSLog("InfoViewModel: \(self.content.count) content (cache hits \(cache), firestore hits \(firestore))")
+                // firebase-ios-sdk 11.3+ declares QueryDocumentSnapshot
+                // Sendable, so the docs array crosses the Task.detached
+                // boundary directly — no @unchecked box needed.
+                Task.detached(priority: .userInitiated) { [weak self] in
+                    var cache = 0
+                    var firestore = 0
+                    // Phase 1 fix: previously `self.events = []` lived inside the per-document
+                    // compactMap, so each decoded doc reset events and a concurrent snapshot
+                    // mid-decode could duplicate or drop entries. Build a local buffer first,
+                    // then assign atomically once decoding completes.
+                    let decodedContent: [Content] = docs.compactMap { queryDocumentSnapshot -> Content? in
+                        do {
+                            if queryDocumentSnapshot.metadata.isFromCache {
+                                cache = cache + 1
+                            } else {
+                                firestore = firestore + 1
+                            }
+                            return try queryDocumentSnapshot.data(as: Content.self)
+                        } catch {
+                            Log.firestore.error("content decode failed: \(error, privacy: .public)")
+                            CrashReport.record(error, context: ["op": "decodeContent"])
+                            return nil
+                        }
+                    }
+                    var rebuiltEvents: [Event] = []
+                    var seenEventIds: Set<Int> = []
+                    for c in decodedContent {
+                        if !c.sessions.isEmpty {
+                            for s in c.sessions {
+                                if seenEventIds.contains(s.id) {
+                                    continue
+                                }
+                                seenEventIds.insert(s.id)
+                                let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds, relatedIds: c.relatedIds)
+                                rebuiltEvents.append(e)
+                                /* Task {
+                                    if await NotificationUtility.notificationExists(id: e.id) {
+                                        NotificationUtility.removeNotification(id: e.id)
+                                        let notDate = e.beginTimestamp.addingTimeInterval(Double((-self.notifyAt)) * 60)
+                                        NotificationUtility.scheduleNotification(date: notDate, id: e.id, title: e.title, location: self.locations.first(where: {$0.id == e.locationId})?.name ?? "unknown")
+                                    }
+                                } */
+                            }
+                        }
+                    }
+
+                    await MainActor.run {
+                        // Discard this result if a newer snapshot's decode already landed.
+                        guard let self, generation == self.contentGeneration else { return }
+                        self.content = decodedContent
+                        self.events = rebuiltEvents
+                        NSLog("InfoViewModel: \(self.content.count) content (cache hits \(cache), firestore hits \(firestore))")
+                    }
+                }
             }
     }
 
@@ -607,30 +639,46 @@ final class InfoViewModel {
         speakerListener = db.collection("conferences")
             .document(code)
             .collection("speakers")
-            .order(by: "name", descending: false).addSnapshotListener { querySnapshot, error in
+            .order(by: "name", descending: false).addSnapshotListener { [weak self] querySnapshot, error in
+                guard let self else { return }
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("speakers: empty snapshot")
                     return
                 }
 
-                var cache = 0
-                var firestore = 0
-                self.speakers = docs.compactMap { queryDocumentSnapshot -> Speaker? in
-                    do {
-                        if queryDocumentSnapshot.metadata.isFromCache {
-                            cache = cache + 1
-                        } else {
-                            firestore = firestore + 1
+                // Phase perf: same off-main decode treatment as fetchContent —
+                // speakers is one of the larger collections and is re-decoded
+                // in full on every snapshot tick.
+                self.speakerGeneration += 1
+                let generation = self.speakerGeneration
+
+                Task.detached(priority: .userInitiated) { [weak self] in
+                    var cache = 0
+                    var firestore = 0
+                    var decodedSpeakers: [Speaker] = docs.compactMap { queryDocumentSnapshot -> Speaker? in
+                        do {
+                            if queryDocumentSnapshot.metadata.isFromCache {
+                                cache = cache + 1
+                            } else {
+                                firestore = firestore + 1
+                            }
+                            return try queryDocumentSnapshot.data(as: Speaker.self)
+                        } catch {
+                            Log.firestore.error("speaker decode failed: \(error, privacy: .public)")
+                            CrashReport.record(error, context: ["op": "decodeSpeaker"])
+                            return nil
                         }
-                        return try queryDocumentSnapshot.data(as: Speaker.self)
-                    } catch {
-                        Log.firestore.error("speaker decode failed: \(error, privacy: .public)")
-                        CrashReport.record(error, context: ["op": "decodeSpeaker"])
-                        return nil
+                    }
+                    // Finding B: sort before assigning so there's exactly one
+                    // didSet/observation invalidation per snapshot tick instead of two.
+                    decodedSpeakers.sort(using: KeyPathComparator(\.self.name, comparator: .localizedStandard))
+
+                    await MainActor.run {
+                        guard let self, generation == self.speakerGeneration else { return }
+                        self.speakers = decodedSpeakers
+                        NSLog("InfoViewModel: \(self.speakers.count) speakers (cache hits \(cache), firestore hits \(firestore))")
                     }
                 }
-                self.speakers.sort(using: KeyPathComparator(\.self.name, comparator: .localizedStandard))
-                NSLog("InfoViewModel: \(self.speakers.count) speakers (cache hits \(cache), firestore hits \(firestore))")
             }
     }
 
@@ -638,7 +686,8 @@ final class InfoViewModel {
         orgListener = db.collection("conferences")
             .document(code)
             .collection("organizations")
-            .order(by: "name", descending: false).addSnapshotListener { querySnapshot, error in
+            .order(by: "name", descending: false).addSnapshotListener { [weak self] querySnapshot, error in
+                guard let self else { return }
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("orgs: empty snapshot")
                     return
@@ -646,7 +695,7 @@ final class InfoViewModel {
 
                 var cache = 0
                 var firestore = 0
-                self.orgs = docs.compactMap { queryDocumentSnapshot -> Organization? in
+                var decodedOrgs: [Organization] = docs.compactMap { queryDocumentSnapshot -> Organization? in
                     do {
                         if queryDocumentSnapshot.metadata.isFromCache {
                             cache = cache + 1
@@ -660,7 +709,10 @@ final class InfoViewModel {
                         return nil
                     }
                 }
-                self.orgs.sort(using: KeyPathComparator(\.self.name, comparator: .localizedStandard))
+                // Finding B: sort the local array before assigning to `orgs`
+                // so there's exactly one didSet/observation invalidation per tick.
+                decodedOrgs.sort(using: KeyPathComparator(\.self.name, comparator: .localizedStandard))
+                self.orgs = decodedOrgs
                 NSLog("InfoViewModel: \(self.orgs.count) organizations (cache hits \(cache), firestore hits \(firestore))")
             }
     }
@@ -669,7 +721,8 @@ final class InfoViewModel {
         listListener = db.collection("conferences")
             .document(code)
             .collection("faqs")
-            .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
+            .order(by: "id", descending: false).addSnapshotListener { [weak self] querySnapshot, error in
+                guard let self else { return }
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("faqs: empty snapshot")
                     return
@@ -699,7 +752,8 @@ final class InfoViewModel {
             .order(by: "updated_at", descending: true)
             // Phase 2: cap news feed; older articles can be loaded on demand later.
             .limit(to: 100)
-            .addSnapshotListener { querySnapshot, error in
+            .addSnapshotListener { [weak self] querySnapshot, error in
+                guard let self else { return }
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("articles: empty snapshot")
                     return
@@ -729,7 +783,8 @@ final class InfoViewModel {
         menuListener = db.collection("conferences")
             .document(code)
             .collection("menus")
-            .order(by: "id", descending: false).addSnapshotListener { querySnapshot, error in
+            .order(by: "id", descending: false).addSnapshotListener { [weak self] querySnapshot, error in
+                guard let self else { return }
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("menus: empty snapshot")
                     return
@@ -761,7 +816,8 @@ final class InfoViewModel {
         feedbackFormsListener = db.collection("conferences")
             .document(code)
             .collection("feedbackforms")
-            .addSnapshotListener { querySnapshot, error in
+            .addSnapshotListener { [weak self] querySnapshot, error in
+                guard let self else { return }
                 guard let docs = querySnapshot?.documents else {
                     Log.firestore.info("feedbackForms: empty snapshot")
                     return

@@ -82,9 +82,20 @@ enum NotificationUtility {
     } */
     
     static func scheduleNotification(date: Date, id: Int, title: String, location: String) {
+        // Bugfix: without .year, UNCalendarNotificationTrigger matches the next
+        // occurrence of month/day/hour/minute — if `date` is already in the past
+        // (bookmarking an in-progress event, or browsing a past conference) the
+        // trigger silently fires ~12 months later instead of not firing at all.
+        // Guard against scheduling anything that's already elapsed, and include
+        // .year so a future date actually fires on the intended year.
+        guard date > Date.now else {
+            Log.notifications.debug("skipping notification for id \(id, privacy: .public): date already in the past")
+            return
+        }
+
         let calendar = Calendar(identifier: .gregorian)
         let components = calendar.dateComponents(in: .current, from: date)
-        let newComponents = DateComponents(calendar: calendar, timeZone: .current, month: components.month, day: components.day, hour: components.hour, minute: components.minute)
+        let newComponents = DateComponents(calendar: calendar, timeZone: .current, year: components.year, month: components.month, day: components.day, hour: components.hour, minute: components.minute)
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: newComponents, repeats: false)
 

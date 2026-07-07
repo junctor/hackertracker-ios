@@ -9,16 +9,13 @@ import SwiftUI
 
 struct EventsView: View {
     @EnvironmentObject var selected: SelectedConference
-    @AppStorage("showLocaltime") var showLocaltime: Bool = false
-    @AppStorage("show24hourtime") var show24hourtime: Bool = true
-    @AppStorage("showPastEvents") var showPastEvents: Bool = true
-    @AppStorage("showConflictAlert") var showConflictAlert: Bool = true
+    @AppStorage(AppStorageKeys.showLocaltime) var showLocaltime: Bool = false
+    @AppStorage(AppStorageKeys.show24hourtime) var show24hourtime: Bool = true
+    @AppStorage(AppStorageKeys.showPastEvents) var showPastEvents: Bool = true
+    @AppStorage(AppStorageKeys.showConflictAlert) var showConflictAlert: Bool = true
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
-    @EnvironmentObject var toTop: ToTop
-    @EnvironmentObject var toBottom: ToBottom
-    @EnvironmentObject var toCurrent: ToCurrent
-    @EnvironmentObject var toNext: ToNext
+    @EnvironmentObject var scrollBus: ScrollCommandBus
     @EnvironmentObject var filters: Filters
     let dfu = DateFormatterUtility.shared
     var includeNav: Bool = true
@@ -84,28 +81,99 @@ struct EventsView: View {
     /// User toggle (defaulting on) for whether custom events appear in
     /// the schedule at all. Lives next to the rest of the schedule
     /// state so its value is read inline with the synthesizer.
-    @AppStorage("showCustomEvents") private var showCustomEventsInSchedule: Bool = true
+    @AppStorage(AppStorageKeys.showCustomEvents) private var showCustomEventsInSchedule: Bool = true
     /// Filter-chip composition mode. Read from the same
     /// AppStorage key the Filters sheet writes to.
-    @AppStorage("filterMatchMode") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    @AppStorage(AppStorageKeys.filterMatchMode) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     private var filterMatchMode: FilterMatchMode {
         FilterMatchMode(rawOrDefault: filterMatchModeRaw)
     }
 
-    /// Firestore events + synthesized CustomEvents that target the
-    /// currently-selected conference. Three Schedule call sites read
-    /// this in place of viewModel.events so user-created rows flow
-    /// through filters / search / eventDayGroup naturally.
+    // MARK: Perf A: shared filter+search+group cache
+    //
+    // The filter -> search -> eventDayGroup pipeline used to be
+    // recomputed inline at five call sites per body pass (filtered
+    // count, two jump-to-day menus, two EventScrollViews). It's now
+    // computed exactly once per relevant input change via the
+    // `.task(id: schedulePipelineKey)` below (same shape as
+    // SpeakersView's speakerTagIdsMap cache) and shared by every
+    // call site in both the iPhone and iPad branches.
+
+    /// Filtered + searched events grouped (and pre-sorted) by day.
+    /// Feeds both EventScrollView instances.
+    @State private var scheduleGrouped: [(key: String, value: [Event])] = []
+    /// Day keys for the jump-to-day menus. Derived from the filtered
+    /// (but NOT searched) pipeline — the menus have always ignored the
+    /// search text, so preserve that.
+    @State private var scheduleDayKeys: [String] = []
     /// Live count of events that survive the current filter +
     /// search selection. Driven into both the Filters sheet's
     /// tally label and any future toolbar-resident counter.
-    private var scheduleFilteredCount: Int {
-        scheduleEvents
-            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope, mode: filterMatchMode)
-            .search(text: debouncedSearch, speakers: viewModel.speakers)
-            .count
+    @State private var scheduleFilteredCount: Int = 0
+
+    /// Identity of every input the pipeline reads. When any of them
+    /// change, `.task(id:)` re-runs `recomputeSchedulePipeline()`.
+    private var schedulePipelineKey: Int {
+        var hasher = Hasher()
+        hasher.combine(selected.code)
+        // Firestore events: id + timestamps + title + tags + location
+        // cover the fields the pipeline and the rendered cells read.
+        hasher.combine(viewModel.events.count)
+        for e in viewModel.events {
+            hasher.combine(e.id)
+            hasher.combine(e.beginTimestamp)
+            hasher.combine(e.endTimestamp)
+            hasher.combine(e.title)
+            hasher.combine(e.tagIds)
+            hasher.combine(e.locationId)
+        }
+        // Custom events (synthesized into the schedule when enabled).
+        hasher.combine(showCustomEventsInSchedule)
+        hasher.combine(customEvents.count)
+        for c in customEvents {
+            hasher.combine(c.id)
+            hasher.combine(c.beginTimestamp)
+            hasher.combine(c.endTimestamp)
+            hasher.combine(c.title)
+            hasher.combine(c.colorHex)
+            hasher.combine(c.eventDescription)
+            hasher.combine(c.conferenceCodes as? [String] ?? [])
+        }
+        // Filter / search selection.
+        hasher.combine(filters.filters)
+        hasher.combine(filterMatchModeRaw)
+        hasher.combine(debouncedSearch)
+        hasher.combine(viewModel.tagtypes.count)
+        hasher.combine(viewModel.speakers.count)
+        // Bookmark identity (bookmark chip + toggles from cells).
+        for b in bookmarks { hasher.combine(b.id) }
+        // Notes ("Has Notes" chip).
+        hasher.combine(noteEventIDsForScope)
+        hasher.combine(noteContentIDsForScope)
+        // Day-grouping timezone inputs.
+        hasher.combine(showLocaltime)
+        hasher.combine(viewModel.conference?.timezone)
+        hasher.combine(dfu.tzGeneration)
+        return hasher.finalize()
     }
 
+    /// Runs the pipeline once and fans the results out to the cached
+    /// @State copies above.
+    private func recomputeSchedulePipeline() {
+        let filtered = scheduleEvents
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope, mode: filterMatchMode)
+        scheduleDayKeys = filtered
+            .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference)
+            .map { $0.key }
+        let searched = filtered.search(text: debouncedSearch, speakers: viewModel.speakers)
+        scheduleFilteredCount = searched.count
+        scheduleGrouped = searched.eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference)
+    }
+
+    /// Firestore events + synthesized CustomEvents that target the
+    /// currently-selected conference. The pipeline recompute reads
+    /// this in place of viewModel.events so user-created rows flow
+    /// through filters / search / eventDayGroup naturally.
     private var scheduleEvents: [Event] {
         guard showCustomEventsInSchedule else { return viewModel.events }
         let code = selected.code
@@ -142,32 +210,6 @@ struct EventsView: View {
   /// other so the detail pane never shows stale state.
   @State private var ipadSelectedCustomEventId: UUID? = nil
 
-  /// Inline search bar shown only when `isSearching` is true.
-  @ViewBuilder private var inlineSearchBar: some View {
-      if isSearching {
-          HStack(spacing: 8) {
-              Image(systemName: "magnifyingglass").foregroundColor(.secondary)
-              TextField("Search title, speaker, or description", text: $searchText)
-                  .focused($searchFocused)
-                  .submitLabel(.search)
-                  .autocorrectionDisabled()
-                  .textInputAutocapitalization(.never)
-              if !searchText.isEmpty {
-                  Button {
-                      searchText = ""
-                  } label: {
-                      Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
-                  }
-                  .accessibilityLabel("Clear search text")
-              }
-          }
-          .padding(.horizontal, 12)
-          .padding(.vertical, 8)
-          .background(.thinMaterial)
-          .transition(.move(edge: .top).combined(with: .opacity))
-      }
-  }
-
   /// Polish: "Jump to Day" Menu. Now displayed as a floating button at the
   /// bottom-right of the schedule (see .overlay on the schedule VStack).
   /// The label here is just the icon; the surrounding floating-button chrome
@@ -177,32 +219,29 @@ struct EventsView: View {
       Menu {
           // Dates first (ascending; eventDayGroup already sorts that way),
           // then Top / Now / Next / Bottom.
-          ForEach(
-              scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope, mode: filterMatchMode)
-                  .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
-          ) { day, _ in
+          ForEach(scheduleDayKeys, id: \.self) { day in
               Button(day) {
                   eventDay = day
               }
           }
           Divider()
           Button {
-              toTop.val = true
+              scrollBus.send(.top)
           } label: {
               Label("Top", systemImage: "arrow.up")
           }
           Button {
-              toCurrent.val = true
+              scrollBus.send(.current)
           } label: {
               Label("Now", systemImage: "clock")
           }
           Button {
-              toNext.val = true
+              scrollBus.send(.next)
           } label: {
               Label("Next", systemImage: "arrow.turn.right.down")
           }
           Button {
-              toBottom.val = true
+              scrollBus.send(.bottom)
           } label: {
               Label("Bottom", systemImage: "arrow.down")
           }
@@ -214,23 +253,6 @@ struct EventsView: View {
       // trigger that meant the date list rendered in reverse (descending).
       // .fixed forces declaration order.
       .menuOrder(.fixed)
-  }
-
-  /// Toolbar button that toggles the inline search field.
-  @ViewBuilder private var searchToggleButton: some View {
-      Button {
-          withAnimation(.easeInOut(duration: 0.2)) {
-              isSearching.toggle()
-          }
-          if isSearching {
-              searchFocused = true
-          } else {
-              searchText = ""
-          }
-      } label: {
-          Image(systemName: isSearching ? "xmark.circle" : "magnifyingglass")
-      }
-      .accessibilityLabel(isSearching ? "Close search" : "Search schedule")
   }
 
   /// Schedule body content used inside both the iPhone NavigationStack
@@ -248,15 +270,9 @@ struct EventsView: View {
         }
       }
       VStack(spacing: 0) {
-        inlineSearchBar
+        InlineSearchBar(placeholder: "Search title, speaker, or description", text: $searchText, isFocused: $searchFocused, visible: isSearching)
         EventScrollView(
-          events:
-            scheduleEvents
-            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope, mode: filterMatchMode)
-            .search(text: debouncedSearch, speakers: viewModel.speakers)
-            .eventDayGroup(
-              showLocaltime: showLocaltime, conference: viewModel.conference
-            ),
+          events: scheduleGrouped,
           dayTag: eventDay,
           showPastEvents: showPastEvents, includeNav: includeNav,
           showLocaltime: $showLocaltime
@@ -324,7 +340,7 @@ struct EventsView: View {
             .onChange(of: showPastEvents) { _, value in
               Log.ui.debug("EventsView showPastEvents=\(value)")
               viewModel.showPastEvents = value
-              toTop.val = true
+              scrollBus.send(.top)
             }
             .toggleStyle(.automatic)
           } label: {
@@ -349,15 +365,22 @@ struct EventsView: View {
             Image(systemName: "plus")
           }
           .accessibilityLabel("Add custom event")
-          searchToggleButton
+          SearchToggleButton(isSearching: $isSearching, searchText: $searchText, isFocused: $searchFocused, searchLabel: "Search schedule")
         }
       }
       .task(id: searchText) {
         try? await Task.sleep(nanoseconds: 250_000_000)
         if !Task.isCancelled { debouncedSearch = searchText }
       }
+      // Perf A: single recompute of the filter+search+group pipeline,
+      // shared by the EventScrollView, jump-to-day menu, and the
+      // filter sheet's matched count.
+      .task(id: schedulePipelineKey) {
+        recomputeSchedulePipeline()
+      }
       .environment(\.noteEventIDs, noteEventIDsForScope)
       .environment(\.noteContentIDs, noteContentIDsForScope)
+      .environment(\.bookmarkSnapshot, BookmarkSnapshot(bookmarkIds: bookmarks.map(\.id)))
       .onAppear { refreshNoteEventIDs() }
       .onReceive(NotificationCenter.default.publisher(
           for: .NSManagedObjectContextDidSave
@@ -420,6 +443,7 @@ struct EventsView: View {
       .environment(\.iPadCustomEventSelection, $ipadSelectedCustomEventId)
       .environment(\.noteEventIDs, noteEventIDsForScope)
       .environment(\.noteContentIDs, noteContentIDsForScope)
+      .environment(\.bookmarkSnapshot, BookmarkSnapshot(bookmarkIds: bookmarks.map(\.id)))
       .onAppear { refreshNoteEventIDs() }
       .onReceive(NotificationCenter.default.publisher(
           for: .NSManagedObjectContextDidSave
@@ -475,14 +499,9 @@ struct EventsView: View {
       } */
     } else {
       VStack(spacing: 0) {
-        inlineSearchBar
+        InlineSearchBar(placeholder: "Search title, speaker, or description", text: $searchText, isFocused: $searchFocused, visible: isSearching)
         EventScrollView(
-          events:
-            scheduleEvents
-            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope, mode: filterMatchMode)
-            .search(text: debouncedSearch, speakers: viewModel.speakers).eventDayGroup(
-                showLocaltime: showLocaltime, conference: viewModel.conference
-            ),
+          events: scheduleGrouped,
           dayTag: eventDay,
           showPastEvents: showPastEvents, includeNav: includeNav,
           // tappedScheduleTwice: $tappedScheduleTwice, schedule: $schedule,
@@ -499,7 +518,7 @@ struct EventsView: View {
           ToolbarItemGroup(placement: .navigationBarTrailing) {
             Menu {
                 Button {
-                    toTop.val = true
+                    scrollBus.send(.top)
                 } label: {
                   HStack {
                     Text("Top")
@@ -507,7 +526,7 @@ struct EventsView: View {
                   }
                 }
                   Button {
-                      toCurrent.val = true
+                      scrollBus.send(.current)
                   } label: {
                     HStack {
                       Text("Now")
@@ -515,7 +534,7 @@ struct EventsView: View {
                     }
                   }
                   Button {
-                      toNext.val = true
+                      scrollBus.send(.next)
                   } label: {
                     HStack {
                       Text("Next")
@@ -523,7 +542,7 @@ struct EventsView: View {
                     }
                   }
                   Button {
-                      toBottom.val = true
+                      scrollBus.send(.bottom)
                   } label: {
                     HStack {
                       Text("Bottom")
@@ -531,10 +550,7 @@ struct EventsView: View {
                     }
                   }
                   Divider()
-              ForEach(
-                scheduleEvents.filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope, mode: filterMatchMode)
-                    .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference), id: \.key
-              ) { day, _ in
+              ForEach(scheduleDayKeys, id: \.self) { day in
                 Button(day) {
                   eventDay = day
                 }
@@ -544,7 +560,7 @@ struct EventsView: View {
               Image(systemName: "arrow.up.arrow.down")
             }
             .accessibilityLabel("Jump to day")
-            searchToggleButton
+            SearchToggleButton(isSearching: $isSearching, searchText: $searchText, isFocused: $searchFocused, searchLabel: "Search schedule")
           }
         }
         .task(id: searchText) {
@@ -552,7 +568,15 @@ struct EventsView: View {
             try? await Task.sleep(nanoseconds: 250_000_000)
             if !Task.isCancelled { debouncedSearch = searchText }
         }
-      .onChange(of: viewModel.conference) { _, con in 
+        // Perf A: single recompute of the filter+search+group pipeline
+        // for the embedded (no-nav) schedule variant.
+        .task(id: schedulePipelineKey) {
+            recomputeSchedulePipeline()
+        }
+        // Perf C: cells read bookmarks from the environment; publish
+        // the snapshot for the embedded variant too.
+        .environment(\.bookmarkSnapshot, BookmarkSnapshot(bookmarkIds: bookmarks.map(\.id)))
+      .onChange(of: viewModel.conference) { _, con in
         Log.ui.debug("EventsView conference -> \(con?.name ?? "<nil>", privacy: .public)")
       }
     }
@@ -569,10 +593,7 @@ struct EventScrollView: View {
     let dfu = DateFormatterUtility.shared
     // @Binding var tappedScheduleTwice: Bool
     @Environment(InfoViewModel.self) private var viewModel
-    @EnvironmentObject var toTop: ToTop
-    @EnvironmentObject var toCurrent: ToCurrent
-    @EnvironmentObject var toBottom: ToBottom
-    @EnvironmentObject var toNext: ToNext
+    @EnvironmentObject var scrollBus: ScrollCommandBus
     @State var viewShowing = false
     @Binding var showLocaltime: Bool
     @State var eventDayGroup: [(key: String, value: [Event])] = []
@@ -581,9 +602,52 @@ struct EventScrollView: View {
     /// When this is empty we show a ContentUnavailableView instead of a
     /// blank scroll surface.
     private var visibleEvents: [(key: String, value: [Event])] {
-        showPastEvents ? events : events.compactMap { (key, day) in
-            let upcoming = day.filter { Date() < $0.endTimestamp }
+        let now = Date()
+        return showPastEvents ? events : events.compactMap { (key, day) in
+            let upcoming = day.filter { now < $0.endTimestamp }
             return upcoming.isEmpty ? nil : (key, upcoming)
+        }
+    }
+
+    /// ScrollCommandBus consumer. Performs the scroll for each command
+    /// against this instance's proxy. Preserves the old ToTop fallback:
+    /// when past events are hidden, "top" behaves like "current" since
+    /// the true first event may not be rendered.
+    private func handle(_ command: ScrollCommand, proxy: ScrollViewProxy) {
+        // Day groups arrive pre-sorted by begin time (eventDayGroup),
+        // so a flatMap walks events in chronological order.
+        let ordered = events.flatMap { $0.value }
+        switch command {
+        case .top:
+            guard showPastEvents else {
+                handle(.current, proxy: proxy)
+                return
+            }
+            if let e = ordered.first {
+                withAnimation {
+                    proxy.scrollTo(e.id, anchor: .top)
+                }
+            }
+        case .bottom:
+            if let e = ordered.last {
+                withAnimation {
+                    proxy.scrollTo(e.id)
+                }
+            }
+        case .current:
+            let curDate = Date()
+            if let e = ordered.first(where: { curDate < $0.endTimestamp }) {
+                withAnimation {
+                    proxy.scrollTo(e.id, anchor: .top)
+                }
+            }
+        case .next:
+            let curDate = Date()
+            if let e = ordered.first(where: { curDate < $0.beginTimestamp }) {
+                withAnimation {
+                    proxy.scrollTo(e.id, anchor: .top)
+                }
+            }
         }
     }
 
@@ -654,51 +718,8 @@ struct EventScrollView: View {
                           proxy.scrollTo(changedValue, anchor: .top)
                       }
                   }
-                  .onChange(of: toTop.val) { _, tapTop in 
-                      guard tapTop else { return }
-                      if tapTop, showPastEvents {
-                          if let e = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first {
-                              withAnimation {
-                                  proxy.scrollTo(e.id, anchor: .top)
-                              }
-                          }
-                          toTop.val = false
-                      } else {
-                          toTop.val = false
-                          toCurrent.val = true
-                      }
-                      
-                  }
-                  .onChange(of: toBottom.val) { _, tapBottom in 
-                      guard tapBottom else { return }
-                      if tapBottom, let es = events.map({$0.value.sorted{$0.beginTimestamp < $1.beginTimestamp}}).last, let e = es.last {
-                          withAnimation {
-                              proxy.scrollTo(e.id)
-                          }
-                          toBottom.val = false
-                      }
-                  }
-                  .onChange(of: toCurrent.val) { _, tapCurrent in 
-                      guard tapCurrent else { return }
-                      let curDate = Date()
-                      // print("events: \(events.key)")
-                      if tapCurrent, let es = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first(where: {curDate < $0.endTimestamp}) {
-                          withAnimation {
-                              proxy.scrollTo(es.id, anchor: .top)
-                          }
-                          toCurrent.val = false
-                      }
-                  }
-                  .onChange(of: toNext.val) { _, tapNext in 
-                      guard tapNext else { return }
-                      let curDate = Date()
-                      // print("events: \(events.key)")
-                      if tapNext, let es = events.flatMap({$0.value}).sorted(by: {$0.beginTimestamp < $1.beginTimestamp}).first(where: {curDate < $0.beginTimestamp}) {
-                          withAnimation {
-                              proxy.scrollTo(es.id, anchor: .top)
-                          }
-                          toNext.val = false
-                      }
+                  .onReceive(scrollBus.subject) { command in
+                      handle(command, proxy: proxy)
                   }
                   .onAppear {
                       viewShowing = true
@@ -741,12 +762,11 @@ struct EventData: View {
         .background(.ultraThinMaterial)
     ) {
       Section {
-        ForEach(
-          events.sorted {
-            $0.beginTimestamp < $1.beginTimestamp
-          }, id: \.id
-        ) { event in
-          if showPastEvents || event.endTimestamp >= Date() {
+        // Perf D: per-day arrays arrive pre-sorted from eventDayGroup;
+        // capture "now" once instead of calling Date() per row.
+        let now = Date()
+        ForEach(events, id: \.id) { event in
+          if showPastEvents || event.endTimestamp >= now {
             // Three row variants:
             //   1. iPad split + custom event -> set the custom-event
             //      selection (clears the content selection) so the

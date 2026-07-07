@@ -11,7 +11,7 @@ import Kingfisher
 struct ProductsView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
-    @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
+    @AppStorage(AppStorageKeys.showMerchInfo) var showMerchInfo: Bool = true
     @State private var searchText = ""
     /// Perf C: debounced mirror of `searchText`. Updated on a 200ms
     /// .task(id:) so visibleProducts re-filters once per pause rather
@@ -23,7 +23,7 @@ struct ProductsView: View {
     /// selection survive tab switches; the store also persists it
     /// across cold launches via UserDefaults.
     @EnvironmentObject private var merchFilters: MerchFiltersStore
-    @AppStorage("filterMatchModeMerch") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    @AppStorage(AppStorageKeys.filterMatchModeMerch) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     private var filterMatchMode: FilterMatchMode {
         FilterMatchMode(rawOrDefault: filterMatchModeRaw)
     }
@@ -98,65 +98,10 @@ struct ProductsView: View {
             }
     }
 
-    @ViewBuilder private var inlineSearchBar: some View {
-        if isSearching {
-            HStack(spacing: 8) {
-                Image(systemName: "magnifyingglass").foregroundColor(.secondary)
-                TextField("Search merch", text: $searchText)
-                    .focused($searchFocused)
-                    .submitLabel(.search)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                if !searchText.isEmpty {
-                    Button {
-                        searchText = ""
-                    } label: {
-                        Image(systemName: "xmark.circle.fill").foregroundColor(.secondary)
-                    }
-                    .accessibilityLabel("Clear search text")
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(.thinMaterial)
-            .transition(.move(edge: .top).combined(with: .opacity))
-        }
-    }
-
-    @ViewBuilder private var searchToggleButton: some View {
-        Button {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                isSearching.toggle()
-            }
-            if isSearching {
-                searchFocused = true
-            } else {
-                searchText = ""
-            }
-        } label: {
-            Image(systemName: isSearching ? "xmark.circle" : "magnifyingglass")
-        }
-        .accessibilityLabel(isSearching ? "Close search" : "Search merch")
-    }
-
-    @ViewBuilder private var jumpMenu: some View {
-        Menu {
-            Button {
-                jumpTarget = "__top"
-            } label: { Label("Top", systemImage: "arrow.up") }
-            Button {
-                jumpTarget = "__bottom"
-            } label: { Label("Bottom", systemImage: "arrow.down") }
-        } label: {
-            Image(systemName: "arrow.up.arrow.down")
-        }
-        .menuOrder(.fixed)
-    }
-
     @ViewBuilder
     private var productsSidebar: some View {
         VStack(spacing: 0) {
-            inlineSearchBar
+            InlineSearchBar(placeholder: "Search merch", text: $searchText, isFocused: $searchFocused, visible: isSearching)
         ScrollView {
             if showMerchInfo {
                 MerchInfo()
@@ -228,12 +173,7 @@ struct ProductsView: View {
 
                 Spacer()
 
-                jumpMenu
-                    .font(themeManager.title2Font)
-                    .foregroundStyle(.primary)
-                    .frame(width: 48, height: 48)
-                    .background(.regularMaterial, in: Circle())
-                    .accessibilityLabel("Jump")
+                JumpMenuOverlay(target: $jumpTarget)
             }
             .padding(.horizontal, 20)
             .padding(.bottom, 12)
@@ -251,7 +191,7 @@ struct ProductsView: View {
                     }
                     .accessibilityLabel("Merch info")
                 }
-                searchToggleButton
+                SearchToggleButton(isSearching: $isSearching, searchText: $searchText, isFocused: $searchFocused, searchLabel: "Search merch")
                 if let c = viewModel.conference, c.enableMerchCart {
                     NavigationLink(destination: CartView()) {
                         Image(systemName: "qrcode")
@@ -303,7 +243,7 @@ struct ProductsView: View {
 }
 
 struct MerchInfo: View {
-    @AppStorage("showMerchInfo") var showMerchInfo: Bool = true
+    @AppStorage(AppStorageKeys.showMerchInfo) var showMerchInfo: Bool = true
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
     
@@ -326,7 +266,7 @@ struct MerchInfo: View {
                 .foregroundColor(.primary)
                 .frame(maxWidth: .infinity)
                 .padding(10)
-                .background(themeManager.danger)
+                .background(themeManager.cardSurface)
                 .cornerRadius(15)
             }
             Divider()
@@ -405,7 +345,7 @@ struct MerchSizeFilter: View {
     /// the already-filtered list to keep the sheet stateless.
     var matchedCount: Int = 0
 
-    @AppStorage("filterMatchModeMerch") private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    @AppStorage(AppStorageKeys.filterMatchModeMerch) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
 
     var body: some View {

@@ -5,6 +5,7 @@
 //  Created by Seth W Law on 5/2/22.
 //
 
+import Combine
 import CoreData
 import FirebaseFirestore
 import FirebaseAnalytics
@@ -14,41 +15,46 @@ class SelectedConference: ObservableObject {
     @Published var code = "INIT"
 }
 
-class GoToButton: ObservableObject, Equatable {
-    static func == (lhs: GoToButton, rhs: GoToButton) -> Bool {
-        lhs.val == rhs.val
-    }
-    @Published var val: Bool = false
+/// Scroll commands the schedule (and any other scrollable list) can
+/// respond to. Sent through ScrollCommandBus below.
+enum ScrollCommand {
+    case top, bottom, current, next
 }
 
-class ToTop: GoToButton {}
-class ToBottom: GoToButton {}
-class ToCurrent: GoToButton {}
-class ToNext: GoToButton {}
+/// Fire-and-forget command bus for scroll-to actions. Intentionally an
+/// ObservableObject with NO @Published properties: `objectWillChange`
+/// never fires, so sending a command doesn't invalidate every view
+/// holding the bus via @EnvironmentObject — consumers subscribe with
+/// `.onReceive(bus.subject)` and scroll their own proxy. This replaces
+/// the old ToTop/ToBottom/ToCurrent/ToNext published-Bool handshake,
+/// which re-evaluated the whole schedule body twice per command.
+final class ScrollCommandBus: ObservableObject {
+    let subject = PassthroughSubject<ScrollCommand, Never>()
+    func send(_ command: ScrollCommand) {
+        subject.send(command)
+    }
+}
 
 struct ContentView: View {
-    @AppStorage("conferenceCode") var conferenceCode: String = "INIT"
-    @AppStorage("launchScreen") var launchScreen: String = "Main"
-    @AppStorage("showHidden") var showHidden: Bool = false
-    @AppStorage("showLocaltime") var showLocaltime: Bool = false
-    @AppStorage("showNews") var showNews: Bool = true
-    @AppStorage("lightMode") var lightMode: Bool = false
-    @AppStorage("colorMode") var colorMode: Bool = false
-    @AppStorage("easterEgg") var easterEgg: Bool = false
+    @AppStorage(AppStorageKeys.conferenceCode) var conferenceCode: String = "INIT"
+    @AppStorage(AppStorageKeys.launchScreen) var launchScreen: String = "Main"
+    @AppStorage(AppStorageKeys.showHidden) var showHidden: Bool = false
+    @AppStorage(AppStorageKeys.showLocaltime) var showLocaltime: Bool = false
+    @AppStorage(AppStorageKeys.showNews) var showNews: Bool = true
+    @AppStorage(AppStorageKeys.lightMode) var lightMode: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.easterEgg) var easterEgg: Bool = false
 
     @StateObject var selected = SelectedConference()
     @State private var viewModel = InfoViewModel()
     @State private var consViewModel = ConferencesViewModel()
-    @StateObject var theme = Theme()
-    /// Themes-PR1 plumbing: app-wide theme manager. Read by call
-    /// sites in subsequent PRs via `@Environment(ThemeManager.self)`.
-    /// Injected here so it has a single source of truth at the
-    /// ContentView level, same as the other long-lived stores.
+    /// App-wide theme manager: palettes, typography, light/dark
+    /// preference, and the colorful-mode card palette. The single
+    /// theming source of truth (the legacy `Theme` ObservableObject
+    /// is gone). Injected here at the ContentView level, same as the
+    /// other long-lived stores.
     @State private var themeManager = ThemeManager()
-    @StateObject private var toTop = ToTop()
-    @StateObject private var toBottom = ToBottom()
-    @StateObject private var toCurrent = ToCurrent()
-    @StateObject private var toNext = ToNext()
+    @StateObject private var scrollBus = ScrollCommandBus()
     @StateObject var filters = Filters(filters:[])
     /// Independent filter set for the Speakers list — selections here
     /// don't bleed into Schedule / All Content.
@@ -58,12 +64,7 @@ struct ContentView: View {
     /// selection survives tab switches (and now cold launches too).
     @StateObject var merchFilters = MerchFiltersStore()
     @State private var tabSelection = 1
-    // @State private var tappedMainTwice = false
-    // @State private var tappedScheduleTwice = false
-    @State private var info = UUID()
-    @State private var schedule = UUID()
     @State private var isInit: Bool = false
-    @State private var scheduleView = ScheduleView(tagIds: [])
     @State private var showingEmergencySheet = false
 
     var body: some View {
@@ -85,16 +86,14 @@ struct ContentView: View {
                         // Text("Info")
                     }
                     .tag(1)
-                    .id(info)
-                    .preferredColorScheme(theme.colorScheme)
-                scheduleView
+                    .preferredColorScheme(themeManager.preferredColorScheme)
+                ScheduleView(tagIds: [])
                     .tabItem {
                         Image(systemName: "calendar")
                         // Text("Main")
                     }
                     .tag(2)
-                    .id(schedule)
-                    .preferredColorScheme(theme.colorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
                 MapView()
                     .tabItem {
                         // Animate the SF Symbol while map assets are
@@ -105,14 +104,14 @@ struct ContentView: View {
                         // Text("Maps")
                     }
                     .tag(3)
-                    .preferredColorScheme(theme.colorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
                 SettingsView()
                     .tabItem {
                         Image(systemName: "gearshape")
                         // Text("Settings")
                     }
                     .tag(4)
-                    .preferredColorScheme(theme.colorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
             }
             // Easter-egg overlay: faint, fading beezle behind the UI.
             // Only renders when easterEgg is on. With colorMode also on,
@@ -156,13 +155,9 @@ struct ContentView: View {
             }
             .environmentObject(selected)
             .environment(viewModel)
-            .environmentObject(theme)
             .environment(themeManager)
             .environment(consViewModel)
-            .environmentObject(toTop)
-            .environmentObject(toBottom)
-            .environmentObject(toCurrent)
-            .environmentObject(toNext)
+            .environmentObject(scrollBus)
             .environmentObject(filters)
             .environmentObject(speakerFilters)
             .environmentObject(merchFilters)
@@ -184,22 +179,20 @@ struct ContentView: View {
                 NavigationStack {
                     ConferencesView()
                 }
-                    .preferredColorScheme(theme.colorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
                     .environmentObject(selected)
                     .environment(viewModel)
                     .environment(consViewModel)
-                    .environmentObject(theme)
                     .environment(themeManager)
                     .environmentObject(filters)
                     .environmentObject(speakerFilters)
                     .environmentObject(merchFilters)
             } else {
-                _04View(message: "Loading", show404: false).preferredColorScheme(theme.colorScheme)
-                    .preferredColorScheme(theme.colorScheme)
+                _04View(message: "Loading", show404: false).preferredColorScheme(themeManager.preferredColorScheme)
+                    .preferredColorScheme(themeManager.preferredColorScheme)
                     .environmentObject(selected)
                     .environment(viewModel)
                     .environment(consViewModel)
-                    .environmentObject(theme)
                     .environment(themeManager)
                     .environmentObject(filters)
                     .environmentObject(speakerFilters)
@@ -244,16 +237,16 @@ struct ContentView_Previews: PreviewProvider {
 /// through the full hue spectrum once every 12s; with just easterEgg
 /// it tints to the system primary so it adapts to light/dark mode.
 private struct BeezleEasterEggOverlay: View {
-    @AppStorage("easterEgg") var easterEgg: Bool = false
-    @AppStorage("colorMode") var colorMode: Bool = false
+    @AppStorage(AppStorageKeys.easterEgg) var easterEgg: Bool = false
+    @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
     /// User-tunable peak opacity of the breathing watermark. Floor at
     /// 0.05 so we never persist a fully-invisible setting that looks
     /// like the feature is broken; ceiling at 1.0 if the user wants
     /// the ghost solid-on at peak.
-    @AppStorage("easterEggMaxOpacity") var easterEggMaxOpacity: Double = 0.20
+    @AppStorage(AppStorageKeys.easterEggMaxOpacity) var easterEggMaxOpacity: Double = 0.20
     /// Period of the sine-wave pulse, in seconds. 0 turns the pulse
     /// off entirely — the watermark stays held at peak opacity.
-    @AppStorage("easterEggPeriod") var easterEggPeriod: Double = 12.0
+    @AppStorage(AppStorageKeys.easterEggPeriod) var easterEggPeriod: Double = 12.0
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
