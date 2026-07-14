@@ -781,27 +781,31 @@ struct EventData: View {
             if let custSel = iPadCustomEventSelection,
                let contentSel = iPadContentSelection {
               if let cid = event.customEventID {
-                Button {
-                  contentSel.wrappedValue = nil
-                  custSel.wrappedValue = cid
-                } label: {
-                  EventCell(event: event, showDay: false)
-                    .id(event.id)
-                    .foregroundColor(.primary)
-                    .padding(1)
-                }
-                .buttonStyle(.plain)
+                // iPad: a plain tappable cell, NOT a Button. EventCell
+                // contains its own bookmark Button, and nesting a Button
+                // inside a Button breaks gesture arbitration on iPadOS 17
+                // (scroll + row tap die while the inner bookmark still
+                // fires). A contentShape + onTapGesture composes with the
+                // inner button and leaves scrolling intact.
+                EventCell(event: event, showDay: false)
+                  .id(event.id)
+                  .foregroundColor(.primary)
+                  .padding(1)
+                  .contentShape(Rectangle())
+                  .onTapGesture {
+                    contentSel.wrappedValue = nil
+                    custSel.wrappedValue = cid
+                  }
               } else {
-                Button {
-                  custSel.wrappedValue = nil
-                  contentSel.wrappedValue = event.contentId
-                } label: {
-                  EventCell(event: event, showDay: false)
-                    .id(event.id)
-                    .foregroundColor(.primary)
-                    .padding(1)
-                }
-                .buttonStyle(.plain)
+                EventCell(event: event, showDay: false)
+                  .id(event.id)
+                  .foregroundColor(.primary)
+                  .padding(1)
+                  .contentShape(Rectangle())
+                  .onTapGesture {
+                    custSel.wrappedValue = nil
+                    contentSel.wrappedValue = event.contentId
+                  }
               }
             } else if let cid = event.customEventID {
               NavigationLink(destination: CustomEventDetailView(eventID: cid)) {
@@ -811,15 +815,14 @@ struct EventData: View {
                   .padding(1)
               }
             } else if let sel = iPadContentSelection {
-              Button {
-                sel.wrappedValue = event.contentId
-              } label: {
-                EventCell(event: event, showDay: false)
-                  .id(event.id)
-                  .foregroundColor(.primary)
-                  .padding(1)
-              }
-              .buttonStyle(.plain)
+              EventCell(event: event, showDay: false)
+                .id(event.id)
+                .foregroundColor(.primary)
+                .padding(1)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                  sel.wrappedValue = event.contentId
+                }
             } else {
               NavigationLink(destination: ContentDetailView(contentId:event.contentId)) {
                 EventCell(event: event, showDay: false)
