@@ -126,21 +126,28 @@ struct EventCell: View {
                                 .foregroundStyle(.secondary)
                                 .accessibilityLabel("Has a saved note")
                         }
-                        Button {
-                            bookmarkAction()
-                        } label: {
-                            Image(systemName: bookmarkIds.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
-                                .foregroundColor((bookmarkIds.contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkSnapshot.conflictIds, bookmarkKey: bookmarkSnapshot.conflictKey)) ? themeManager.danger : .primary)
-                        }
-                        .accessibilityLabel(
-                            bookmarkIds.contains(Int32(event.id))
-                                ? (viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkSnapshot.conflictIds, bookmarkKey: bookmarkSnapshot.conflictKey)
-                                    ? "Bookmarked, conflicts with another event"
-                                    : "Remove bookmark")
-                                : "Add bookmark"
-                        )
+                        // Bookmark toggle. NOT a Button: on iPad the row
+                        // itself is a Button, and a Button nested inside a
+                        // Button breaks gesture resolution in the ScrollView
+                        // on iPadOS 17 — a swipe that starts on a cell then
+                        // neither scrolls nor selects (only swipes from the
+                        // section header work). A high-priority tap toggles
+                        // the bookmark and takes precedence over the row's
+                        // tap, without introducing a nested control.
+                        Image(systemName: bookmarkIds.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                            .foregroundColor((bookmarkIds.contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkSnapshot.conflictIds, bookmarkKey: bookmarkSnapshot.conflictKey)) ? themeManager.danger : .primary)
+                            .padding(.leading, 8)
+                            .contentShape(Rectangle())
+                            .highPriorityGesture(TapGesture().onEnded { bookmarkAction() })
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilityLabel(
+                                bookmarkIds.contains(Int32(event.id))
+                                    ? (viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkSnapshot.conflictIds, bookmarkKey: bookmarkSnapshot.conflictKey)
+                                        ? "Bookmarked, conflicts with another event"
+                                        : "Remove bookmark")
+                                    : "Add bookmark"
+                            )
                     }
-                    .buttonStyle(PlainButtonStyle())
                 }
                 .padding(.vertical, 10)
                 .padding(.trailing, 12)

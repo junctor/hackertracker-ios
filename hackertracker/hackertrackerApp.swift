@@ -46,7 +46,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         Messaging.messaging().delegate = self
 
         return true
-    }    
+    }
 }
 
 @main
