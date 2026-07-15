@@ -400,24 +400,23 @@ struct EventsView: View {
         // re-renders this view when the active timezone changes.
         let _ = dfu.tzGeneration
     if IPadAdaptive.isIPad && includeNav {
-      // iPad: HStack-based custom split layout. Two sibling NavigationStacks
-      // align naturally at the top -- no iOS 18 NavigationSplitView
-      // floating-card sidebar styling, no Y misalignment between columns.
-      // Each NavigationStack hosts its own toolbar so chrome stays consistent.
-      HStack(spacing: 0) {
-        NavigationStack {
+      // iPad: ONE NavigationStack wrapping a two-column HStack. The
+      // sidebar's ScrollView must sit under NavigationStack -> HStack
+      // (the standard scrollable composition — same as the iPhone path
+      // below and every other iPad split screen, which place their
+      // sidebar directly in the HStack). The previous layout nested a
+      // NavigationStack *inside* the HStack per column, and a ScrollView
+      // inside a NavigationStack-inside-an-HStack does not scroll on
+      // iPadOS 17 — that was the "can't scroll the schedule" bug. The
+      // single stack also carries the sidebar's toolbar + title.
+      NavigationStack {
+        HStack(spacing: 0) {
           scheduleSidebar
-        }
-        .frame(width: IPadAdaptive.sidebarWidth)
-        Divider()
-        // iPad: keep a NavigationStack on the right pane so the sibling
-        // pair preserves the layout symmetry iPadOS 18 uses to size the
-        // safe-area top inset under the floating tab bar (the left
-        // nav-title was disappearing otherwise). Hide *this* nav bar so
-        // the empty header doesn't take visible space, and pad the top
-        // so the event title isn't covered by the floating tab pill.
-        // CustomEventDetailView's action buttons render inline on iPad.
-        NavigationStack {
+            .frame(width: IPadAdaptive.sidebarWidth)
+          Divider()
+          // Detail pane. Pad the top so the event title clears the
+          // floating tab pill; CustomEventDetailView renders its action
+          // buttons inline on iPad.
           Group {
             if let cid = ipadSelectedCustomEventId {
               CustomEventDetailView(eventID: cid)
@@ -433,7 +432,6 @@ struct EventsView: View {
               )
             }
           }
-          .toolbar(.hidden, for: .navigationBar)
           .safeAreaInset(edge: .top, spacing: 0) {
             Color.clear.frame(height: 16)
           }
