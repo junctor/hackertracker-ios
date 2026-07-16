@@ -17,21 +17,32 @@ struct CountdownView: View {
     var body: some View {
         VStack(alignment: .center) {
             HStack {
-                Text("\(countdownTimer?.days ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.pink)
+                // Four DISTINCT colors, all derived from the theme accent
+                // hue (accentSpectrum), so each unit reads differently
+                // while still matching the theme — even on a mono-accent
+                // theme like DEF CON Red (a spread of reds/oranges) where
+                // accent/success/danger would otherwise collapse to one
+                // color.
+                let unitColors = themeManager.accentSpectrum(4)
+                Text("\(countdownTimer?.days ?? 0)").font(themeManager.titleFont).foregroundColor(unitColors[0])
                 Text("days").font(themeManager.captionFont).foregroundColor(.primary)
 
-                Text("\(countdownTimer?.hours ?? 0)").font(themeManager.titleFont).foregroundColor(themeManager.accent)
+                Text("\(countdownTimer?.hours ?? 0)").font(themeManager.titleFont).foregroundColor(unitColors[1])
                 Text("hours").font(themeManager.captionFont).foregroundColor(.primary)
 
-                Text("\(countdownTimer?.minutes ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.green)
+                Text("\(countdownTimer?.minutes ?? 0)").font(themeManager.titleFont).foregroundColor(unitColors[2])
                 Text("min").font(themeManager.captionFont).foregroundColor(.primary)
 
-                Text("\(countdownTimer?.seconds ?? 0)").font(themeManager.titleFont).foregroundColor(themeManager.danger)
+                Text("\(countdownTimer?.seconds ?? 0)").font(themeManager.titleFont).foregroundColor(unitColors[3])
                 Text("sec").font(themeManager.captionFont).foregroundColor(.primary)
             }
         }.frame(maxWidth: .infinity)
             .accentColor(.primary)
-            .background(Color(.systemGray5))
+            // Recessed pill: this sits on top of the InfoView card
+            // (cardSurface), so use the theme's base background — darker
+            // than the card — to make the countdown read as an inset panel
+            // that stands out without the harsh systemGray of before.
+            .background(themeManager.background)
             .cornerRadius(5)
             .onAppear {
                 countdownTimer = getCountdown(start: start)
