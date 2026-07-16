@@ -6,6 +6,26 @@
 
 import SwiftUI
 
+extension View {
+    /// Attaches the "long-press to peek at the original description"
+    /// gesture, but ONLY on OSes that can display AI summaries (iOS 26+,
+    /// via `AISummaryAvailability`). On iOS 17 the gesture must not be
+    /// attached at all: a long-press recognizer on a schedule/content
+    /// cell competes with the row-selection `Button` and the enclosing
+    /// `ScrollView`'s scroll pan, so a touch that starts on the cell body
+    /// neither scrolls nor selects (only the section header / bookmark
+    /// worked). iOS 26 — the only place the AI summary, and therefore
+    /// this peek, is relevant — resolves the gestures correctly.
+    @MainActor @ViewBuilder
+    func peekOriginalOnLongPress(perform action: @escaping () -> Void) -> some View {
+        if AISummaryAvailability.isPossiblyAvailable {
+            self.onLongPressGesture(minimumDuration: 0.5, perform: action)
+        } else {
+            self
+        }
+    }
+}
+
 struct EventCell: View {
     let event: Event
     // let bookmarks: [Int32]
@@ -166,9 +186,15 @@ struct EventCell: View {
                 TalkSummaryCache.shared.warm(event)
             }
         }
-        // Long-press peeks at the original description, but only
-        // when a summary is being displayed.
-        .onLongPressGesture(minimumDuration: 0.5) {
+        // Long-press to peek at the original description — gated to the
+        // OSes that can actually show AI summaries (iOS 26+, via
+        // AISummaryAvailability). On iOS 17 the gesture must NOT be
+        // attached: a long-press recognizer on the cell competes with
+        // the row-selection Button and the ScrollView pan there and
+        // breaks scroll/tap that starts on the cell body. iOS 26 — where
+        // the summary (and thus this peek) is relevant — resolves the
+        // gestures correctly.
+        .peekOriginalOnLongPress {
             if aiSummaries, TalkSummaryCache.shared.summary(for: event) != nil {
                 showingOriginalDescription = true
             }

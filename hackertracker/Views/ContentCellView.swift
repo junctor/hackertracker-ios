@@ -147,10 +147,12 @@ struct ContentCell: View {
                 TalkSummaryCache.shared.warm(content)
             }
         }
-        // Long-press to peek at the original description, but only
-        // when there's a summary on the row to compare against — a
-        // bare long-press on a non-AI cell would feel inconsistent.
-        .onLongPressGesture(minimumDuration: 0.5) {
+        // Long-press to peek at the original description — gated to
+        // iOS 26+ (AISummaryAvailability), the OSes that show AI
+        // summaries and where the gesture doesn't fight scroll/tap. On
+        // iOS 17 it must not be attached (breaks cell-body scroll/tap).
+        // Same treatment as EventCellView.
+        .peekOriginalOnLongPress {
             if aiSummaries, TalkSummaryCache.shared.summary(for: content) != nil {
                 showingOriginalDescription = true
             }
