@@ -72,6 +72,7 @@ struct OrgView: View {
             }
         }
         .padding(5)
+        .themedBackground(themeManager)
         .analyticsScreen(name: "OrgView")
     }
 }

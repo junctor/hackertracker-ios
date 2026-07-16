@@ -109,6 +109,7 @@ struct GlobalSearchView: View {
             .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
             .navigationTitle("Global Search")
             .themedNavTitle("Global Search", themeManager)
+            .themedBackground(themeManager)
             .task(id: searchText) {
                 try? await Task.sleep(nanoseconds: 200_000_000)
                 if !Task.isCancelled { debouncedSearch = searchText }

@@ -95,6 +95,7 @@ struct SharedScheduleView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
+        .themedBackground(themeManager)
         .analyticsScreen(name: "SharedScheduleView")
     }
 

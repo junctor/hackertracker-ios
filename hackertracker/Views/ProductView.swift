@@ -136,10 +136,11 @@ struct ProductView: View {
                 }
                 
                 Text(message.uppercased())
-                    .foregroundColor(.gray)
+                    .foregroundColor(ThemeColors.muted)
                     .font(themeManager.captionFont)
             }
         }
+        .themedBackground(themeManager)
         .padding(15)
         .task {
             self.selectedVariant = self.product.variants[0].variantId

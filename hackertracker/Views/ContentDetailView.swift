@@ -116,6 +116,7 @@ struct ContentDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
+            .themedBackground(themeManager)
             .toolbar {
                 // iPad: sidebar's section title owns the parent navbar.
                 // Skip per-item principal here to avoid title flicker.
@@ -340,7 +341,7 @@ struct showSessionRow: View {
         .padding(.trailing, 5)
         .padding(.vertical, 5)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.background)
+        .background(themeManager.cardSurface)
         .cornerRadius(10)
         .padding(.bottom, 5)
     }

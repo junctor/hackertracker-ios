@@ -183,6 +183,7 @@ struct ProductsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
+        .themedBackground(themeManager)
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 if !showMerchInfo, let c = viewModel.conference, let docId = c.merchHelpDocId, let doc = viewModel.documentsById[docId] {
@@ -368,10 +369,10 @@ struct MerchSizeFilter: View {
                                 .padding(8)
                                 .frame(maxWidth: .infinity)
                                 .foregroundColor(isOn ? .white : .primary)
-                                .background(isOn ? Color.accentColor : Color.clear)
+                                .background(isOn ? themeManager.accent : Color.clear)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .stroke(isOn ? Color.clear : Color.accentColor, lineWidth: 2)
+                                        .stroke(isOn ? Color.clear : themeManager.accent, lineWidth: 2)
                                 )
                                 .cornerRadius(10)
                         }

@@ -28,6 +28,7 @@ struct LocationView: View {
             .accentColor(.primary)
             .navigationTitle("Locations")
             .themedNavTitle("Locations", themeManager)
+            .themedBackground(themeManager)
             .searchable(text: $searchText)
             .analyticsScreen(name: "LocationView")
         }

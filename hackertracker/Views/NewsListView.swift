@@ -76,6 +76,7 @@ struct NewsListView: View {
         }
         .navigationTitle("News")
         .themedNavTitle("News", themeManager)
+        .themedBackground(themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)

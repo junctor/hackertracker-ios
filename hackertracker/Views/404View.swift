@@ -41,6 +41,7 @@ struct _04View: View {
                             .padding(25)
                     }
             }
+            .themedBackground(themeManager)
         }
         .analyticsScreen(name: "404View")
     }
