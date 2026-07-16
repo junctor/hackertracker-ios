@@ -93,6 +93,7 @@ struct ConferencesView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
+            .themedBackground(themeManager)
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     SearchToggleButton(isSearching: $isSearching, searchText: $searchText, isFocused: $searchFocused, searchLabel: "Search conferences")

@@ -34,7 +34,7 @@ struct SpeakerDetailView: View {
                         if let pronouns = speaker.pronouns {
                             Text("(\(pronouns))")
                                 .font(themeManager.captionFont)
-                                .foregroundColor(.gray)
+                                .foregroundColor(ThemeColors.muted)
                         }
                         if let affiliations = speaker.affiliations, affiliations.count > 0 {
                             showAffiliations(affiliations: affiliations)
@@ -98,6 +98,7 @@ struct SpeakerDetailView: View {
                     }
                 }
             }
+            .themedBackground(themeManager)
             .analyticsScreen(name: "SpeakerDetailView")
         } else {
             _04View(message: "Speaker \(id) not found")

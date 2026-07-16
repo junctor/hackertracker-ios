@@ -84,6 +84,7 @@ struct OrgsView: View {
         }
         .navigationTitle(title)
         .themedNavTitle(title, themeManager)
+        .themedBackground(themeManager)
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)

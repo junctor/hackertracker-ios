@@ -59,6 +59,7 @@ struct ShareBookmarksView: View {
                 Divider()
             }
         }
+        .themedBackground(themeManager)
         .analyticsScreen(name: "ShareBookmarksView")
         .padding(15)
     }

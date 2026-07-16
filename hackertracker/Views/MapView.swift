@@ -48,7 +48,7 @@ struct MapView: View {
             content
                 .overlay(alignment: .bottomLeading) { zoomFloatingControls }
                 .padding(10)
-                .background(Color(.systemBackground))
+                .background(themeManager.background)
                 .navigationTitle(currentMapTitle ?? "Maps")
                 .themedNavTitle(currentMapTitle ?? "Maps", themeManager)
                 .navigationBarTitleDisplayMode(.inline)

@@ -68,6 +68,7 @@ struct CustomEventDetailView: View {
                 .frame(maxHeight: .infinity)
             }
         }
+        .themedBackground(themeManager)
         .navigationBarTitle(Text(""), displayMode: .inline)
         .toolbar {
             // iPad detail pane is rendered without a NavigationStack
@@ -253,7 +254,7 @@ struct CustomEventDetailView: View {
         .padding(.trailing, 5)
         .padding(.vertical, 5)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.background)
+        .background(themeManager.cardSurface)
         .cornerRadius(10)
         .padding(.bottom, 5)
     }
@@ -267,7 +268,7 @@ struct CustomEventDetailView: View {
         .padding(.trailing, 5)
         .padding(.vertical, 5)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.background)
+        .background(themeManager.cardSurface)
         .cornerRadius(10)
         .padding(.bottom, 5)
     }

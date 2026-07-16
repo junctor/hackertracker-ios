@@ -107,6 +107,7 @@ struct CustomEventFormView: View {
             .navigationTitle(existing == nil ? "New Event" : "Edit Event")
             .themedNavTitle(existing == nil ? "New Event" : "Edit Event", themeManager)
             .navigationBarTitleDisplayMode(.inline)
+            .themedBackground(themeManager)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }

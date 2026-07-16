@@ -93,6 +93,7 @@ struct CartView: View {
         .navigationTitle("Merch")
         .themedNavTitle("Merch", themeManager)
         .padding(15)
+        .themedBackground(themeManager)
     }
     
     func checkOutOfStock() {

@@ -36,6 +36,7 @@ struct CustomEventShareSheet: View {
             .navigationTitle("Share Event")
             .themedNavTitle("Share Event", themeManager)
             .navigationBarTitleDisplayMode(.inline)
+            .themedBackground(themeManager)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Done") { dismiss() }
