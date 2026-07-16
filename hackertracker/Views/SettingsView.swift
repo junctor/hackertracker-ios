@@ -436,6 +436,7 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
         .navigationTitle("About")
         .themedNavTitle("About", themeManager)
         .navigationBarTitleDisplayMode(.inline)
+        .themedBackground(themeManager)
     }
 
     private var versionHeader: some View {
