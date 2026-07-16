@@ -919,6 +919,7 @@ struct ThemePickerView: View {
         .navigationTitle("Theme")
         .themedNavTitle("Theme", themeManager)
         .navigationBarTitleDisplayMode(.inline)
+        .themedBackground(themeManager)
     }
 
     /// One row per registered theme. Each row previews the theme's
