@@ -17,20 +17,29 @@ struct CountdownView: View {
     var body: some View {
         VStack(alignment: .center) {
             HStack {
-                Text("\(countdownTimer?.days ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.pink)
+                // Each unit gets a distinct theme token so the whole
+                // countdown recolors with the active theme instead of the
+                // old hardcoded pink/green (which clashed with DEF CON Red,
+                // Synthwave, etc). Cycles the theme's vibrant semantic
+                // colors: accent -> success -> danger -> accent.
+                Text("\(countdownTimer?.days ?? 0)").font(themeManager.titleFont).foregroundColor(themeManager.accent)
                 Text("days").font(themeManager.captionFont).foregroundColor(.primary)
 
-                Text("\(countdownTimer?.hours ?? 0)").font(themeManager.titleFont).foregroundColor(themeManager.accent)
+                Text("\(countdownTimer?.hours ?? 0)").font(themeManager.titleFont).foregroundColor(themeManager.success)
                 Text("hours").font(themeManager.captionFont).foregroundColor(.primary)
 
-                Text("\(countdownTimer?.minutes ?? 0)").font(themeManager.titleFont).foregroundColor(ThemeColors.green)
+                Text("\(countdownTimer?.minutes ?? 0)").font(themeManager.titleFont).foregroundColor(themeManager.danger)
                 Text("min").font(themeManager.captionFont).foregroundColor(.primary)
 
-                Text("\(countdownTimer?.seconds ?? 0)").font(themeManager.titleFont).foregroundColor(themeManager.danger)
+                Text("\(countdownTimer?.seconds ?? 0)").font(themeManager.titleFont).foregroundColor(themeManager.accent)
                 Text("sec").font(themeManager.captionFont).foregroundColor(.primary)
             }
         }.frame(maxWidth: .infinity)
             .accentColor(.primary)
+            // Neutral raised pill: this sits on top of the InfoView card
+            // (already cardSurface), so it needs a contrasting elevation.
+            // systemGray5 is theme-neutral (adapts light/dark) and doesn't
+            // clash — the theming that mattered was the number colors above.
             .background(Color(.systemGray5))
             .cornerRadius(5)
             .onAppear {
