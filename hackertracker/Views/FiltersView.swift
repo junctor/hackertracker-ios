@@ -65,6 +65,7 @@ struct EventFilters: View {
             .navigationTitle("Filters")
             .themedNavTitle("Filters", themeManager)
             .navigationBarTitleDisplayMode(.inline)
+            .themedBackground(themeManager)
             .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
             .toolbarBackground(.visible, for: .navigationBar)
             .toolbar {
