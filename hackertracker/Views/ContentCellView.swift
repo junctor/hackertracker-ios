@@ -108,21 +108,26 @@ struct ContentCell: View {
                                 .foregroundStyle(.secondary)
                                 .accessibilityLabel("Has a saved note")
                         }
-                        Button {
-                            bookmarkAction()
-                        } label: {
-                            Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
-                                .foregroundColor(hasBookmarkConflict ? themeManager.danger : .primary)
-                        }
-                        .accessibilityLabel(
-                            isBookmarked
-                                ? (hasBookmarkConflict
-                                    ? "Bookmarked, conflicts with another event"
-                                    : "Remove bookmark")
-                                : "Add bookmark"
-                        )
+                        // Bookmark toggle. NOT a Button: on iPad the row is
+                        // a Button, and a Button nested inside a Button breaks
+                        // scroll + tap resolution in the ScrollView on iPadOS
+                        // 17 (a swipe from a cell neither scrolls nor selects).
+                        // A high-priority tap toggles the bookmark and beats
+                        // the row's tap without nesting a control.
+                        Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
+                            .foregroundColor(hasBookmarkConflict ? themeManager.danger : .primary)
+                            .padding(.leading, 8)
+                            .contentShape(Rectangle())
+                            .highPriorityGesture(TapGesture().onEnded { bookmarkAction() })
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilityLabel(
+                                isBookmarked
+                                    ? (hasBookmarkConflict
+                                        ? "Bookmarked, conflicts with another event"
+                                        : "Remove bookmark")
+                                    : "Add bookmark"
+                            )
                     }
-                    .buttonStyle(PlainButtonStyle())
                 }
                 .padding(.vertical, 10)
                 .padding(.trailing, 12)
@@ -142,10 +147,12 @@ struct ContentCell: View {
                 TalkSummaryCache.shared.warm(content)
             }
         }
-        // Long-press to peek at the original description, but only
-        // when there's a summary on the row to compare against — a
-        // bare long-press on a non-AI cell would feel inconsistent.
-        .onLongPressGesture(minimumDuration: 0.5) {
+        // Long-press to peek at the original description — gated to
+        // iOS 26+ (AISummaryAvailability), the OSes that show AI
+        // summaries and where the gesture doesn't fight scroll/tap. On
+        // iOS 17 it must not be attached (breaks cell-body scroll/tap).
+        // Same treatment as EventCellView.
+        .peekOriginalOnLongPress {
             if aiSummaries, TalkSummaryCache.shared.summary(for: content) != nil {
                 showingOriginalDescription = true
             }

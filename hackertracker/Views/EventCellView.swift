@@ -6,6 +6,26 @@
 
 import SwiftUI
 
+extension View {
+    /// Attaches the "long-press to peek at the original description"
+    /// gesture, but ONLY on OSes that can display AI summaries (iOS 26+,
+    /// via `AISummaryAvailability`). On iOS 17 the gesture must not be
+    /// attached at all: a long-press recognizer on a schedule/content
+    /// cell competes with the row-selection `Button` and the enclosing
+    /// `ScrollView`'s scroll pan, so a touch that starts on the cell body
+    /// neither scrolls nor selects (only the section header / bookmark
+    /// worked). iOS 26 — the only place the AI summary, and therefore
+    /// this peek, is relevant — resolves the gestures correctly.
+    @MainActor @ViewBuilder
+    func peekOriginalOnLongPress(perform action: @escaping () -> Void) -> some View {
+        if AISummaryAvailability.isPossiblyAvailable {
+            self.onLongPressGesture(minimumDuration: 0.5, perform: action)
+        } else {
+            self
+        }
+    }
+}
+
 struct EventCell: View {
     let event: Event
     // let bookmarks: [Int32]
@@ -126,21 +146,28 @@ struct EventCell: View {
                                 .foregroundStyle(.secondary)
                                 .accessibilityLabel("Has a saved note")
                         }
-                        Button {
-                            bookmarkAction()
-                        } label: {
-                            Image(systemName: bookmarkIds.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
-                                .foregroundColor((bookmarkIds.contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkSnapshot.conflictIds, bookmarkKey: bookmarkSnapshot.conflictKey)) ? themeManager.danger : .primary)
-                        }
-                        .accessibilityLabel(
-                            bookmarkIds.contains(Int32(event.id))
-                                ? (viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkSnapshot.conflictIds, bookmarkKey: bookmarkSnapshot.conflictKey)
-                                    ? "Bookmarked, conflicts with another event"
-                                    : "Remove bookmark")
-                                : "Add bookmark"
-                        )
+                        // Bookmark toggle. NOT a Button: on iPad the row
+                        // itself is a Button, and a Button nested inside a
+                        // Button breaks gesture resolution in the ScrollView
+                        // on iPadOS 17 — a swipe that starts on a cell then
+                        // neither scrolls nor selects (only swipes from the
+                        // section header work). A high-priority tap toggles
+                        // the bookmark and takes precedence over the row's
+                        // tap, without introducing a nested control.
+                        Image(systemName: bookmarkIds.contains(Int32(event.id)) ? "bookmark.fill" : "bookmark")
+                            .foregroundColor((bookmarkIds.contains(Int32(event.id)) && viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkSnapshot.conflictIds, bookmarkKey: bookmarkSnapshot.conflictKey)) ? themeManager.danger : .primary)
+                            .padding(.leading, 8)
+                            .contentShape(Rectangle())
+                            .highPriorityGesture(TapGesture().onEnded { bookmarkAction() })
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilityLabel(
+                                bookmarkIds.contains(Int32(event.id))
+                                    ? (viewModel.bookmarkConflicts(eventId: event.id, bookmarks: bookmarkSnapshot.conflictIds, bookmarkKey: bookmarkSnapshot.conflictKey)
+                                        ? "Bookmarked, conflicts with another event"
+                                        : "Remove bookmark")
+                                    : "Add bookmark"
+                            )
                     }
-                    .buttonStyle(PlainButtonStyle())
                 }
                 .padding(.vertical, 10)
                 .padding(.trailing, 12)
@@ -159,9 +186,15 @@ struct EventCell: View {
                 TalkSummaryCache.shared.warm(event)
             }
         }
-        // Long-press peeks at the original description, but only
-        // when a summary is being displayed.
-        .onLongPressGesture(minimumDuration: 0.5) {
+        // Long-press to peek at the original description — gated to the
+        // OSes that can actually show AI summaries (iOS 26+, via
+        // AISummaryAvailability). On iOS 17 the gesture must NOT be
+        // attached: a long-press recognizer on the cell competes with
+        // the row-selection Button and the ScrollView pan there and
+        // breaks scroll/tap that starts on the cell body. iOS 26 — where
+        // the summary (and thus this peek) is relevant — resolves the
+        // gestures correctly.
+        .peekOriginalOnLongPress {
             if aiSummaries, TalkSummaryCache.shared.summary(for: event) != nil {
                 showingOriginalDescription = true
             }
