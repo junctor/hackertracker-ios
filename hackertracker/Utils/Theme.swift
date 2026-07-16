@@ -635,6 +635,33 @@ final class ThemeManager {
     var divider: Color        { current.palette.divider.auto }
     var chipBackground: Color { current.palette.chipBackground.auto }
 
+    /// `count` visually-distinct colors derived from the active theme's
+    /// accent hue. Used where we want several different-but-on-theme
+    /// colors (e.g. the countdown's day/hour/min/sec numbers) rather
+    /// than repeating one token. A mono-accent theme like DEF CON Red
+    /// yields a spread of reds/oranges instead of four identical reds;
+    /// the default (blue) yields blues/teals/greens.
+    ///
+    /// Hues are spread symmetrically around the accent hue. Saturation
+    /// and brightness are floored so a muted accent still reads as
+    /// colorful. Falls back to the flat accent if HSB can't be read.
+    func accentSpectrum(_ count: Int) -> [Color] {
+        guard count > 0 else { return [] }
+        var h: CGFloat = 0, s: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        guard UIColor(accent).getHue(&h, saturation: &s, brightness: &b, alpha: &a) else {
+            return Array(repeating: accent, count: count)
+        }
+        let sat = max(s, 0.55)
+        let bri = max(b, 0.72)
+        let step: CGFloat = 0.09   // hue rotation between adjacent units
+        let mid = CGFloat(count - 1) / 2
+        return (0..<count).map { i in
+            var hue = (h + (CGFloat(i) - mid) * step).truncatingRemainder(dividingBy: 1)
+            if hue < 0 { hue += 1 }
+            return Color(hue: Double(hue), saturation: Double(sat), brightness: Double(bri))
+        }
+    }
+
     /// SwiftUI `Font.Design` matching the active theme. Used by call
     /// sites that need the raw design value (e.g. MarkdownUI's
     /// `FontFamily(.system(_:))`, UIKit appearance proxies).
