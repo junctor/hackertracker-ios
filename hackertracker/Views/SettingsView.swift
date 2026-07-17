@@ -117,6 +117,7 @@ struct SettingsView: View {
                             VStack(spacing: 0) { StartScreenPickerView() }
                             VStack(spacing: 0) { NotificationSettingsView() }
                             VStack(spacing: 0) { AISummarySettingsView() }
+                            VStack(spacing: 0) { AgeVerificationSettingsView() }
                             VStack(spacing: 0) { ShowCustomEventsSettingsView() }
                             VStack(spacing: 0) { EasterEggSettingsView() }
                             Spacer(minLength: 0)
@@ -132,6 +133,7 @@ struct SettingsView: View {
                     ShowNewsSettingsView()
                     NotificationSettingsView()
                     AISummarySettingsView()
+                    AgeVerificationSettingsView()
                     ShowCustomEventsSettingsView()
                     EasterEggSettingsView()
                 }
@@ -834,6 +836,51 @@ struct AISummarySettingsView: View {
                 if speakerAISummaries { showSpeakerToggle = true }
             }
         }
+    }
+}
+
+/// Settings row showing Declared Age Range verification status, with a
+/// re-verify button on iOS 26+. On older iOS the row explains the
+/// feature is unavailable rather than showing a dead button.
+struct AgeVerificationSettingsView: View {
+    @Environment(InfoViewModel.self) private var viewModel
+    @Environment(ThemeManager.self) private var themeManager
+    @State private var verifying = false
+
+    private var statusText: String {
+        if #available(iOS 26, *) {
+            if let lower = viewModel.ageGate.lowerBound {
+                return "Verified: \(lower)+"
+            }
+            return "Not verified"
+        }
+        return "Unavailable on this iOS"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Age Verification")
+                .font(themeManager.headingFont)
+            Text(statusText)
+                .font(themeManager.captionFont)
+                .foregroundStyle(.secondary)
+            if #available(iOS 26, *) {
+                Button {
+                    verifying = true
+                    Task {
+                        await viewModel.refreshAgeGate(forcePrompt: true)
+                        verifying = false
+                    }
+                } label: {
+                    Text(verifying ? "Verifying…" : "Verify Age")
+                }
+                .disabled(verifying)
+                Text("Age-restricted content is shown based on your device's declared age range.")
+                    .font(themeManager.captionFont)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .settingsCard(themeManager)
     }
 }
 
