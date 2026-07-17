@@ -30,6 +30,10 @@ struct Event: Codable, Identifiable {
     /// events stay nil and the cell helpers fall through to the existing
     /// tag-color lookup.
     var customColorHex: String? = nil
+    /// Minimum age required to see this event, copied from the parent
+    /// Content by the synthesizer. NOT in CodingKeys (events are built in
+    /// code); nil = no minimum.
+    var visibleAgeMin: Int? = nil
 
     private enum CodingKeys: String, CodingKey {
         case id

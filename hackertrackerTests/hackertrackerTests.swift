@@ -31,4 +31,31 @@ class hackertrackerTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
+
+    func testContentDecodesVisibleAgeMin() throws {
+        let json = """
+        {"id": 1, "description": "d", "links": [], "media": [], "people": [],
+         "sessions": [], "tag_ids": [], "title": "t", "visible_age_min": 18}
+        """.data(using: .utf8)!
+        let content = try JSONDecoder().decode(Content.self, from: json)
+        XCTAssertEqual(content.visibleAgeMin, 18)
+    }
+
+    func testContentDefaultsVisibleAgeMinToNilWhenAbsent() throws {
+        let json = """
+        {"id": 2, "description": "d", "links": [], "media": [], "people": [],
+         "sessions": [], "tag_ids": [], "title": "t"}
+        """.data(using: .utf8)!
+        let content = try JSONDecoder().decode(Content.self, from: json)
+        XCTAssertNil(content.visibleAgeMin)
+    }
+
+    func testOrganizationDecodesVisibleAgeMin() throws {
+        let json = """
+        {"name": "n", "description": "d", "links": [], "media": [],
+         "tag_ids": [], "visible_age_min": 21}
+        """.data(using: .utf8)!
+        let org = try JSONDecoder().decode(Organization.self, from: json)
+        XCTAssertEqual(org.visibleAgeMin, 21)
+    }
 }

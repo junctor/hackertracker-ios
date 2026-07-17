@@ -611,7 +611,7 @@ final class InfoViewModel {
                                     continue
                                 }
                                 seenEventIds.insert(s.id)
-                                let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds, relatedIds: c.relatedIds)
+                                let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds, relatedIds: c.relatedIds, visibleAgeMin: c.visibleAgeMin)
                                 rebuiltEvents.append(e)
                                 /* Task {
                                     if await NotificationUtility.notificationExists(id: e.id) {

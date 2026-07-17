@@ -24,6 +24,9 @@ struct Content: Codable, Identifiable {
     var feedbackDisableTimestamp: Date?
     var feedbackEnableTimestamp: Date?
     var feedbackFormId: Int?
+    /// Minimum age required to see this content. Absent → no minimum
+    /// (see AgeGateConfig.defaultMinAge). Enforced only on iOS 26+.
+    var visibleAgeMin: Int?
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -40,6 +43,7 @@ struct Content: Codable, Identifiable {
         case feedbackDisableTimestamp = "feedback_disable_timestamp"
         case feedbackEnableTimestamp = "feedback_enable_timestamp"
         case feedbackFormId = "feedback_form_id"
+        case visibleAgeMin = "visible_age_min"
     }
 }
 
