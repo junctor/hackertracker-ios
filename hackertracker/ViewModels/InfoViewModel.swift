@@ -97,6 +97,8 @@ final class InfoViewModel {
     @ObservationIgnored private var rawContent: [Content] = []
     @ObservationIgnored private var rawEvents: [Event] = []
     @ObservationIgnored private var rawOrgs: [Organization] = []
+    @ObservationIgnored private var rawDocuments: [Document] = []
+    @ObservationIgnored private var rawSpeakers: [Speaker] = []
 
     /// Re-derive the public (age-filtered) collections from the raw decoded
     /// arrays. Called after each decode and after the age bracket changes.
@@ -104,6 +106,8 @@ final class InfoViewModel {
         content = rawContent.filter { ageGate.isVisible(minAge: $0.visibleAgeMin) }
         events  = rawEvents.filter  { ageGate.isVisible(minAge: $0.visibleAgeMin) }
         orgs    = rawOrgs.filter    { ageGate.isVisible(minAge: $0.visibleAgeMin) }
+        documents = rawDocuments.filter { ageGate.isVisible(minAge: $0.visibleAgeMin) }
+        speakers  = rawSpeakers.filter  { ageGate.isVisible(minAge: $0.visibleAgeMin) }
     }
 
     /// Up-front + Settings entry point.
@@ -476,7 +480,7 @@ final class InfoViewModel {
                 }
                 var cache = 0
                 var firestore = 0
-                self.documents = docs.compactMap { queryDocumentSnapshot -> Document? in
+                self.rawDocuments = docs.compactMap { queryDocumentSnapshot -> Document? in
                     do {
                         if queryDocumentSnapshot.metadata.isFromCache {
                             cache = cache + 1
@@ -490,6 +494,7 @@ final class InfoViewModel {
                         return nil
                     }
                 }
+                self.applyAgeFilter()
                 NSLog("InfoViewModel: \(self.documents.count) documents (cache hits \(cache), firestore hits \(firestore))")
             }
     }
@@ -703,7 +708,8 @@ final class InfoViewModel {
 
                     await MainActor.run {
                         guard let self, generation == self.speakerGeneration else { return }
-                        self.speakers = decodedSpeakers
+                        self.rawSpeakers = decodedSpeakers
+                        self.applyAgeFilter()
                         NSLog("InfoViewModel: \(self.speakers.count) speakers (cache hits \(cache), firestore hits \(firestore))")
                     }
                 }

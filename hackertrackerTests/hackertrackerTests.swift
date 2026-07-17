@@ -51,6 +51,29 @@ class hackertrackerTests: XCTestCase {
         let content = try JSONDecoder().decode(Content.self, from: json)
         XCTAssertNil(content.visibleAgeMin)
     }
+
+    func testDocumentDecodesVisibleAgeMin() throws {
+        let json = """
+        {"id": 1, "title_text": "t", "body_text": "b", "visible_age_min": 18}
+        """.data(using: .utf8)!
+        let doc = try JSONDecoder().decode(Document.self, from: json)
+        XCTAssertEqual(doc.visibleAgeMin, 18)
+    }
+
+    func testDocumentDefaultsVisibleAgeMinNilWhenAbsent() throws {
+        let json = #"{"id": 2, "title_text": "t", "body_text": "b"}"#.data(using: .utf8)!
+        let doc = try JSONDecoder().decode(Document.self, from: json)
+        XCTAssertNil(doc.visibleAgeMin)
+    }
+
+    func testSpeakerDecodesVisibleAgeMin() throws {
+        let json = """
+        {"id": 1, "conference": "c", "description": "d", "link": "", "links": [],
+         "name": "n", "twitter": "", "event_ids": [], "visible_age_min": 16}
+        """.data(using: .utf8)!
+        let speaker = try JSONDecoder().decode(Speaker.self, from: json)
+        XCTAssertEqual(speaker.visibleAgeMin, 16)
+    }
 }
 
 @MainActor
