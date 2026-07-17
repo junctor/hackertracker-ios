@@ -76,9 +76,14 @@ final class AgeGateTests: XCTestCase {
         XCTAssertFalse(g.isVisible(minAge: 18))     // max age 15 < 18 → hidden
     }
 
-    func testAtOrAboveMinIsVisible() async {
-        let g = await gate(lower: 18, upper: nil)   // 18+
-        XCTAssertTrue(g.isVisible(minAge: 18))
+    func testEqualBoundaryIsVisible() async {
+        let g = await gate(lower: 16, upper: 16)   // upperBound == minAge
+        XCTAssertTrue(g.isVisible(minAge: 16))     // 16 >= 16 → visible
+    }
+
+    func testAboveMinWithKnownUpperIsVisible() async {
+        let g = await gate(lower: 16, upper: 17)
+        XCTAssertTrue(g.isVisible(minAge: 13))     // 17 >= 13 → visible (known upper)
     }
 
     func testStraddleFailsOpen() async {
