@@ -51,3 +51,44 @@ class hackertrackerTests: XCTestCase {
         XCTAssertNil(content.visibleAgeMin)
     }
 }
+
+@MainActor
+final class AgeGateTests: XCTestCase {
+    /// Feeds a fixed range so the decision logic can be tested without the OS.
+    struct FakeProvider: AgeRangeProviding {
+        let result: AgeRangeResult
+        func requestRange(gates: [Int], forcePrompt: Bool) async -> AgeRangeResult { result }
+    }
+
+    private func gate(lower: Int?, upper: Int?) async -> AgeGate {
+        let g = AgeGate(provider: FakeProvider(result: .init(lowerBound: lower, upperBound: upper)))
+        await g.refresh(forcePrompt: false)
+        return g
+    }
+
+    func testNilMinIsAlwaysVisible() async {
+        let g = await gate(lower: 13, upper: 15)   // confirmed under 18
+        XCTAssertTrue(g.isVisible(minAge: nil))     // no minimum → visible
+    }
+
+    func testConfirmedUnderIsHidden() async {
+        let g = await gate(lower: 13, upper: 15)
+        XCTAssertFalse(g.isVisible(minAge: 18))     // max age 15 < 18 → hidden
+    }
+
+    func testAtOrAboveMinIsVisible() async {
+        let g = await gate(lower: 18, upper: nil)   // 18+
+        XCTAssertTrue(g.isVisible(minAge: 18))
+    }
+
+    func testStraddleFailsOpen() async {
+        let g = await gate(lower: 16, upper: 17)
+        XCTAssertTrue(g.isVisible(minAge: 16))      // 17 >= 16 → visible
+        XCTAssertFalse(g.isVisible(minAge: 18))     // 17 < 18 → hidden
+    }
+
+    func testUnknownRangeFailsOpen() async {
+        let g = await gate(lower: nil, upper: nil)  // declined/error/pre-26
+        XCTAssertTrue(g.isVisible(minAge: 18))      // no signal → visible
+    }
+}
