@@ -6,6 +6,7 @@
 //
 
 @testable import hackertracker
+import FirebaseCore
 import XCTest
 
 class hackertrackerTests: XCTestCase {
@@ -95,5 +96,40 @@ final class AgeGateTests: XCTestCase {
     func testUnknownRangeFailsOpen() async {
         let g = await gate(lower: nil, upper: nil)  // declined/error/pre-26
         XCTAssertTrue(g.isVisible(minAge: 18))      // no signal → visible
+    }
+}
+
+@MainActor
+final class InfoViewModelAgeFilterTests: XCTestCase {
+    override func setUpWithError() throws {
+        // InfoViewModel's init reaches for Firestore.firestore(), which
+        // crashes if FirebaseApp.configure() hasn't run in this test host.
+        // Guard so repeated test runs / other suites configuring it don't
+        // trigger "already configured" assertions.
+        if FirebaseApp.app() == nil {
+            FirebaseApp.configure()
+        }
+    }
+
+    func testInfoViewModelHidesUnderageContent() async {
+        let vm = InfoViewModel(
+            ageGate: AgeGate(provider: AgeGateTests.FakeProvider(
+                result: .init(lowerBound: 13, upperBound: 15)))   // confirmed under 18
+        )
+        await vm.ageGate.refresh()
+        vm._setDecodedContentForTesting([
+            Content.stub(id: 1, visibleAgeMin: nil),
+            Content.stub(id: 2, visibleAgeMin: 18)
+        ])
+        XCTAssertEqual(vm.content.map(\.id), [1])   // id 2 (18+) hidden from a 13–15 user
+    }
+}
+
+extension Content {
+    static func stub(id: Int, visibleAgeMin: Int?) -> Content {
+        Content(id: id, conferenceName: nil, description: "", links: [], logo: nil,
+                media: [], people: [], sessions: [], tagIds: [], relatedIds: nil,
+                title: "stub", feedbackDisableTimestamp: nil, feedbackEnableTimestamp: nil,
+                feedbackFormId: nil, visibleAgeMin: visibleAgeMin)
     }
 }
