@@ -55,7 +55,12 @@ final class SharedScheduleStore {
     /// Refresh entries against the given bookmark IDs and the full conference
     /// list (typically `ConferencesViewModel.conferences`). Safe to call
     /// repeatedly; idempotent.
-    func refresh(bookmarkIds: Set<Int>, allConferences: [Conference]) async {
+    ///
+    /// `ageGate` is the same gate `InfoViewModel` uses to filter `content`/
+    /// `events`/`orgs` for the active conference -- passed in here so this
+    /// store's cross-conference fetch respects the same age-restriction
+    /// decision instead of bypassing it.
+    func refresh(bookmarkIds: Set<Int>, allConferences: [Conference], ageGate: AgeGate) async {
         // 1. Find conferences whose date ranges overlap with at least one other.
         let overlapping = Self.overlappingConferences(from: allConferences)
         guard overlapping.count >= 2, !bookmarkIds.isEmpty else {
@@ -86,7 +91,8 @@ final class SharedScheduleStore {
                 group.addTask {
                     let events = await self.fetchBookmarkedEvents(
                         conferenceCode: code,
-                        bookmarkIds: ids
+                        bookmarkIds: ids,
+                        ageGate: ageGate
                     )
                     return (code, events)
                 }
@@ -147,7 +153,8 @@ final class SharedScheduleStore {
     /// collection, returning the Event-flattened subset whose `id` is in
     /// `bookmarkIds`. Mirrors the logic in InfoViewModel.fetchContent.
     private func fetchBookmarkedEvents(conferenceCode: String,
-                                       bookmarkIds: Set<Int>) async -> [Event] {
+                                       bookmarkIds: Set<Int>,
+                                       ageGate: AgeGate) async -> [Event] {
         do {
             let snap = try await db.collection("conferences")
                 .document(conferenceCode)
@@ -157,6 +164,11 @@ final class SharedScheduleStore {
             var seen: Set<Int> = []
             for doc in snap.documents {
                 guard let content = try? doc.data(as: Content.self) else { continue }
+                // Same age-gate decision InfoViewModel applies to its own
+                // `content`/`events` arrays -- skip age-restricted content
+                // the gate says shouldn't be visible, so bookmarks don't
+                // leak it into the combined cross-conference schedule.
+                guard ageGate.isVisible(minAge: content.visibleAgeMin) else { continue }
                 for session in content.sessions where bookmarkIds.contains(session.id) {
                     guard !seen.contains(session.id) else { continue }
                     seen.insert(session.id)
@@ -170,7 +182,8 @@ final class SharedScheduleStore {
                         locationId: session.locationId,
                         people: content.people,
                         tagIds: content.tagIds,
-                        relatedIds: content.relatedIds
+                        relatedIds: content.relatedIds,
+                        visibleAgeMin: content.visibleAgeMin
                     )
                     events.append(event)
                 }
