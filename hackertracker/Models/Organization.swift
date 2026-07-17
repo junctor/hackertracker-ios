@@ -21,6 +21,7 @@ struct Organization: Codable, Identifiable {
     var visibleAgeMin: Int?
 
     private enum CodingKeys: String, CodingKey {
+        case id
         case name
         case description
         case logo

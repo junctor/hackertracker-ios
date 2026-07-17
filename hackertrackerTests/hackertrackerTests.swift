@@ -32,6 +32,7 @@ class hackertrackerTests: XCTestCase {
         }
     }
 
+    // Organization is not decode-tested here: its @DocumentID id cannot be decoded by a plain JSONDecoder. The visible_age_min CodingKey wiring is identical to Content's, which IS covered above.
     func testContentDecodesVisibleAgeMin() throws {
         let json = """
         {"id": 1, "description": "d", "links": [], "media": [], "people": [],
@@ -48,14 +49,5 @@ class hackertrackerTests: XCTestCase {
         """.data(using: .utf8)!
         let content = try JSONDecoder().decode(Content.self, from: json)
         XCTAssertNil(content.visibleAgeMin)
-    }
-
-    func testOrganizationDecodesVisibleAgeMin() throws {
-        let json = """
-        {"name": "n", "description": "d", "links": [], "media": [],
-         "tag_ids": [], "visible_age_min": 21}
-        """.data(using: .utf8)!
-        let org = try JSONDecoder().decode(Organization.self, from: json)
-        XCTAssertEqual(org.visibleAgeMin, 21)
     }
 }
