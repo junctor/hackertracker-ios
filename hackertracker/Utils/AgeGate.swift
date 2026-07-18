@@ -17,6 +17,21 @@ enum AgeGateConfig {
     static let requestedGates: [Int] = [13, 16, 18]
 }
 
+/// Whether the age-band debug override (the Settings test harness) is
+/// reachable in this build. True in DEBUG and in TestFlight (the app
+/// carries a `sandboxReceipt`), but FALSE in App Store production — so
+/// real users can never simulate or bypass their declared age band.
+/// The override is additionally hidden behind a 7-tap chord in Settings.
+enum AgeDebugAccess {
+    static var isAvailable: Bool {
+        #if DEBUG
+        return true
+        #else
+        return Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        #endif
+    }
+}
+
 /// Coarse age bracket. nil bounds = unknown (declined / error / iOS < 26).
 struct AgeRangeResult {
     let lowerBound: Int?
@@ -53,16 +68,17 @@ final class AgeGate {
     private static let upperKey = "ageGate.upperBound.v1"
 
     func refresh(forcePrompt: Bool = false) async {
-        #if DEBUG
-        // Debug harness: when a simulated band is active, honor it instead
-        // of querying the provider, so the override survives the up-front
-        // launch refresh (and relaunches) during testing.
-        if UserDefaults.standard.bool(forKey: Self.debugOverrideKey) {
+        // Debug/TestFlight harness: when a simulated band is active AND this
+        // build allows it, honor it instead of querying the provider, so the
+        // override survives the up-front launch refresh (and relaunches).
+        // Gated by AgeDebugAccess so a stray override key is inert in
+        // App Store production.
+        if AgeDebugAccess.isAvailable,
+           UserDefaults.standard.bool(forKey: Self.debugOverrideKey) {
             lowerBound = UserDefaults.standard.object(forKey: Self.debugLowerKey) as? Int
             upperBound = UserDefaults.standard.object(forKey: Self.debugUpperKey) as? Int
             return
         }
-        #endif
         let result = await provider.requestRange(gates: AgeGateConfig.requestedGates,
                                                   forcePrompt: forcePrompt)
         lowerBound = result.lowerBound
@@ -81,13 +97,13 @@ final class AgeGate {
         return upper >= minAge
     }
 
-    #if DEBUG
-    // MARK: - Debug band override (test harness, DEBUG builds only)
+    // MARK: - Debug band override (test harness)
     //
     // Lets a tester force the effective declared-age band from Settings so
     // gated content can be reviewed without the real iOS 26 flow. The band
     // is persisted and re-applied by refresh(), so it sticks across the
-    // launch query and relaunches until cleared.
+    // launch query and relaunches until cleared. Only reachable when
+    // AgeDebugAccess.isAvailable (DEBUG / TestFlight) — never in App Store.
     private static let debugOverrideKey = "ageGate.debug.override.v1"
     private static let debugLowerKey = "ageGate.debug.lower.v1"
     private static let debugUpperKey = "ageGate.debug.upper.v1"
@@ -115,7 +131,6 @@ final class AgeGate {
         d.removeObject(forKey: Self.debugLowerKey)
         d.removeObject(forKey: Self.debugUpperKey)
     }
-    #endif
 }
 
 // MARK: - iOS 26 Declared Age Range adapter
