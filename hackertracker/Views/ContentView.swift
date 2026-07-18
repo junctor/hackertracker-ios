@@ -136,6 +136,9 @@ struct ContentView: View {
                 viewModel.showNews = showNews
                 viewModel.easterEgg = easterEgg
 
+                // Age gate: query the declared age range up front so
+                // restricted content is filtered before the user browses.
+                await viewModel.refreshAgeGate()
 
                 // viewModel.fetchData(code: selected.code)
             }

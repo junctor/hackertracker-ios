@@ -22,6 +22,7 @@ struct Speaker: Codable, Equatable {
     var title: String?
     var twitter: String
     var eventIds: [Int]
+    var visibleAgeMin: Int?
 
     static func == (lhs: Speaker, rhs: Speaker) -> Bool {
         if lhs.id == rhs.id, lhs.name == rhs.name, lhs.description == rhs.description {
@@ -44,6 +45,7 @@ struct Speaker: Codable, Equatable {
         case title
         case twitter
         case eventIds = "event_ids"
+        case visibleAgeMin = "visible_age_min"
     }
 }
 

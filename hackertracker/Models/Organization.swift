@@ -17,6 +17,8 @@ struct Organization: Codable, Identifiable {
     var media: [Media]
     var tag_ids: [Int]
     var tag_id_as_organizer: Int?
+    /// Minimum age required to see this organization. Absent → no minimum.
+    var visibleAgeMin: Int?
 
     private enum CodingKeys: String, CodingKey {
         case id
@@ -27,6 +29,7 @@ struct Organization: Codable, Identifiable {
         case media
         case tag_ids
         case tag_id_as_organizer
+        case visibleAgeMin = "visible_age_min"
     }
 }
 

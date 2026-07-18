@@ -13,10 +13,12 @@ struct Document: Codable, Identifiable {
     var id: Int
     var title: String
     var body: String
+    var visibleAgeMin: Int?
 
     private enum CodingKeys: String, CodingKey {
         case id
         case title = "title_text"
         case body = "body_text"
+        case visibleAgeMin = "visible_age_min"
     }
 }

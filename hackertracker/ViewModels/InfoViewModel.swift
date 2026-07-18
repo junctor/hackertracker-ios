@@ -23,6 +23,12 @@ import SwiftUI
 @Observable
 @MainActor
 final class InfoViewModel {
+    let ageGate: AgeGate
+
+    init(ageGate: AgeGate = .makeDefault()) {
+        self.ageGate = ageGate
+    }
+
     var conference: Conference?
     var documents = [Document]() {
         didSet { documentsById = Dictionary(uniqueKeysWithValues: documents.map { ($0.id, $0) }) }
@@ -88,6 +94,45 @@ final class InfoViewModel {
             orgsById = idx
         }
     }
+    @ObservationIgnored private var rawContent: [Content] = []
+    @ObservationIgnored private var rawEvents: [Event] = []
+    @ObservationIgnored private var rawOrgs: [Organization] = []
+    @ObservationIgnored private var rawDocuments: [Document] = []
+    @ObservationIgnored private var rawSpeakers: [Speaker] = []
+
+    /// Re-derive the public (age-filtered) collections from the raw decoded
+    /// arrays. Called after each decode and after the age bracket changes.
+    func applyAgeFilter() {
+        content = rawContent.filter { ageGate.isVisible(minAge: $0.visibleAgeMin) }
+        events  = rawEvents.filter  { ageGate.isVisible(minAge: $0.visibleAgeMin) }
+        orgs    = rawOrgs.filter    { ageGate.isVisible(minAge: $0.visibleAgeMin) }
+        documents = rawDocuments.filter { ageGate.isVisible(minAge: $0.visibleAgeMin) }
+        speakers  = rawSpeakers.filter  { ageGate.isVisible(minAge: $0.visibleAgeMin) }
+    }
+
+    /// Up-front + Settings entry point.
+    func refreshAgeGate(forcePrompt: Bool = false) async {
+        await ageGate.refresh(forcePrompt: forcePrompt)
+        applyAgeFilter()
+    }
+
+    // Test seams (used only by the unit tests).
+    func _setDecodedContentForTesting(_ c: [Content]) { rawContent = c; applyAgeFilter() }
+
+    /// Debug/TestFlight harness: force a simulated age band and immediately
+    /// re-filter every gated list. Wired to the Settings band picker, which
+    /// is gated by AgeDebugAccess (never reachable in App Store production).
+    func debugSetAgeBracket(lower: Int?, upper: Int?) {
+        ageGate.debugSetBracket(lower: lower, upper: upper)
+        applyAgeFilter()
+    }
+
+    /// Debug/TestFlight harness: drop the override and re-query the real gate.
+    func debugClearAgeOverride() async {
+        ageGate.debugClearOverride()
+        await refreshAgeGate()
+    }
+
     var faqs = [FAQ]()
     var news = [Article]()
     var menus = [InfoMenu]()
@@ -449,7 +494,7 @@ final class InfoViewModel {
                 }
                 var cache = 0
                 var firestore = 0
-                self.documents = docs.compactMap { queryDocumentSnapshot -> Document? in
+                self.rawDocuments = docs.compactMap { queryDocumentSnapshot -> Document? in
                     do {
                         if queryDocumentSnapshot.metadata.isFromCache {
                             cache = cache + 1
@@ -463,6 +508,7 @@ final class InfoViewModel {
                         return nil
                     }
                 }
+                self.applyAgeFilter()
                 NSLog("InfoViewModel: \(self.documents.count) documents (cache hits \(cache), firestore hits \(firestore))")
             }
     }
@@ -611,7 +657,7 @@ final class InfoViewModel {
                                     continue
                                 }
                                 seenEventIds.insert(s.id)
-                                let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds, relatedIds: c.relatedIds)
+                                let e = Event(id: s.id, contentId: c.id, description: c.description, beginTimestamp: s.beginTimestamp, endTimestamp: s.endTimestamp, title: c.title, locationId: s.locationId, people: c.people, tagIds: c.tagIds, relatedIds: c.relatedIds, visibleAgeMin: c.visibleAgeMin)
                                 rebuiltEvents.append(e)
                                 /* Task {
                                     if await NotificationUtility.notificationExists(id: e.id) {
@@ -627,8 +673,9 @@ final class InfoViewModel {
                     await MainActor.run {
                         // Discard this result if a newer snapshot's decode already landed.
                         guard let self, generation == self.contentGeneration else { return }
-                        self.content = decodedContent
-                        self.events = rebuiltEvents
+                        self.rawContent = decodedContent
+                        self.rawEvents = rebuiltEvents
+                        self.applyAgeFilter()   // sets self.content / self.events (filtered)
                         NSLog("InfoViewModel: \(self.content.count) content (cache hits \(cache), firestore hits \(firestore))")
                     }
                 }
@@ -675,7 +722,8 @@ final class InfoViewModel {
 
                     await MainActor.run {
                         guard let self, generation == self.speakerGeneration else { return }
-                        self.speakers = decodedSpeakers
+                        self.rawSpeakers = decodedSpeakers
+                        self.applyAgeFilter()
                         NSLog("InfoViewModel: \(self.speakers.count) speakers (cache hits \(cache), firestore hits \(firestore))")
                     }
                 }
@@ -712,7 +760,8 @@ final class InfoViewModel {
                 // Finding B: sort the local array before assigning to `orgs`
                 // so there's exactly one didSet/observation invalidation per tick.
                 decodedOrgs.sort(using: KeyPathComparator(\.self.name, comparator: .localizedStandard))
-                self.orgs = decodedOrgs
+                self.rawOrgs = decodedOrgs
+                self.applyAgeFilter()
                 NSLog("InfoViewModel: \(self.orgs.count) organizations (cache hits \(cache), firestore hits \(firestore))")
             }
     }

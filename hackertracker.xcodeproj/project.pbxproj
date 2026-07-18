@@ -10,6 +10,7 @@
 		3C04BD9E2A5FDFD900D01402 /* Filters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C04BD9D2A5FDFD900D01402 /* Filters.swift */; };
 		3C04BDA02A5FE91500D01402 /* FiltersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C04BD9F2A5FE91500D01402 /* FiltersView.swift */; };
 		3C07C209285C6F7600CC9469 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C07C208285C6F7600CC9469 /* Theme.swift */; };
+		B2F695DFBD5E83F401AC1EFE /* AgeGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C6C981E5BEC28D5626B1437 /* AgeGate.swift */; };
 		3C0E05CB2A53E5F500E7154F /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E05CA2A53E5F500E7154F /* EventDetailView.swift */; };
 		3C0E05CD2A53E6AD00E7154F /* GlobalSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E05CC2A53E6AD00E7154F /* GlobalSearchView.swift */; };
 		3C0E05CF2A53E70200E7154F /* Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E05CE2A53E70200E7154F /* Searchable.swift */; };
@@ -150,6 +151,7 @@
 		3C04BD9D2A5FDFD900D01402 /* Filters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filters.swift; sourceTree = "<group>"; };
 		3C04BD9F2A5FE91500D01402 /* FiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiltersView.swift; sourceTree = "<group>"; };
 		3C07C208285C6F7600CC9469 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		3C6C981E5BEC28D5626B1437 /* AgeGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgeGate.swift; sourceTree = "<group>"; };
 		3C0E05CA2A53E5F500E7154F /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		3C0E05CC2A53E6AD00E7154F /* GlobalSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSearchView.swift; sourceTree = "<group>"; };
 		3C0E05CE2A53E70200E7154F /* Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Searchable.swift; sourceTree = "<group>"; };
@@ -490,6 +492,7 @@
 				3C0E05CE2A53E70200E7154F /* Searchable.swift */,
 				3C07C208285C6F7600CC9469 /* Theme.swift */,
 				B3769181BE2945B88CBA7D99 /* AppStorageKeys.swift */,
+				3C6C981E5BEC28D5626B1437 /* AgeGate.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -766,6 +769,7 @@
 				5DAE04B62820948B00930A2D /* ContentView.swift in Sources */,
 				3C07C209285C6F7600CC9469 /* Theme.swift in Sources */,
 				F35BEAD60BF24C4BB0AED8CF /* AppStorageKeys.swift in Sources */,
+				B2F695DFBD5E83F401AC1EFE /* AgeGate.swift in Sources */,
 				5DC0DE0000000000000000A1 /* Logger+HT.swift in Sources */,
 				5DC0DE0000000000000000B1 /* KFImage+HT.swift in Sources */,
 				5DC0DE0000000000000000C1 /* ClockService.swift in Sources */,

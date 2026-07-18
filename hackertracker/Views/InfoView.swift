@@ -371,7 +371,8 @@ struct InfoView: View {
                     let ids = Set(bookmarks.map { Int($0.id) })
                     await sharedSchedule.refresh(
                         bookmarkIds: ids,
-                        allConferences: consViewModel.conferences
+                        allConferences: consViewModel.conferences,
+                        ageGate: viewModel.ageGate
                     )
                 }
                 .onAppear {
