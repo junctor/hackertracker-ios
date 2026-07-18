@@ -119,6 +119,21 @@ final class InfoViewModel {
     // Test seams (used only by the unit tests).
     func _setDecodedContentForTesting(_ c: [Content]) { rawContent = c; applyAgeFilter() }
 
+    #if DEBUG
+    /// Debug harness: force a simulated age band and immediately re-filter
+    /// every gated list. Wired to the Settings band picker (DEBUG builds).
+    func debugSetAgeBracket(lower: Int?, upper: Int?) {
+        ageGate.debugSetBracket(lower: lower, upper: upper)
+        applyAgeFilter()
+    }
+
+    /// Debug harness: drop the override and re-query the real/device gate.
+    func debugClearAgeOverride() async {
+        ageGate.debugClearOverride()
+        await refreshAgeGate()
+    }
+    #endif
+
     var faqs = [FAQ]()
     var news = [Article]()
     var menus = [InfoMenu]()

@@ -53,6 +53,16 @@ final class AgeGate {
     private static let upperKey = "ageGate.upperBound.v1"
 
     func refresh(forcePrompt: Bool = false) async {
+        #if DEBUG
+        // Debug harness: when a simulated band is active, honor it instead
+        // of querying the provider, so the override survives the up-front
+        // launch refresh (and relaunches) during testing.
+        if UserDefaults.standard.bool(forKey: Self.debugOverrideKey) {
+            lowerBound = UserDefaults.standard.object(forKey: Self.debugLowerKey) as? Int
+            upperBound = UserDefaults.standard.object(forKey: Self.debugUpperKey) as? Int
+            return
+        }
+        #endif
         let result = await provider.requestRange(gates: AgeGateConfig.requestedGates,
                                                   forcePrompt: forcePrompt)
         lowerBound = result.lowerBound
@@ -70,6 +80,42 @@ final class AgeGate {
         guard let upper = upperBound else { return true }  // no signal → fail open
         return upper >= minAge
     }
+
+    #if DEBUG
+    // MARK: - Debug band override (test harness, DEBUG builds only)
+    //
+    // Lets a tester force the effective declared-age band from Settings so
+    // gated content can be reviewed without the real iOS 26 flow. The band
+    // is persisted and re-applied by refresh(), so it sticks across the
+    // launch query and relaunches until cleared.
+    private static let debugOverrideKey = "ageGate.debug.override.v1"
+    private static let debugLowerKey = "ageGate.debug.lower.v1"
+    private static let debugUpperKey = "ageGate.debug.upper.v1"
+
+    var debugOverrideActive: Bool { UserDefaults.standard.bool(forKey: Self.debugOverrideKey) }
+
+    /// Force the effective band. Caller should re-run the filter afterward
+    /// (see InfoViewModel.debugSetAgeBracket).
+    func debugSetBracket(lower: Int?, upper: Int?) {
+        lowerBound = lower
+        upperBound = upper
+        let d = UserDefaults.standard
+        d.set(true, forKey: Self.debugOverrideKey)
+        d.set(lower, forKey: Self.debugLowerKey)
+        d.set(upper, forKey: Self.debugUpperKey)
+        // Mirror into the normal cache so first-frame filtering matches.
+        d.set(lower, forKey: Self.lowerKey)
+        d.set(upper, forKey: Self.upperKey)
+    }
+
+    /// Turn the override off and return to the real/device-driven flow.
+    func debugClearOverride() {
+        let d = UserDefaults.standard
+        d.removeObject(forKey: Self.debugOverrideKey)
+        d.removeObject(forKey: Self.debugLowerKey)
+        d.removeObject(forKey: Self.debugUpperKey)
+    }
+    #endif
 }
 
 // MARK: - iOS 26 Declared Age Range adapter

@@ -847,7 +847,28 @@ struct AgeVerificationSettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
     @State private var verifying = false
 
+    #if DEBUG
+    // Test harness: force a declared-age band from Settings so gated
+    // content can be reviewed on any OS without the real iOS 26 flow.
+    private static let debugOff = "Off (use device)"
+    private static let debugBands: [(label: String, lower: Int?, upper: Int?)] = [
+        ("Unknown (fail-open)", nil, nil),
+        ("Under 13", nil, 12),
+        ("13–15", 13, 15),
+        ("16–17", 16, 17),
+        ("18+", 18, nil)
+    ]
+    @State private var debugBand: String = AgeVerificationSettingsView.debugOff
+    #endif
+
     private var statusText: String {
+        #if DEBUG
+        if viewModel.ageGate.debugOverrideActive {
+            let lo = viewModel.ageGate.lowerBound.map(String.init) ?? "nil"
+            let up = viewModel.ageGate.upperBound.map(String.init) ?? "nil"
+            return "DEBUG band active — lower: \(lo), upper: \(up)"
+        }
+        #endif
         if #available(iOS 26, *) {
             if let lower = viewModel.ageGate.lowerBound {
                 return "Verified: \(lower)+"
@@ -879,8 +900,42 @@ struct AgeVerificationSettingsView: View {
                     .font(themeManager.captionFont)
                     .foregroundStyle(.secondary)
             }
+            #if DEBUG
+            Divider().padding(.vertical, 4)
+            Text("DEBUG · Simulate age band")
+                .font(themeManager.captionFont)
+                .foregroundStyle(.secondary)
+            Picker("Age band", selection: $debugBand) {
+                Text(Self.debugOff).tag(Self.debugOff)
+                ForEach(Self.debugBands, id: \.label) { band in
+                    Text(band.label).tag(band.label)
+                }
+            }
+            .pickerStyle(.menu)
+            .onChange(of: debugBand) { _, label in
+                if label == Self.debugOff {
+                    Task { await viewModel.debugClearAgeOverride() }
+                } else if let band = Self.debugBands.first(where: { $0.label == label }) {
+                    viewModel.debugSetAgeBracket(lower: band.lower, upper: band.upper)
+                }
+            }
+            Text("Overrides the declared age range so you can review gated content on any OS. Lists re-filter immediately; the choice persists until set back to “\(Self.debugOff)”.")
+                .font(themeManager.captionFont)
+                .foregroundStyle(.secondary)
+            #endif
         }
         .settingsCard(themeManager)
+        #if DEBUG
+        .onAppear {
+            if viewModel.ageGate.debugOverrideActive {
+                let lo = viewModel.ageGate.lowerBound
+                let up = viewModel.ageGate.upperBound
+                debugBand = Self.debugBands.first { $0.lower == lo && $0.upper == up }?.label ?? Self.debugOff
+            } else {
+                debugBand = Self.debugOff
+            }
+        }
+        #endif
     }
 }
 
