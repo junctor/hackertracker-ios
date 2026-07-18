@@ -10,7 +10,6 @@
 		3C04BD9E2A5FDFD900D01402 /* Filters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C04BD9D2A5FDFD900D01402 /* Filters.swift */; };
 		3C04BDA02A5FE91500D01402 /* FiltersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C04BD9F2A5FE91500D01402 /* FiltersView.swift */; };
 		3C07C209285C6F7600CC9469 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C07C208285C6F7600CC9469 /* Theme.swift */; };
-		B2F695DFBD5E83F401AC1EFE /* AgeGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C6C981E5BEC28D5626B1437 /* AgeGate.swift */; };
 		3C0E05CB2A53E5F500E7154F /* EventDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E05CA2A53E5F500E7154F /* EventDetailView.swift */; };
 		3C0E05CD2A53E6AD00E7154F /* GlobalSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E05CC2A53E6AD00E7154F /* GlobalSearchView.swift */; };
 		3C0E05CF2A53E70200E7154F /* Searchable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C0E05CE2A53E70200E7154F /* Searchable.swift */; };
@@ -126,6 +125,7 @@
 		5DF51AE028526C0C007BCB83 /* UserEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF51ADF28526C0C007BCB83 /* UserEvent.swift */; };
 		5DF82B262A5F3B29001395C7 /* NotificationUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF82B252A5F3B29001395C7 /* NotificationUtility.swift */; };
 		61AE145FB3CF4CEF9CD898DC /* ListChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C3F9C2929744A6948A2200 /* ListChrome.swift */; };
+		B2F695DFBD5E83F401AC1EFE /* AgeGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C6C981E5BEC28D5626B1437 /* AgeGate.swift */; };
 		F35BEAD60BF24C4BB0AED8CF /* AppStorageKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3769181BE2945B88CBA7D99 /* AppStorageKeys.swift */; };
 /* End PBXBuildFile section */
 
@@ -151,10 +151,10 @@
 		3C04BD9D2A5FDFD900D01402 /* Filters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Filters.swift; sourceTree = "<group>"; };
 		3C04BD9F2A5FE91500D01402 /* FiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FiltersView.swift; sourceTree = "<group>"; };
 		3C07C208285C6F7600CC9469 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		3C6C981E5BEC28D5626B1437 /* AgeGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgeGate.swift; sourceTree = "<group>"; };
 		3C0E05CA2A53E5F500E7154F /* EventDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventDetailView.swift; sourceTree = "<group>"; };
 		3C0E05CC2A53E6AD00E7154F /* GlobalSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSearchView.swift; sourceTree = "<group>"; };
 		3C0E05CE2A53E70200E7154F /* Searchable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Searchable.swift; sourceTree = "<group>"; };
+		3C6C981E5BEC28D5626B1437 /* AgeGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgeGate.swift; sourceTree = "<group>"; };
 		3C92B96B2859DED600523901 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		3C92B96C2859E51F00523901 /* ColorUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorUtility.swift; sourceTree = "<group>"; };
 		3CD532D62A29A992009D17F3 /* EventCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventCellView.swift; sourceTree = "<group>"; };
@@ -973,7 +973,7 @@
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26071503;
+				CURRENT_PROJECT_VERSION = 26071801;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
@@ -1013,7 +1013,7 @@
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26071503;
+				CURRENT_PROJECT_VERSION = 26071801;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
