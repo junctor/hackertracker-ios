@@ -117,7 +117,9 @@ struct SettingsView: View {
                             VStack(spacing: 0) { StartScreenPickerView() }
                             VStack(spacing: 0) { NotificationSettingsView() }
                             VStack(spacing: 0) { AISummarySettingsView() }
-                            VStack(spacing: 0) { AgeVerificationSettingsView() }
+                            if AgeVerificationSettingsView.isVisible {
+                                VStack(spacing: 0) { AgeVerificationSettingsView() }
+                            }
                             VStack(spacing: 0) { ShowCustomEventsSettingsView() }
                             VStack(spacing: 0) { EasterEggSettingsView() }
                             Spacer(minLength: 0)
@@ -133,7 +135,9 @@ struct SettingsView: View {
                     ShowNewsSettingsView()
                     NotificationSettingsView()
                     AISummarySettingsView()
-                    AgeVerificationSettingsView()
+                    if AgeVerificationSettingsView.isVisible {
+                        AgeVerificationSettingsView()
+                    }
                     ShowCustomEventsSettingsView()
                     EasterEggSettingsView()
                 }
@@ -846,6 +850,16 @@ struct AgeVerificationSettingsView: View {
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
     @State private var verifying = false
+
+    /// Whether the Age Verification row should appear at all. Shown when the
+    /// OS supports the Declared Age Range API (iOS 26+, the real feature) or
+    /// when the debug/TestFlight band harness is available. Hidden otherwise
+    /// (App Store on iOS 17–25) so users don't see an inert "Unavailable"
+    /// row for a feature their OS can't use.
+    static var isVisible: Bool {
+        if #available(iOS 26, *) { return true }
+        return AgeDebugAccess.isAvailable
+    }
 
     // Test harness: force a declared-age band from Settings so gated
     // content can be reviewed on any OS without the real iOS 26 flow.
