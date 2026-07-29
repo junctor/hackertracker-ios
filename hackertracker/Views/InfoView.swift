@@ -182,7 +182,7 @@ struct InfoView: View {
                                 .font(themeManager.subheadlineFont)
                             LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                                 ForEach(self.viewModel.documents, id: \.id) { doc in
-                                    NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
+                                    NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, reportContext: (.document, doc.id))) {
                                         CardView(systemImage: "doc", text: doc.title, color: colorMode ? ThemeColors.blue : themeManager.cardSurface)
                                     }
                                 }
@@ -194,7 +194,7 @@ struct InfoView: View {
                         LazyVGrid(columns: gridItemLayout, alignment: .center, spacing: 20) {
                             if let emergId = viewModel.conference?.emergencyDocId, emergId > 0 {
                                 if let doc = viewModel.documentsById[emergId] {
-                                    NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
+                                    NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, reportContext: (.document, doc.id))) {
                                         CardView(systemImage: "doc", text: doc.title, color: themeManager.danger)
                                     }
                                 }
@@ -711,7 +711,7 @@ struct MenuView: View {
                 switch item.function {
                 case "document":
                     if let docId = item.documentId, let doc = self.viewModel.documentsById[docId] {
-                        NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body)) {
+                        NavigationLink(destination: DocumentView(title_text: doc.title, body_text: doc.body, reportContext: (.document, doc.id))) {
                             CardView(systemImage: item.symbol ?? "doc", text: doc.title, color: colorMode ? ThemeColors.blue : themeManager.cardSurface)
                             }
                     }

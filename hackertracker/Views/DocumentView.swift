@@ -17,6 +17,8 @@ struct DocumentView: View {
     /// bar (not duplicated in the scroll body). Emergency / merch-help docs
     /// still want the prominent in-body banner, so this defaults to true.
     var showInlineTitle: Bool = true
+    var reportContext: (type: ReportObjectType, id: Int)? = nil
+    @State private var showReport = false
     @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
 
     @Environment(ThemeManager.self) private var themeManager
@@ -54,6 +56,19 @@ struct DocumentView: View {
         .iPadReadableContent()
         .analyticsScreen(name: "DocumentView")
         .padding(15)
+        .toolbar {
+            if reportContext != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { showReport = true } label: { Image(systemName: "exclamationmark.bubble") }
+                        .accessibilityLabel("Report an issue")
+                }
+            }
+        }
+        .sheet(isPresented: $showReport) {
+            if let ctx = reportContext {
+                ReportContentSheet(objectType: ctx.type, objectId: ctx.id)
+            }
+        }
     }
 }
 
