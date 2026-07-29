@@ -84,6 +84,9 @@ struct SharedScheduleView: View {
             if !sharedSchedule.entries.isEmpty {
                 HStack {
                     Spacer()
+                    // Live count of bookmarked events shown in the combined list.
+                    FloatingCountChip(count: sharedSchedule.entries.count, unit: "bookmark", systemImage: "bookmark.fill")
+                    Spacer()
                     JumpMenuOverlay(target: $jumpTarget)
                 }
                 .padding(.horizontal, 20)

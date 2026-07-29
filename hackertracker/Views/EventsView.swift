@@ -170,6 +170,21 @@ struct EventsView: View {
         scheduleGrouped = searched.eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference)
     }
 
+    /// Count of schedule events currently visible in the list, honoring the
+    /// "Show Past Events" toggle (past events are excluded when it's off,
+    /// matching EventScrollView.visibleEvents). Drives the floating count
+    /// chip. Computed on render so it reflects filter/bookmark changes and
+    /// events aging past their end time the next time the schedule re-renders.
+    private var visibleScheduleCount: Int {
+        guard !showPastEvents else {
+            return scheduleGrouped.reduce(0) { $0 + $1.value.count }
+        }
+        let now = Date()
+        return scheduleGrouped.reduce(0) { acc, group in
+            acc + group.value.filter { now < $0.endTimestamp }.count
+        }
+    }
+
     /// Firestore events + synthesized CustomEvents that target the
     /// currently-selected conference. The pipeline recompute reads
     /// this in place of viewModel.events so user-created rows flow
@@ -292,6 +307,11 @@ struct EventsView: View {
           }
           .tint(.primary)
           .accessibilityLabel(filters.filters.isEmpty ? "Filters" : "Filters active")
+
+          Spacer()
+
+          // Live count of events currently shown (respects Show Past Events).
+          FloatingCountChip(count: visibleScheduleCount, unit: "event", systemImage: "calendar")
 
           Spacer()
 
