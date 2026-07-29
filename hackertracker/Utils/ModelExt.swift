@@ -75,10 +75,10 @@ enum PseudoTagID {
     static let all: Set<Int> = [bookmarks, customEvents, hasNotes]
 }
 
-/// Filter-chip composition mode. Read from @AppStorage(AppStorageKeys.filterMatchMode)
-/// by FiltersView (writes) and the predicate consumers (reads). Storing
-/// the raw string lets us swap it cleanly via @AppStorage on multiple
-/// independent views without an envelope object.
+/// Filter-chip composition mode, selectable per tag section. Persisted as
+/// JSON (tagTypeId -> raw mode) under @AppStorage(AppStorageKeys.sectionFilterModes)
+/// via `SectionFilterModes`; FiltersView writes it and predicate consumers
+/// (`sectionFilterMatch`, `[Event].filters`, `[Content].filters`) read it.
 enum FilterMatchMode: String, CaseIterable {
     case any = "any"
     case all = "all"

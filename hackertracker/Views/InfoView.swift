@@ -21,6 +21,14 @@ struct InfoView: View {
     /// screen. Stored as a JSON-encoded Set<String> of conference
     /// codes that the user has collapsed; persists across launches.
     @AppStorage(AppStorageKeys.infoLogoCollapsedCodes) private var collapsedLogoCodesRaw: String = "[]"
+    /// Per-section filter-chip composition modes. Read from the same
+    /// AppStorage key the Filters sheet writes to, so the shared/combined
+    /// schedule respects the same per-section any/all selection as
+    /// EventsView.
+    @AppStorage(AppStorageKeys.sectionFilterModes) private var sectionModesRaw: String = ""
+    private var sectionModes: [Int: FilterMatchMode] {
+        SectionFilterModes(json: sectionModesRaw).asDictionary
+    }
     @EnvironmentObject var selected: SelectedConference
     @EnvironmentObject var filters: Filters
     @Environment(ConferencesViewModel.self) private var consViewModel
@@ -521,7 +529,7 @@ struct InfoView: View {
                 case "SharedEvents":
                     EventScrollView(events:
                         sharedEvents
-                            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes)
+                            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, sectionModes: sectionModes)
                             .search(text: searchText, speakers: viewModel.speakers)
                             .eventDayGroup(
                                 showLocaltime: showLocaltime, conference: viewModel.conference

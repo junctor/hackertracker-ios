@@ -20,7 +20,6 @@ enum AppStorageKeys {
     static let notifyAt = "notifyAt"
     static let showLocaltime = "showLocaltime"
     static let show24hourtime = "show24hourtime"
-    static let filterMatchMode = "filterMatchMode"
     static let easterEgg = "easterEgg"
     static let aiSummaries = "aiSummaries"
     static let showNews = "showNews"

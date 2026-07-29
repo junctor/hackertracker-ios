@@ -16,11 +16,11 @@ struct ContentListView: View {
     /// Perf C: debounced mirror of `searchText`. contentGroup() reads
     /// this so the group/filter pipeline runs once per typing pause.
     @State private var debouncedSearch = ""
-    /// Filter-chip composition mode. Mirrors EventsView so both
-    /// lists honor the same user choice from the Filters sheet.
-    @AppStorage(AppStorageKeys.filterMatchMode) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
-    private var filterMatchMode: FilterMatchMode {
-        FilterMatchMode(rawOrDefault: filterMatchModeRaw)
+    /// Per-section filter-chip composition modes. Mirrors EventsView so
+    /// both lists honor the same user choices from the Filters sheet.
+    @AppStorage(AppStorageKeys.sectionFilterModes) private var sectionModesRaw: String = ""
+    private var sectionModes: [Int: FilterMatchMode] {
+        SectionFilterModes(json: sectionModesRaw).asDictionary
     }
     @State private var showFilters = false
     @Environment(InfoViewModel.self) private var viewModel
@@ -81,38 +81,41 @@ struct ContentListView: View {
     /// Grouped content computed once per body evaluation, shared by
     /// contentFilteredCount and grouped to avoid duplicate filtering.
     private var groupedContent: [String.Element: [Content]] {
-        let bookmarkIds = Set(bookmarks.map(\.id))
-        // Predicate composes search text + filter chips. The chips OR
-        // with each other (matches any one keeps the row). Real tags
-        // hit via tagIds.intersects; pseudo-tags 1337 (Bookmarks),
-        // 1339 (Has Notes) hit via their dedicated membership sets.
-        // Each category contributes a Bool? — non-nil only when at
-        // least one chip from that category is selected. Compose by
-        // mode: .any → OR (current default), .all → AND. Categories
-        // without a chip selection don't constrain the result.
+        // NOTE: deliberately NOT calling the shared `[Content].filters`
+        // extension (ModelExt.swift) here. That extension matches its
+        // Bookmarks pseudo-chip against `Int32(content.id)`, but bookmarks
+        // are actually keyed by session/event id (see
+        // ContentDetailView.bookmarkAction / `s.id`, where `s` is a
+        // `Content.sessions` entry) — `Content.id` and its session ids are
+        // different numbers. Reusing it here would silently break the
+        // Bookmarks chip on this screen. Instead, this predicate composes
+        // search text + filter chips using the same shared building blocks
+        // (`sectionFilterMatch`, `PseudoTagID`) with the intended
+        // semantics: tag sections are ANDed together, each with its own
+        // any/all mode from `sectionModes`; pseudo-tags (Bookmarks 1337,
+        // Has Notes 1339) are each their own AND constraint — matching
+        // `[Event].filters`/`[Content].filters`'s pseudo-constraint
+        // handling, just with a correct session-based bookmark check.
+        let bookmarkedSessionIds = Set(bookmarks.map(\.id))
         let realTagIDs = filters.filters.subtracting(PseudoTagID.all)
-        let useTags = !realTagIDs.isEmpty
+        var selectedByType: [Int: [Int]] = [:]
+        for typeId in realTagIDs {
+            if let tagType = viewModel.tagtypes.first(where: { $0.tags.contains(where: { $0.id == typeId }) }) {
+                selectedByType[tagType.id, default: []].append(typeId)
+            }
+        }
         let useBookmarks = filters.filters.contains(PseudoTagID.bookmarks)
         let useHasNotes = filters.filters.contains(PseudoTagID.hasNotes)
-        let mode = filterMatchMode
         return Dictionary(
             grouping: content.search(text: debouncedSearch).filter { c in
                 if filters.filters.isEmpty { return true }
-                let tagMatch: Bool? = useTags
-                    ? c.tagIds.contains(where: { realTagIDs.contains($0) })
-                    : nil
-                let bookmarkMatch: Bool? = useBookmarks
-                    ? c.sessions.contains(where: { bookmarkIds.contains(Int32($0.id)) })
-                    : nil
-                let hasNotesMatch: Bool? = useHasNotes
-                    ? noteContentIDsForScope.contains(Int32(c.id))
-                    : nil
-                let checks = [tagMatch, bookmarkMatch, hasNotesMatch].compactMap { $0 }
-                guard !checks.isEmpty else { return true }
-                switch mode {
-                case .any: return checks.contains(true)
-                case .all: return checks.allSatisfy { $0 }
+                if !selectedByType.isEmpty,
+                   !sectionFilterMatch(tagIds: c.tagIds, selectedByType: selectedByType, sectionModes: sectionModes) {
+                    return false
                 }
+                if useBookmarks, !c.sessions.contains(where: { bookmarkedSessionIds.contains(Int32($0.id)) }) { return false }
+                if useHasNotes, !noteContentIDsForScope.contains(Int32(c.id)) { return false }
+                return true
             },
             by: { $0.title.lowercased().first ?? "-" }
         )
