@@ -31,7 +31,11 @@ struct ReportContentSheet: View {
                 } header: {
                     Text("What’s wrong with this content?")
                 } footer: {
-                    Text("Please don’t include personal information. Your message and an anonymous app identifier are sent to the organizers.")
+                    Text("""
+                    Submit a report if you believe that the associated content is illegal or unsafe in your jurisdiction.
+
+                    Your message and an anonymous app identifier are sent to the Hacker Tracker team, and may also be shared with the conference organizers. If you would like to receive a response, please reach out to the respective conference organizers instead of submitting a report here. We encourage you to not share personal information here; we do not guarantee a response.
+                    """)
                 }
             }
             .themedNavTitle("Report an Issue", themeManager)
