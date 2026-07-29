@@ -46,7 +46,6 @@ struct EventFilters: View {
         // app's other modal forms.
         NavigationStack {
             ScrollView {
-                FilterMatchCountLabel(count: matchedCount, unit: unitLabel)
                 if showBookmarks {
                     FilterRow(id: PseudoTagID.bookmarks, name: "Bookmarks", color: ThemeColors.blue)
                     FilterRow(id: PseudoTagID.customEvents, name: "Custom Events", color: .purple)
@@ -67,6 +66,10 @@ struct EventFilters: View {
                     } header: {
                         HStack {
                             Text(tagtype.label)
+                                // Explicit font + fixed row height so the
+                                // title's size and position stay constant
+                                // whether or not the Any/All picker is shown.
+                                .font(themeManager.headingFont)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             let selectedInSection = tagtype.tags.filter { filters.filters.contains($0.id) }.count
                             if selectedInSection >= 2 {
@@ -78,11 +81,30 @@ struct EventFilters: View {
                                 .fixedSize()
                             }
                         }
+                        .frame(height: 34)
                     }
                 }
                 .headerProminence(.increased)
+                // Clearance so the last chips can scroll above the floating count chip.
+                Color.clear.frame(height: 56)
             }
             .padding(.horizontal, 10)
+            // Live matched-count as a floating chip pinned to the bottom of
+            // the sheet so it stays visible while the chip list scrolls.
+            .overlay(alignment: .bottom) {
+                let plural = matchedCount == 1 ? unitLabel : unitLabel + "s"
+                HStack(spacing: 6) {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
+                    Text("\(matchedCount) \(plural)")
+                }
+                .font(themeManager.subheadlineFont)
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 9)
+                .background(.regularMaterial, in: Capsule())
+                .overlay(Capsule().stroke(Color.primary.opacity(0.08), lineWidth: 0.5))
+                .padding(.bottom, 14)
+            }
             .navigationTitle("Filters")
             .themedNavTitle("Filters", themeManager)
             .navigationBarTitleDisplayMode(.inline)
