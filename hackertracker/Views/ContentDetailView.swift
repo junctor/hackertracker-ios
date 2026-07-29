@@ -14,6 +14,7 @@ struct ContentDetailView: View {
     @State private var showFeedback: Bool = false
     // @State private var showFeedbackButton = true
     @State private var showAlert: Bool = false
+    @State private var showReport: Bool = false
     @State private var alertMessage: String = ""
     /// Polish: drives the iOS Mail-style nav-bar title handoff. Continuous
     /// 0...1 -- 0 means the body title is still fully in view (nav title
@@ -128,6 +129,15 @@ struct ContentDetailView: View {
                             .opacity(navTitleOpacity)
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showReport = true
+                    } label: { Image(systemName: "exclamationmark.bubble") }
+                    .accessibilityLabel("Report an issue")
+                }
+            }
+            .sheet(isPresented: $showReport) {
+                ReportContentSheet(objectType: .content, objectId: contentId)
             }
             .onAppear() {
                 Log.ui.debug("ContentDetailView loading \(item.id) - \(item.title, privacy: .public)")
