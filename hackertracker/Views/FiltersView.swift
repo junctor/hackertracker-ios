@@ -22,9 +22,20 @@ struct EventFilters: View {
     /// Singular noun used in the live tally label ("event", "talk",
     /// etc.). Plural is auto-derived with a trailing s.
     var unitLabel: String = "event"
-    @AppStorage(AppStorageKeys.filterMatchMode) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
+    @AppStorage(AppStorageKeys.sectionFilterModes) private var sectionModesRaw: String = ""
 
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
+
+    private func binding(forTagType id: Int) -> Binding<FilterMatchMode> {
+        Binding(
+            get: { SectionFilterModes(json: sectionModesRaw).mode(for: id) },
+            set: { newValue in
+                var m = SectionFilterModes(json: sectionModesRaw)
+                m.setMode(newValue, for: id)
+                sectionModesRaw = m.jsonString
+            }
+        )
+    }
 
     var body: some View {
         // Wrap in a NavigationStack so the sheet picks up the system's
@@ -35,7 +46,6 @@ struct EventFilters: View {
         // app's other modal forms.
         NavigationStack {
             ScrollView {
-                MatchModePickerRow(raw: $filterMatchModeRaw)
                 FilterMatchCountLabel(count: matchedCount, unit: unitLabel)
                 if showBookmarks {
                     FilterRow(id: PseudoTagID.bookmarks, name: "Bookmarks", color: ThemeColors.blue)
@@ -55,8 +65,19 @@ struct EventFilters: View {
                             }
                         }
                     } header: {
-                        Text(tagtype.label)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                        HStack {
+                            Text(tagtype.label)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            let selectedInSection = tagtype.tags.filter { filters.filters.contains($0.id) }.count
+                            if selectedInSection >= 2 {
+                                Picker("", selection: binding(forTagType: tagtype.id)) {
+                                    Text("Any").tag(FilterMatchMode.any)
+                                    Text("All").tag(FilterMatchMode.all)
+                                }
+                                .pickerStyle(.segmented)
+                                .fixedSize()
+                            }
+                        }
                     }
                 }
                 .headerProminence(.increased)
