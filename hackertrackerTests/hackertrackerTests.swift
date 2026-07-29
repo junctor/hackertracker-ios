@@ -187,3 +187,58 @@ extension Content {
                 feedbackFormId: nil, visibleAgeMin: visibleAgeMin)
     }
 }
+
+final class FeedbackReporterTests: XCTestCase {
+    func testFeedbackReportEncodesExactKeys() throws {
+        let conf = Conference.reportStub(id: 258, name: "DEF CON 34")
+        let fixedDate = Date(timeIntervalSince1970: 1_767_400_000)
+        let report = FeedbackReporter.makeReport(
+            message: "nope", conference: conf, objectType: .person, objectId: 42,
+            now: fixedDate, uuid: "UUID-1", deviceID: "DEV-1")
+        let data = try JSONEncoder().encode(report)
+        let obj = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+        XCTAssertEqual(obj["conference_id"] as? Int, 258)
+        XCTAssertEqual(obj["object_type"] as? String, "person")
+        XCTAssertEqual(obj["object_id"] as? Int, 42)
+        XCTAssertEqual(obj["report_uuid"] as? String, "UUID-1")
+        XCTAssertEqual(obj["device_identifier"] as? String, "DEV-1")
+        XCTAssertNotNil(obj["report_timestamp"] as? String)
+        XCTAssertTrue((obj["client"] as? String)?.hasPrefix("HackerTracker iOS") ?? false)
+        // UTC "yyyy-MM-dd HH:mm:ss" shape
+        XCTAssertEqual((obj["report_timestamp"] as? String)?.count, 19)
+    }
+
+    func testDeviceIdentifierIsStable() {
+        XCTAssertEqual(ReportDeviceIdentifier.current(), ReportDeviceIdentifier.current())
+    }
+}
+
+extension Conference {
+    /// Minimal fixture for feedback-reporter tests, decoded through
+    /// `Conference`'s real `Codable` conformance (rather than fighting
+    /// the `@DocumentID`-bearing memberwise initializer) so every
+    /// stored property gets a valid, uncontroversial value.
+    static func reportStub(id: Int, name: String) -> Conference {
+        let json = """
+        {
+            "id": \(id),
+            "name": "\(name)",
+            "description": "",
+            "code": "stub",
+            "end_date": "2026-08-09",
+            "start_date": "2026-08-06",
+            "kickoff_timestamp": 1767200000,
+            "start_timestamp": 1767200000,
+            "end_timestamp": 1767400000,
+            "hidden": false,
+            "enable_merch": false,
+            "enable_merch_cart": false,
+            "home_menu_id": 1
+        }
+        """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .secondsSince1970
+        // swiftlint:disable:next force_try
+        return try! decoder.decode(Conference.self, from: Data(json.utf8))
+    }
+}
