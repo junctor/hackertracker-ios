@@ -46,7 +46,6 @@ struct EventFilters: View {
         // app's other modal forms.
         NavigationStack {
             ScrollView {
-                FilterMatchCountLabel(count: matchedCount, unit: unitLabel)
                 if showBookmarks {
                     FilterRow(id: PseudoTagID.bookmarks, name: "Bookmarks", color: ThemeColors.blue)
                     FilterRow(id: PseudoTagID.customEvents, name: "Custom Events", color: .purple)
@@ -67,6 +66,10 @@ struct EventFilters: View {
                     } header: {
                         HStack {
                             Text(tagtype.label)
+                                // Explicit font + fixed row height so the
+                                // title's size and position stay constant
+                                // whether or not the Any/All picker is shown.
+                                .font(themeManager.headingFont)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             let selectedInSection = tagtype.tags.filter { filters.filters.contains($0.id) }.count
                             if selectedInSection >= 2 {
@@ -78,11 +81,20 @@ struct EventFilters: View {
                                 .fixedSize()
                             }
                         }
+                        .frame(height: 34)
                     }
                 }
                 .headerProminence(.increased)
+                // Clearance so the last chips can scroll above the floating count chip.
+                Color.clear.frame(height: 56)
             }
             .padding(.horizontal, 10)
+            // Live matched-count as a floating chip pinned to the bottom of
+            // the sheet so it stays visible while the chip list scrolls.
+            .overlay(alignment: .bottom) {
+                FloatingCountChip(count: matchedCount, unit: unitLabel)
+                    .padding(.bottom, 14)
+            }
             .navigationTitle("Filters")
             .themedNavTitle("Filters", themeManager)
             .navigationBarTitleDisplayMode(.inline)
@@ -172,6 +184,37 @@ struct FilterRow: View {
                     .stroke(filters.filters.contains(id) ? Color.clear : color, lineWidth: 2)
             )
         }
+    }
+}
+
+/// Floating "N events" capsule pinned to the bottom of a scrolling list.
+/// Shared by the Filters sheet, the Schedule, All Content, and the
+/// Combined Schedule so the count affordance looks identical everywhere.
+/// The caller supplies the already-computed count (each screen counts
+/// with its own pipeline / past-events rules); the chip just presents it.
+struct FloatingCountChip: View {
+    let count: Int
+    let unit: String
+    /// SF Symbol shown to the left of the count. Defaults to the filter
+    /// glyph used by the Filters sheet; list screens pass a screen-
+    /// appropriate icon (calendar, doc, bookmark).
+    var systemImage: String = "line.3.horizontal.decrease.circle"
+    @Environment(ThemeManager.self) private var themeManager
+
+    var body: some View {
+        let plural = count == 1 ? unit : unit + "s"
+        HStack(spacing: 6) {
+            Image(systemName: systemImage)
+            Text("\(count) \(plural)")
+        }
+        .font(themeManager.subheadlineFont)
+        .foregroundStyle(.primary)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 9)
+        .background(.regularMaterial, in: Capsule())
+        .overlay(Capsule().stroke(Color.primary.opacity(0.08), lineWidth: 0.5))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(count) \(plural)")
     }
 }
 

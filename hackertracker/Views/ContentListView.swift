@@ -259,6 +259,11 @@ struct ContentListView: View {
 
                 Spacer()
 
+                // Live count of talks currently shown (filter + search applied).
+                FloatingCountChip(count: contentFilteredCount, unit: "talk", systemImage: "doc.text")
+
+                Spacer()
+
                 jumpToGroupMenu
                     .font(themeManager.title2Font)
                     .foregroundStyle(.primary)
