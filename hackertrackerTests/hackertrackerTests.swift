@@ -74,6 +74,19 @@ class hackertrackerTests: XCTestCase {
         let speaker = try JSONDecoder().decode(Speaker.self, from: json)
         XCTAssertEqual(speaker.visibleAgeMin, 16)
     }
+
+    func testSectionModesDefaultsToAny() {
+        let m = SectionFilterModes(json: "")
+        XCTAssertEqual(m.mode(for: 5), .any)
+    }
+
+    func testSectionModesRoundTripsJSON() {
+        var m = SectionFilterModes(json: "")
+        m.setMode(.all, for: 5)
+        let restored = SectionFilterModes(json: m.jsonString)
+        XCTAssertEqual(restored.mode(for: 5), .all)
+        XCTAssertEqual(restored.mode(for: 6), .any)
+    }
 }
 
 @MainActor

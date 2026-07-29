@@ -127,6 +127,7 @@
 		61AE145FB3CF4CEF9CD898DC /* ListChrome.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39C3F9C2929744A6948A2200 /* ListChrome.swift */; };
 		B2F695DFBD5E83F401AC1EFE /* AgeGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C6C981E5BEC28D5626B1437 /* AgeGate.swift */; };
 		F35BEAD60BF24C4BB0AED8CF /* AppStorageKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3769181BE2945B88CBA7D99 /* AppStorageKeys.swift */; };
+		3ABFD5C49EADA3BA420469D9 /* SectionFilterModes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66C9AE3D73B886A43F9DE173 /* SectionFilterModes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -265,6 +266,7 @@
 		5DF51ADF28526C0C007BCB83 /* UserEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserEvent.swift; sourceTree = "<group>"; };
 		5DF82B252A5F3B29001395C7 /* NotificationUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationUtility.swift; sourceTree = "<group>"; };
 		B3769181BE2945B88CBA7D99 /* AppStorageKeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStorageKeys.swift; sourceTree = "<group>"; };
+		66C9AE3D73B886A43F9DE173 /* SectionFilterModes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionFilterModes.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -493,6 +495,7 @@
 				3C07C208285C6F7600CC9469 /* Theme.swift */,
 				B3769181BE2945B88CBA7D99 /* AppStorageKeys.swift */,
 				3C6C981E5BEC28D5626B1437 /* AgeGate.swift */,
+				66C9AE3D73B886A43F9DE173 /* SectionFilterModes.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -803,6 +806,7 @@
 				5DF51ABC2851203F007BCB83 /* Document.swift in Sources */,
 				5DDF035E2C28B4F10087BA59 /* ContentDetailView.swift in Sources */,
 				5D9681162C5946E000D246B0 /* FeedbackUtility.swift in Sources */,
+				3ABFD5C49EADA3BA420469D9 /* SectionFilterModes.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -973,7 +977,7 @@
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26072001;
+				CURRENT_PROJECT_VERSION = 26072201;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
@@ -991,7 +995,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 6.2;
+				MARKETING_VERSION = 6.3;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1013,7 +1017,7 @@
 				CODE_SIGN_ENTITLEMENTS = hackertracker/hackertracker.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 26072001;
+				CURRENT_PROJECT_VERSION = 26072201;
 				DEVELOPMENT_ASSET_PATHS = "\"hackertracker/Preview Content\"";
 				DEVELOPMENT_TEAM = MJ97FDMT75;
 				ENABLE_PREVIEWS = YES;
@@ -1031,7 +1035,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 6.2;
+				MARKETING_VERSION = 6.3;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = org.beezle.hackertracker;
 				PRODUCT_NAME = "$(TARGET_NAME)";

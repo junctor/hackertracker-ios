@@ -39,4 +39,5 @@ enum AppStorageKeys {
     static let easterEggMaxOpacity = "easterEggMaxOpacity"
     static let lastMapIndex = "lastMapIndex"
     static let infoLogoCollapsedCodes = "infoLogoCollapsedCodes"
+    static let sectionFilterModes = "sectionFilterModes.v1"
 }
