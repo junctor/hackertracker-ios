@@ -87,6 +87,24 @@ class hackertrackerTests: XCTestCase {
         XCTAssertEqual(restored.mode(for: 5), .all)
         XCTAssertEqual(restored.mode(for: 6), .any)
     }
+
+    func testSectionAnyMatchesEitherTag() {
+        // Section 100 has tags 1,2 selected in .any mode.
+        let match = sectionFilterMatch(tagIds: [2, 9],
+                                       selectedByType: [100: [1, 2]],
+                                       sectionModes: [100: .any])
+        XCTAssertTrue(match)   // has tag 2 → any passes
+    }
+    func testSectionAllRequiresBothTags() {
+        XCTAssertFalse(sectionFilterMatch(tagIds: [1], selectedByType: [100: [1, 2]], sectionModes: [100: .all]))
+        XCTAssertTrue(sectionFilterMatch(tagIds: [1, 2], selectedByType: [100: [1, 2]], sectionModes: [100: .all]))
+    }
+    func testTwoSectionsAreANDed() {
+        // Type 100 {1} any, Organizer 200 {5} any → needs a 100-tag AND a 200-tag.
+        let sel = [100: [1], 200: [5]]
+        XCTAssertFalse(sectionFilterMatch(tagIds: [1], selectedByType: sel, sectionModes: [:]))       // missing 200
+        XCTAssertTrue(sectionFilterMatch(tagIds: [1, 5], selectedByType: sel, sectionModes: [:]))       // both → default .any each
+    }
 }
 
 @MainActor

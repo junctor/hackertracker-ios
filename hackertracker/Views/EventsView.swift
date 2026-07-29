@@ -161,7 +161,7 @@ struct EventsView: View {
     /// @State copies above.
     private func recomputeSchedulePipeline() {
         let filtered = scheduleEvents
-            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope, mode: filterMatchMode)
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope, sectionModes: [:])
         scheduleDayKeys = filtered
             .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference)
             .map { $0.key }
