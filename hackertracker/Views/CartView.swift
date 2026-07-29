@@ -16,9 +16,24 @@ struct CartView: View {
     @State private var totalItems = 0
     @State private var showDeleteAlert = false
 
+    /// Variant ids belonging to the currently-selected conference's
+    /// products. The Cart entity stores no conference association, so a
+    /// cart built under one conference otherwise leaks into another.
+    private var currentConferenceVariantIds: Set<Int32> {
+        Set(viewModel.products.flatMap { $0.variants.map { Int32($0.variantId) } })
+    }
+
+    /// Cart rows scoped to the current conference. Used everywhere in
+    /// place of the raw @FetchRequest so totals, the item list, and the
+    /// QR payload never include items from other conferences.
+    private var currentCart: [Cart] {
+        let ids = currentConferenceVariantIds
+        return cart.filter { ids.contains($0.variantId) }
+    }
+
     var body: some View {
         ScrollView {
-            if !viewModel.outOfStock && cart.count > 0 {
+            if !viewModel.outOfStock && currentCart.count > 0 {
                 QRCodeView(qrString: generateQRValue())
             } else {
                 if viewModel.outOfStock {
@@ -26,7 +41,7 @@ struct CartView: View {
                         .font(themeManager.headingFont)
                     Text("Remove out of stock items from list")
                         .font(themeManager.subheadlineFont)
-                } else if cart.count == 0 {
+                } else if currentCart.count == 0 {
                     Text("No Items Selected")
                         .font(themeManager.headingFont)
                     NavigationLink(destination: ProductsView()) {
@@ -36,7 +51,7 @@ struct CartView: View {
                 }
             }
             Divider()
-            ForEach(cart, id: \.self) { (item: Cart) in
+            ForEach(currentCart, id: \.self) { (item: Cart) in
                 if let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) }).first, let variant = product.variants.filter({$0.variantId == item.variantId}).first {
                     CartRow(product: product, item: item, variant: variant, total: $total, totalItems: $totalItems)
                 }
@@ -69,7 +84,7 @@ struct CartView: View {
             viewModel.outOfStock = false
             var mytotal = 0
             var mytotalItems = 0
-            for item in cart {
+            for item in currentCart {
                 if let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) }).first, let variant = product.variants.filter({$0.variantId == item.variantId}).first {
                     if variant.stockStatus == "OUT" {
                         viewModel.outOfStock = true
@@ -98,7 +113,7 @@ struct CartView: View {
     
     func checkOutOfStock() {
         viewModel.outOfStock = false
-        for item in cart {
+        for item in currentCart {
             if let product = viewModel.products.filter({ $0.variants.contains(where: { $0.variantId == item.variantId }) }).first, let variant = product.variants.filter({$0.variantId == item.variantId}).first {
                 if variant.stockStatus == "OUT" {
                     viewModel.outOfStock = true
@@ -110,11 +125,13 @@ struct CartView: View {
     func generateQRValue() -> String {
         var qrCart: QRCart
         
-        qrCart = QRCart(i: cart.map {QRItem(v: Int($0.variantId), q: Int($0.count))})
-        
+        qrCart = QRCart(i: currentCart.map {QRItem(v: Int($0.variantId), q: Int($0.count))})
+
         let version = 1
         let items = qrCart.i.map { "\($0.v):\($0.q)" }.joined(separator: ";")
-        let compact = "\(version):\(viewModel.conference?.id ?? 0):i\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""):\(items):"
+        // Uppercased so the payload uses only characters the merch scanner
+        // expects (the "i" build-marker becomes "I").
+        let compact = "\(version):\(viewModel.conference?.id ?? 0):i\(Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""):\(items):".uppercased()
         Log.cart.debug("QR encoded: \(compact, privacy: .public)")
         return compact
         
