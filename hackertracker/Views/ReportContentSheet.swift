@@ -34,7 +34,6 @@ struct ReportContentSheet: View {
                     Text("Please don’t include personal information. Your message and an anonymous app identifier are sent to the organizers.")
                 }
             }
-            .navigationTitle("Report an Issue")
             .themedNavTitle("Report an Issue", themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -63,12 +62,15 @@ struct ReportContentSheet: View {
         guard let conference = viewModel.conference else {
             errorText = "No active conference."; return
         }
+        let conferenceId = conference.id
+        let conferenceName = conference.name
         errorText = nil
         sending = true
         Task {
             let result = await FeedbackReporter.send(
                 message: message.trimmingCharacters(in: .whitespacesAndNewlines),
-                conference: conference, objectType: objectType, objectId: objectId)
+                conferenceId: conferenceId, conferenceName: conferenceName,
+                objectType: objectType, objectId: objectId)
             sending = false
             switch result {
             case .success: sent = true

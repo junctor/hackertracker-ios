@@ -98,13 +98,13 @@ enum FeedbackReporter {
     }
 
     /// Deterministic builder (injectable stamps for tests).
-    static func makeReport(message: String, conference: Conference,
+    static func makeReport(message: String, conferenceId: Int, conferenceName: String,
                            objectType: ReportObjectType, objectId: Int,
                            now: Date, uuid: String, deviceID: String) -> FeedbackReport {
         FeedbackReport(
             message: message,
-            conferenceId: conference.id,
-            conferenceName: conference.name,
+            conferenceId: conferenceId,
+            conferenceName: conferenceName,
             objectType: objectType.rawValue,
             objectId: objectId,
             reportTimestamp: timestampFormatter.string(from: now),
@@ -114,9 +114,9 @@ enum FeedbackReporter {
         )
     }
 
-    static func send(message: String, conference: Conference,
+    static func send(message: String, conferenceId: Int, conferenceName: String,
                      objectType: ReportObjectType, objectId: Int) async -> Result<Void, ReportError> {
-        let report = makeReport(message: message, conference: conference,
+        let report = makeReport(message: message, conferenceId: conferenceId, conferenceName: conferenceName,
                                 objectType: objectType, objectId: objectId,
                                 now: Date(), uuid: UUID().uuidString,
                                 deviceID: ReportDeviceIdentifier.current())

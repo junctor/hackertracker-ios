@@ -9,11 +9,7 @@ import FirebaseFirestore
 import Foundation
 import SwiftUI
 
-/// `@unchecked Sendable`: all stored properties are value types that are
-/// safe to copy across actor boundaries; the compiler can't verify this
-/// automatically because `DocumentID<String>` (Firebase) and the nested
-/// `Map`/`Document` models aren't themselves marked `Sendable`.
-struct Conference: Codable, Identifiable, Equatable, @unchecked Sendable {
+struct Conference: Codable, Identifiable, Equatable {
     static func == (lhs: Conference, rhs: Conference) -> Bool {
         lhs.code == rhs.code
     }
