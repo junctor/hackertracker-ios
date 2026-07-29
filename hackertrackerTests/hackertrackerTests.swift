@@ -74,6 +74,37 @@ class hackertrackerTests: XCTestCase {
         let speaker = try JSONDecoder().decode(Speaker.self, from: json)
         XCTAssertEqual(speaker.visibleAgeMin, 16)
     }
+
+    func testSectionModesDefaultsToAny() {
+        let m = SectionFilterModes(json: "")
+        XCTAssertEqual(m.mode(for: 5), .any)
+    }
+
+    func testSectionModesRoundTripsJSON() {
+        var m = SectionFilterModes(json: "")
+        m.setMode(.all, for: 5)
+        let restored = SectionFilterModes(json: m.jsonString)
+        XCTAssertEqual(restored.mode(for: 5), .all)
+        XCTAssertEqual(restored.mode(for: 6), .any)
+    }
+
+    func testSectionAnyMatchesEitherTag() {
+        // Section 100 has tags 1,2 selected in .any mode.
+        let match = sectionFilterMatch(tagIds: [2, 9],
+                                       selectedByType: [100: [1, 2]],
+                                       sectionModes: [100: .any])
+        XCTAssertTrue(match)   // has tag 2 → any passes
+    }
+    func testSectionAllRequiresBothTags() {
+        XCTAssertFalse(sectionFilterMatch(tagIds: [1], selectedByType: [100: [1, 2]], sectionModes: [100: .all]))
+        XCTAssertTrue(sectionFilterMatch(tagIds: [1, 2], selectedByType: [100: [1, 2]], sectionModes: [100: .all]))
+    }
+    func testTwoSectionsAreANDed() {
+        // Type 100 {1} any, Organizer 200 {5} any → needs a 100-tag AND a 200-tag.
+        let sel = [100: [1], 200: [5]]
+        XCTAssertFalse(sectionFilterMatch(tagIds: [1], selectedByType: sel, sectionModes: [:]))       // missing 200
+        XCTAssertTrue(sectionFilterMatch(tagIds: [1, 5], selectedByType: sel, sectionModes: [:]))       // both → default .any each
+    }
 }
 
 @MainActor
@@ -154,5 +185,29 @@ extension Content {
                 media: [], people: [], sessions: [], tagIds: [], relatedIds: nil,
                 title: "stub", feedbackDisableTimestamp: nil, feedbackEnableTimestamp: nil,
                 feedbackFormId: nil, visibleAgeMin: visibleAgeMin)
+    }
+}
+
+final class FeedbackReporterTests: XCTestCase {
+    func testFeedbackReportEncodesExactKeys() throws {
+        let fixedDate = Date(timeIntervalSince1970: 1_767_400_000)
+        let report = FeedbackReporter.makeReport(
+            message: "nope", conferenceId: 258, conferenceName: "DEF CON 34", objectType: .person, objectId: 42,
+            now: fixedDate, uuid: "UUID-1", deviceID: "DEV-1")
+        let data = try JSONEncoder().encode(report)
+        let obj = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+        XCTAssertEqual(obj["conference_id"] as? Int, 258)
+        XCTAssertEqual(obj["object_type"] as? String, "person")
+        XCTAssertEqual(obj["object_id"] as? Int, 42)
+        XCTAssertEqual(obj["report_uuid"] as? String, "UUID-1")
+        XCTAssertEqual(obj["device_identifier"] as? String, "DEV-1")
+        XCTAssertNotNil(obj["report_timestamp"] as? String)
+        XCTAssertTrue((obj["client"] as? String)?.hasPrefix("HackerTracker iOS") ?? false)
+        // UTC "yyyy-MM-dd HH:mm:ss" shape
+        XCTAssertEqual((obj["report_timestamp"] as? String)?.count, 19)
+    }
+
+    func testDeviceIdentifierIsStable() {
+        XCTAssertEqual(ReportDeviceIdentifier.current(), ReportDeviceIdentifier.current())
     }
 }

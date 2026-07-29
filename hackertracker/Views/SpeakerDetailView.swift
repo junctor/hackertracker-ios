@@ -16,6 +16,8 @@ struct SpeakerDetailView: View {
 
     var id: Int
 
+    @State private var showReport: Bool = false
+
     /// Polish: drives the nav-bar title handoff. Continuous 0...1 so the
     /// inline title crossfades in smoothly as the in-body speaker name
     /// scrolls past the nav bar.
@@ -97,6 +99,15 @@ struct SpeakerDetailView: View {
                         }
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showReport = true
+                    } label: { Image(systemName: "exclamationmark.bubble") }
+                    .accessibilityLabel("Report an issue")
+                }
+            }
+            .sheet(isPresented: $showReport) {
+                ReportContentSheet(objectType: .person, objectId: id)
             }
             .themedBackground(themeManager)
             .analyticsScreen(name: "SpeakerDetailView")

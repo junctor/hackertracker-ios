@@ -16,6 +16,7 @@ struct OrgView: View {
     @EnvironmentObject var filters: Filters
     @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
     @Binding var tabSelection: Int
+    @State private var showReport = false
 
     @Environment(ThemeManager.self) private var themeManager
 
@@ -74,6 +75,15 @@ struct OrgView: View {
         .padding(5)
         .themedBackground(themeManager)
         .analyticsScreen(name: "OrgView")
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button { showReport = true } label: { Image(systemName: "exclamationmark.bubble") }
+                    .accessibilityLabel("Report an issue")
+            }
+        }
+        .sheet(isPresented: $showReport) {
+            ReportContentSheet(objectType: .org, objectId: 0)
+        }
     }
 }
 

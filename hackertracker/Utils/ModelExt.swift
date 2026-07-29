@@ -30,45 +30,36 @@ extension [TagType] {
 }
 
 extension [Content] {
-    func filters(typeIds: Set<Int>, bookmarks: Set<Int32>, tagTypes: [TagType]) -> Self {
+    func filters(
+        typeIds: Set<Int>,
+        bookmarks: Set<Int32>,
+        tagTypes: [TagType],
+        contentNoteIDs: Set<Int32> = [],
+        sectionModes: [Int: FilterMatchMode] = [:]
+    ) -> Self {
         if typeIds.isEmpty {
             return self
         } else {
-            var filterTypes: [Int: [Int]] = [:]
-            for typeId in typeIds {
+            var selectedByType: [Int: [Int]] = [:]
+            for typeId in typeIds where !PseudoTagID.all.contains(typeId) {
                 if let tagType = tagTypes.first(where: { $0.tags.contains(where: { $0.id == typeId }) }) {
-                    if filterTypes.keys.contains(tagType.id) {
-                        filterTypes[tagType.id]?.append(typeId)
+                    if selectedByType.keys.contains(tagType.id) {
+                        selectedByType[tagType.id]?.append(typeId)
                     } else {
-                        filterTypes[tagType.id] = [typeId]
+                        selectedByType[tagType.id] = [typeId]
                     }
                 }
             }
-            
-            if typeIds.contains(1337) {
-                return filter {
-                    isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes)
-                    && bookmarks.contains(Int32($0.id))
+
+            return filter { content in
+                if !selectedByType.isEmpty,
+                   !sectionFilterMatch(tagIds: content.tagIds, selectedByType: selectedByType, sectionModes: sectionModes) {
+                    return false
                 }
-            } else {
-                return filter { isFiltered(tagIds: $0.tagIds, filterTypes: filterTypes) }
+                if typeIds.contains(PseudoTagID.bookmarks), !bookmarks.contains(Int32(content.id)) { return false }
+                if typeIds.contains(PseudoTagID.hasNotes), !contentNoteIDs.contains(Int32(content.id)) { return false }
+                return true
             }
-        }
-    }
-    
-    func isFiltered(tagIds: [Int], filterTypes: [Int: [Int]]) -> Bool {
-        var results: [Bool] = []
-        for ft in filterTypes {
-            var myR = false
-            if ft.value.contains(where: { tagIds.contains($0) }) {
-                myR = true
-            }
-            results.append(myR)
-        }
-        if results.contains(false) {
-            return false
-        } else {
-            return true
         }
     }
 }
@@ -84,10 +75,10 @@ enum PseudoTagID {
     static let all: Set<Int> = [bookmarks, customEvents, hasNotes]
 }
 
-/// Filter-chip composition mode. Read from @AppStorage(AppStorageKeys.filterMatchMode)
-/// by FiltersView (writes) and the predicate consumers (reads). Storing
-/// the raw string lets us swap it cleanly via @AppStorage on multiple
-/// independent views without an envelope object.
+/// Filter-chip composition mode, selectable per tag section. Persisted as
+/// JSON (tagTypeId -> raw mode) under @AppStorage(AppStorageKeys.sectionFilterModes)
+/// via `SectionFilterModes`; FiltersView writes it and predicate consumers
+/// (`sectionFilterMatch`, `[Event].filters`, `[Content].filters`) read it.
 enum FilterMatchMode: String, CaseIterable {
     case any = "any"
     case all = "all"
@@ -95,6 +86,27 @@ enum FilterMatchMode: String, CaseIterable {
     init(rawOrDefault raw: String) {
         self = FilterMatchMode(rawValue: raw) ?? .any
     }
+}
+
+/// Core per-section filter decision. `selectedByType` maps tagTypeId ->
+/// selected real tag ids in that section. For each active section, `.any`
+/// requires the item to carry at least one of the section's tags; `.all`
+/// requires all of them. Active sections are combined with AND. No sections
+/// → true (caller handles the empty-selection short-circuit).
+func sectionFilterMatch(tagIds: [Int],
+                        selectedByType: [Int: [Int]],
+                        sectionModes: [Int: FilterMatchMode]) -> Bool {
+    let itemTags = Set(tagIds)
+    for (typeId, selected) in selectedByType {
+        let mode = sectionModes[typeId] ?? .any
+        let ok: Bool
+        switch mode {
+        case .any: ok = selected.contains { itemTags.contains($0) }
+        case .all: ok = selected.allSatisfy { itemTags.contains($0) }
+        }
+        if !ok { return false }   // AND across sections
+    }
+    return true
 }
 
 extension [Event] {
@@ -110,52 +122,35 @@ extension [Event] {
         tagTypes: [TagType],
         eventNoteIDs: Set<Int32> = [],
         contentNoteIDs: Set<Int32> = [],
-        mode: FilterMatchMode = .any
+        sectionModes: [Int: FilterMatchMode] = [:]
     ) -> Self {
         if typeIds.isEmpty {
             return self
         } else {
-            var filterTypes: [Int: [Int]] = [:]
-            for typeId in typeIds {
+            var selectedByType: [Int: [Int]] = [:]
+            for typeId in typeIds where !PseudoTagID.all.contains(typeId) {
                 if let tagType = tagTypes.first(where: { $0.tags.contains(where: { $0.id == typeId }) }) {
-                    if filterTypes.keys.contains(tagType.id) {
-                        filterTypes[tagType.id]?.append(typeId)
+                    if selectedByType.keys.contains(tagType.id) {
+                        selectedByType[tagType.id]?.append(typeId)
                     } else {
-                        filterTypes[tagType.id] = [typeId]
+                        selectedByType[tagType.id] = [typeId]
                     }
                 }
             }
-            // Each chip category contributes independently. In .any
-            // mode (OR) a row survives when ANY active category
-            // matches it. In .all mode (AND) a row must satisfy
-            // EVERY active category. "Active" = at least one chip
-            // from that category is selected; categories with no
-            // selection don't constrain the result either way.
-            let realTagIDs = Set(filterTypes.values.flatMap { $0 })
-            let useTags = !realTagIDs.isEmpty
             let useBookmarks = typeIds.contains(PseudoTagID.bookmarks)
             let useCustom = typeIds.contains(PseudoTagID.customEvents)
             let useHasNotes = typeIds.contains(PseudoTagID.hasNotes)
             return filter { event in
-                let tagMatch: Bool? = useTags
-                    ? event.tagIds.contains(where: { realTagIDs.contains($0) })
-                    : nil
-                let bookmarkMatch: Bool? = useBookmarks
-                    ? bookmarks.contains(Int32(event.id))
-                    : nil
-                let customMatch: Bool? = useCustom
-                    ? (event.customEventID != nil)
-                    : nil
-                let hasNotesMatch: Bool? = useHasNotes
-                    ? (eventNoteIDs.contains(Int32(event.id))
-                       || contentNoteIDs.contains(Int32(event.contentId)))
-                    : nil
-                let checks = [tagMatch, bookmarkMatch, customMatch, hasNotesMatch].compactMap { $0 }
-                guard !checks.isEmpty else { return true }
-                switch mode {
-                case .any: return checks.contains(true)
-                case .all: return checks.allSatisfy { $0 }
+                // Tag sections (AND across sections, per-section any/all).
+                if !selectedByType.isEmpty,
+                   !sectionFilterMatch(tagIds: event.tagIds, selectedByType: selectedByType, sectionModes: sectionModes) {
+                    return false
                 }
+                // Pseudo constraints — each active one is its own AND.
+                if useBookmarks, !bookmarks.contains(Int32(event.id)) { return false }
+                if useCustom, event.customEventID == nil { return false }
+                if useHasNotes, !(eventNoteIDs.contains(Int32(event.id)) || contentNoteIDs.contains(Int32(event.contentId))) { return false }
+                return true
             }
         }
     }
@@ -181,22 +176,6 @@ extension [Event] {
         }
         return eventDict.sorted {
             ($0.value.first?.beginTimestamp ?? Date()) < ($1.value.first?.beginTimestamp ?? Date())
-        }
-    }
-    
-    func isFiltered(tagIds: [Int], filterTypes: [Int: [Int]]) -> Bool {
-        var results: [Bool] = []
-        for ft in filterTypes {
-            var myR = false
-            if ft.value.contains(where: { tagIds.contains($0) }) {
-                myR = true
-            }
-            results.append(myR)
-        }
-        if results.contains(false) {
-            return false
-        } else {
-            return true
         }
     }
 }

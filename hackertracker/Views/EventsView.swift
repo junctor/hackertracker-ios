@@ -82,11 +82,11 @@ struct EventsView: View {
     /// the schedule at all. Lives next to the rest of the schedule
     /// state so its value is read inline with the synthesizer.
     @AppStorage(AppStorageKeys.showCustomEvents) private var showCustomEventsInSchedule: Bool = true
-    /// Filter-chip composition mode. Read from the same
+    /// Per-section filter-chip composition modes. Read from the same
     /// AppStorage key the Filters sheet writes to.
-    @AppStorage(AppStorageKeys.filterMatchMode) private var filterMatchModeRaw: String = FilterMatchMode.defaultRaw
-    private var filterMatchMode: FilterMatchMode {
-        FilterMatchMode(rawOrDefault: filterMatchModeRaw)
+    @AppStorage(AppStorageKeys.sectionFilterModes) private var sectionModesRaw: String = ""
+    private var sectionModes: [Int: FilterMatchMode] {
+        SectionFilterModes(json: sectionModesRaw).asDictionary
     }
 
     // MARK: Perf A: shared filter+search+group cache
@@ -141,7 +141,7 @@ struct EventsView: View {
         }
         // Filter / search selection.
         hasher.combine(filters.filters)
-        hasher.combine(filterMatchModeRaw)
+        hasher.combine(sectionModesRaw)
         hasher.combine(debouncedSearch)
         hasher.combine(viewModel.tagtypes.count)
         hasher.combine(viewModel.speakers.count)
@@ -161,7 +161,7 @@ struct EventsView: View {
     /// @State copies above.
     private func recomputeSchedulePipeline() {
         let filtered = scheduleEvents
-            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope, mode: filterMatchMode)
+            .filters(typeIds: filters.filters, bookmarks: Set(bookmarks.map { $0.id }), tagTypes: viewModel.tagtypes, eventNoteIDs: noteEventIDsForScope, contentNoteIDs: noteContentIDsForScope, sectionModes: sectionModes)
         scheduleDayKeys = filtered
             .eventDayGroup(showLocaltime: showLocaltime, conference: viewModel.conference)
             .map { $0.key }

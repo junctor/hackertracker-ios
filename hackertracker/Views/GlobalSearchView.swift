@@ -57,7 +57,7 @@ struct GlobalSearchView: View {
                             ForEach(viewModel.documents.search(text: debouncedSearch).sorted {
                                 $0.title < $1.title
                             }, id: \.id) { document in
-                                NavigationLink(destination: DocumentView(title_text: document.title, body_text: document.body)) {
+                                NavigationLink(destination: DocumentView(title_text: document.title, body_text: document.body, reportContext: (.document, document.id))) {
                                     docSearchRow(title_text: document.title, themeColor: colorMode ? themeManager.carouselColor(index: document.id) : Color(.systemGray2))
                                         .foregroundColor(.primary)
                                         .padding(1)
