@@ -30,6 +30,11 @@ struct ReportContentSheet: View {
     /// about a specific piece of content, so it uses softer copy.
     private var isGeneralFeedback: Bool { objectType == .conference }
 
+    /// Nav-bar title: general feedback is just "Feedback".
+    private var navTitle: String {
+        isGeneralFeedback ? "Feedback" : "Report an Issue"
+    }
+
     /// Header shown above the message field.
     private var promptText: String {
         isGeneralFeedback ? "General Feedback" : "What’s wrong with this content?"
@@ -69,7 +74,7 @@ struct ReportContentSheet: View {
                     Text(footerText)
                 }
             }
-            .themedNavTitle("Report an Issue", themeManager)
+            .themedNavTitle(navTitle, themeManager)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
