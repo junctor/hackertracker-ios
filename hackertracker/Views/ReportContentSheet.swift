@@ -47,7 +47,7 @@ struct ReportContentSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                if !objectName.isEmpty {
+                if !isGeneralFeedback, !objectName.isEmpty {
                     Section {
                         Text(objectName)
                             .font(themeManager.headingFont)
