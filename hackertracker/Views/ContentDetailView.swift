@@ -14,7 +14,6 @@ struct ContentDetailView: View {
     @State private var showFeedback: Bool = false
     // @State private var showFeedbackButton = true
     @State private var showAlert: Bool = false
-    @State private var showReport: Bool = false
     @State private var alertMessage: String = ""
     /// Polish: drives the iOS Mail-style nav-bar title handoff. Continuous
     /// 0...1 -- 0 means the body title is still fully in view (nav title
@@ -130,14 +129,14 @@ struct ContentDetailView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showReport = true
-                    } label: { Image(systemName: "exclamationmark.bubble") }
-                    .accessibilityLabel("Report an issue")
+                    DetailActionsMenu(
+                        noteTargetID: item.id,
+                        noteKind: .content,
+                        reportObjectType: .content,
+                        reportObjectId: contentId,
+                        objectName: item.title
+                    )
                 }
-            }
-            .sheet(isPresented: $showReport) {
-                ReportContentSheet(objectType: .content, objectId: contentId, objectName: viewModel.contentById[contentId]?.title ?? "")
             }
             .onAppear() {
                 Log.ui.debug("ContentDetailView loading \(item.id) - \(item.title, privacy: .public)")
@@ -520,6 +519,65 @@ struct ContentDetailPreviews: PreviewProvider {
 
     static var previews: some View {
         ContentDetailPreview()
+    }
+}
+
+/// Toolbar "•••" menu for a detail screen. Groups the private-note
+/// shortcut ("Add a note" / "Edit note", depending on whether one
+/// exists) with the report-an-issue action directly below it. Owns its
+/// own note-existence fetch so the label stays correct as notes are
+/// added, edited, or synced in from another device.
+struct DetailActionsMenu: View {
+    let noteTargetID: Int
+    let noteKind: NoteKind
+    let reportObjectType: ReportObjectType
+    let reportObjectId: Int
+    let objectName: String
+
+    @Environment(\.managedObjectContext) private var viewContext
+    @FetchRequest private var notes: FetchedResults<Note>
+    @State private var showingEditor = false
+    @State private var showingReport = false
+
+    init(noteTargetID: Int, noteKind: NoteKind, reportObjectType: ReportObjectType, reportObjectId: Int, objectName: String) {
+        self.noteTargetID = noteTargetID
+        self.noteKind = noteKind
+        self.reportObjectType = reportObjectType
+        self.reportObjectId = reportObjectId
+        self.objectName = objectName
+        _notes = FetchRequest<Note>(
+            sortDescriptors: [NSSortDescriptor(keyPath: \Note.updatedAt, ascending: false)],
+            predicate: NSPredicate(format: "targetID == %d AND targetKind == %@", Int32(noteTargetID), noteKind.rawValue)
+        )
+    }
+
+    private var hasNote: Bool {
+        notes.first?.body.flatMap { !$0.isEmpty } ?? false
+    }
+
+    var body: some View {
+        Menu {
+            Button {
+                showingEditor = true
+            } label: {
+                Label(hasNote ? "Edit note" : "Add a note", systemImage: hasNote ? "square.and.pencil" : "note.text.badge.plus")
+            }
+            Button {
+                showingReport = true
+            } label: {
+                Label("Report an issue", systemImage: "exclamationmark.bubble")
+            }
+        } label: {
+            Image(systemName: "ellipsis.circle")
+        }
+        .accessibilityLabel("More")
+        .sheet(isPresented: $showingEditor) {
+            NoteEditorView(targetID: noteTargetID, kind: noteKind, initialBody: notes.first?.body ?? "")
+                .environment(\.managedObjectContext, viewContext)
+        }
+        .sheet(isPresented: $showingReport) {
+            ReportContentSheet(objectType: reportObjectType, objectId: reportObjectId, objectName: objectName)
+        }
     }
 }
 
