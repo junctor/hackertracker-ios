@@ -12,7 +12,7 @@ import Foundation
 import Security
 
 enum ReportObjectType: String {
-    case content, org, person, document
+    case content, org, person, document, conference
 }
 
 struct ReportError: Error {
