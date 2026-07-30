@@ -304,21 +304,6 @@ struct InfoView: View {
                         }
                         .padding(.top, 12)
                     }
-                    if let url = URL(string: "mailto:hackertracker@defcon.org?subject=HackerTracker&body=\r\n-----------------------\r\nVersion: \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] ?? "Unknown")  (\(Bundle.main.infoDictionary?["CFBundleVersion"] ?? "Unknown"))\r\niOS: \(ProcessInfo.processInfo.operatingSystemVersionString)\r\nApp: \(Bundle.main.bundleIdentifier ?? "Unknown")\r\n-----------------------\r\n".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!) {
-                        Divider()
-                        HStack {
-                            Button {
-                                openURL(url)
-                            } label: {
-                                Label("Contact Us", systemImage: "person.fill.questionmark")
-                            }
-                        }
-                        .foregroundColor(.primary)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .padding(15)
-                        .background(themeManager.cardSurface)
-                        .cornerRadius(15)
-                    }
                     HStack {
                         if let v = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
                             Button {

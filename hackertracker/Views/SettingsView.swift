@@ -429,6 +429,9 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
                 Markdown(AboutView.aboutBody).themedMarkdown(themeManager)
 
                 Divider()
+                contactSection
+
+                Divider()
                 privacySection
 
                 if let info = BuildInfo.current {
@@ -452,6 +455,41 @@ HackerTracker iOS is licensed under the [GNU General Public License v3.0](https:
             Text("Build \(buildVersion)")
                 .font(themeManager.calloutFont)
                 .foregroundStyle(.secondary)
+        }
+    }
+
+    /// Prefilled support email so bug reports arrive with the app version,
+    /// iOS version, and bundle id already attached. Moved here from the
+    /// Info screen so all app-support affordances live under About.
+    private var contactURL: URL? {
+        let body = "\r\n-----------------------\r\nVersion: \(marketingVersion) (\(buildVersion))\r\niOS: \(ProcessInfo.processInfo.operatingSystemVersionString)\r\nApp: \(Bundle.main.bundleIdentifier ?? "Unknown")\r\n-----------------------\r\n"
+        guard let encoded = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else { return nil }
+        return URL(string: "mailto:hackertracker@defcon.org?subject=HackerTracker&body=\(encoded)")
+    }
+
+    private var contactSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: "person.fill.questionmark")
+                Text("Contact")
+                    .font(themeManager.headingFont)
+            }
+
+            Text("Questions or feedback about the app? Email us — your app and device details are prefilled to help us troubleshoot.")
+                .font(themeManager.footnoteFont)
+                .foregroundStyle(.secondary)
+
+            if let url = contactURL {
+                Button {
+                    openURL(url)
+                } label: {
+                    Label("Contact Us", systemImage: "envelope")
+                        .frame(maxWidth: .infinity)
+                        .padding(10)
+                        .background(themeManager.accent.opacity(0.15))
+                        .cornerRadius(8)
+                }
+            }
         }
     }
 
