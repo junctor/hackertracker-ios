@@ -26,6 +26,24 @@ struct ReportContentSheet: View {
     @State private var errorText: String?
     @State private var sent = false
 
+    /// A conference-level report is general feedback rather than a report
+    /// about a specific piece of content, so it uses softer copy.
+    private var isGeneralFeedback: Bool { objectType == .conference }
+
+    /// Header shown above the message field.
+    private var promptText: String {
+        isGeneralFeedback ? "General Feedback" : "What’s wrong with this content?"
+    }
+
+    /// Footer under the message field. General feedback drops the first
+    /// (illegal/unsafe-content) paragraph and keeps only the second.
+    private var footerText: String {
+        let handling = "Your message and an anonymous app identifier are sent to the Hacker Tracker team, and may also be shared with the conference organizers. If you would like to receive a response, please reach out to the respective conference organizers instead of submitting a report here. We encourage you to not share personal information here; we do not guarantee a response."
+        guard !isGeneralFeedback else { return handling }
+        let scope = "Submit a report if you believe that the associated content is illegal or unsafe in your jurisdiction."
+        return scope + "\n\n" + handling
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -41,13 +59,9 @@ struct ReportContentSheet: View {
                     TextEditor(text: $message)
                         .frame(minHeight: 140)
                 } header: {
-                    Text("What’s wrong with this content?")
+                    Text(promptText)
                 } footer: {
-                    Text("""
-                    Submit a report if you believe that the associated content is illegal or unsafe in your jurisdiction.
-
-                    Your message and an anonymous app identifier are sent to the Hacker Tracker team, and may also be shared with the conference organizers. If you would like to receive a response, please reach out to the respective conference organizers instead of submitting a report here. We encourage you to not share personal information here; we do not guarantee a response.
-                    """)
+                    Text(footerText)
                 }
             }
             .themedNavTitle("Report an Issue", themeManager)
