@@ -137,7 +137,7 @@ struct ContentDetailView: View {
                 }
             }
             .sheet(isPresented: $showReport) {
-                ReportContentSheet(objectType: .content, objectId: contentId)
+                ReportContentSheet(objectType: .content, objectId: contentId, objectName: viewModel.contentById[contentId]?.title ?? "")
             }
             .onAppear() {
                 Log.ui.debug("ContentDetailView loading \(item.id) - \(item.title, privacy: .public)")

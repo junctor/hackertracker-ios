@@ -12,6 +12,10 @@ import SwiftUI
 struct ReportContentSheet: View {
     let objectType: ReportObjectType
     let objectId: Int
+    /// Human-readable name of the content being reported (talk title,
+    /// speaker name, org name, document title). Shown non-editably so the
+    /// submitter can confirm what the report is about. Empty = hide the row.
+    var objectName: String = ""
 
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
@@ -25,6 +29,14 @@ struct ReportContentSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                if !objectName.isEmpty {
+                    Section {
+                        Text(objectName)
+                            .font(themeManager.headingFont)
+                    } header: {
+                        Text("Reporting")
+                    }
+                }
                 Section {
                     TextEditor(text: $message)
                         .frame(minHeight: 140)
