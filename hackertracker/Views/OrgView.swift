@@ -82,7 +82,7 @@ struct OrgView: View {
             }
         }
         .sheet(isPresented: $showReport) {
-            ReportContentSheet(objectType: .org, objectId: 0)
+            ReportContentSheet(objectType: .org, objectId: 0, objectName: org.name)
         }
     }
 }

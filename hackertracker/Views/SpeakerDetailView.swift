@@ -107,7 +107,7 @@ struct SpeakerDetailView: View {
                 }
             }
             .sheet(isPresented: $showReport) {
-                ReportContentSheet(objectType: .person, objectId: id)
+                ReportContentSheet(objectType: .person, objectId: id, objectName: viewModel.speakersById[id]?.name ?? "")
             }
             .themedBackground(themeManager)
             .analyticsScreen(name: "SpeakerDetailView")

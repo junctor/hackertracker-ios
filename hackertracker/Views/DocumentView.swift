@@ -66,7 +66,7 @@ struct DocumentView: View {
         }
         .sheet(isPresented: $showReport) {
             if let ctx = reportContext {
-                ReportContentSheet(objectType: ctx.type, objectId: ctx.id)
+                ReportContentSheet(objectType: ctx.type, objectId: ctx.id, objectName: title_text)
             }
         }
     }
