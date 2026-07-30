@@ -47,12 +47,17 @@ struct ReportContentSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                if !isGeneralFeedback, !objectName.isEmpty {
+                if !objectName.isEmpty {
                     Section {
                         Text(objectName)
                             .font(themeManager.headingFont)
                     } header: {
-                        Text("Reporting")
+                        // General feedback shows the conference name but
+                        // without the "Reporting" label (it's not a report
+                        // about that named object, just context).
+                        if !isGeneralFeedback {
+                            Text("Reporting")
+                        }
                     }
                 }
                 Section {
