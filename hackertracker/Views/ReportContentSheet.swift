@@ -87,9 +87,9 @@ struct ReportContentSheet: View {
                 Button("Retry") { submit() }
                 Button("Cancel", role: .cancel) { errorText = nil }
             } message: { Text(errorText ?? "") }
-            .alert("Report Sent", isPresented: $sent) {
+            .alert("Report submitted", isPresented: $sent) {
                 Button("OK") { dismiss() }
-            } message: { Text("Thanks — the organizers will take a look.") }
+            }
         }
     }
 
