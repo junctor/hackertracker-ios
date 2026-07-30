@@ -699,6 +699,8 @@ struct MenuView: View {
     @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
     @State var schedule = UUID()
+    /// Drives the conference-level report sheet for a "form" menu item.
+    @State private var showReport = false
     @FetchRequest(sortDescriptors: []) var readnews: FetchedResults<News>
     
     @Environment(ThemeManager.self) private var themeManager
@@ -781,10 +783,25 @@ struct MenuView: View {
                      NavigationLink(destination: GlobalSearchView()) {
                          CardView(systemImage: item.symbol ?? "magnifyingglass", text: "Search", color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                      }
+                case "form":
+                    // Conference-level report: the same "report an issue"
+                    // feedback form as the detail screens, scoped to the
+                    // current conference (its id/name) rather than a single
+                    // piece of content.
+                    Button {
+                        showReport = true
+                    } label: {
+                        CardView(systemImage: item.symbol ?? "exclamationmark.bubble", text: item.title, color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
+                    }
                 default:
                     EmptyView()
                 }
-                
+
+            }
+        }
+        .sheet(isPresented: $showReport) {
+            if let con = viewModel.conference {
+                ReportContentSheet(objectType: .conference, objectId: con.id, objectName: con.name)
             }
         }
     }
