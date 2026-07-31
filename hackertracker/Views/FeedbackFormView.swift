@@ -9,7 +9,9 @@ import SwiftUI
 
 struct FeedbackFormView: View {
     @Binding var showFeedback: Bool
-    var item: Content
+    /// The content being rated, or `nil` for conference-level general
+    /// feedback (no associated talk — submits with content_id 0).
+    var item: Content?
     var form: FeedbackForm
     @Environment(InfoViewModel.self) private var viewModel
     @Environment(ThemeManager.self) private var themeManager
@@ -28,9 +30,11 @@ struct FeedbackFormView: View {
         VStack {
             Text(form.name)
                 .font(themeManager.titleFont)
-            Divider()
-            Text(item.title)
-                .font(themeManager.title3Font)
+            if let item {
+                Divider()
+                Text(item.title)
+                    .font(themeManager.title3Font)
+            }
         }
         .padding(15)
         Divider()
@@ -77,11 +81,11 @@ struct FeedbackFormView: View {
 
 extension FeedbackFormView {
     
-    func uploadFeedback(item: Content, form: FeedbackForm, answers: [Int: AnyObject], viewModel: InfoViewModel, dfu: DateFormatterUtility) {
+    func uploadFeedback(item: Content?, form: FeedbackForm, answers: [Int: AnyObject], viewModel: InfoViewModel, dfu: DateFormatterUtility) {
         var feedback: [String: Any] = [:]
         feedback["client"] = "HackerTracker iOS v\(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "") (\( Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""))"
         feedback["conference_id"] = viewModel.conference?.id ?? 0
-        feedback["content_id"] = item.id
+        feedback["content_id"] = item?.id ?? 0
         feedback["device_id"] = UIDevice.current.identifierForVendor?.uuidString ?? "no-ios-uuid-found"
         feedback["feedback_form_id"] = form.id
         feedback["items"] = []
@@ -115,7 +119,7 @@ extension FeedbackFormView {
                 if let jd = jsonData, let fb = String(data: jd, encoding: .utf8) {
                     NSLog("Feedback form for submission: \(fb)")
                 }
-                let capturedItemId = item.id
+                let capturedItemId = item?.id
                 URLSession.shared.dataTask(with: request) { data, response, error in
                     if let error = error {
                         DispatchQueue.main.async {
@@ -134,7 +138,12 @@ extension FeedbackFormView {
                     }
                     DispatchQueue.main.async {
                         self.alertMessage = "Feedback Sent"
-                        FeedbackUtility.addFeedback(context: viewContext, id: capturedItemId)
+                        // Only content-scoped feedback is recorded locally
+                        // (to hide that content's Submit Feedback button).
+                        // General feedback has no content id to mark.
+                        if let capturedItemId {
+                            FeedbackUtility.addFeedback(context: viewContext, id: capturedItemId)
+                        }
                         self.showAlert.toggle()
                     }
                     NSLog("Feedback sent successfully")
