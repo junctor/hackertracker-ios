@@ -684,8 +684,11 @@ struct MenuView: View {
     @AppStorage(AppStorageKeys.colorMode) var colorMode: Bool = false
     let gridItemLayout = [GridItem(.flexible()), GridItem(.flexible())]
     @State var schedule = UUID()
-    /// Drives the conference-level report sheet for a "form" menu item.
-    @State private var showReport = false
+    /// Drives the conference-level "General Feedback" survey sheet for a
+    /// "form" menu item, plus its post-submit confirmation alert.
+    @State private var showGeneralFeedback = false
+    @State private var feedbackAlert = false
+    @State private var feedbackAlertMessage = ""
     @FetchRequest(sortDescriptors: []) var readnews: FetchedResults<News>
     
     @Environment(ThemeManager.self) private var themeManager
@@ -769,14 +772,17 @@ struct MenuView: View {
                          CardView(systemImage: item.symbol ?? "magnifyingglass", text: "Search", color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
                      }
                 case "form":
-                    // Conference-level report: the same "report an issue"
-                    // feedback form as the detail screens, scoped to the
-                    // current conference (its id/name) rather than a single
-                    // piece of content.
-                    Button {
-                        showReport = true
-                    } label: {
-                        CardView(systemImage: item.symbol ?? "exclamationmark.bubble", text: item.title, color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
+                    // Conference-level general feedback: presents the
+                    // survey-style FeedbackForm named "General Feedback"
+                    // (the same mechanism as content "Submit Feedback",
+                    // not the report-an-issue flow). Only shown when that
+                    // form is present in the conference's feedbackForms.
+                    if viewModel.feedbackForms.contains(where: { $0.name == "General Feedback" }) {
+                        Button {
+                            showGeneralFeedback = true
+                        } label: {
+                            CardView(systemImage: item.symbol ?? "exclamationmark.bubble", text: item.title, color: colorMode ? themeManager.carouselColor(index: item.id) : themeManager.cardSurface)
+                        }
                     }
                 default:
                     EmptyView()
@@ -784,10 +790,21 @@ struct MenuView: View {
 
             }
         }
-        .sheet(isPresented: $showReport) {
-            if let con = viewModel.conference {
-                ReportContentSheet(objectType: .conference, objectId: con.id, objectName: con.name)
+        .sheet(isPresented: $showGeneralFeedback) {
+            if let form = viewModel.feedbackForms.first(where: { $0.name == "General Feedback" }) {
+                FeedbackFormView(
+                    showFeedback: $showGeneralFeedback,
+                    item: nil,
+                    form: form,
+                    showAlert: $feedbackAlert,
+                    alertMessage: $feedbackAlertMessage
+                )
             }
+        }
+        .alert("Feedback", isPresented: $feedbackAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(feedbackAlertMessage)
         }
     }
 }
