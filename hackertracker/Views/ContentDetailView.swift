@@ -292,23 +292,8 @@ struct showSessionRow: View {
                     } label: {
                         Image(systemName: "clock")
                     }
-                    if show24hourtime {
-                        if s.beginTimestamp != s.endTimestamp {
-                            Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinuteTimeFormatter.string(from: s.endTimestamp))")
-                                .font(themeManager.subheadlineFont)
-                        } else {
-                            Text("\(dfu.shortDayMonthDayTimeOfWeekFormatter.string(from: s.beginTimestamp))")
-                                .font(themeManager.subheadlineFont)
-                        }
-                    } else {
-                        if s.beginTimestamp != s.endTimestamp {
-                            Text("\(dfu.shortDayMonthDay12HourOfWeekFormatter.string(from: s.beginTimestamp))-\(dfu.hourMinute12TimeFormatter.string(from: s.endTimestamp))")
-                                .font(themeManager.subheadlineFont)
-                        } else {
-                            Text("\(dfu.shortDayMonthDay12HourOfWeekFormatter.string(from: s.beginTimestamp))")
-                                .font(themeManager.subheadlineFont)
-                        }
-                    }
+                    Text(dfu.sessionRange(begin: s.beginTimestamp, end: s.endTimestamp, use24hour: show24hourtime))
+                        .font(themeManager.subheadlineFont)
                 }
                 .fullScreenCover(isPresented: $showAddContentModal) {
                     AddContent(content: item, session: s)

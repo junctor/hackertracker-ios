@@ -232,6 +232,27 @@ class DateFormatterUtility {
         return formatter
     }()
 
+    /// Formats a session's time range for the detail screens. The start
+    /// always shows day + time. The end shows time only when it falls on
+    /// the same calendar day (in the active timezone) — e.g.
+    /// "Mon, Aug 5 13:00-15:00" — but repeats the day when the event
+    /// crosses midnight — e.g. "Mon, Aug 5 13:00 - Tue, Aug 6 09:00".
+    /// A zero-length session (begin == end) shows just the start.
+    func sessionRange(begin: Date, end: Date, use24hour: Bool) -> String {
+        let dayTime = use24hour ? shortDayMonthDayTimeOfWeekFormatter : shortDayMonthDay12HourOfWeekFormatter
+        let start = dayTime.string(from: begin)
+        guard begin != end else { return start }
+
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone ?? .current
+        if calendar.isDate(begin, inSameDayAs: end) {
+            let timeOnly = use24hour ? hourMinuteTimeFormatter : hourMinute12TimeFormatter
+            return "\(start)-\(timeOnly.string(from: end))"
+        } else {
+            return "\(start) - \(dayTime.string(from: end))"
+        }
+    }
+
     func getConferenceDates(start: Date, end: Date) -> [String] {
         let calendar = NSCalendar.current
         var ret: [String] = []
