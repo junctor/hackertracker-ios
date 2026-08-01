@@ -13,7 +13,9 @@ import Foundation
 private enum ModelExtFormatters {
     static let eventDay: DateFormatter = {
         let f = DateFormatter()
-        f.dateFormat = "MMMM d"
+        // Weekday + month + day, e.g. "Thursday, August 7" (rendered
+        // uppercased in the schedule's day-section headers).
+        f.dateFormat = "EEEE, MMMM d"
         f.locale = Locale(identifier: "en_US_POSIX")
         return f
     }()
